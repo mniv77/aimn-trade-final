@@ -13,10 +13,13 @@ except ImportError:
     pass
 
 # Load API credentials from environment
-ALPACA_KEY = os.getenv("APCA_API_KEY_ID", "")
-ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY", "")
-ALPACA_BASE_URL = os.getenv("ALPACA_BASE_URL", "https://paper-api.alpaca.markets")
+#LPACA_SECRET = os.getenv("APCA_API_SECRET_KEY", "")
 
+ALPACA_KEY = "PKIU63SSI0ZS85BQUY2E"
+ALPACA_SECRET = "lwG2g6Hrgtd6V1oWwGjzcvdOQgMxfgAmVdgo88Pq"
+ALPACA_BASE_URL = "https://paper-api.alpaca.markets"
+
+PAPER_TRADING = True  # or False if you're using a live account
 
 # === SYMBOLS TO SCAN ===
 SYMBOLS = [
