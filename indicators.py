@@ -75,10 +75,19 @@ class AIMnIndicators:
             'bullish_cross': bullish_cross,
             'bearish_cross': bearish_cross
         }
+
     @staticmethod
     def check_entry_conditions(data, symbol, rsi_config, macd_config, volume_config, atr_config):
         # Dummy logic - replace this with real indicator logic later
         return False
+
+    
+    @staticmethod
+    def check_entry_conditions(data, symbol, rsi_config, macd_config, volume_config, atr_config):
+        # Temporary logic to prevent errors – you can improve later
+        return False
+
+
     
     @staticmethod
     def calculate_volume_signals(df: pd.DataFrame, obv_period: int = 20) -> Dict[str, pd.Series]:
@@ -188,3 +197,4 @@ class AIMnIndicators:
         df['volatility_expanding'] = atr_data['volatility_expanding']
         
         return df
+
