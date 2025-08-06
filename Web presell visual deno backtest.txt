@@ -1,0 +1,92 @@
+#  1. Fetch Real Historical Stock Data
+
+
+# In market_data.py or new stock_data.py
+
+from alpaca.data.historical import StockHistoricalDataClient
+from alpaca.data.requests import StockBarsRequest
+from alpaca.data.timeframe import TimeFrame
+from datetime import datetime, timedelta
+import pandas as pd
+from config import ALPACA_KEY, ALPACA_SECRET, SYMBOLS
+
+# Create a client for stocks
+stock_client = StockHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET)
+
+def fetch_stock_bars(symbol: str, limit: int = 300) -> pd.DataFrame:
+    now = datetime.utcnow()
+    start = now - timedelta(minutes=limit + 10)
+    request = StockBarsRequest(
+        symbol_or_symbols=symbol,
+        timeframe=TimeFrame.Minute,
+        start=start, end=now
+    )
+    bars = stock_client.get_stock_bars(request).df
+    if symbol not in bars.index.get_level_values(0):
+        return pd.DataFrame()
+    df = bars.loc[symbol].copy().reset_index()
+    df = df.rename(columns={'timestamp': 'datetime', 'open': 'open', 'high':'high','low':'low','close':'close','volume':'volume'})
+    df.set_index('datetime', inplace=True)
+    return df[['open','high','low','close','volume']]
+
+
+#   2. Smart Fake Data Detector
+
+
+def is_real_market_data(df: pd.DataFrame) -> bool:
+    """
+    Heuristics to judge if OHLC data appears realistic:
+    - Volume varies naturally (not constant)
+    - Price changes (not flat)
+    - Volume vs price correlation
+    """
+    if df.empty or len(df) < 50:
+        return False
+    vol_std = df['volume'].rolling(20).std().iloc[-1]
+    price_std = df['close'].rolling(20).std().iloc[-1]
+    if vol_std < 1 or price_std < 0.01:
+        return False
+    return True
+
+#  3. Backtest Script Example for AAPL/TSLA
+
+# stock_backtest_demo.py
+from market_data import fetch_stock_bars
+from scanner import AIMnScanner
+from indicators import AIMnIndicators
+from position_manager import AIMnPositionManager
+from trade_snapshot import save_trade_snapshot
+from trade_exporter import export_trades_to_csv
+from config import SYMBOL_PARAMS
+
+symbol = "AAPL"
+df = fetch_stock_bars(symbol, limit=300)
+
+if not is_real_market_data(df):
+    print(f"⚠️  {symbol} data looks synthetic or flat!")
+    exit()
+
+scanner = AIMnScanner(SYMBOL_PARAMS)
+manager = AIMnPositionManager(max_positions=1)
+params = SYMBOL_PARAMS.get(symbol, {})
+
+for i in range(100, len(df)):
+    window = df.iloc[:i+1]
+    indicators = AIMnIndicators.calculate_all_indicators(window.copy(), params)
+    latest = indicators.iloc[-1:]
+    market = {symbol: indicators}
+
+    if not manager.has_position():
+        opportunity = scanner.scan_all_symbols(market)
+        if opportunity and opportunity['symbol'] == symbol:
+            manager.enter_position(opportunity, shares=1, params=params)
+    else:
+        pos = manager.positions[symbol]
+        price = latest['close'].values[0]
+        rsi = latest['rsi_real'].values[0]
+        trade = manager.update_position(symbol, price, rsi)
+        if trade:
+            fn = f"{symbol}_{trade['exit_code']}_{trade['entry_time'].strftime('%Y%m%d_%H%M%S')}"
+            save_trade_snapshot(window, symbol, trade['entry_time'], trade['exit_time'],
+                                trade['entry_price'], trade['exit_price'], fn,
+                                stop_loss=pos.stop_loss_price, rsi=rsi, exit_reason=trade['exit_code'])
