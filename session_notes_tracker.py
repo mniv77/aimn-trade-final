@@ -108,6 +108,15 @@ if __name__ == "__main__":
         user_filter = st.selectbox("Filter by Session ID", options=["All"] + sorted(log_df["session_id"].unique()))
         if user_filter != "All":
             log_df = log_df[log_df["session_id"] == user_filter]
-        st.dataframe(log_df)
 
+        date_range = st.date_input("Filter by Date Range", [log_df["timestamp"].min().date(), log_df["timestamp"].max().date()])
+        if isinstance(date_range, list) and len(date_range) == 2:
+            start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
+            log_df = log_df[(log_df["timestamp"] >= start_date) & (log_df["timestamp"] <= end_date)]
+
+        search_term = st.text_input("Search Notes for Keyword:").strip()
+        if search_term:
+            log_df = log_df[log_df["note"].str.contains(search_term, case=False, na=False)]
+
+        st.dataframe(log_df)
         st.markdown(f"**Total Sessions Logged:** {log_df['session_id'].nunique()} | **Total Notes:** {len(log_df)}")
