@@ -1,5 +1,4 @@
-# dashboard.py
-
+# filename: dashboard.py
 """
 AIMn Trading System — Streamlit Control Dashboard (root/dashboard.py)
 
@@ -14,19 +13,12 @@ It supports:
   • Account/positions status panes
   • Live log viewer (tail)
 
-This is a self-contained UI scaffold that **runs today** without the backend.
-All broker/db/orchestrator calls are **stubbed** and can be wired up in subsequent files
-(app/orchestrator.py, app/broker_*.py, app/state.py, etc.).
+This now calls real backend glue:
+  • app.broker_manager for credentials/symbols/account/positions
+  • app.orchestrator for start/pause/apply/stop/close
 
 Usage:
   streamlit run dashboard.py
-
-Next files to add after this:
-  app/__init__.py
-  app/broker_base.py, app/broker_alpaca.py, app/broker_gemini.py
-  app/state.py (SQLite + encryption helpers)
-  app/orchestrator.py (scanner/execution loop)
-  app/params.py (schema + defaults)
 """
 
 import os
@@ -36,6 +28,10 @@ from datetime import datetime
 from typing import List, Dict, Any
 
 import streamlit as st
+
+# Backend glue
+from app import orchestrator
+from app import broker_manager
 
 # =============================
 # Session State Helpers
@@ -95,66 +91,71 @@ def _ensure_state():
 
 
 # =============================
-# Backend Stub Layer
-# Replace with real implementations in app/* modules next.
+# Backend Calls (via broker_manager / orchestrator)
 # =============================
 class Backend:
     @staticmethod
     def save_credentials(broker: str, key_id: str, secret: str, **extra):
-        # TODO: store encrypted in DB via app/state.py
+        broker_manager.set_credentials(broker, key_id, secret, **extra)
+        # simple connection test
+        broker_manager.get_broker(broker)
         return True
 
     @staticmethod
     def list_symbols(broker: str) -> List[str]:
-        # TODO: call broker adapter
-        # Provide a safe default for now
-        if broker == "Gemini":
-            return [
-                "BTC/USD", "ETH/USD", "LTC/USD", "BCH/USD",
-                "SOL/USD", "ADA/USD", "DOGE/USD", "AVAX/USD"
-            ]
-        return DEFAULT_SYMBOLS.copy()
+        try:
+            return broker_manager.list_symbols(broker)
+        except Exception as e:
+            st.warning(f"Symbol sync failed: {e}")
+            return st.session_state.symbols
 
     @staticmethod
     def get_account(broker: str) -> Dict[str, Any]:
-        # TODO: call broker adapter
-        return {
-            "broker": broker,
-            "mode": "Paper" if st.session_state.get("paper", True) else "Live",
-            "portfolio_value": 100000.00,
-            "buying_power": 100000.00,
-            "timestamp": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-        }
+        try:
+            acct = broker_manager.get_account(broker)
+            mode = "Paper" if st.session_state.get("paper", True) else "Live"
+            acct["mode"] = mode
+            acct["broker"] = broker
+            acct["timestamp"] = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+            return acct
+        except Exception as e:
+            return {
+                "broker": broker,
+                "mode": "Paper" if st.session_state.get("paper", True) else "Live",
+                "portfolio_value": 0.0,
+                "buying_power": 0.0,
+                "timestamp": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+                "error": str(e),
+            }
 
     @staticmethod
     def get_positions(broker: str) -> List[Dict[str, Any]]:
-        # TODO: real positions
-        return []
+        try:
+            return broker_manager.get_positions(broker)
+        except Exception as e:
+            st.caption(f"Positions unavailable: {e}")
+            return []
 
     @staticmethod
     def apply_params(broker: str, params_per_symbol: Dict[str, Dict[str, Any]]):
-        # TODO: persist to DB and hot-apply to orchestrator
-        return True
+        enabled = st.session_state.get("enabled_symbols", [])
+        return orchestrator.apply_params(params_per_symbol, enabled)
 
     @staticmethod
     def start_scanner(broker: str):
-        # TODO: launch orchestrator loop
-        return True
+        return orchestrator.start(broker, paper=st.session_state.get("paper", True), live_confirmed=st.session_state.get("live_confirmed", False))
 
     @staticmethod
     def pause_scanner():
-        # TODO: pause orchestrator
-        return True
+        return orchestrator.pause()
 
     @staticmethod
     def stop_now():
-        # TODO: emergency close all
-        return True
+        return orchestrator.stop_now()
 
     @staticmethod
     def close_position():
-        # TODO: graceful close active position using exit logic
-        return True
+        return orchestrator.close_position()
 
 
 # =============================
@@ -188,20 +189,23 @@ def ui_topbar():
         if st.button("Connect Broker / Save Keys", use_container_width=True):
             with st.modal("Connect to broker"):
                 st.write(f"**{st.session_state.broker}** credentials")
+                default_base = "https://paper-api.alpaca.markets" if st.session_state.broker == "Alpaca" else "https://api.sandbox.gemini.com"
                 key_id = st.text_input("API Key", type="password")
                 secret = st.text_input("API Secret", type="password")
-                extra_json = st.text_area("Extra (JSON)", value="{}", help="Optional: passphrase, base_url, etc.")
+                base_url = st.text_input("Base URL", value=default_base)
+                extra_json = st.text_area("Extra (JSON)", value="{}", help="Optional: passphrase, asset_class, quote_filter, etc.")
                 submitted = st.button("Save")
                 if submitted:
                     try:
                         extra = json.loads(extra_json or "{}")
+                        extra["base_url"] = base_url
                     except Exception:
                         st.error("Extra must be valid JSON.")
                         st.stop()
                     ok = Backend.save_credentials(st.session_state.broker, key_id, secret, **extra)
                     if ok:
                         st.session_state.connected = True
-                        st.success("Credentials saved (encrypted store to be wired).")
+                        st.success("Credentials saved and broker connected.")
                     else:
                         st.error("Failed to save credentials.")
 
@@ -263,6 +267,9 @@ def ui_symbols_and_tuning():
         )
     with c2:
         st.write("**Per-symbol parameters** (edit and Save)")
+        if not st.session_state.enabled_symbols:
+            st.info("Enable at least one symbol to edit params.")
+            return
         sel = st.selectbox("Edit parameters for symbol", options=st.session_state.enabled_symbols)
         params = st.session_state.params_per_symbol.get(sel, DEFAULT_PARAMS.copy()).copy()
         with st.form(key=f"params_{sel}"):
@@ -308,7 +315,7 @@ def ui_symbols_and_tuning():
                 st.session_state.params_per_symbol[sel] = params
                 ok = Backend.apply_params(st.session_state.broker, st.session_state.params_per_symbol)
                 if ok:
-                    st.success(f"Parameters saved for {sel} and applied (backend hook pending).")
+                    st.success(f"Parameters saved for {sel} and applied.")
 
 
 def ui_status_and_logs():
@@ -320,8 +327,8 @@ def ui_status_and_logs():
             f"""
             **Broker:** {acct.get('broker')}  
             **Mode:** {acct.get('mode')}  
-            **Portfolio Value:** ${acct.get('portfolio_value'):,.2f}  
-            **Buying Power:** ${acct.get('buying_power'):,.2f}  
+            **Portfolio Value:** ${acct.get('portfolio_value', 0):,.2f}  
+            **Buying Power:** ${acct.get('buying_power', 0):,.2f}  
             **Updated:** {acct.get('timestamp')}  
             """
         )
@@ -362,8 +369,8 @@ def main():
     ui_status_and_logs()
 
     st.caption(
-        "This is the UI scaffold. Backend wiring (brokers, DB encryption, orchestrator) "
-        "will be added in subsequent files without breaking this interface."
+        "Backend wired: broker_manager + orchestrator are active. "
+        "Next: encrypted DB for credentials and hot apply during live."
     )
 
 
