@@ -2,29 +2,17 @@
 """
 AIMn Trading System — Orchestrator (background control loop)
 
-Purpose
--------
-This module runs the background loop that the Streamlit dashboard controls.
-It exposes simple functions the UI can call to:
-  • start() / pause() the scanner-executor loop
-  • apply_params() for live per-symbol tuning
-  • stop_now() for emergency liquidation
-  • close_position() for graceful exit
-  • status() to report current state back to the UI
+Adds:
+  • HEARTBEAT log every tick (shows broker, mode, enabled count)
+  • health() endpoint returning current status
 
-Notes
------
-• This is a minimal, safe scaffold that works today. It logs activity and
-  simulates scanning. You can wire in your real scanner/position_manager later
-  without changing the UI.
-• No third-party deps. Uses Python threading and a global singleton Worker.
-• Log file path defaults to env AIMN_LOG_FILE or 'aimn_crypto_trading.log'.
+Usage (manual):
+  python -m app.orchestrator
 """
 
 from __future__ import annotations
 
 import os
-import json
 import time
 import threading
 from dataclasses import dataclass, field
@@ -44,9 +32,7 @@ def _log(msg: str) -> None:
         with open(LOG_PATH, "a", encoding="utf-8") as f:
             f.write(line)
     except Exception:
-        # As a last resort, print
         print(line, end="")
-
 
 # ----------------------------------------------------------------------------
 # Global State
@@ -63,11 +49,9 @@ class OrchestratorState:
     symbols_enabled: list[str] = field(default_factory=list)
     params_per_symbol: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
-
 _state = OrchestratorState()
 _worker: Optional["Worker"] = None
 _state_lock = threading.Lock()
-
 
 # ----------------------------------------------------------------------------
 # Worker Thread
@@ -86,36 +70,37 @@ class Worker(threading.Thread):
         while not self.stop_event.is_set():
             with self.lock:
                 if not self.state.is_running or self.state.is_paused:
-                    # idle but alive — sleep briefly
+                    # idle
                     pass
                 else:
-                    # === MAIN LOOP ===
                     self._tick()
             time.sleep(self.interval_sec)
         _log("Orchestrator worker stopped.")
 
     def _tick(self) -> None:
-        # This is where you'll call your real scanner & executor
-        # For now we simulate and log
+        # MAIN LOOP: where real scanning/execution will happen
         self.state.last_tick_ts = time.time()
         enabled = self.state.symbols_enabled or []
         broker = self.state.broker
         mode = "PAPER" if self.state.paper else "LIVE"
-        _log(f"Tick: broker={broker} mode={mode} enabled={enabled}")
 
-        # Example: pseudo-scan using params
+        # --- HEARTBEAT ---
+        _log(f"HEARTBEAT broker={broker} mode={mode} enabled_count={len(enabled)}")
+
+        # Example visibility for params on first few symbols
         try:
-            for sym in enabled:
+            for sym in enabled[:3]:
                 params = self.state.params_per_symbol.get(sym, {})
-                # Add minimal visibility
                 if params:
-                    _log(f"  scan {sym}: rsiW={params.get('rsi_window')} macd=({params.get('macd_fast')},{params.get('macd_slow')},{params.get('macd_signal')})")
+                    _log(
+                        f"  scan {sym}: rsiW={params.get('rsi_window')} "
+                        f"macd=({params.get('macd_fast')},{params.get('macd_slow')},{params.get('macd_signal')})"
+                    )
         except Exception as e:
             _log(f"Scan error: {e}")
 
     def stop(self) -> None:
         self.stop_event.set()
-
 
 # ----------------------------------------------------------------------------
 # Public API used by the Dashboard
@@ -138,13 +123,11 @@ def start(broker: str = "Alpaca", paper: bool = True, live_confirmed: bool = Fal
             _log("start(): resuming existing worker")
     return True
 
-
 def pause() -> bool:
     with _state_lock:
         _state.is_paused = True
         _log("pause(): loop paused")
     return True
-
 
 def resume() -> bool:
     with _state_lock:
@@ -153,33 +136,24 @@ def resume() -> bool:
         _log("resume(): loop resumed")
     return True
 
-
 def apply_params(params_per_symbol: Dict[str, Dict[str, Any]], enabled_symbols: list[str]) -> bool:
     with _state_lock:
         _state.params_per_symbol = params_per_symbol or {}
         _state.symbols_enabled = enabled_symbols or []
-        # Log a short diff
         _log(f"apply_params(): enabled={_state.symbols_enabled}")
     return True
 
-
 def stop_now() -> bool:
-    """Emergency termination & liquidation stub.
-    In the real system: close all positions immediately.
-    """
+    """Emergency termination & liquidation stub."""
     _log("STOP NOW requested — (stub) close all positions immediately")
-    # TODO: broker.close_all_positions()
+    # TODO: broker_manager.close_all_positions(active_broker)
     return True
 
-
 def close_position() -> bool:
-    """Graceful close of current position stub.
-    In the real system: use your exit logic.
-    """
+    """Graceful close of current position stub."""
     _log("close_position() requested — (stub) close active position via exit logic")
     # TODO: position_manager.close_active()
     return True
-
 
 def status() -> Dict[str, Any]:
     with _state_lock:
@@ -193,6 +167,11 @@ def status() -> Dict[str, Any]:
             "last_tick_ts": _state.last_tick_ts,
         }
 
+def health() -> Dict[str, Any]:
+    """Lightweight health ping for UI/tests."""
+    s = status()
+    s["ok"] = True
+    return s
 
 def shutdown() -> None:
     global _worker
@@ -204,11 +183,10 @@ def shutdown() -> None:
         _state.is_paused = True
         _log("shutdown(): orchestrator stopped")
 
-
 # Convenience for manual testing
 if __name__ == "__main__":
     start("Alpaca", paper=True)
-    apply_params({"BTC/USD": {"rsi_window": 100, "macd_fast": 12, "macd_slow": 26, "macd_signal": 9}}, ["BTC/USD"]) 
+    apply_params({"BTC/USD": {"rsi_window": 100, "macd_fast": 12, "macd_slow": 26, "macd_signal": 9}}, ["BTC/USD"])
     time.sleep(5)
     pause()
     time.sleep(2)
