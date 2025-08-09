@@ -1,0 +1,125 @@
+AIMn Trading System — Progress Log & Setup Guide
+
+Last updated: Aug 9, 2025 (PT)
+
+✅ What’s done (this session)
+
+Branch: dashboard-live-trading
+
+New / updated files
+
+dashboard.py (root) — Streamlit control panel wired to backend (connect broker, sync symbols, per‑symbol tuning, start/pause, STOP NOW, live logs).
+
+app/orchestrator.py — Background loop with HEARTBEAT logging and health() endpoint; handles start/pause/apply/stop stubs.
+
+app/broker_base.py — Abstract interface shared by broker adapters.
+
+app/broker_alpaca.py — Alpaca adapter (REST lib or raw HTTP fallback) for account, positions, orders, symbols.
+
+app/broker_gemini.py — Gemini adapter (sandbox default) with HMAC auth, USDT‑guard for safety, close‑all helper.
+
+app/broker_manager.py — Broker factory + cache; now persists encrypted creds via app/state.py.
+
+app/state.py — Encrypted local storage (SQLite + Fernet) for API keys and per‑symbol params.
+
+.gitignore — Keeps repo clean (ignores logs, data, exports, venv, large archives, secrets, etc.).
+
+Wiring completed
+
+Dashboard → Broker Manager: Connect broker, Sync Symbols, Account/Positions panels.
+
+Dashboard → Orchestrator: Start/Pause, STOP NOW, Close Position, Apply Params.
+
+Orchestrator → Logs: periodic HEARTBEAT entries to aimn_crypto_trading.log.
+
+📁 Current repo structure (key parts)
+
+AIMn-Trade/
+├── .gitignore
+├── dashboard.py
+└── app/
+    ├── broker_base.py
+    ├── broker_alpaca.py
+    ├── broker_gemini.py
+    ├── broker_manager.py
+    ├── orchestrator.py
+    └── state.py   # creates app/state.db and app/secret.key on first run
+
+▶️ How to run (Paper mode first)
+
+Install deps (you likely have these already):
+
+pip install streamlit alpaca-trade-api cryptography requests
+
+Launch dashboard:
+
+streamlit run dashboard.py
+
+In the UI:
+
+Broker: choose Alpaca or Gemini.
+
+Click Connect Broker / Save Keys → enter API Key/Secret. (Saved encrypted in app/state.db; key at app/secret.key.)
+
+Click Sync Symbols → choose Enable symbols.
+
+Adjust Per‑symbol parameters → Save Params (hot‑applies to orchestrator).
+
+Click Start Scanning.
+
+Watch Status & Logs → you’ll see HEARTBEAT broker=... mode=PAPER enabled_count=... every ~2s.
+
+Live mode: flip off "Paper Mode" → type LIVE to confirm. STOP NOW is always available.
+
+🔐 Security notes
+
+Credentials are stored encrypted (Fernet) in app/state.db; the symmetric key lives in app/secret.key.
+
+.gitignore excludes .env, logs, exports, data, and archives to prevent leaking secrets or large artifacts.
+
+For production, consider moving the key to OS keyring / environment and the DB to a protected path.
+
+🧭 Next steps (short list)
+
+Trade logging
+
+Add app/trade_snapshot.py (chart or price snapshots at entry/exit).
+
+Add app/trade_exporter.py (CSV/JSON appends for each closed trade).
+
+Execution wiring
+
+Connect orchestrator ticks to your existing Python logic (scanner.py, position_manager.py) or port the essentials into app/ to keep the new structure clean.
+
+Map Close Position → adapter’s close_position() for the active symbol; STOP NOW → close_all_positions().
+
+Dashboard polish
+
+Active trade mini‑panel (symbol, side, entry, trailing levels, unrealized P/L).
+
+Presets: import/export per‑symbol parameter sets (CSV/JSON) for your V strategy.
+
+Merge
+
+Open PR from dashboard-live-trading → main once basic live flow is verified in Paper.
+
+🛠️ Troubleshooting quickies
+
+Push rejected (fetch first) → git fetch origin && git pull --rebase origin main && git push or work on dashboard-live-trading and open a PR.
+
+Big files blocking push → ensure .gitignore is present; untrack with git rm -r --cached <paths> then commit.
+
+No HEARTBEAT in logs → ensure you clicked Start Scanning, and that AIMN_LOG_FILE (if set) points to a writable path.
+
+Gemini errors → sandbox base URL by default: https://api.sandbox.gemini.com; USDT pairs only, by design.
+
+📌 Notes for future me (and you)
+
+The new code aims to keep UI decoupled from broker specifics via broker_base/broker_manager.
+
+Credentials are now persistent & encrypted; no need to re‑enter every session.
+
+Orchestrator is intentionally simple; we’ll incrementally swap in the real scanner/execution to avoid breaking stability.
+
+End of document — you can print or commit this file to the repo’s /docs folder later if you want persistent in‑repo docs.
+
