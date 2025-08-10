@@ -66,3 +66,10 @@ LOG_LEVEL = "INFO"
 
 # === MODE ===
 PAPER_TRADING = True
+
+# Add this at the end of config.py
+settings = {
+    "SYMBOL": "BTC/USD",  # Default symbol to trade
+    "SLEEP_INTERVAL": 60,  # Seconds between checks
+}
+settings = {"SYMBOL": "BTC/USD", "SLEEP_INTERVAL": 60} 

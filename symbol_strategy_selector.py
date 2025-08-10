@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # filename: symbol_strategy_selector.py
 
 import streamlit as st
@@ -113,3 +114,11 @@ try:
         st.info("No trades logged yet.")
 except Exception as e:
     st.error(f"Failed to load trade log: {e}")
+=======
+# symbol_strategy_selector.py
+
+def get_strategy_for_symbol(symbol):
+    def strategy(data):
+        return None
+    return strategy
+>>>>>>> 0c0df91 (Initial push)

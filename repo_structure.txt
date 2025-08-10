@@ -1,0 +1,22 @@
+# repo structure (placeholders are UPPER_SNAKE_CASE)
+aimn/
+├─ wsgi.py
+├─ run_worker.py
+├─ requirements.txt
+├─ README.md
+├─ .gitignore
+├─ .env.example
+├─ snapshots/                  # saved charts (gitignored)
+├─ app/
+│  ├─ __init__.py
+│  ├─ db.py
+│  ├─ models.py
+│  ├─ security.py
+│  ├─ indicators.py
+│  ├─ market_data.py
+│  ├─ scanner.py
+│  ├─ broker.py
+│  ├─ position_manager.py
+│  └─ views.py
+└─ scripts/
+   └─ bootstrap_seed.py

@@ -401,3 +401,11 @@ if __name__ == "__main__":
     
     # Test connection
     test_alpaca_connection()
+    
+    
+# Add this at the very end of alpaca_connector.py
+def place_order(symbol: str, side: str) -> Dict:
+    """Wrapper function for main_v2.py"""
+    connector = AlpacaTradingConnector(paper_trading=True)
+    qty = 1  # Default quantity, adjust as needed
+    return connector.place_order(symbol, side, qty)

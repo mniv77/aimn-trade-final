@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AIMn Automated Trading System  8-5-25
 
 ## 🔍 Overview
@@ -180,3 +181,187 @@ The AIMn system is:
 ---
 
 **Built with love & logic. Inspired by Mayyam’s modular elegance.**
+=======
+# AIMn Automated Trading System  8-5-25
+
+## 🔍 Overview
+The **AIMn Trading Bot** is a fully automated stock and crypto trading system using Python. It includes:
+- Symbol-agnostic scanning engine (multi-professor logic)
+- RSIReal + MACD + VolumeTrend confirmation
+- Dynamic dual trailing stop exit system
+- Optional Pine Script integration for alerts (FastAPI)
+- Streamlit-based visual dashboard for live monitoring
+- 🔧 **AI-based parameter tuner with multi-symbol support**
+- 🧠 **Future: Real-time parameter sync from Pine Script (TV Strategy)**
+
+---
+
+## 🧠 Architecture
+### Backend Components:
+- `main_v2.py`: Central trading loop, orchestrates scanning + trading
+- `scanner.py`: Symbol scanner with RSIReal, MACD, VolumeTrend, ATR filters
+- `indicators.py`: Matches Pine Script - RSIReal, MACD, OBV, ATR
+- `position_manager.py`: Entry/exit manager using dynamic trailing rules
+- `alpaca_connector.py`: Alpaca broker connector (paper/live)
+- `market_data.py`: Historical data fetcher (Alpaca/Yahoo fallback)
+- `config.py`: Symbol-specific config (thresholds, filters)
+- `parameter_optimizer.py`: AI optimizer (single/multi-symbol tuning)
+
+### Frontend Components:
+- `aimn_working_dashboard.py`: Streamlit dashboard for:
+  - 📈 Real trades log
+  - 📊 P&L & trade history
+  - 💹 Live popup tracker
+  - 🛠 Tuning UI per-symbol
+
+### Optional Alerts:
+- `main.py`: FastAPI app to receive webhook JSON
+- `alert_handler.py`: Secure parser for alert routing
+- `aimn_trades.json`: Persistent trade record
+- `trade_snapshots/`: Auto-chart image capture on exit
+
+---
+
+## 🔁 Trading Flow
+1. **Load Watchlist** from `config.py`
+2. **Fetch Data** using Alpaca/YFinance
+3. **Compute Indicators**: RSIReal, MACD, VolumeTrend, ATR
+4. **Scan All Symbols**: Check BUY/SELL signals & score
+5. **Select Best Trade**: Highest scoring opportunity, regardless of last trade
+6. **Enter Trade** if no current open
+7. **Apply Exit Logic**: Stop loss → early trail → peak trail
+8. **Log & Save**: JSON record + chart snapshot
+
+> 🧠 "Each trade is independent - the market decides the next professor."
+
+---
+
+## 📦 File Structure
+```
+AIMn-Bot/
+├── main_v2.py
+├── config.py
+├── alpaca_connector.py
+├── indicators.py
+├── scanner.py
+├── position_manager.py
+├── market_data.py
+├── alert_handler.py
+├── main.py
+├── aimn_trades.json
+├── trade_snapshots/
+├── aimn_working_dashboard.py
+├── parameter_config.json
+├── parameter_optimizer.py
+├── .env
+├── requirements.txt
+```
+
+---
+
+## 📊 Dashboard Features
+### ✅ Clean Trade Logs
+- Symbol, direction, entry/exit, %P&L, reason
+
+### 🎮 Live Trade Viewer
+- Real-time trade status with dynamic lines
+- Closes on exit, image saved
+
+### 🛠 Per-Symbol Tuning
+- Adjust filters per asset: RSI, MACD, Volume, ATR
+- Set trailing parameters (start/minus) visually
+
+---
+
+## 🤖 AI Parameter Tuner
+### `parameter_optimizer.py` Usage
+
+- Tune **one** symbol:
+```bash
+python parameter_optimizer.py --symbol AAPL
+```
+
+- Tune **group**:
+```bash
+python parameter_optimizer.py --group crypto
+```
+
+- Tune **all** symbols:
+```bash
+python parameter_optimizer.py --all
+```
+
+Automatically optimizes:
+- RSI window, MACD, Volume, ATR
+- Stop loss %, trail start/minus %
+
+Logs results to:
+- `parameter_config.json`
+- Optional CSV summary
+
+---
+
+## 📈 Volume Trend Entry Logic (New!)
+### Buy Confirmation:
+- Volume > average
+- Price up
+- OBV uptrend
+
+### Sell Confirmation:
+- Volume > average
+- Price down
+- OBV downtrend
+
+Volume trend filters are baked into scanner scores. Trade only happens when price AND volume trend align.
+
+---
+
+## 🧬 Pine Script Input Integration (WIP)
+- Base model is 1-symbol Pine Script strategy (RSIReal, MACD, Volume, ATR)
+- Parameters are programmable with dual decimal support
+- Entry/Exit modeled per trailing logic in Python
+- Future AI model to backtest Pine params across assets
+- **Goal:** Real-time flow from TV Strategy → Python via webhook or param dump
+
+---
+
+## 🔥 Dashboard UX Vision
+### User-Centric Experience:
+- 💰 **Only completed real trades shown**
+- 🧠 **No charts until trade is real**
+- 📺 **Popup Trade Mode**: Live status, closes with snapshot
+- 🧾 **Simple stats**: Win rate, ROI, current position, net P&L
+- 🔴 **STOP button** for manual override
+
+### Sections:
+- 💵 Net P&L
+- 📦 Current Trade
+- 📅 Recent 5 Trades
+- 🧪 Win %, avg %, max drawdown
+
+---
+
+## 🛣 Roadmap
+- [x] Add VolumeTrend confirmation
+- [x] AI parameter tuner (multi-symbol)
+- [ ] Pine Script ↔ Python signal matching validator
+- [ ] Trade replay viewer (from snapshots)
+- [ ] SaaS dashboard (FastAPI + React)
+- [ ] TV-to-Python param loader (multi-symbol)
+
+---
+
+## 📍 Summary
+The AIMn system is:
+- Symbol-agnostic
+- Entry via RSIReal + MACD + Volume
+- Dual trailing exit system
+- Always scanning, never stuck on 1 asset
+- Designed like dozens of independent trading professors
+
+**Philosophy**: “Let the market pick your trades. Let logic pick your exits.”
+
+---
+
+**Built with love & logic. Inspired by Mayyam’s modular elegance.**
+>>>>>>> 0c0df91 (Initial push)

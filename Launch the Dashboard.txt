@@ -1,0 +1,285 @@
+AIMn Dashboard - Official Operations and System Overview
+
+This document describes the structure, purpose, and usage of the AIMn Trading Dashboard, as well as the components of the trading system that support it. It serves as the definitive guide for operating, tuning, and monitoring the AIMn automated trading bot.
+
+🔍 Overview
+
+The AIMn Dashboard is a real-time Streamlit interface for monitoring and managing trades executed by the AIMn auto-trading system. It includes real trade logs, live chart tracking, and parameter tuning for supported symbols.
+
+The system is powered by:
+
+Pine Script strategy: Implements entry/exit logic using RSIReal, MACD, Volume, and ATR.
+
+Python backend: Scans markets, selects trades, executes them via API (Alpaca, Gemini, etc.), and logs results.
+
+Streamlit frontend: Displays logs, P&L, charts, and provides manual controls.
+
+🔁 System Flow: Scanning to Execution
+
+Symbol List Defined
+
+You specify the list of assets (e.g. BTC/USD, ETH/USD, AAPL, TSLA) in main_v2.py.
+
+Scanning with Indicators
+
+scanner.py loads market data and computes indicators using indicators.py:
+
+RSIReal
+
+MACD cross
+
+Volume confirmation
+
+ATR volatility filter
+
+Signal Evaluation
+
+Each symbol is scored using a weighted system based on:
+
+Strength of RSI signal
+
+MACD histogram magnitude
+
+Volume surge over average
+
+ATR expansion ratio
+
+The best opportunity is selected based on the highest score.
+
+Position Management
+
+If no open trade exists, the system enters the top-scoring opportunity.
+
+If a position is active, trailing exit logic is applied (early and peak phases).
+
+Exit & Logging
+
+Trades exit based on:
+
+Trailing stop logic
+
+Stop Loss
+
+RSI profit exit
+
+Results are stored in aimn_trades.json.
+
+Chart snapshot is saved in trade_snapshots/.
+
+Webhook-Based Trade Execution (Optional)
+
+You can send alerts from TradingView or any system using a webhook message to:
+
+{
+  "bot_id": "MN-COMPOUND-BOT",
+  "secret": "supersecure123",
+  "action": "enter_long",  // or "enter_short", "exit_long", "exit_short"
+  "symbol": "BTC/USD",
+  "qty": 1,
+  "price": 27640.00
+}
+
+The webhook endpoint is defined in main.py using FastAPI.
+
+Trade execution is handled securely via position_manager.py using broker APIs.
+
+📂 File Structure
+
+File/Folder
+
+Description
+
+main_v2.py
+
+Main orchestrator script (scanning + execution loop)
+
+scanner.py
+
+Symbol scanning and signal scoring based on indicators
+
+indicators.py
+
+All technical indicator logic (RSIReal, MACD, Volume, ATR)
+
+position_manager.py
+
+Entry and exit trade logic and risk tracking
+
+aimn_working_dashboard.py
+
+Streamlit dashboard code
+
+aimn_trades.json
+
+JSON log of actual executed trades
+
+trade_snapshots/
+
+Auto-saved PNG charts of each trade after exit
+
+parameter_config.json
+
+Saved strategy parameters per symbol from tuning interface
+
+config.py
+
+Broker credentials and bot identification
+
+main.py
+
+FastAPI webhook receiver (for external alerts)
+
+alert_handler.py
+
+Validates and processes incoming webhook alert payloads
+
+alpaca_connector.py
+
+Alpaca API connection setup and trading helper functions
+
+aimn_crypto_config.py
+
+Holds symbol lists and crypto-specific parameter overrides
+
+aimn_trading.log
+
+Text log of all system events for debugging/tracking
+
+requirements.txt
+
+Python dependencies list
+
+🔥 Feature 1: Real Trade Log
+
+Goal: Show only completed, actual trades (not just scanner signals).
+
+Data displayed:
+
+Symbol
+
+Direction (Buy/Sell)
+
+Entry Price
+
+Exit Price
+
+% P&L
+
+Dollar P&L
+
+Exit Reason (e.g. P = Peak Trail, E = Early Trail, R = RSI, S = Stop Loss)
+
+Timestamp
+
+Source: aimn_trades.json (auto-updated after every trade)
+
+📊 Feature 2: Live Trade Viewer
+
+Goal: Open a popup chart window when a trade is active.
+
+Details:
+
+Displays:
+
+Entry/Exit price
+
+All lines: Entry (orange), Stop Loss (red), Early Trail (purple), Peak Trail (pink), Trailing Minus (blue/lime)
+
+Live % P&L
+
+Auto-saves snapshot after exit to trade_snapshots/ (named with symbol + timestamp)
+
+Includes emergency STOP NOW button to manually close the trade early
+
+🔧 Feature 3: Parameter Tuning Interface
+
+Goal: Allow user to tune indicators and strategy parameters without editing code.
+
+Tunable Inputs (copied from Pine Script):
+
+RSI: Window, Oversold/Overbought, RSI Exit levels
+
+MACD: Fast, Slow, Signal lengths
+
+Volume: MA length, Threshold, Enable/Disable filter
+
+ATR: Period, MA Period, Threshold, Enable/Disable filter
+
+Stop Loss %
+
+Early Trail Start %, Minus %
+
+Peak Trail Start %, Minus %
+
+Workflow:
+
+List of all symbols appears
+
+User selects one or more symbols to tune
+
+Current parameters are loaded from parameter_config.json
+
+Inputs are editable and saved on update
+
+🌊 MaYYaM Connection: Water Project Integration
+
+The AIMn system is inspired by MaYYaM’s modular, decentralized architecture, originally designed to solve California's water shortage.
+
+From the MaYYaM Prologue (https://www.mayyamw.com/prologue):
+
+Problem: Centralized RO desalination is costly, land-heavy, and environmentally taxing.
+
+Solution: Patented solar-powered water generation units on catamarans producing fresh water, electricity, hydrogen, and oxygen.
+
+Model: Distributed, modular, and profitable units sold or leased to operators — same philosophy AIMn uses for trading modules.
+
+This connection reflects AIMn’s scalable vision: empower many individuals to run profitable, self-contained units (traders, water-makers, or both).
+
+⚡ Operating Instructions
+
+Start the Bot
+
+py main_v2.py
+
+Scans symbols
+
+Executes trades via broker
+
+Logs trade info
+
+Launch the Dashboard
+
+streamlit run aimn_working_dashboard.py
+
+View live trade log
+
+Open charts when trades are active
+
+Tune symbol parameters
+
+Optional: Run Webhook Server
+
+uvicorn main:app --reload
+
+Use for receiving alerts from TradingView or other external platforms.
+
+✅ Next Steps
+
+Planned features:
+
+AI-powered auto-tuning loop using parameter_config.json
+
+Option to simulate historical strategy results per symbol
+
+Trade replay viewer using saved snapshots
+
+Public-facing website for showcasing trades and onboarding users
+
+📍 Summary
+
+This guide is meant to ensure full self-sufficiency. Anyone reading it should understand the architecture of AIMn, be able to launch and monitor the bot, and use the dashboard to view live trades or tune strategy behavior.
+
+You never need to repeat yourself. This doc is your AI memory.
+
+End of Document.
+

@@ -3,17 +3,17 @@
 AIMn Trading System - Market Data Loader
 Pulls 1-minute historical OHLCV data for crypto symbols from Alpaca
 """
-
-from alpaca.data.historical import CryptoHistoricalDataClient
-from alpaca.data.requests import CryptoBarsRequest
-from alpaca.data.timeframe import TimeFrame
+from alpaca_trade_api.rest import REST
+#from alpaca.data.requests import CryptoBarsRequest
+#from alpaca.data.timeframe import TimeFrame
 from datetime import datetime, timedelta
 import pandas as pd
 from config import ALPACA_KEY, ALPACA_SECRET
 from config import SYMBOLS, TIMEFRAME
 
 # Create Alpaca client
-client = CryptoHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET)
+
+api = REST(ALPACA_KEY, ALPACA_SECRET, 'https://paper-api.alpaca.markets/v2')
 
 def fetch_crypto_bars(symbol: str, limit: int = 200) -> pd.DataFrame:
     """
@@ -28,6 +28,9 @@ def fetch_crypto_bars(symbol: str, limit: int = 200) -> pd.DataFrame:
         end=now
     )
     bars = client.get_crypto_bars(request).df
+
+def get_latest_data(symbol: str) -> pd.DataFrame:
+    return
 
     # Clean and structure DataFrame
     if symbol not in bars.index.get_level_values(0):

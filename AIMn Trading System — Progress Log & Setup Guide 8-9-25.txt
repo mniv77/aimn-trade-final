@@ -1,0 +1,89 @@
+AIMn Trading System — Progress Log & Setup Guide 8-9-25
+ 
+
+AIMn Trading System — Progress Log & Setup Guide
+
+Last updated: Aug 9, 2025 (PT)
+
+✅ Completed Work
+
+Branch: dashboard-live-trading
+
+Files Added/Updated:
+
+dashboard.py
+
+app/orchestrator.py
+
+app/broker_base.py
+
+app/broker_alpaca.py
+
+app/broker_gemini.py
+
+app/broker_manager.py
+
+app/state.py
+
+.gitignore
+
+market_data.py
+
+indicators.py
+
+config.py
+
+scanner.py
+
+position_manager.py
+
+trade_exporter.py
+
+trade_snapshot.py
+
+symbol_strategy_selector.py
+
+Key Integrations:
+
+Dashboard ↔ Broker Manager
+
+Dashboard ↔ Orchestrator
+
+Orchestrator ↔ Logs
+
+▶️ How to Run
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+Start dashboard:
+
+streamlit run dashboard.py
+
+Select broker (Alpaca or Gemini), load symbols, set parameters, and start scanning.
+
+Monitor live trades/logs in aimn_crypto_trading.log.
+
+🔐 Security
+
+API keys encrypted in app/state.db.
+
+Encryption key in app/secret.key (not committed to Git).
+
+For production, store keys securely off-server.
+
+📌 Next Steps
+
+Link orchestrator, scanner, and position manager for live execution.
+
+Add CSV export for trade logs.
+
+Implement active trade controls with parameter presets.
+
+Merge into main after paper trading success.
+
+Enable live trading from dashboard after validation.
+
+✅ System is ready for integration testing and live-trade preparation.
+
