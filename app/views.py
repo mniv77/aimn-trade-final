@@ -12,6 +12,8 @@ import os
 ui_bp = Blueprint("ui", __name__)
 api_bp = Blueprint("api", __name__)
 
+from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify
+
 PARAM_FIELDS = [
     "mode","rsi_period","rsi_buy_whole","rsi_buy_decimal","rsi_sell_whole","rsi_sell_decimal",
     "macd_fast","macd_slow","macd_signal","vol_window",
@@ -414,4 +416,180 @@ def trade_view(trade_id: int):
 @ui_bp.route("/snapshots/<path:fname>")
 def serve_snapshot(fname: str):
     # why: serve saved frames even without static server config
+    return send_from_directory(SNAP_DIR, fname, as_attachment=False)
+    
+@api_bp.route("/health")
+def health():
+    """DB + runtime health."""
+    from .services.settings import SettingsService
+    from .db import db_session
+    from sqlalchemy import text
+
+    try:
+        db_session.execute(text("SELECT 1"))
+        svc = SettingsService()
+        rt = svc.get_runtime()
+        return jsonify({
+            "status": "ok",
+            "enabled": bool(rt.bot_enabled),
+            "mode": rt.mode,
+            "last_heartbeat": str(rt.last_heartbeat)
+        }), 200
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 503
+        
+        # Append to the END of app/views.py (do not remove your existing code)
+
+# 1) Ensure these are already imported at the top of views.py; add any missing ones:
+from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify
+from .db import db_session
+from .models import StrategyParam
+from .services.settings import SettingsService
+
+# 2) Ensure blueprints exist somewhere above; if not, add these lines once:
+# ui_bp = Blueprint("ui", __name__)
+# api_bp = Blueprint("api", __name__)
+
+# 3) ADD the Bulk Apply page + endpoint:
+BULK_HTML = """
+<!doctype html>
+<html>
+<head>
+  <title>AIMn — Bulk Apply</title>
+  <style>
+    body{font-family:sans-serif} .card{border:1px solid #bbb;padding:12px;border-radius:8px;max-width:900px}
+    label{display:block;margin:4px 0} .top a{margin-right:12px}
+  </style>
+  <script>
+    function selAll(){ document.querySelectorAll('input.target').forEach(cb=>{ if(!cb.disabled) cb.checked=true; }); }
+    function clrAll(){ document.querySelectorAll('input.target').forEach(cb=>cb.checked=false); }
+  </script>
+</head>
+<body>
+  <div class="top"><a href="/">Dashboard</a> <b>Bulk Apply</b></div>
+  <h2>Bulk Apply Parameters</h2>
+  <div class="card">
+    <form method="post" action="{{ url_for('api.bulk_apply') }}">
+      <p><b>1) Source profile</b></p>
+      <select name="source_id" required>
+        <option value="">-- select --</option>
+        {% for p in all_profiles %}
+          <option value="{{p.id}}">{{p.symbol}} — {{p.timeframe}} (id={{p.id}})</option>
+        {% endfor %}
+      </select>
+
+      <p style="margin-top:10px;"><b>2) Target profiles</b></p>
+      <button type="button" onclick="selAll()">Select All</button>
+      <button type="button" onclick="clrAll()">Clear All</button>
+      <div style="max-height:260px;overflow:auto;border:1px solid #ddd;padding:8px;margin-top:6px;">
+        {% for p in all_profiles %}
+          <label>
+            <input type="checkbox" class="target" name="target_ids" value="{{p.id}}">
+            {{p.symbol}} — {{p.timeframe}} (id={{p.id}})
+          </label>
+        {% endfor %}
+      </div>
+
+      <p style="margin-top:10px;"><b>3) (Optional) Auto-create from symbols CSV</b></p>
+      <div>
+        Symbols: <input name="new_symbols_csv" size="40" placeholder="BTC/USD,ETH/USD,SOL/USD">
+        TF: <input name="new_tf" size="6" value="1m">
+        <label><input type="checkbox" name="create_missing"> Create & include</label>
+      </div>
+
+      <p style="margin-top:10px;"><b>4) Apply</b></p>
+      <button>Apply Source Parameters</button>
+    </form>
+  </div>
+</body>
+</html>
+"""
+
+@ui_bp.route("/bulk")
+def bulk():
+    all_profiles = db_session.query(StrategyParam).order_by(StrategyParam.symbol, StrategyParam.timeframe).all()
+    return render_template_string(BULK_HTML, all_profiles=all_profiles)
+
+@api_bp.route("/bulk_apply", methods=["POST"])
+def bulk_apply():
+    src_id = int(request.form["source_id"])
+    target_ids = [int(x) for x in request.form.getlist("target_ids") if x.isdigit()]
+    create_missing = "create_missing" in request.form
+    new_symbols_csv = (request.form.get("new_symbols_csv") or "").strip()
+    new_tf = (request.form.get("new_tf") or "").strip() or "1m"
+
+    src = db_session.get(StrategyParam, src_id)
+    if not src:
+        return redirect(url_for("ui.index"))
+
+    excluded = {"id", "symbol", "timeframe", "updated_at"}
+    copy_fields = [c.name for c in StrategyParam.__table__.columns if c.name not in excluded]
+
+    if create_missing and new_symbols_csv:
+        symbols = [s.strip().upper() for s in new_symbols_csv.split(",") if s.strip()]
+        for sym in symbols:
+            existing = db_session.query(StrategyParam).filter_by(symbol=sym, timeframe=new_tf).one_or_none()
+            if not existing:
+                clone = StrategyParam(symbol=sym, timeframe=new_tf)
+                for f in copy_fields:
+                    setattr(clone, f, getattr(src, f))
+                db_session.add(clone); db_session.commit()
+                target_ids.append(clone.id)
+
+    for tid in set(target_ids):
+        if tid == src_id:
+            continue
+        dst = db_session.get(StrategyParam, tid)
+        if not dst:
+            continue
+        for f in copy_fields:
+            setattr(dst, f, getattr(src, f))
+    db_session.commit()
+    SettingsService().refresh_cache()
+    return redirect(url_for("bulk"))
+
+# --- append to END of app/views.py ---
+
+# Requires at top (ensure these imports exist in your file):
+# from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify
+# from .db import db_session
+# from .models import StrategyParam   # already used
+from .models import Trade            # add this import if missing
+from flask import send_from_directory
+import os
+
+# Snapshots directory (saved frames live here)
+SNAP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "snapshots"))
+os.makedirs(SNAP_DIR, exist_ok=True)
+
+@ui_bp.route("/orders")
+def orders():
+    rows = db_session.query(Trade).order_by(Trade.ts.desc()).limit(500).all()
+    # simple HTML for quick visibility
+    html = [
+        "<!doctype html><html><head><title>AIMn — Orders Log</title>",
+        "<style>body{font-family:sans-serif}table{border-collapse:collapse}td,th{border:1px solid #888;padding:6px}</style>",
+        "</head><body>",
+        "<div><a href='/'>Dashboard</a></div>",
+        "<h2>Orders Log</h2>",
+        "<table><tr><th>ID</th><th>Time</th><th>Symbol</th><th>Side</th><th>Price</th><th>PnL%</th><th>Reason</th><th>Snapshot</th></tr>"
+    ]
+    for t in rows:
+        snap_name = f"trade_{t.id}.html"
+        snap_path = os.path.join(SNAP_DIR, snap_name)
+        if os.path.exists(snap_path):
+            snap_link = f"<a target='_blank' href='/snapshots/{snap_name}'>View</a>"
+        else:
+            snap_link = "<span style='color:#888'>None</span>"
+        html.append(
+            f"<tr><td>{t.id}</td><td>{t.ts}</td><td>{t.symbol}</td>"
+            f"<td>{t.side}</td><td>{t.price:.6f}</td><td>{(t.pnl_pct or 0):.2f}</td>"
+            f"<td>{t.reason or ''}</td><td>{snap_link}</td></tr>"
+        )
+    html.append("</table></body></html>")
+    return "\n".join(html)
+
+@ui_bp.route("/snapshots/<path:fname>")
+def serve_snapshot(fname: str):
+    # serve saved chart frames (HTML files) from snapshots folder
     return send_from_directory(SNAP_DIR, fname, as_attachment=False)
