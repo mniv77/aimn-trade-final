@@ -77,3 +77,15 @@ class LogEvent(Base):
     message = Column(Text, nullable=False)
     meta = Column(JSON)
     ts = Column(DateTime, server_default=func.now())
+    
+# Append this near your other models. Do NOT remove existing ones.
+from sqlalchemy import Column, Integer, String, UniqueConstraint
+from .db import Base
+
+class LoopTarget(Base):
+    __tablename__ = "loop_targets"
+    id = Column(Integer, primary_key=True)
+    symbol = Column(String(32), nullable=False)
+    timeframe = Column(String(16), nullable=False)
+    __table_args__ = (UniqueConstraint("symbol", "timeframe", name="uq_loop_symbol_tf"), )
+

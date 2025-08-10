@@ -50,3 +50,21 @@ class SettingsService:
         rt.last_heartbeat = datetime.utcnow()
         db_session.commit()
         return rt
+        # Inside your existing SettingsService class, ADD this method:
+from .models import LoopTarget, StrategyParam
+from .db import db_session
+
+class SettingsService:
+    # ... keep your existing methods
+
+    def get_loop_symbols(self) -> list[tuple[str, str]]:
+        """
+        Returns list of (symbol, timeframe) that the worker should scan.
+        If none selected, falls back to all StrategyParam profiles.
+        """
+        rows = db_session.query(LoopTarget).all()
+        if rows:
+            return [(r.symbol, r.timeframe) for r in rows]
+        # fallback: all profiles
+        profs = db_session.query(StrategyParam).order_by(StrategyParam.symbol, StrategyParam.timeframe).all()
+        return [(p.symbol, p.timeframe) for p in profs]
