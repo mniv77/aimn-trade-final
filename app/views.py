@@ -3,11 +3,29 @@
 # =====================
 from flask import Blueprint, render_template_string, request, redirect, url_for, jsonify, send_from_directory
 from .db import db_session
-from .models import StrategyParam, UiEvent, Trade
+# from .models import StrategyParam, UiEvent, Trade
 from .services.settings import SettingsService
 from .security import upsert_alpaca_keys
 from .market_data import fetch_bars
 import os
+
+from .models import StrategyParam, Trade
+try:
+    # optional model; skip if not present yet
+    from .models import UiEvent
+except Exception:
+    UiEvent = None
+
+# 2) In the latest_trade endpoint, add a guard (replace the function body as below):
+@api_bp.route("/events/latest_trade")
+def latest_trade():
+    if UiEvent is None:
+        # model not present; just return empty so UI doesn't break
+        return jsonify({})
+    ev = db_session.query(UiEvent).order_by(UiEvent.id.desc()).first()
+    if not ev:
+        return jsonify({})
+    return jsonify({"id": ev.ref_id, "kind": ev.kind})
 
 ui_bp = Blueprint("ui", __name__)
 api_bp = Blueprint("api", __name__)

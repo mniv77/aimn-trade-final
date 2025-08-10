@@ -9,27 +9,55 @@ class User(Base):
     username = Column(String(64), unique=True, nullable=False)
     # Single-user system: seed one user row if needed.
 
+# ======================================================================
+# FILE: app/models.py  (REPLACE ONLY the StrategyParam class definition)
+# ======================================================================
+from sqlalchemy import Column, Integer, Float, String, DateTime, func, UniqueConstraint
+from .db import Base
+
 class StrategyParam(Base):
     __tablename__ = "strategy_params"
+    __table_args__ = (
+        UniqueConstraint("symbol", "timeframe", name="uq_strategy_symbol_tf"),
+    )
+
     id = Column(Integer, primary_key=True)
-    symbol = Column(String(32), nullable=False)            # e.g., "BTC/USD"
-    timeframe = Column(String(16), nullable=False)         # e.g., "1m"
+    symbol = Column(String(32), nullable=False, index=True)
+    timeframe = Column(String(16), nullable=False, index=True)
+
+    # TV-style tuning fields
+    mode = Column(String(8), nullable=False, default="BUY")
+
     rsi_period = Column(Integer, default=14)
-    rsi_buy = Column(Float, default=30.0)
-    rsi_sell = Column(Float, default=70.0)
+    rsi_buy_whole = Column(Integer, default=30)
+    rsi_buy_decimal = Column(Integer, default=0)
+    rsi_sell_whole = Column(Integer, default=70)
+    rsi_sell_decimal = Column(Integer, default=0)
+
     macd_fast = Column(Integer, default=12)
     macd_slow = Column(Integer, default=26)
     macd_signal = Column(Integer, default=9)
     vol_window = Column(Integer, default=20)
-    weight_rsi = Column(Float, default=0.4)
-    weight_macd = Column(Float, default=0.4)
+
+    weight_rsi = Column(Float, default=0.5)
+    weight_macd = Column(Float, default=0.3)
     weight_vol = Column(Float, default=0.2)
-    entry_threshold = Column(Float, default=0.6)
-    trailing_pct_primary = Column(Float, default=0.8)      # %
-    trailing_pct_secondary = Column(Float, default=1.5)    # %
-    position_size_usd = Column(Float, default=50.0)
+    entry_threshold = Column(Float, default=1.0)
+
+    trailing_pct_primary_whole = Column(Integer, default=1)
+    trailing_pct_primary_decimal = Column(Integer, default=0)
+    trailing_pct_secondary_whole = Column(Integer, default=2)
+    trailing_pct_secondary_decimal = Column(Integer, default=0)
+    trailing_start_whole = Column(Integer, default=1)
+    trailing_start_decimal = Column(Integer, default=0)
+    stop_loss_whole = Column(Integer, default=1)
+    stop_loss_decimal = Column(Integer, default=0)
+    rsi_exit_whole = Column(Integer, default=50)
+    rsi_exit_decimal = Column(Integer, default=0)
+
+    position_size_usd = Column(Integer, default=50)
+
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    __table_args__ = (UniqueConstraint("symbol", "timeframe", name="uq_symbol_tf"), )
 
 class ApiCredential(Base):
     __tablename__ = "api_credentials"
