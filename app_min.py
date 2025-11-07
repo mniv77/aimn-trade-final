@@ -12,10 +12,6 @@ app = Flask(
     template_folder=str(TEMPLATES),
     static_folder=str(STATIC)
 )
-#----------------new
- 
-#---------------------true link----------------
- 
 
 # --- Health (never touches DB) ---
 @app.get("/api/health")
@@ -43,6 +39,12 @@ def symbol_api_manager():
 def trade_tester():
     # You confirmed the correct file is trade_tester.html (underscore)
     return render_template("trade_tester.html")
+
+# ✅ NEW ROUTE ADDED - This was missing!
+@app.route("/trade-popup-fixed", endpoint="trade_popup_fixed")
+def trade_popup_fixed():
+    """Display the trading popup window with real-time chart and controls"""
+    return render_template("trade-popup-fixed.html")
 
 @app.route("/symbols", endpoint="symbols")
 def symbols():
@@ -87,17 +89,25 @@ def beginner_guide():
 def diagnostics():
     # You said this is the better diagnostics screen
     return render_template("functional_scanner_diagnostics.html")
-#_______________
+
 # --- AI/ML Dashboard Home ---
 @app.route("/aiml", endpoint="aiml_home")
 def aiml_home():
     return render_template("aiml/home.html")
 
+
+# app_min.py — keep this route exactly like this
 @app.route("/aiml/manual-tune", endpoint="manual_tune")
 def manual_tune():
-    return render_template("aiml/manual_tune.html")
-
-#_______________
+    ctx = {
+        # safe defaults so Jinja can render even if you haven't computed stats yet
+        "pnl_pct": 0.0,
+        "n_trades": 0,
+        "win_rate": 0.0,
+        "avg_trade_pct": 0.0,
+        "max_drawdown": 0.0,
+    }
+    return render_template("aiml/manual_tune.html", **ctx)
 
 
  
