@@ -1,0 +1,285 @@
+Popup ↔ Scanner Integration Specification (v1.0) 9-3-25
+Project: AIMn Multi-Professor Auto-Trading System
+Scope: How the Scanner hands off an entry to the Popup Trading UI, how the Popup executes and exits, and how completion is reported back to the Scanner—using consistent auth, payloads, and DB fields.
+
+1) Components & Roles
+    • Scanner System (meirniv.pythonanywhere.com): Finds entries, decides symbol / side / entry / qty (and optional risk params) and initiates an order session.
+    • Popup Trading UI (popup-trader-ui-meirniv.pythonanywhere.com):
+Renders a real-time chart (our own canvas, not TV), displays entry, trail-start, stop, top/minus trailing, and detects exits (T/L/R/P). Saves snapshots and writes orders to DB.
+    • Database:
+        ◦ Current prod in Popup: SQLite (trader.db) with tables trade_sessions, orders, tenants.
+        ◦ Target for shared state: MySQL (MeirNiv$trading_db). We provide compatible schemas so we can migrate without breaking API contracts.
+
+2) Message Flow (happy path)
+Scanner
+  └─ POST /api/trade_sessions  (create session, optional params)
+        ↓
+Popup creates session (id = SID), returns popup URL
+        ↓
+User sees popup chart, lines lock at entry; trailing active
+        ↓
+Exit happens (T/L/R/P) → Popup POST /api/trade-completed (to Scanner)
+        ↓
+Scanner marks signal processed, resumes exchange scanning
+Exit codes:
+T = Trailing, L = Stop loss, R = RSI rule, P = Panic/manual
+
+3) Authentication & Multi-User
+    • Auth: Authorization: Bearer <SHARED_API_KEY> on both directions.
+    • Tenant (optional): X-Tenant: <tenant> (defaults to "public" if omitted).
+    • User: X-User-Id: <user_id> (or ?user=<id> for dev). Popup stores user_id on both trade_sessions and orders.
+Note: Broker API keys/secret are not in URLs. They must be stored server-side (DB secrets table or environment variables) and only used by the trading adapter—never echoed to clients.
+
+4) API Contracts
+4.1 Scanner → Popup: Create Session
+POST https://popup-trader-ui-meirniv.pythonanywhere.com/api/trade_sessions
+Headers
+Authorization: Bearer <SHARED_API_KEY>
+Content-Type: application/json
+X-User-Id: default_user             # required for multi-user separation
+X-Tenant: public                    # optional
+Body (minimum)
+{
+  "signal_id": 12345,
+  "symbol": "AAPL",
+  "exchange": "NASDAQ",
+  "side": "BUY",
+  "qty": 10,
+  "entry_price": 221.45
+}
+Optional strategy knobs (percent semantics; all optional):
+"params": {
+  "p21": 2.0,    // stop loss %
+  "p23": 0.3,    // trail start %
+  "p25": 1.5,    // early trailing width (minus %) 
+  "p27": 1.5,    // tighten at PnL%
+  "p29": 1.0,    // late trailing width (minus %)
+  "p31": 0.5     // RSI min profit % (gate for R)
+}
+Success (200)
+{
+  "ok": true,
+  "id": 1002,
+  "sid": 1002,
+  "user_id": "default_user",
+  "popup_url": "/chart_lite?symbol=AAPL&exchange=NASDAQ&side=BUY&qty=10&sid=1002&entry=221.45"
+}
+Notes
+    • Popup returns a URL that opens our real-time chart with the session pinned (no TradingView delay).
+    • If entry_price is omitted, popup seeds it from the live last price at moment of promotion and freezes it.
+Errors
+{ "ok": false, "error": "missing field: symbol" }
+
+4.2 Popup → Scanner: Trade Completed
+POST https://meirniv.pythonanywhere.com/api/trade-completed
+Headers
+Authorization: Bearer <SHARED_API_KEY>
+Content-Type: application/json
+X-User-Id: default_user
+X-Tenant: public
+Body
+{
+  "signal_id": 12345,
+  "session_id": 1002,
+  "exchange": "NASDAQ",
+  "symbol": "AAPL",
+  "side": "BUY",
+  "exit_reason": "T",
+  "exit_price": 224.10,
+  "pnl_percentage": 1.20,
+  "trade_duration_seconds": 1425,
+  "timestamp": "2025-09-03T10:39:15Z"
+}
+Success (200)
+{
+  "status": "success",
+  "message": "Exchange NASDAQ scanning resumed",
+  "exchange_state": { "exchange":"NASDAQ", "is_scanning": true, "active_position_symbol": null }
+}
+Failure (4xx/5xx)
+{ "status":"error", "message":"Missing required fields: signal_id" }
+
+5) Strategy Semantics (display + exits)
+The Scanner owns entries. The Popup handles exit-only logic and renders lines:
+    • Fixed lines (do not move once order locked):
+        ◦ Entry: the exact price the order entered (frozen).
+        ◦ Trail-Start: entry * (1 + p23%) for BUY; entry * (1 - p23%) for SELL.
+        ◦ Stop Loss: entry * (1 - p21%) for BUY; entry * (1 + p21%) for SELL.
+    • Trailing (dynamic, only moves upward for BUY / downward for SELL):
+        ◦ Top Trailing = the highest price seen since arming (BUY), or lowest (SELL).
+Arming begins once price crosses Trail-Start band from entry.
+        ◦ Minus Trailing = Top * (1 - p25%) for BUY; Top * (1 + p25%) for SELL.
+If p27 (PnL tighten threshold) is reached, width switches to p29%.
+        ◦ Exit T triggers when last price crosses Minus Trailing in the adverse direction.
+        ◦ Exit L triggers when last price crosses Stop Loss band.
+        ◦ Exit R (optional): RSI exit allowed only if PnL ≥ p31% and RSI threshold hit.
+Exit labels on chart: shows reason letter (T/L/R/P) and P&L%.
+
+6) Database
+6.1 Current Popup (SQLite)
+Tables already exist and are being written by the UI:
+    • trade_sessions (additions already applied: user_id, status timestamps)
+        ◦ id (PK), tenant, user_id, symbol, exchange, side, qty,
+        ◦ entry_price, params_json, status, opened_at, closed_at,
+        ◦ exit_price, exit_value, pnl_pct, pnl_amount, reason,
+        ◦ snapshot_path, created_at
+    • orders
+        ◦ id (PK), tenant, user_id, symbol, exchange, side, qty,
+        ◦ entry_price, exit_price, exit_value, pnl_pct, pnl_amount,
+        ◦ reason, snapshot_path, created_at, exit_time
+Planned column: signal_id on trade_sessions (so we can report back which signal we fulfilled).
+Add (idempotent):
+ALTER TABLE trade_sessions ADD COLUMN signal_id INTEGER;
+CREATE INDEX IF NOT EXISTS idx_trade_sessions_signal ON trade_sessions(signal_id);
+6.2 Shared MySQL (Target)
+If/when we move to shared MySQL, mirror the tables:
+CREATE TABLE trade_sessions (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  tenant VARCHAR(64) DEFAULT 'public',
+  user_id VARCHAR(64) NOT NULL,
+  signal_id BIGINT NULL,
+  symbol VARCHAR(32) NOT NULL,
+  exchange VARCHAR(32) NOT NULL,
+  side ENUM('BUY','SELL') NOT NULL,
+  qty INT NOT NULL,
+  entry_price DECIMAL(18,8) NULL,
+  params_json JSON NULL,
+  status VARCHAR(16) DEFAULT 'NEW',
+  opened_at BIGINT NULL,
+  closed_at BIGINT NULL,
+  exit_price DECIMAL(18,8) NULL,
+  exit_value DECIMAL(18,8) NULL,
+  pnl_pct DECIMAL(9,4) NULL,
+  pnl_amount DECIMAL(18,8) NULL,
+  reason CHAR(1) NULL,
+  snapshot_path VARCHAR(255) NULL,
+  created_at BIGINT NOT NULL
+);
+
+CREATE TABLE orders (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  tenant VARCHAR(64) DEFAULT 'public',
+  user_id VARCHAR(64) NOT NULL,
+  symbol VARCHAR(32) NOT NULL,
+  exchange VARCHAR(32) NOT NULL,
+  side ENUM('BUY','SELL') NOT NULL,
+  qty INT NOT NULL,
+  entry_price DECIMAL(18,8) NOT NULL,
+  exit_price DECIMAL(18,8) NOT NULL,
+  exit_value DECIMAL(18,8) NULL,
+  pnl_pct DECIMAL(9,4) NULL,
+  pnl_amount DECIMAL(18,8) NULL,
+  reason CHAR(1) NOT NULL,
+  snapshot_path VARCHAR(255) NULL,
+  created_at BIGINT NOT NULL,
+  exit_time BIGINT NOT NULL
+);
+
+CREATE INDEX idx_sessions_user ON trade_sessions(user_id);
+CREATE INDEX idx_orders_user   ON orders(user_id);
+CREATE INDEX idx_sessions_signal ON trade_sessions(signal_id);
+If the Scanner team prefers to keep their own signal_alerts table, that’s fine—trade_sessions.signal_id simply references it for correlation.
+
+7) Required Endpoints (Popup)
+Already implemented:
+    • POST /api/trade_sessions — Create session (supports params, entry_price, and headers for X-User-Id, X-Tenant).
+    • POST /api/trade_sessions/<sid>/close — Record exit (reason, exit price, PnL); writes orders and updates session.
+    • POST /api/trade_sessions/<sid>/snapshot — Accepts a data:image/png;base64, to save chart frame for history.
+    • GET /chart_lite?... — Real-time canvas chart (no TV), draws fixed lines + moving trailing, shows entry arrow when locked.
+    • Health/Debug: /healthz, /healthz/db, /healthz/lite
+Dev helpers (don’t use from Scanner in prod):
+    • GET /api/trade_sessions/quick and /quick_safe (no-fail demo creators)
+
+8) Error Handling & Idempotency
+    • If Scanner retries POST /api/trade_sessions, provide an Idempotency-Key header (UUID). Popup will treat repeated keys within a short window as the same request (we can add a small idempotency table or reuse a unique key on (user_id, signal_id)).
+    • On any 4xx from Popup, Scanner must not block the exchange permanently; roll back “paused scanning” state.
+    • Popup retries the trade-completed POST on 5xx with exponential backoff (2 attempts is enough). If all fail, the exit is still recorded locally; Scanner can reconcile via a periodic fetch (future endpoint: /api/exits?since=...).
+
+9) Security
+    • Shared API key in Authorization: Bearer … both ways.
+    • No secrets in URLs. Broker credentials are stored server-side and fetched per user_id + tenant when needed.
+    • Input validation: both sides validate required fields and bounds on percents. Reject on missing symbol, bad side, nonsense qty, etc.
+    • Auditing: log request IDs, user_id, tenant, signal_id, sid.
+
+10) Acceptance Criteria
+    • Create session
+        ◦ Given a valid JSON payload with auth, Popup returns { ok:true, sid } and a popup_url.
+        ◦ The chart opens with fixed Entry/Trail-Start/Stop lines and shows the entry arrow once locked.
+    • Trailing behavior
+        ◦ Top trailing ascends with new highs (BUY) and never drops; Minus trailing is computed with p25% (or p29% after p27% gain).
+        ◦ Exit T fires exactly when price crosses Minus trailing.
+    • Stop loss
+        ◦ Exit L fires exactly when price crosses stop band from entry.
+    • Completion callback
+        ◦ On exit, Popup POSTs to Scanner /api/trade-completed with exit reason, price, PnL%.
+    • Multi-user
+        ◦ user_id propagates into trade_sessions and orders.
+    • Health
+        ◦ /healthz endpoints return ok.
+
+11) Test Plan (quick)
+    1. Create Session (Scanner)
+        ◦ POST to Popup with signal_id, symbol, exchange, side, qty, entry_price, params.
+        ◦ Expect { ok:true, sid, popup_url }.
+    2. Visual
+        ◦ Open popup_url. Entry/Trail-Start/Stop are fixed. Last price line moves. Entry arrow shown.
+    3. Trailing Exit
+        ◦ Use parameters that are easy to hit (e.g., p23=0.1, p25=0.5) and verify exit T POST reaches Scanner.
+    4. Stop Exit
+        ◦ Set p21 small so price crosses quickly; verify exit L.
+    5. Panic
+        ◦ Click “Panic Close” (or POST directly). Verify exit P.
+    6. DB
+        ◦ Check trade_sessions and orders rows with correct user_id, signal_id, PnL, exit reason.
+
+12) Open Items / Alignment Needed
+    • Shared DB: If the Scanner team really wants one MySQL for both sides, we’ll:
+        ◦ Migrate Popup to write MySQL instead of SQLite (or dual-write for a transition period).
+        ◦ Add trade_sessions.signal_id now to align.
+    • Strategy knobs: Confirm % semantics (all percent, not decimals) for p21/p23/p25/p29; p27/p31 are also percent, but not converted to decimals (PnL% thresholds).
+    • Idempotency: Decide between (user_id, signal_id) uniqueness vs an Idempotency-Key header table.
+    • Broker adapters: When live trading is on, the Popup will call a broker adapter; credentials will be looked up by (tenant, user_id, broker) in a secrets table.
+
+13) Example cURL
+Create session
+curl -X POST https://popup-trader-ui-meirniv.pythonanywhere.com/api/trade_sessions \
+  -H "Authorization: Bearer $SHARED_API_KEY" \
+  -H "X-User-Id: default_user" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "signal_id": 12345,
+    "symbol": "AAPL",
+    "exchange": "NASDAQ",
+    "side": "BUY",
+    "qty": 10,
+    "entry_price": 221.45,
+    "params": { "p21":2, "p23":0.3, "p25":1.5, "p27":1.5, "p29":1.0, "p31":0.5 }
+  }'
+Trade completed (Popup → Scanner)
+curl -X POST https://meirniv.pythonanywhere.com/api/trade-completed \
+  -H "Authorization: Bearer $SHARED_API_KEY" \
+  -H "X-User-Id: default_user" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "signal_id": 12345,
+    "session_id": 1002,
+    "exchange": "NASDAQ",
+    "symbol": "AAPL",
+    "side": "BUY",
+    "exit_reason": "T",
+    "exit_price": 224.10,
+    "pnl_percentage": 1.20,
+    "trade_duration_seconds": 1425,
+    "timestamp":"2025-09-03T10:39:15Z"
+  }'
+
+14) Deployment Checklist (Popup side)
+    • SHARED_API_KEY set as env var on server.
+    • resolve_user() + ensure_user_columns() applied (already done on your app).
+    • trade_sessions.signal_id column added.
+    • /api/trade_sessions accepts signal_id, params, entry_price; returns popup_url.
+    • /api/trade_sessions/<sid>/close posts orders and calls Scanner /api/trade-completed.
+    • Health endpoints return ok.
+    • (Later) Swap SQLite → MySQL connection strings when shared DB is greenlit.
+
+If the Scanner team wants changes (field names, status codes, or moving the shared DB sooner), just mark them in this doc and we’ll update both sides in lockstep. Once we agree here, you’ll be a nudge away from live trading—and then we can go wild on the demos. 🚀

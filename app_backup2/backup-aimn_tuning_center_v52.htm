@@ -1,0 +1,988 @@
+.sync-indicator {
+            background: rgba(255,193,7,0.3);
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Strategy Tuning Center - V5.2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .strategy-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .symbol-section {
+            margin-bottom: 30px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .symbol-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .paste-area {
+            margin-bottom: 20px;
+        }
+
+        .paste-area textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px dashed rgba(255,255,255,0.5);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-family: monospace;
+            resize: vertical;
+            font-size: 14px;
+        }
+
+        .paste-area textarea::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .param-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .param-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .param-section h3 {
+            margin-bottom: 15px;
+            color: #87ceeb;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 5px;
+        }
+
+        .param-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .param-group {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .param-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #e0e0e0;
+            font-size: 12px;
+        }
+
+        .param-group input, .param-group select {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 13px;
+        }
+
+        .param-group input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .mode-selector {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .mode-selector select {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-parse {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            font-size: 18px;
+            padding: 15px 30px;
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
+            box-shadow: 0 8px 25px rgba(0,123,255,0.6);
+        }
+
+        .btn-clear {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-auto-fill {
+            background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+            color: black;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 18px 35px;
+            box-shadow: 0 8px 25px rgba(255,193,7,0.4);
+            border: 3px solid #ff8f00;
+        }
+
+        .btn-auto-fill:hover {
+            background: linear-gradient(135deg, #ff8f00 0%, #ffc107 100%);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(255,193,7,0.6);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .status-display {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: rgba(40,167,69,0.3);
+            border: 1px solid #28a745;
+        }
+
+        .status-error {
+            background: rgba(220,53,69,0.3);
+            border: 1px solid #dc3545;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .current-params {
+            background: rgba(0,123,255,0.2);
+            border: 1px solid #007bff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .current-params h4 {
+            margin-bottom: 10px;
+            color: #87ceeb;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .help-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff6600 0%, #ff4500 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255,102,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .help-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255,102,0,0.5);
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .popup-close:hover {
+            background: #ff3333;
+        }
+
+        .step {
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .step-number {
+            background: #00ff00;
+            color: black;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            color: #00ffff;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .code-example {
+            background: #000;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #00ff00;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Help Button -->
+        <button class="help-button" onclick="openHelpPopup()" title="How to use Parameter Transfer">
+            ❓
+        </button>
+
+        <div class="header">
+            <h1>🎯 AIMn Strategy Tuning Center - V5.2</h1>
+            <p>TradingView Parameter Transfer to Database</p>
+        </div>
+
+        <div class="strategy-info">
+            <strong>📊 Strategy:</strong> AImn-Cl Looping Strategy - V6.1 (Dual Trailing System)<br>
+            <strong>🎮 Features:</strong> RSI Real + MACD + Volume + ATR + Dual Trailing System
+        </div>
+
+        <div class="sync-indicator" style="display: none;">
+            🔄 <strong>SYNCHRONIZED ORDER:</strong> Paste TV numbers in exact order - auto-fills all fields!
+        </div>
+
+        <div class="form-container">
+            <!-- Symbol and Mode Selection -->
+            <div class="symbol-section">
+                <div class="symbol-header">
+                    <select id="symbolSelect" style="font-size: 1.2em; padding: 10px;">
+                        <option value="">Select Symbol/Exchange</option>
+                        <option value="BTC_BINANCE">BTC - Binance</option>
+                        <option value="ETH_BINANCE">ETH - Binance</option>
+                        <option value="LTC_BINANCE">LTC - Binance</option>
+                        <option value="BCH_BINANCE">BCH - Binance</option>
+                        <option value="LINK_BINANCE">LINK - Binance</option>
+                        <option value="UNI_BINANCE">UNI - Binance</option>
+                        <option value="AAVE_BINANCE">AAVE - Binance</option>
+                        <option value="AAPL_NASDAQ">AAPL - NASDAQ</option>
+                        <option value="TSLA_NASDAQ">TSLA - NASDAQ</option>
+                        <option value="MSFT_NASDAQ">MSFT - NASDAQ</option>
+                    </select>
+                </div>
+
+                <!-- TradingView Numbers Paste Area -->
+                <div class="paste-area">
+                    <label for="tvNumbers">📋 Paste TradingView Numbers (Copy from TV Parameter Display):</label>
+                    <textarea id="tvNumbers" placeholder="Paste numbers from TradingView strategy display...
+
+EXACT ORDER EXPECTED:
+1. Trade Mode (BUY/SELL)
+2. RSI Real Window
+3. Oversold Level (whole)
+4. Oversold Level (decimal)
+5. Overbought Level (whole)
+6. Overbought Level (decimal)
+7. RSI Exit Level Buy (whole)
+8. RSI Exit Level Buy (decimal)
+9. RSI Exit Level Sell (whole)
+10. RSI Exit Level Sell (decimal)
+11. MACD Fast Length
+12. MACD Slow Length
+13. MACD Signal Length
+14. Volume MA Length
+15. Volume Threshold Multiplier
+16. Use Volume Confirmation
+17. ATR Length
+18. ATR MA Length
+19. ATR Expansion Multiplier
+20. Use ATR Volatility Filter
+21. Stop Loss % (whole)
+22. Stop Loss % (decimal)
+23. Early Trail Start % (whole)
+24. Early Trail Start % (decimal)
+25. Early Trail Minus % (whole)
+26. Early Trail Minus % (decimal)
+27. Peak Trail Start % (whole)
+28. Peak Trail Start % (decimal)
+29. Peak Trail Minus % (whole)
+30. Peak Trail Minus % (decimal)
+31. RSI Exit Min Profit % (whole)
+32. RSI Exit Min Profit % (decimal)
+33. Enable Alerts
+34. Show All Lines
+35. Show Entry/Exit Signals"></textarea>
+                    <div class="button-group">
+                        <button class="btn-auto-fill" onclick="autoFillFromNumbers()">🚀 AUTO-FILL ALL FIELDS</button>
+                        <button class="btn-clear" onclick="clearPasteArea()">🗑️ Clear</button>
+                    </div>
+                </div>
+
+                <!-- Parameter Sections - ALL FIELDS IN EXACT TV ORDER -->
+                <div class="param-sections">
+                    <!-- Core Settings -->
+                    <div class="param-section">
+                        <h3>🎯 Core Settings</h3>
+                        <div class="param-grid">
+                            <div class="param-group">
+                                <label for="tradeMode">1. Trade Mode</label>
+                                <select id="tradeMode">
+                                    <option value="BUY">BUY</option>
+                                    <option value="SELL">SELL</option>
+                                </select>
+                            </div>
+
+                            <div class="param-group">
+                                <label for="rsiWindow">2. RSI Real Window</label>
+                                <input type="number" id="rsiWindow" placeholder="100" min="10">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="oversoldLevel_Int">3. Oversold Level (whole)</label>
+                                <input type="number" id="oversoldLevel_Int" placeholder="30" min="1" max="99">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="oversoldLevel_Dec">4. Oversold Level (decimal)</label>
+                                <input type="number" id="oversoldLevel_Dec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="overboughtLevel_Int">5. Overbought Level (whole)</label>
+                                <input type="number" id="overboughtLevel_Int" placeholder="70" min="1" max="99">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="overboughtLevel_Dec">6. Overbought Level (decimal)</label>
+                                <input type="number" id="overboughtLevel_Dec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="rsiExitLevelBuy_Int">7. RSI Exit Buy (whole)</label>
+                                <input type="number" id="rsiExitLevelBuy_Int" placeholder="70" min="1" max="99">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="rsiExitLevelBuy_Dec">8. RSI Exit Buy (decimal)</label>
+                                <input type="number" id="rsiExitLevelBuy_Dec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="rsiExitLevelSell_Int">9. RSI Exit Sell (whole)</label>
+                                <input type="number" id="rsiExitLevelSell_Int" placeholder="30" min="1" max="99">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="rsiExitLevelSell_Dec">10. RSI Exit Sell (decimal)</label>
+                                <input type="number" id="rsiExitLevelSell_Dec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="fastLength">11. MACD Fast Length</label>
+                                <input type="number" id="fastLength" placeholder="12" min="1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="slowLength">12. MACD Slow Length</label>
+                                <input type="number" id="slowLength" placeholder="26" min="1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="signalLength">13. MACD Signal Length</label>
+                                <input type="number" id="signalLength" placeholder="9" min="1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="volMALength">14. Volume MA Length</label>
+                                <input type="number" id="volMALength" placeholder="20" min="5">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="volThreshold">15. Volume Threshold</label>
+                                <input type="number" id="volThreshold" placeholder="1.2" min="1.0" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="useVolumeFilter">16. Use Volume Filter</label>
+                                <select id="useVolumeFilter">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </div>
+
+                            <div class="param-group">
+                                <label for="atrLength">17. ATR Length</label>
+                                <input type="number" id="atrLength" placeholder="14" min="1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="atrMALength">18. ATR MA Length</label>
+                                <input type="number" id="atrMALength" placeholder="20" min="1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="atrThreshold">19. ATR Threshold</label>
+                                <input type="number" id="atrThreshold" placeholder="1.3" min="1.0" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="useATRFilter">20. Use ATR Filter</label>
+                                <select id="useATRFilter">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exit Settings -->
+                    <div class="param-section">
+                        <h3>🎯 Exit Settings</h3>
+                        <div class="param-grid">
+                            <div class="param-group">
+                                <label for="stopLossInt">21. Stop Loss % (whole)</label>
+                                <input type="number" id="stopLossInt" placeholder="2" min="0">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="stopLossDec">22. Stop Loss % (decimal)</label>
+                                <input type="number" id="stopLossDec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="earlyStartInt">23. Early Trail Start % (whole)</label>
+                                <input type="number" id="earlyStartInt" placeholder="1" min="0">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="earlyStartDec">24. Early Trail Start % (decimal)</label>
+                                <input type="number" id="earlyStartDec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="earlyMinusInt">25. Early Trail Minus % (whole)</label>
+                                <input type="number" id="earlyMinusInt" placeholder="15" min="0">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="earlyMinusDec">26. Early Trail Minus % (decimal)</label>
+                                <input type="number" id="earlyMinusDec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="peakStartInt">27. Peak Trail Start % (whole)</label>
+                                <input type="number" id="peakStartInt" placeholder="5" min="1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="peakStartDec">28. Peak Trail Start % (decimal)</label>
+                                <input type="number" id="peakStartDec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="peakMinusInt">29. Peak Trail Minus % (whole)</label>
+                                <input type="number" id="peakMinusInt" placeholder="0" min="0">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="peakMinusDec">30. Peak Trail Minus % (decimal)</label>
+                                <input type="number" id="peakMinusDec" placeholder="0.5" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="rsiProfitInt">31. RSI Exit Min Profit % (whole)</label>
+                                <input type="number" id="rsiProfitInt" placeholder="1" min="0">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="rsiProfitDec">32. RSI Exit Min Profit % (decimal)</label>
+                                <input type="number" id="rsiProfitDec" placeholder="0.0" min="0" max="0.9" step="0.1">
+                            </div>
+
+                            <div class="param-group">
+                                <label for="enableAlerts">33. Enable Alerts</label>
+                                <select id="enableAlerts">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </div>
+
+                            <div class="param-group">
+                                <label for="showLines">34. Show All Lines</label>
+                                <select id="showLines">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </div>
+
+                            <div class="param-group">
+                                <label for="showSignals">35. Show Entry/Exit Signals</label>
+                                <select id="showSignals">
+                                    <option value="true">true</option>
+                                    <option value="false">false</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button class="btn-save" onclick="saveParameters()">💾 Save to Database</button>
+                    <button class="btn-clear" onclick="clearForm()">🗑️ Clear All</button>
+                </div>
+
+                <!-- Status Display -->
+                <div id="statusDisplay" class="status-display hidden"></div>
+            </div>
+
+            <!-- Return to Dashboard Button -->
+            <div style="text-align: center; margin-top: 40px; padding: 30px;">
+                <a href="/" style="background: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold; display: inline-block; transition: all 0.3s ease;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.3)'"
+                   onmouseout="this.style.transform='translateY(0px)'; this.style.boxShadow='none'">
+                    🏠 Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Popup -->
+    <div class="popup-overlay" id="helpPopup">
+        <div class="popup-content">
+            <button class="popup-close" onclick="closeHelpPopup()">×</button>
+
+            <h2 style="color: #00ff00; text-align: center; margin-bottom: 30px;">
+                🎯 How to Transfer Parameters from TradingView
+            </h2>
+
+            <div class="step">
+                <div style="display: flex; align-items: flex-start;">
+                    <span class="step-number">1</span>
+                    <div>
+                        <div class="step-title">Open Your TradingView Strategy</div>
+                        <p>Open your <strong>AImn-Cl Looping Strategy - V6.1</strong> in TradingView and make sure it's loaded on a chart.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div style="display: flex; align-items: flex-start;">
+                    <span class="step-number">2</span>
+                    <div>
+                        <div class="step-title">Enable Parameter Display</div>
+                        <p>In your strategy settings, find <strong>"📋 Show Parameter Display for Copy"</strong> and set it to <strong>TRUE</strong>.</p>
+                        <p style="color: #ffc107;">⚠️ This will show a parameter box in the top-right corner of your chart.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div style="display: flex; align-items: flex-start;">
+                    <span class="step-number">3</span>
+                    <div>
+                        <div class="step-title">Set Your Trade Mode</div>
+                        <p>Choose <strong>BUY</strong> or <strong>SELL</strong> mode in your TradingView strategy settings. The parameter display will update automatically.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div style="display: flex; align-items: flex-start;">
+                    <span class="step-number">4</span>
+                    <div>
+                        <div class="step-title">Copy Parameters from TradingView</div>
+                        <p><strong>Right-click</strong> on the parameter display box (top-right of chart) and select <strong>"Copy"</strong>.</p>
+                        <div class="code-example">
+You should copy something like:<br>
+SELL<br>
+100<br>
+30<br>
+0.0<br>
+70<br>
+0.0<br>
+12<br>
+26<br>
+9<br>
+...and so on (35 values total)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div style="display: flex; align-items: flex-start;">
+                    <span class="step-number">5</span>
+                    <div>
+                        <div class="step-title">Come Back to This Page</div>
+                        <p>Return to this tuning center page and select your <strong>Symbol/Exchange</strong> from the dropdown at the top.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div style="display: flex; align-items: flex-start;">
+                    <span class="step-number">6</span>
+                    <div>
+                        <div class="step-title">Paste and Auto-Fill</div>
+                        <p><strong>Paste</strong> the copied numbers into the text area below, then click the <strong>"🚀 AUTO-FILL ALL FIELDS"</strong> button.</p>
+                        <p style="color: #00ff00;">✅ All 35 fields will populate automatically in perfect order!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div style="display: flex; align-items: flex-start;">
+                    <span class="step-number">7</span>
+                    <div>
+                        <div class="step-title">Save to Database</div>
+                        <p>Review the auto-filled values, then click <strong>"💾 Save to Database"</strong> to store your optimized parameters.</p>
+                        <p style="color: #ffc107;">🎯 Your scanner and trading system will now use these tuned parameters!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(0,123,255,0.2); border: 1px solid #007bff; border-radius: 8px; padding: 20px; margin-top: 30px;">
+                <h3 style="color: #00ffff; margin-bottom: 15px;">💡 Pro Tips:</h3>
+                <ul style="color: #e0e0e0; line-height: 1.8;">
+                    <li>Test different parameter sets on different timeframes</li>
+                    <li>Save separate configurations for different market conditions</li>
+                    <li>Always backtest before applying to live trading</li>
+                    <li>The boolean values (true/false) transfer automatically</li>
+                    <li>Each symbol can have different optimized parameters</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="closeHelpPopup()" style="background: #28a745; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                    Got it! Let's start tuning 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database simulation
+        let parameterDatabase = {};
+
+        // EXACT ORDER MAPPING - SYNCHRONIZED WITH TV STRATEGY
+        const fieldOrder = [
+            'tradeMode',                // 1
+            'rsiWindow',               // 2
+            'oversoldLevel_Int',       // 3
+            'oversoldLevel_Dec',       // 4
+            'overboughtLevel_Int',     // 5
+            'overboughtLevel_Dec',     // 6
+            'rsiExitLevelBuy_Int',     // 7
+            'rsiExitLevelBuy_Dec',     // 8
+            'rsiExitLevelSell_Int',    // 9
+            'rsiExitLevelSell_Dec',    // 10
+            'fastLength',              // 11
+            'slowLength',              // 12
+            'signalLength',            // 13
+            'volMALength',             // 14
+            'volThreshold',            // 15
+            'useVolumeFilter',         // 16
+            'atrLength',               // 17
+            'atrMALength',             // 18
+            'atrThreshold',            // 19
+            'useATRFilter',            // 20
+            'stopLossInt',             // 21
+            'stopLossDec',             // 22
+            'earlyStartInt',           // 23
+            'earlyStartDec',           // 24
+            'earlyMinusInt',           // 25
+            'earlyMinusDec',           // 26
+            'peakStartInt',            // 27
+            'peakStartDec',            // 28
+            'peakMinusInt',            // 29
+            'peakMinusDec',            // 30
+            'rsiProfitInt',            // 31
+            'rsiProfitDec',            // 32
+            'enableAlerts',            // 33
+            'showLines',               // 34
+            'showSignals'              // 35
+        ];
+
+        function autoFillFromNumbers() {
+            const pasteArea = document.getElementById('tvNumbers');
+            const text = pasteArea.value.trim();
+
+            if (!text) {
+                showStatus('Please paste TradingView numbers first!', 'error');
+                return;
+            }
+
+            // Split by lines and filter empty lines
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line !== '');
+
+            if (lines.length < fieldOrder.length) {
+                showStatus(`⚠️ Expected ${fieldOrder.length} values, got ${lines.length}. Please check your TV copy!`, 'error');
+                return;
+            }
+
+            let filled = 0;
+
+            // Fill each field in exact order
+            for (let i = 0; i < fieldOrder.length && i < lines.length; i++) {
+                const fieldId = fieldOrder[i];
+                const field = document.getElementById(fieldId);
+                const value = lines[i];
+
+                if (field) {
+                    field.value = value;
+                    field.style.background = 'rgba(40,167,69,0.3)';
+                    filled++;
+
+                    // Reset color after 2 seconds
+                    setTimeout(() => {
+                        field.style.background = 'rgba(255,255,255,0.1)';
+                    }, 2000);
+                }
+            }
+
+            if (filled > 0) {
+                showStatus(`✅ Auto-filled ${filled} parameters in perfect order!`, 'success');
+            } else {
+                showStatus('❌ Failed to fill parameters. Check the format!', 'error');
+            }
+        }
+
+        function saveParameters() {
+            const symbolSelect = document.getElementById('symbolSelect');
+            const symbol = symbolSelect.value;
+            const tradeMode = document.getElementById('tradeMode').value;
+
+            if (!symbol) {
+                showStatus('Please select a symbol first!', 'error');
+                return;
+            }
+
+            // Collect all parameters in order
+            const params = {
+                symbol: symbol,
+                trade_mode: tradeMode,
+                rsi_window: document.getElementById('rsiWindow').value || '100',
+                oversold_level_int: document.getElementById('oversoldLevel_Int').value || '30',
+                oversold_level_dec: document.getElementById('oversoldLevel_Dec').value || '0.0',
+                overbought_level_int: document.getElementById('overboughtLevel_Int').value || '70',
+                overbought_level_dec: document.getElementById('overboughtLevel_Dec').value || '0.0',
+                rsi_exit_buy_int: document.getElementById('rsiExitLevelBuy_Int').value || '70',
+                rsi_exit_buy_dec: document.getElementById('rsiExitLevelBuy_Dec').value || '0.0',
+                rsi_exit_sell_int: document.getElementById('rsiExitLevelSell_Int').value || '30',
+                rsi_exit_sell_dec: document.getElementById('rsiExitLevelSell_Dec').value || '0.0',
+                macd_fast: document.getElementById('fastLength').value || '12',
+                macd_slow: document.getElementById('slowLength').value || '26',
+                macd_signal: document.getElementById('signalLength').value || '9',
+                vol_ma_length: document.getElementById('volMALength').value || '20',
+                vol_threshold: document.getElementById('volThreshold').value || '1.2',
+                use_vol_filter: document.getElementById('useVolumeFilter').value || 'true',
+                atr_length: document.getElementById('atrLength').value || '14',
+                atr_ma_length: document.getElementById('atrMALength').value || '20',
+                atr_threshold: document.getElementById('atrThreshold').value || '1.3',
+                use_atr_filter: document.getElementById('useATRFilter').value || 'true',
+                stop_loss_int: document.getElementById('stopLossInt').value || '2',
+                stop_loss_dec: document.getElementById('stopLossDec').value || '0.0',
+                early_start_int: document.getElementById('earlyStartInt').value || '1',
+                early_start_dec: document.getElementById('earlyStartDec').value || '0.0',
+                early_minus_int: document.getElementById('earlyMinusInt').value || '15',
+                early_minus_dec: document.getElementById('earlyMinusDec').value || '0.0',
+                peak_start_int: document.getElementById('peakStartInt').value || '5',
+                peak_start_dec: document.getElementById('peakStartDec').value || '0.0',
+                peak_minus_int: document.getElementById('peakMinusInt').value || '0',
+                peak_minus_dec: document.getElementById('peakMinusDec').value || '0.5',
+                rsi_profit_int: document.getElementById('rsiProfitInt').value || '1',
+                rsi_profit_dec: document.getElementById('rsiProfitDec').value || '0.0',
+                enable_alerts: document.getElementById('enableAlerts').value || 'true',
+                show_lines: document.getElementById('showLines').value || 'true',
+                show_signals: document.getElementById('showSignals').value || 'true',
+                updated: new Date().toLocaleString()
+            };
+
+            // Save to "database" (simulation)
+            parameterDatabase[symbol + '_' + tradeMode] = params;
+
+            // In real implementation, this would be an AJAX call to your Python backend
+            console.log('Saving parameters:', params);
+
+            showStatus(`✅ Parameters saved for ${symbol} (${tradeMode} mode)!`, 'success');
+        }
+
+        function clearPasteArea() {
+            document.getElementById('tvNumbers').value = '';
+            showStatus('Paste area cleared!', 'success');
+        }
+
+        function clearForm() {
+            const inputs = document.querySelectorAll('input, select:not(#symbolSelect), textarea');
+            inputs.forEach(input => input.value = '');
+            showStatus('Form cleared!', 'success');
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusDisplay');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-display status-${type}`;
+            statusDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Help popup functions
+        function openHelpPopup() {
+            document.getElementById('helpPopup').style.display = 'flex';
+        }
+
+        function closeHelpPopup() {
+            document.getElementById('helpPopup').style.display = 'none';
+        }
+
+        // Close popup when clicking outside
+        document.addEventListener('click', function(event) {
+            const popup = document.getElementById('helpPopup');
+            if (event.target === popup) {
+                closeHelpPopup();
+            }
+        });
+    </script>
+</body>
+</html>

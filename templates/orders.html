@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<h1>Orders</h1>
+
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+  <div style="padding:12px;border:1px solid var(--border);border-radius:12px">
+    <h3>Create Order</h3>
+    <label>Symbol</label>
+    <input id="sym" value="BTCUSD">
+    <label>Side</label>
+    <select id="side"><option>BUY</option><option>SELL</option></select>
+    <label>Qty</label>
+    <input id="qty" type="number" value="1" min="1" step="1" style="width:80px">
+    <button id="submit">Create</button>
+    <div id="resp" style="margin-top:8px"></div>
+  </div>
+
+  <div style="padding:12px;border:1px solid var(--border);border-radius:12px">
+    <h3>Controls</h3>
+    <button id="stopNow">STOP NOW</button>
+    <button id="panic">PANIC CLOSE</button>
+    <div id="ctrlResp" style="margin-top:8px"></div>
+  </div>
+
+  <div style="padding:12px;border:1px solid var(--border);border-radius:12px;min-width:320px">
+    <h3>Open Orders</h3>
+    <pre id="open" style="min-height:120px"></pre>
+  </div>
+</div>
+
+<script>
+async function refreshOpen() {
+  const r = await fetch('/api/open_orders');
+  document.getElementById('open').textContent = JSON.stringify(await r.json(), null, 2);
+}
+document.getElementById('submit').onclick = async ()=>{
+  const payload = { symbol: sym.value.trim(), side: side.value, qty: Number(qty.value||1) };
+  const r = await fetch('/api/order', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  document.getElementById('resp').textContent = JSON.stringify(await r.json(), null, 2);
+  refreshOpen();
+};
+document.getElementById('stopNow').onclick = async ()=>{
+  const r = await fetch('/api/stop_now', {method:'POST'});
+  document.getElementById('ctrlResp').textContent = JSON.stringify(await r.json(), null, 2);
+};
+document.getElementById('panic').onclick = async ()=>{
+  const r = await fetch('/api/panic_close', {method:'POST'});
+  document.getElementById('ctrlResp').textContent = JSON.stringify(await r.json(), null, 2);
+};
+refreshOpen(); setInterval(refreshOpen, 5000);
+</script>
+{% endblock %}

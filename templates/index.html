@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AIMn Trading System - Revolutionary AI Trading</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0C1324 0%, #1a1a2e 50%, #16213e 100%);
+            color: #F5F7FA;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, rgba(15,209,200,0.1) 0%, rgba(182,255,77,0.1) 100%);
+            padding: 30px 20px;
+            border-bottom: 2px solid rgba(15,209,200,0.3);
+            position: relative;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-svg {
+            filter: drop-shadow(0 4px 16px rgba(15,209,200,0.2));
+            height: 80px;
+            width: auto;
+        }
+
+        .header-info {
+            text-align: right;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .system-status {
+            color: #0FD1C8;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .live-indicator {
+            color: #B6FF4D;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #B6FF4D;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero-section {
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .main-title {
+            font-size: 3.5em;
+            background: linear-gradient(45deg, #0FD1C8, #B6FF4D, #0FD1C8);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 3s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(15,209,200,0.5);
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.8em;
+            color: #0FD1C8;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(15,209,200,0.5);
+            font-weight: 300;
+        }
+
+        .tagline {
+            font-size: 1.3em;
+            color: #cccccc;
+            font-style: italic;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .quote {
+            font-size: 1.5em;
+            color: #B6FF4D;
+            font-weight: 600;
+            background: rgba(0,0,0,0.3);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #B6FF4D;
+            margin: 30px auto;
+            max-width: 800px;
+            box-shadow: 0 8px 32px rgba(182,255,77,0.1);
+        }
+
+        /* Live Market Scanner Section */
+        .live-scanner-section {
+            background: rgba(0,0,0,0.4);
+            padding: 40px 20px;
+            margin: 40px 0;
+            border-top: 2px solid rgba(15,209,200,0.2);
+            border-bottom: 2px solid rgba(15,209,200,0.2);
+        }
+
+        .scanner-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .scanner-title {
+            font-size: 2.2em;
+            color: #0FD1C8;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .scanner-subtitle {
+            color: #B6FF4D;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* Conveyor Belt Animation - Compact Version for Homepage */
+        .conveyor-container {
+            overflow: hidden;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            height: 200px;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 2px solid rgba(15,209,200,0.2);
+        }
+
+        .conveyor-belt {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            height: 100%;
+            padding: 8px 0;
+        }
+
+        .belt-row {
+            display: flex;
+            white-space: nowrap;
+            overflow: hidden;
+            height: 50px;
+            position: relative;
+            align-items: center;
+        }
+
+        .belt-row:nth-child(1) { animation: scrollLeft1 20s linear infinite; }
+        .belt-row:nth-child(2) { animation: scrollLeft2 25s linear infinite; }
+        .belt-row:nth-child(3) { animation: scrollLeft3 18s linear infinite; }
+
+        @keyframes scrollLeft1 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft2 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft3 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .symbol-card {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(15, 209, 200, 0.1);
+            border: 1px solid rgba(15, 209, 200, 0.3);
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin-right: 12px;
+            min-width: 160px;
+            height: 42px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .symbol-card:hover {
+            background: rgba(15, 209, 200, 0.2);
+            transform: scale(1.05);
+        }
+
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            font-size: 0.7rem;
+        }
+
+        .symbol-name {
+            font-weight: 700;
+            color: white;
+            min-width: 45px;
+        }
+
+        .symbol-price {
+            font-weight: 600;
+            color: #0FD1C8;
+            min-width: 55px;
+        }
+
+        .symbol-signal {
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-align: center;
+            min-width: 30px;
+        }
+
+        .signal-buy {
+            background: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+
+        .signal-sell {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .signal-neutral {
+            background: rgba(107, 114, 128, 0.3);
+            color: #6b7280;
+            border: 1px solid #6b7280;
+        }
+
+        .scanner-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            color: #B6FF4D;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+
+        .navigation-section {
+            background: rgba(0,0,0,0.4);
+            padding: 50px 20px;
+            margin-top: 40px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .nav-card {
+            background: linear-gradient(135deg, rgba(15,209,200,0.1) 0%, rgba(182,255,77,0.1) 100%);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(15,209,200,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-5px);
+            border-color: #B6FF4D;
+            box-shadow: 0 10px 30px rgba(182,255,77,0.3);
+        }
+
+        .nav-card a {
+            color: #0FD1C8;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: 600;
+            display: block;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 10px;
+        }
+
+        .nav-card a:hover {
+            color: #B6FF4D;
+        }
+
+        .nav-desc {
+            color: #cccccc;
+            margin-top: 10px;
+            font-size: 1em;
+            position: relative;
+            z-index: 2;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #0FD1C8 0%, #B6FF4D 100%);
+            color: #0C1324;
+            padding: 50px 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .cta-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .cta-text {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            background: #0C1324;
+            color: #B6FF4D;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+            border: 2px solid transparent;
+        }
+
+        .cta-button:hover {
+            background: transparent;
+            color: #0C1324;
+            border-color: #0C1324;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(12,19,36,0.3);
+        }
+
+        .nav-section-title {
+            text-align: center;
+            color: #0FD1C8;
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .header-info {
+                text-align: center;
+            }
+
+            .live-indicator {
+                justify-content: center;
+            }
+
+            .main-title {
+                font-size: 2.5em;
+            }
+
+            .logo-svg {
+                height: 60px;
+            }
+
+            .conveyor-container {
+                height: 150px;
+            }
+
+            .scanner-stats {
+                gap: 15px;
+            }
+
+            .stat-item {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-section">
+        <div class="header-content">
+            <div class="logo-container">
+                <!-- AIMn Professional Logo -->
+                <svg class="logo-svg" width="420" height="120" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Main symbol -->
+                    <g transform="translate(60, 60)">
+                        <!-- Outer circle with gradient -->
+                        <circle cx="0" cy="0" r="28" fill="none" stroke="url(#primaryGradient)" stroke-width="2.5"/>
+
+                        <!-- Inner geometric A representing AI -->
+                        <path d="M-10,-15 L0,-22 L10,-15 L7,-10 L-7,-10 Z"
+                              fill="none" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="-5" y1="-6" x2="5" y2="-6" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round"/>
+
+                        <!-- Market chart bars -->
+                        <g transform="translate(0, 10)">
+                            <rect x="-8" y="0" width="2.5" height="10" fill="#0FD1C8" rx="1"/>
+                            <rect x="-3" y="-3" width="2.5" height="13" fill="#B6FF4D" rx="1"/>
+                            <rect x="2" y="2" width="2.5" height="8" fill="#0FD1C8" rx="1"/>
+                            <rect x="7" y="-1" width="2.5" height="11" fill="#0FD1C8" rx="1"/>
+                        </g>
+
+                        <!-- Subtle connection lines suggesting network -->
+                        <g stroke="#0FD1C8" stroke-width="1" opacity="0.4">
+                            <line x1="-20" y1="-8" x2="-15" y2="-5"/>
+                            <line x1="15" y1="-5" x2="20" y2="-8"/>
+                            <line x1="-20" y1="8" x2="-15" y2="5"/>
+                            <line x1="15" y1="5" x2="20" y2="8"/>
+                        </g>
+                    </g>
+
+                    <!-- Wordmark -->
+                    <text x="120" y="52" font-family="Space Grotesk, sans-serif" font-size="42" font-weight="600" fill="#F5F7FA">AIMn</text>
+
+                    <!-- Tagline -->
+                    <text x="120" y="76" font-family="Inter, sans-serif" font-size="12" fill="#0FD1C8" letter-spacing="2px" opacity="0.9">TRADING SYSTEM</text>
+
+                    <!-- Gradient definition -->
+                    <defs>
+                        <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#0FD1C8"/>
+                            <stop offset="100%" stop-color="#B6FF4D"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+
+            <div class="header-info">
+                <div class="system-status">Multi-Professor System Active</div>
+                <div class="live-indicator">
+                    <span class="status-dot"></span>
+                    Live Market Scanning
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="main-title">Revolutionary AI Trading Platform</div>
+            <div class="subtitle">Neural Trading • Market Intelligence • Profit Optimization</div>
+            <div class="tagline">Where Advanced AI Meets Precision Trading Excellence</div>
+            <div class="quote">
+                "Let the market pick your trades. Let logic pick your exits."
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Live Market Scanner Section -->
+    <div class="live-scanner-section">
+        <div class="scanner-header">
+            <div class="scanner-title">Live Market Scanner</div>
+            <div class="scanner-subtitle">Real-time scanning across all markets and exchanges</div>
+        </div>
+
+        <div class="conveyor-container">
+            <div class="conveyor-belt">
+                <div class="belt-row" id="belt-row-1"></div>
+                <div class="belt-row" id="belt-row-2"></div>
+                <div class="belt-row" id="belt-row-3"></div>
+            </div>
+        </div>
+
+        <div class="scanner-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="symbols-scanned">--</div>
+                <div>Symbols Scanned</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="signals-found">--</div>
+                <div>Signals Found</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="active-exchanges">--</div>
+                <div>Active Exchanges</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="scan-speed">--</div>
+                <div>Scans/Second</div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="navigation-section">
+        <div class="nav-card">
+            <a href="{{ url_for('scanner') }}">
+            <h3>📡 AIMn Scanner</h3>
+            <p>Open the automatic flowing scanner for live signal detection.</p>
+            </a>
+        </div>
+
+      <div class="nav-card">
+        <a href="{{ url_for('tuning') }}">Tuning Parameters Center</a>
+        <div class="nav-desc">Adjust RSI/MACD, trailing, stops</div>
+      </div>
+
+      <div class="nav-card">
+        <a href="{{ url_for('orders') }}">Orders</a>
+        <div class="nav-desc">Create order, STOP NOW, Panic Close</div>
+      </div>
+
+      <div class="nav-card">
+        <a href="{{ url_for('trade_tester') }}">Trade Tester</a>
+        <div class="nav-desc">Replay bars, validate exits</div>
+      </div>
+
+     <div class="nav-card">
+        <a href="{{ url_for('symbol-api-manager') }}">Symbol &amp; API Management</a>
+       <div class="nav-desc">Watchlist & API config</div>
+     </div>
+
+     <div class="nav-card">
+        <a href="{{ url_for('architectural_analysis') }}">Architectural Analysis</a>
+        <div class="nav-desc">System diagram & philosophy</div>
+      </div>
+
+      <div class="nav-card">
+        <a href="{{ url_for('scanner_analysis') }}">Multi-Professor Scanner Analysis</a>
+        <div class="nav-desc">Scores and recent results</div>
+      </div>
+
+      <div class="nav-card">
+        <a href="{{ url_for('scanner_simulator') }}">Trade Scanner Simulator</a>
+        <div class="nav-desc">Auto/thresholded order tests</div>
+      </div>
+
+      <div class="nav-card">
+        <a href="{{ url_for('beginner_guide') }}">System Overview</a>
+        <div class="nav-desc">Quick start & docs</div>
+      </div>
+
+      <div class="nav-card">
+        <a href="{{ url_for('diagnostics') }}">Diagnostic Scanner</a>
+        <div class="nav-desc">Debug & functional checks</div>
+      </div>
+
+      <div class="nav-card">
+          <a href="{{ url_for('aiml_home') }}">AI/ML Dashboard</a>
+          <div class="nav-desc">Model notes & roadmap</div>
+      </div>
+
+      <div class="nav-card">
+        <a href="{{ url_for('simple_explanation') }}">Simple Explanation</a>
+        <div class="nav-desc">Easy-to-understand overview</div>
+      </div>
+    </div>
+
+
+    <div class="cta-section">
+        <div class="cta-title">Ready to Trade Like a Pro?</div>
+        <div class="cta-text">
+            Join the revolution of traders who never miss an opportunity
+        </div>
+        <a href="/tuning" class="cta-button">Tune Parameters</a>
+    </div>
+
+    <script>
+        let scanData = [];
+        let scanStats = { symbolsScanned: 0, signalsFound: 0, activeExchanges: 5, scanSpeed: 0 };
+
+        function generateSampleData() {
+            const symbols = [
+                {symbol: 'BTC/USD', exchange: 'CRYPTO'},
+                {symbol: 'ETH/USD', exchange: 'CRYPTO'},
+                {symbol: 'AAPL', exchange: 'ALPACA'},
+                {symbol: 'TSLA', exchange: 'ALPACA'},
+                {symbol: 'NVDA', exchange: 'ALPACA'},
+                {symbol: 'SPY', exchange: 'NYSE'},
+                {symbol: 'QQQ', exchange: 'NYSE'},
+                {symbol: 'MSFT', exchange: 'NYSE'},
+                {symbol: 'AMZN', exchange: 'NYSE'},
+                {symbol: 'GOOGL', exchange: 'ALPACA'},
+                {symbol: 'META', exchange: 'NYSE'},
+                {symbol: 'NFLX', exchange: 'ALPACA'},
+                {symbol: 'PLTR', exchange: 'NYSE'},
+                {symbol: 'ROKU', exchange: 'NASDAQ'},
+                {symbol: 'AMD', exchange: 'NASDAQ'},
+                {symbol: 'INTC', exchange: 'NASDAQ'},
+                {symbol: 'COIN', exchange: 'NASDAQ'},
+                {symbol: 'SQ', exchange: 'NYSE'}
+            ];
+
+            scanData = symbols.map(({symbol, exchange}) => {
+                const rsi = Math.random() * 100;
+                const signal = rsi < 30 ? 'BUY' : rsi > 70 ? 'SELL' : 'NEUTRAL';
+
+                return {
+                    symbol,
+                    exchange,
+                    price: (Math.random() * 500 + 50).toFixed(2),
+                    signal
+                };
+            });
+
+            // Update stats
+            scanStats.symbolsScanned = scanData.length;
+            scanStats.signalsFound = scanData.filter(item => item.signal !== 'NEUTRAL').length;
+            scanStats.scanSpeed = (Math.random() * 15 + 5).toFixed(1);
+        }
+
+        function renderConveyorBelt() {
+            if (!scanData.length) return;
+
+            // Split data into 3 rows for homepage (more compact)
+            const rowCount = 3;
+            const itemsPerRow = Math.ceil(scanData.length / rowCount);
+
+            for (let row = 0; row < rowCount; row++) {
+                const rowContainer = document.getElementById(`belt-row-${row + 1}`);
+                if (!rowContainer) continue;
+
+                const startIndex = row * itemsPerRow;
+                const endIndex = Math.min(startIndex + itemsPerRow, scanData.length);
+                const rowData = scanData.slice(startIndex, endIndex);
+
+                // Create multiple copies for continuous scrolling
+                const repeatedData = [...rowData, ...rowData, ...rowData];
+
+                rowContainer.innerHTML = repeatedData.map(item => {
+                    const signalClass = item.signal === 'BUY' ? 'signal-buy' :
+                                       item.signal === 'SELL' ? 'signal-sell' : 'signal-neutral';
+
+                    return `
+                        <div class="symbol-card">
+                            <div class="symbol-info">
+                                <div class="symbol-name">${item.symbol}</div>
+                                <div class="symbol-price">$${item.price}</div>
+                                <div class="symbol-signal ${signalClass}">${item.signal}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('symbols-scanned').textContent = scanStats.symbolsScanned;
+            document.getElementById('signals-found').textContent = scanStats.signalsFound;
+            document.getElementById('active-exchanges').textContent = scanStats.activeExchanges;
+            document.getElementById('scan-speed').textContent = scanStats.scanSpeed;
+        }
+
+        function initialize() {
+            generateSampleData();
+            renderConveyorBelt();
+            updateStats();
+        }
+
+        // Start the scanner animation
+        document.addEventListener('DOMContentLoaded', function() {
+            initialize();
+
+            // Update data periodically
+            setInterval(() => {
+                generateSampleData();
+                renderConveyorBelt();
+                updateStats();
+            }, 4000);
+        });
+    </script>
+</body>
+</html>

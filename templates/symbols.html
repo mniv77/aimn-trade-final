@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Symbols{% endblock %}
+{% block content %}
+<h1>Symbol &amp; API Management</h1>
+
+<div style="margin:10px 0">
+  <input id="newSym" placeholder="Add symbol (e.g., BTCUSD)">
+  <button id="add">Add</button>
+</div>
+
+<table id="tbl" border="1" cellpadding="8"><thead><tr><th>Symbol</th><th>Actions</th></tr></thead><tbody></tbody></table>
+
+<script>
+const tbody = document.querySelector('#tbl tbody');
+async function load() {
+  const r = await fetch('/api/symbols'); const data = await r.json();
+  tbody.innerHTML = '';
+  data.forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s}</td>
+    <td><button data-s="${s}" class="del">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('.del').forEach(b=>{
+    b.onclick = async ()=>{
+      await fetch('/api/symbols/'+encodeURIComponent(b.dataset.s), {method:'DELETE'});
+      load();
+    }
+  });
+}
+document.getElementById('add').onclick = async ()=>{
+  const v = document.getElementById('newSym').value.trim();
+  if(!v) return;
+  await fetch('/api/symbols', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({symbol:v})});
+  document.getElementById('newSym').value='';
+  load();
+};
+load();
+</script>
+{% endblock %}

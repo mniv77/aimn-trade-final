@@ -1,0 +1,442 @@
+# app.py - FIXED VERSION (Removed duplicates and fixed routing)
+from __future__ import annotations
+import os
+from flask import Flask, Blueprint, request, jsonify, render_template, abort, current_app, make_response
+import time, random
+from app_sub.views import main_bp
+from AImnMLResearch.aiml_dashboard import aiml_bp
+from services.quote_provider import get_provider, Quote  # new
+
+
+# Explicitly set template folder
+template_dir = os.path.abspath('templates')
+app = Flask(__name__, template_folder=template_dir, static_folder="static")
+
+# Register blueprints
+app.register_blueprint(main_bp, url_prefix='/main')
+app.register_blueprint(aiml_bp, url_prefix='/aiml')
+
+for rule in app.url_map.iter_rules():
+    print("ROUTE:", rule, rule.endpoint)
+
+#---------------------------------------------------------------
+
+
+# ... your existing imports ...
+from blueprints.trading_api import trading_api
+from blueprints.credentials_api import credentials_api
+
+# ... your existing config/routes ...
+
+# register new APIs
+app.register_blueprint(trading_api, url_prefix=")
+app.register_blueprint(credentials_api)
+
+
+
+# ======================== TOP-OF-FILE (imports & routes) ========================
+# Put this near your other imports (only once)
+
+from brokers.alpaca_client import AlpacaBroker, BaseBroker
+
+#trading_api = Blueprint("trading_api", __name__)
+BROKER: BaseBroker = AlpacaBroker.from_env_or_dummy()
+
+def _ok(data, code=200): return jsonify({"ok": True, **data}), code
+def _err(msg, code=400): return jsonify({"ok": False, "error": msg}), code
+
+
+# --- one-time globals (place near top-level) ---
+_PROVIDER = get_provider()
+_LAST_TICK = {}  # key: f"{exchange}:{symbol}" -> (price, ts_ms)
+
+
+
+# In-memory live price state (fallback sim when no broker feed)
+_LIVE_STATE = {}  # key: f"{exchange}:{symbol}" -> {"p": float, "t": float}
+
+def _no_cache(resp):
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
+
+def _max_allowed_jump_pct(exchange: str) -> float:
+    ex = (exchange or "").upper()
+    return 2.0 if ("CRYPTO" in ex or "FX" in ex or "FOREX" in ex) else 1.0
+
+
+def _seed_price(symbol: str, default: float = 100.0) -> float:
+    # crude seeds for common symbols if no hint
+    seeds = {"AAPL": 175.6, "TSLA": 250.0, "NVDA": 450.0, "SPY": 520.0, "QQQ": 450.0, "BTC/USD": 68000.0, "ETH/USD": 3500.0}
+    return seeds.get(symbol.upper(), default)
+
+# --- REPLACE your existing function body with this one ---
+@app.route("/api/live_price")
+def api_live_price():
+    symbol = request.args.get("symbol", "AAPL")
+    exchange = request.args.get("exchange", "ALPACA")
+    key = f"{exchange}:{symbol}"
+
+    # 1) Try main provider
+    q: Quote | None = _PROVIDER.get_price(symbol, exchange)
+    if q is None or not (q.price and q.price > 0):
+        # 2) Fallback to bounded sim
+        from services.quote_provider import SimQuoteProvider
+        q = SimQuoteProvider().get_price(symbol, exchange)
+
+    now_ms = int(time.time() * 1000)
+    px = float(q.price)
+    feed = q.feed
+
+    # 3) Server-side sanity clamp vs last tick
+    last = _LAST_TICK.get(key)
+    if last:
+        last_px, _ = last
+        if last_px > 0:
+            pct = abs(px - last_px) / last_px * 100.0
+            cap = _max_allowed_jump_pct(exchange)
+            if pct > cap:
+                direction = 1.0 if px > last_px else -1.0
+                px = last_px * (1.0 + direction * cap / 100.0)
+
+    _LAST_TICK[key] = (px, now_ms)
+
+    resp = make_response(jsonify({
+        "symbol": symbol,
+        "exchange": exchange,
+        "price": round(px, 6),
+        "ts": now_ms,
+        "feed": feed,  # "REAL" | "PUBLIC" | "SIM"
+    }))
+    return _no_cache(resp)
+
+
+
+@app.route('/api/flowing-scanner-data')
+def flowing_scanner_data():
+    """Returns scanner data"""
+    symbols = [
+        {'symbol': 'BTC/USD', 'exchange': 'CRYPTO'},
+        {'symbol': 'ETH/USD', 'exchange': 'CRYPTO'},
+        {'symbol': 'AAPL', 'exchange': 'ALPACA'},
+        {'symbol': 'TSLA', 'exchange': 'ALPACA'},
+        {'symbol': 'NVDA', 'exchange': 'ALPACA'},
+        {'symbol': 'SPY', 'exchange': 'NYSE'},
+        {'symbol': 'QQQ', 'exchange': 'NYSE'},
+        {'symbol': 'MSFT', 'exchange': 'NYSE'},
+        {'symbol': 'AMZN', 'exchange': 'NYSE'},
+        {'symbol': 'GOOGL', 'exchange': 'ALPACA'}
+    ]
+
+    scan_results = []
+    for symbol_data in symbols:
+        price = round(random.uniform(50, 550), 2)
+        change = round(random.uniform(-10, 10), 2)
+        volume = random.randint(100000, 1000000)
+        rsi = round(random.uniform(0, 100), 1)
+
+        # Determine signal
+        if rsi < 30:
+            signal = 'BUY'
+        elif rsi > 70:
+            signal = 'SELL'
+        else:
+            signal = 'NEUTRAL'
+
+        scan_results.append({
+            'symbol': symbol_data['symbol'],
+            'exchange': symbol_data['exchange'],
+            'price': str(price),
+            'change': str(change),
+            'volume': f"{volume:,}",
+            'rsi': str(rsi),
+            'signal': signal,
+            'signalStrength': str(round(random.uniform(0.5, 1.0), 2)) if signal != 'NEUTRAL' else '0',
+            'isAvailable': True,
+            'isActivelyTrading': False,
+            'quantity': 0.01 if symbol_data['exchange'] == 'CRYPTO' else 10
+        })
+
+    return jsonify({'scanResults': scan_results})
+
+
+@app.route('/api/exchange-status')
+def exchange_status():
+    """Returns exchange status"""
+    return jsonify({
+        'ALPACA': {'scanning': True, 'activeSymbol': None, 'symbolCount': 250, 'status': 'ACTIVE'},
+        'CRYPTO': {'scanning': True, 'activeSymbol': None, 'symbolCount': 100, 'status': 'ACTIVE'},
+        'FOREX': {'scanning': True, 'activeSymbol': None, 'symbolCount': 50, 'status': 'ACTIVE'},
+        'NYSE': {'scanning': True, 'activeSymbol': None, 'symbolCount': 200, 'status': 'ACTIVE'},
+        'FUTURES': {'scanning': True, 'activeSymbol': None, 'symbolCount': 30, 'status': 'ACTIVE'}
+    })
+
+
+@app.route('/api/create-signal', methods=['POST'])
+def create_signal():
+    """Called by scanner when signal detected"""
+    try:
+        data = request.json
+        print(f"🎯 Signal created: {data['symbol']} {data.get('direction', 'BUY')}")
+        return jsonify({'success': True, 'message': 'Signal created'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/trade-completed', methods=['POST'])
+def trade_completed():
+    """Called when trade completes"""
+    try:
+        data = request.json
+        print(f"✅ Trade completed: {data.get('symbol', 'Unknown')}")
+        return jsonify({'success': True, 'message': 'Scanner resumed'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/ticker-feed')
+def ticker_feed():
+    symbols = [
+        {'symbol': 'BTC/USD', 'exchange': 'CRYPTO'},
+        {'symbol': 'ETH/USD', 'exchange': 'CRYPTO'},
+        {'symbol': 'AAPL', 'exchange': 'ALPACA'},
+        {'symbol': 'TSLA', 'exchange': 'ALPACA'},
+        {'symbol': 'NVDA', 'exchange': 'ALPACA'},
+        {'symbol': 'SPY', 'exchange': 'NYSE'},
+        {'symbol': 'QQQ', 'exchange': 'NYSE'},
+        {'symbol': 'MSFT', 'exchange': 'NYSE'},
+        {'symbol': 'AMZN', 'exchange': 'NYSE'},
+        {'symbol': 'GOOGL', 'exchange': 'ALPACA'}
+    ]
+
+    ticker_items = []
+    for symbol_data in symbols:
+        ticker_items.append({
+            'symbol': symbol_data['symbol'],
+            'exchange': symbol_data['exchange'],
+            'price': str(round(random.uniform(50, 550), 2)),
+            'change': str(round(random.uniform(-10, 10), 2)),
+            'signal': random.choice(['BUY', 'SELL', 'NEUTRAL', 'NEUTRAL', 'NEUTRAL']),
+            'isAvailable': True,
+            'isActivelyTrading': False
+        })
+
+    return jsonify(ticker_items)
+
+
+@app.route('/api/scanner/create-signal', methods=['POST'])
+def create_scanner_signal():
+    data = request.json
+    return jsonify({'ok': True, 'signal_data': data})
+
+
+@app.route('/api/live_price')
+def get_live_price():
+    symbol = request.args.get('symbol')
+    exchange = request.args.get('exchange')
+
+    if exchange == 'CRYPTO':
+        import requests
+        try:
+            clean_symbol = symbol.replace('/', '') + 'T'
+            url = f'https://api.binance.com/api/v3/ticker/price?symbol={clean_symbol}'
+            response = requests.get(url, timeout=5)
+            price = float(response.json()['price'])
+        except Exception as e:
+            print(f"Crypto price error: {e}")
+            price = 108000
+    else:
+        price = 175.50
+
+    return jsonify({'price': price})
+
+
+# ============================================================================
+# PAGE ROUTES
+# ============================================================================
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/scanner')
+def scanner():
+    return render_template('aimn_flowing_scanner_auto.html')
+
+# SIMPLE INLINE VERSION - Replace your trade-popup-fixed route with this:
+#__________________________________________________
+# =========================================
+# FILE: app.py (ADD these routes; do NOT remove your other code)
+# =========================================
+
+
+@app.route("/trade-popup-fixed")
+def trade_popup_fixed():
+    # Micro popup; JS reads query params.
+    return render_template("trade-popup-fixed.html")
+
+@app.route("/trade-full")
+def trade_full():
+    # Expanded popup page.
+    return render_template("trade-full.html")
+
+#________________________________________________________
+
+@app.route('/trade-popup')
+def trade_popup():
+    return render_template('aimn_trade_popup.html')
+
+@app.route('/trade-popup-v2')
+def trade_popup_v2():
+    return render_template('aimn_trade_popup.html')
+
+@app.route('/tuning')
+def tuning_parameters():
+    return render_template('tuning.html')
+
+@app.route('/symbols')
+def symbols():
+    return render_template('symbol_api_manager.html')
+
+@app.route('/scanner-simulator')
+def scanner_simulator():
+    return render_template('aimn_scanner_debug.html')
+
+@app.route('/scanner/debug')
+def scanner_debug():
+    return render_template('aimn_scanner_debug.html')
+
+@app.route('/scanner/diagnostics')
+def scanner_diagnostics():
+    return render_template('functional_scanner_diagnostics.html')
+
+@app.route('/trade-tester')
+def trade_tester():
+    return render_template('trade_tester.html')
+
+@app.route('/simple-explanation')
+def simple_explanation():
+    return render_template('doc/Simple Explanation.html')
+
+@app.route('/architectural-analysis')
+def architectural_analysis():
+    return render_template('doc/Architectural Analysis and Trading Philosophy.html')
+
+@app.route('/scanner-analysis')
+def scanner_analysis():
+    return render_template('doc/AIMn Multi-Professor_Scanner_Analysis.html')
+
+@app.route('/beginner-guide')
+def beginner_guide():
+     return render_template('trading_philosophy.html')
+
+@app.route('/orders')
+def orders():
+    return '''<!DOCTYPE html>
+<html><head><title>Orders - AIMn Trading</title>
+<style>body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+h1 { color: #00ff00; } a { color: #00ccff; text-decoration: none; }
+.placeholder { background: #333; padding: 20px; border-radius: 5px; margin: 20px 0; }</style>
+</head><body><h1>Orders Management</h1>
+<div class="placeholder"><h3>Order History</h3><p>View and manage your trading orders</p></div>
+<div class="placeholder"><h3>Active Orders</h3><p>Monitor currently active orders</p></div>
+<p><a href="/">Back to Dashboard</a></p></body></html>'''
+
+@app.route('/popper')
+def popper():
+    return '''<!DOCTYPE html>
+<html><head><title>Trade Popup - AIMn Trading</title>
+<style>body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+h1 { color: #00ff00; } a { color: #00ccff; text-decoration: none; }
+.trade-box { background: #333; padding: 20px; border-radius: 5px; margin: 20px 0; }
+.pnl { font-size: 24px; color: #00ff00; }</style>
+</head><body><h1>Live Trade Monitor</h1>
+<div class="trade-box"><h3>Active Position</h3>
+<div class="pnl">P&L: +$1,234.56 (+2.45%)</div>
+<p>Symbol: BTC/USD | Entry: $43,250 | Current: $44,310</p>
+<button style="background: red; color: white; padding: 10px 20px; border: none; border-radius: 5px;">Emergency Exit</button></div>
+<p><a href="/">Back to Dashboard</a></p></body></html>'''
+
+@app.route('/loop')
+def loop_controls():
+    return '''<!DOCTYPE html>
+<html><head><title>Loop Controls - AIMn Trading</title>
+<style>body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+h1 { color: #00ff00; } a { color: #00ccff; text-decoration: none; }
+.control-box { background: #333; padding: 20px; border-radius: 5px; margin: 20px 0; }
+button { background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px; }</style>
+</head><body><h1>Trading Loop Controls</h1>
+<div class="control-box"><h3>System Status</h3>
+<p>Status: <span style="color: #00ff00;">ACTIVE</span></p>
+<button>Start Loop</button><button>Pause Loop</button>
+<button style="background: red;">Stop All</button></div>
+<p><a href="/">Back to Dashboard</a></p></body></html>'''
+
+@app.route('/snapshots')
+def snapshots():
+    return '''<!DOCTYPE html>
+<html><head><title>Snapshots - AIMn Trading</title>
+<style>body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; padding: 20px; }
+h1 { color: #00ff00; } a { color: #00ccff; text-decoration: none; }
+.snapshot-box { background: #333; padding: 20px; border-radius: 5px; margin: 20px 0; }</style>
+</head><body><h1>Trade Snapshots</h1>
+<div class="snapshot-box"><h3>Recent Snapshots</h3><p>View captured trading moments and analysis</p></div>
+<div class="snapshot-box"><h3>Performance History</h3><p>Historical performance data and analytics</p></div>
+<p><a href="/">Back to Dashboard</a></p></body></html>'''
+
+@app.route('/trader-guide')
+def trader_guide():
+    return '''<!DOCTYPE html>
+<html>
+<head>
+    <title>Trader Guide - AIMn Trading</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 40px;
+            margin: 0;
+        }
+        h1 { color: #00ff00; }
+        a { color: #00ccff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Trader Guide</h1>
+    <p>Simple explanation and tips for experienced traders.</p>
+    <a href="/">Back to Dashboard</a>
+</body>
+</html>'''
+
+@app.route('/debug-template')
+def debug_template():
+    import os
+    template_path = os.path.join(app.template_folder, 'trade-popup-fixed.html')
+    exists = os.path.exists(template_path)
+    size = os.path.getsize(template_path) if exists else 0
+    return f'''
+    <html>
+    <body style="font-family: monospace; padding: 20px;">
+        <h1>Debug Info</h1>
+        <p><b>Template folder:</b> {app.template_folder}</p>
+        <p><b>Full path:</b> {template_path}</p>
+        <p><b>File exists:</b> {exists}</p>
+        <p><b>File size:</b> {size} bytes</p>
+        <p><b>Working directory:</b> {os.getcwd()}</p>
+    </body>
+    </html>
+    '''
+
+@app.get("/healthz")
+def healthz():
+    try:
+        from config.db import engine
+        str(engine.url)  # touch
+        return {"ok": True, "db": "up"}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}, 500
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")),debug=True)

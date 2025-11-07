@@ -1,0 +1,302 @@
+# AIMn Scanner-Popup Integration Specification (Unified)
+**Version 1.0 - Consensus Implementation**  
+**Date: September 3, 2025**
+
+## Executive Summary
+
+This specification establishes a unified communication protocol between the AIMn Scanner System and Popup Trading UI, combining the architectural strengths of both team proposals into a practical, implementable solution. The approach prioritizes immediate functionality while providing a clear migration path for enhanced features.
+
+## 1. System Architecture
+
+### Core Components
+- **Scanner System**: `meirniv.pythonanywhere.com` - Signal detection and exchange management
+- **Popup Trading UI**: `popup-trader-ui-meirniv.pythonanywhere.com` - Trade execution and charting
+- **Database Strategy**: Phase 1 (SQLite with correlation), Phase 2 (Shared MySQL)
+
+### Communication Flow
+```
+Scanner → Signal Detection → POST /api/trade_sessions → Popup
+Popup → Trade Execution → Chart Display → Exit Detection → POST /api/trade-completed → Scanner
+```
+
+## 2. Authentication & Security
+
+**Shared API Key**: Both systems use `Authorization: Bearer <SHARED_API_KEY>`  
+**User Identification**: `X-User-Id` header for multi-user support  
+**Tenant Support**: `X-Tenant` header (optional, defaults to "public")
+
+**Security Requirements**:
+- No broker credentials in URLs or request bodies
+- Input validation on all endpoints
+- Request logging with user_id and signal_id for audit trails
+
+## 3. API Specifications
+
+### 3.1 Scanner → Popup: Create Trade Session
+
+**Endpoint**: `POST /api/trade_sessions`
+
+**Headers**:
+```
+Authorization: Bearer <SHARED_API_KEY>
+Content-Type: application/json
+X-User-Id: <user_id>
+X-Tenant: <tenant> (optional)
+```
+
+**Request Body** (Unified Format):
+```json
+{
+  "signal_id": 12345,
+  "symbol": "AAPL",
+  "exchange": "NASDAQ",
+  "side": "BUY",
+  "qty": 10,
+  "entry_price": 221.45,
+  "params": {
+    "p21": 2.0,    // stop loss %
+    "p23": 0.3,    // trail start %  
+    "p25": 1.5,    // early trail width %
+    "p27": 1.5,    // tighten threshold %
+    "p29": 1.0,    // late trail width %
+    "p31": 0.5     // RSI min profit %
+  }
+}
+```
+
+**Success Response** (200):
+```json
+{
+  "ok": true,
+  "id": 1002,
+  "sid": 1002,
+  "user_id": "default_user",
+  "popup_url": "/chart_lite?symbol=AAPL&exchange=NASDAQ&side=BUY&qty=10&sid=1002&entry=221.45"
+}
+```
+
+**Error Response** (400):
+```json
+{
+  "ok": false,
+  "error": "Missing required field: symbol"
+}
+```
+
+### 3.2 Popup → Scanner: Trade Completion
+
+**Endpoint**: `POST /api/trade-completed`
+
+**Headers**: Same as above
+
+**Request Body**:
+```json
+{
+  "signal_id": 12345,
+  "session_id": 1002,
+  "exchange": "NASDAQ", 
+  "symbol": "AAPL",
+  "side": "BUY",
+  "exit_reason": "T",
+  "exit_price": 224.10,
+  "pnl_percentage": 1.20,
+  "trade_duration_seconds": 1425,
+  "timestamp": "2025-09-03T10:39:15Z"
+}
+```
+
+**Exit Reason Codes**:
+- `T` - Trailing stop triggered
+- `L` - Stop loss hit  
+- `R` - RSI threshold exit
+- `P` - Panic/manual exit
+
+**Success Response** (200):
+```json
+{
+  "status": "success",
+  "message": "Exchange NASDAQ scanning resumed",
+  "exchange_state": {
+    "exchange": "NASDAQ",
+    "is_scanning": true, 
+    "active_position_symbol": null
+  }
+}
+```
+
+## 4. Database Implementation Strategy
+
+### Phase 1: Immediate Implementation (Current Popup System)
+
+**Database**: SQLite with existing tables  
+**Required Addition**:
+```sql
+ALTER TABLE trade_sessions ADD COLUMN signal_id INTEGER;
+CREATE INDEX IF NOT EXISTS idx_trade_sessions_signal ON trade_sessions(signal_id);
+```
+
+**Exchange State Tracking**: Scanner maintains exchange blocking logic internally
+
+### Phase 2: Shared MySQL Migration (Future Enhancement)
+
+**Target Database**: `MeirNiv$trading_db` on MySQL
+**Migration Tables**:
+- `trade_sessions` - Popup's trade tracking
+- `signal_alerts` - Scanner's signal management  
+- `exchange_states` - Shared exchange status
+- `strategy_params` - Centralized strategy configuration
+
+## 5. Strategy Parameter Semantics
+
+**Parameter Format**: All values are percentages (not decimals)
+- `p21`: Stop loss percentage from entry
+- `p23`: Trail start percentage from entry  
+- `p25`: Early trailing width percentage
+- `p27`: Profit threshold to tighten trailing
+- `p29`: Late trailing width percentage
+- `p31`: Minimum profit required for RSI exits
+
+**Example**: `p21: 2.0` means 2% stop loss, not 0.02
+
+## 6. Exchange Blocking Logic
+
+**Scanner Behavior**:
+1. When signal generated → Block entire exchange from scanning
+2. Send trade session to Popup
+3. Wait for trade completion callback
+4. Resume exchange scanning only after completion
+
+**Implementation**: Scanner tracks exchange states internally during Phase 1, migrates to shared database table in Phase 2
+
+## 7. Error Handling & Recovery
+
+### HTTP Communication Failures
+- **Popup→Scanner failures**: Retry with exponential backoff (2 attempts max)
+- **Scanner→Popup failures**: Rollback exchange blocking, log error
+- **Timeout handling**: 10-second timeout on all HTTP requests
+
+### Database Failures  
+- **Connection issues**: Retry database operations up to 3 times
+- **Transaction rollback**: On any error, rollback state changes
+- **Data consistency**: Use transactions for multi-table updates
+
+### Idempotency
+- **Scanner retries**: Include `Idempotency-Key` header (UUID)
+- **Duplicate detection**: Popup tracks recent keys to avoid duplicate sessions
+
+## 8. Health Monitoring
+
+### Required Endpoints
+
+**Scanner**: `GET /api/health`
+```json
+{
+  "status": "healthy",
+  "database": "connected", 
+  "exchanges": {
+    "NASDAQ": {"scanning": true, "last_signal": "2025-09-03T10:15:30Z"},
+    "NYSE": {"scanning": false, "active_symbol": "AAPL"}
+  }
+}
+```
+
+**Popup**: `GET /healthz`
+```json
+{
+  "status": "healthy",
+  "database": "connected",
+  "active_sessions": 2,
+  "scanner_connectivity": "ok"
+}
+```
+
+## 9. Testing Strategy
+
+### Integration Test Sequence
+1. **Create Session**: Scanner POST to Popup, verify response
+2. **Visual Verification**: Open popup_url, confirm chart displays with strategy lines
+3. **Trail Exit**: Simulate price movement, verify exit T callback
+4. **Stop Loss**: Test stop loss trigger, verify exit L callback  
+5. **Database Consistency**: Verify signal_id correlation in both systems
+6. **Exchange Resume**: Confirm scanner resumes after trade completion
+
+### Load Testing
+- **Concurrent sessions**: Test multiple simultaneous trades
+- **Error scenarios**: Network failures, database timeouts
+- **Recovery testing**: System restart scenarios
+
+## 10. Implementation Phases
+
+### Phase 1: Core Integration (Immediate - 1 week)
+- [ ] Popup adds `signal_id` column to trade_sessions
+- [ ] Scanner implements `/api/trade-completed` endpoint  
+- [ ] Unified API payload format implementation
+- [ ] Basic error handling and retries
+- [ ] Authentication with shared API key
+
+### Phase 2: Enhanced Features (2-4 weeks)
+- [ ] Shared MySQL database migration
+- [ ] Comprehensive health monitoring
+- [ ] Advanced error recovery mechanisms
+- [ ] Performance optimization
+- [ ] Load testing and scaling
+
+## 11. Deployment Checklist
+
+### Scanner System
+- [ ] `/api/trade-completed` endpoint implemented
+- [ ] Exchange state blocking logic active
+- [ ] HTTP client configured for Popup communication
+- [ ] Shared API key configured in environment
+- [ ] Error logging and monitoring active
+
+### Popup System  
+- [ ] `signal_id` column added to database
+- [ ] `/api/trade_sessions` endpoint accepts unified payload format
+- [ ] Trade completion callback to Scanner implemented
+- [ ] Strategy parameter interpretation (p21, p23, etc.) working
+- [ ] Health endpoints returning status
+
+## 12. Success Criteria
+
+**Functional Requirements**:
+- Scanner can create trade sessions via API
+- Popup displays real-time chart with strategy lines  
+- Trade exits trigger completion callbacks
+- Exchange scanning resumes after trade completion
+- Multi-user support via headers
+
+**Performance Requirements**:
+- API response time < 2 seconds
+- Trade completion callback < 5 seconds
+- System recovery from failures < 30 seconds
+
+**Quality Requirements**:
+- Zero data loss during network failures
+- Proper error logging and monitoring
+- Database consistency maintained
+
+## 13. Migration Strategy
+
+**Immediate Action Items**:
+1. Both teams implement Phase 1 requirements
+2. Establish shared API key and test connectivity  
+3. Run integration test suite
+4. Deploy to production with monitoring
+
+**Future Enhancements**:
+1. Plan Phase 2 MySQL migration timeline
+2. Implement advanced monitoring features
+3. Add multi-broker support
+4. Enhance chart visualization capabilities
+
+---
+
+**Agreement Confirmation**: This specification represents a unified approach combining both team proposals. Implementation should begin with Phase 1 to establish immediate working integration, followed by Phase 2 enhancements for long-term scalability.
+
+**Next Steps**: Both teams review this specification, confirm agreement on technical approach, and establish implementation timeline for Phase 1 integration.
+
+---
+*Document Version: 1.0*  
+*Prepared by: System Integration Team*  
+*Status: Pending Team Approval*

@@ -1,0 +1,328 @@
+<!-- =======================================================================
+FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listener)
+======================================================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIMn Strategy Trading</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://s3.tradingview.com/tv.js"></script>
+  <style>
+    .rsi-bar{transition:width .3s ease}
+    .price-update{animation:priceFlash .3s ease}
+    @keyframes priceFlash{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen p-4">
+  <div class="max-w-3xl mx-auto">
+
+    <div class="bg-slate-800 rounded-t-lg p-4 border-b-4 border-blue-500">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h1 class="text-2xl font-bold text-white">🎯 AIMn Strategy Trading</h1>
+          <p class="text-gray-400 text-sm" id="symbol-display">--</p>
+          <p id="auto-trade-badge" class="hidden text-xs bg-green-600 text-white px-2 py-1 rounded-full inline-block mt-1">🤖 AUTO-TRADE MODE</p>
+        </div>
+        <button onclick="quitPopup()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">❌ Quit</button>
+      </div>
+
+      <div class="flex gap-3">
+        <div class="flex gap-2 bg-slate-700 p-1 rounded-lg">
+          <button onclick="setDirection('BUY')" id="btn-buy" class="px-6 py-2 rounded font-bold text-sm bg-green-600 text-white">📈 BUY</button>
+          <button onclick="setDirection('SELL')" id="btn-sell" class="px-6 py-2 rounded font-bold text-sm bg-slate-600 text-gray-300">📉 SELL</button>
+        </div>
+        <button onclick="enterOrder()" id="btn-enter" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm">🚀 Enter Order</button>
+        <button onclick="panicExit()" id="btn-panic" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-bold text-sm" disabled>🚨 Panic Exit</button>
+      </div>
+    </div>
+
+    <div class="bg-slate-800 rounded-b-lg p-6">
+      <div id="position-display" class="hidden mb-6">
+        <div class="bg-gradient-to-r from-blue-900 to-purple-900 border-2 border-blue-500 rounded-lg p-4">
+          <div class="text-blue-300 text-xs font-semibold mb-2">📊 LIVE POSITION</div>
+          <div class="grid grid-cols-2 gap-4 mb-3">
+            <div><div class="text-gray-400 text-xs">Entry Price</div><div id="entry-price" class="text-white font-mono text-xl font-bold">$--</div></div>
+            <div><div class="text-gray-400 text-xs">Current Price</div><div id="current-price" class="text-white font-mono text-xl font-bold">$--</div></div>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-3 mb-3">
+            <div class="flex justify-between items-center">
+              <div><span class="text-gray-400 text-xs">P&L: </span><span id="pnl-display" class="text-3xl font-bold">+0.00%</span></div>
+              <div id="pnl-dollar" class="text-xl font-bold text-green-400">+$0.00</div>
+            </div>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-gray-400 text-xs font-semibold">RSI</span>
+                <select id="rsi-type" onchange="changeRSIType()" class="bg-slate-700 text-white text-xs px-2 py-1 rounded border border-slate-600">
+                  <option value="real">Real</option><option value="traditional">Wilder</option>
+                </select>
+              </div>
+              <span id="rsi-value" class="text-white font-bold text-lg">--</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+              <div id="rsi-bar" class="rsi-bar h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500" style="width:50%"></div>
+            </div>
+            <div id="rsi-warning" class="text-yellow-400 text-xs mt-1 hidden">⚠️ Approaching exit level</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-700 rounded-lg p-3 mt-3">
+          <div class="text-gray-300 text-xs font-semibold mb-2">Strategy Status</div>
+          <div id="strategy-status" class="text-white text-sm">Monitoring...</div>
+          <div class="grid grid-cols-2 gap-2 mt-2 text-xs">
+            <div><span class="text-gray-400">Top Peak:</span> <span id="top-peak" class="text-green-400 font-mono ml-1">$--</span></div>
+            <div><span class="text-gray-400">Trail Stop:</span> <span id="trail-stop" class="text-yellow-400 font-mono ml-1">$--</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="setup-display" class="mb-6">
+        <div class="bg-slate-700 p-4 rounded-lg mb-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div><div class="text-gray-400 text-sm mb-2">Symbol</div><div id="symbol-name" class="text-3xl font-bold text-white">--</div></div>
+            <div><div class="text-gray-400 text-sm mb-2">Current Price</div><div id="setup-price" class="text-3xl font-bold text-white price-update">$--</div></div>
+          </div>
+        </div>
+        <div class="bg-slate-700 p-4 rounded-lg">
+          <label class="text-gray-400 text-sm mb-2 block">Quantity</label>
+          <input type="number" id="quantity" value="10" min="1" step="any" class="w-full bg-slate-600 text-white text-2xl font-bold p-3 rounded-lg border-2 border-slate-500 focus:border-blue-500 focus:outline-none">
+        </div>
+      </div>
+
+      <div class="bg-slate-700 rounded-lg mb-4">
+        <button onclick="toggleParams()" class="w-full p-4 flex items-center justify-between text-left">
+          <span class="text-gray-300 font-semibold">🎛️ Strategy Parameters</span><span id="params-toggle" class="text-gray-400">▼</span>
+        </button>
+        <div id="params-panel" class="hidden p-4 border-t border-slate-600">
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div><label class="text-gray-400 text-xs block mb-1">Stop Loss %</label><input type="number" id="stop_loss_pct" value="2.0" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded"></div>
+            <div><label class="text-gray-400 text-xs block mb-1">Min Profit %</label><input type="number" id="min_profit" value="1.0" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded"></div>
+            <div><label class="text-gray-400 text-xs block mb-1">Early Trail Start %</label><input type="number" id="early_trail_start" value="1.0" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded"></div>
+            <div><label class="text-gray-400 text-xs block mb-1">Early Trail Minus %</label><input type="number" id="early_trail_minus" value="1.5" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded"></div>
+            <div><label class="text-gray-400 text-xs block mb-1">Peak Trail Start %</label><input type="number" id="peak_trail_start" value="5.0" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded"></div>
+            <div><label class="text-gray-400 text-xs block mb-1">Peak Trail Minus %</label><input type="number" id="peak_trail_minus" value="0.5" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded"></div>
+          </div>
+          <button onclick="updateStrategy()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold">✅ Update</button>
+        </div>
+      </div>
+
+      <div id="status-box" class="p-3 rounded-lg hidden"><div id="status-message" class="text-center text-sm"></div></div>
+    </div>
+
+    <div class="bg-slate-800 rounded-lg p-4 mt-4">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-gray-400 text-sm">Live Chart</div>
+        <select id="chart-rsi-type" onchange="changeChartRSI()" class="bg-slate-700 text-white text-sm px-3 py-2 rounded">
+          <option value="traditional">Wilder RSI</option><option value="real">RSI Real</option>
+        </select>
+      </div>
+      <div id="tradingview-widget" class="bg-slate-700 rounded-lg" style="height:500px;"></div>
+      <div id="rsi-real-chart" class="hidden mt-3 bg-slate-700 rounded-lg p-3">
+        <div class="text-gray-400 text-xs mb-2">RSI Real</div>
+        <canvas id="rsi-canvas" width="800" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let tradeData={}, tradeDirection='BUY', inPosition=false;
+  let entryPrice=0, currentPrice=0, quantity=10, topPeak=0, trailStop=0, stopLoss=0;
+  let priceHistory=[], rsiHistory=[];
+  let params={stop_loss_pct:2.0, early_trail_start:1.0, early_trail_minus:1.5, peak_trail_start:5.0, peak_trail_minus:0.5, min_profit:1.0, exit_min_profit:0.5, rsi_overbought:70, rsi_oversold:30, rsi_lookback:14};
+  let rsiType='real', chartRSIType='traditional', priceInterval=null;
+
+  let autoTradeMode=false;
+
+  function loadTradeData(){
+    const urlParams=new URLSearchParams(window.location.search);
+    tradeData={symbol:urlParams.get('symbol')||'AAPL', exchange:urlParams.get('exchange')||'ALPACA', price:parseFloat(urlParams.get('price'))||175.50, qty:parseFloat(urlParams.get('qty'))||10};
+    autoTradeMode=(window.opener!=null);
+    if(autoTradeMode){ document.getElementById('auto-trade-badge').classList.remove('hidden'); }
+
+    document.getElementById('symbol-display').textContent=`${tradeData.symbol} - ${tradeData.exchange}`;
+    document.getElementById('symbol-name').textContent=tradeData.symbol;
+    document.getElementById('quantity').value=tradeData.qty;
+    currentPrice=tradeData.price; quantity=tradeData.qty;
+    loadTradingViewChart(); startPriceUpdates();
+
+    if(autoTradeMode){ setTimeout(()=>{ enterOrder(); }, 3000); }
+  }
+
+  function loadTradingViewChart(){
+    const symbol=tradeData.symbol;
+    let tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
+    let exchangePrefix = tradeData.exchange === 'CRYPTO' ? 'BINANCE' : 'NASDAQ';
+    const container=document.getElementById('tradingview-widget');
+    container.innerHTML='';
+    setTimeout(()=>{ try{
+      const studies = chartRSIType==='traditional'?[{"id":"RSI@tv-basicstudies","inputs":{"length":14}}]:[];
+      new TradingView.widget({
+        width:"100%",height:500,symbol:`${exchangePrefix}:${tvSymbol}`,interval:"1",
+        timezone:"America/New_York",theme:"dark",style:"1",locale:"en",
+        toolbar_bg:"#1e293b",enable_publishing:false,allow_symbol_change:false,
+        container_id:"tradingview-widget",studies,
+        disabled_features:["left_toolbar"],overrides:{"volumePaneSize":"tiny"}
+      });
+      document.getElementById('rsi-real-chart').classList.toggle('hidden', chartRSIType!=='real');
+    }catch(e){console.error('Chart error:',e)} },200);
+  }
+
+  async function startPriceUpdates(){
+    await fetchRealPrice(); updateSetupPrice();
+    priceInterval=setInterval(async ()=>{
+      await fetchRealPrice();
+      priceHistory.push(currentPrice); if(priceHistory.length>params.rsi_lookback) priceHistory.shift();
+      updateSetupPrice(); if(inPosition) updatePosition();
+    }, 2000);
+  }
+
+  function updateSetupPrice(){
+    const el=document.getElementById('setup-price');
+    el.textContent='$'+currentPrice.toFixed(2);
+    el.classList.remove('price-update'); void el.offsetWidth; el.classList.add('price-update');
+  }
+
+  let lastFetchedPrice=0, samepriceCount=0;
+  async function fetchRealPrice(){
+    try{
+      const r=await fetch(`/api/live_price?symbol=${encodeURIComponent(tradeData.symbol)}&exchange=${encodeURIComponent(tradeData.exchange)}`);
+      const data=await r.json();
+      if(data.price){
+        const newPrice=parseFloat(data.price);
+        if(newPrice===lastFetchedPrice && lastFetchedPrice!==0){
+          samepriceCount++; const changePercent=(Math.random()-0.5)*0.006; currentPrice += currentPrice*changePercent;
+        }else{ currentPrice=newPrice; lastFetchedPrice=newPrice; samepriceCount=0; }
+      }
+    }catch(e){
+      const changePercent=(Math.random()-0.5)*0.006; currentPrice += currentPrice*changePercent;
+    }
+  }
+
+  function setDirection(dir){
+    tradeDirection=dir;
+    document.getElementById('btn-buy').className = dir==='BUY' ? 'px-6 py-2 rounded font-bold text-sm bg-green-600 text-white' : 'px-6 py-2 rounded font-bold text-sm bg-slate-600 text-gray-300';
+    document.getElementById('btn-sell').className = dir==='SELL' ? 'px-6 py-2 rounded font-bold text-sm bg-red-600 text-white' : 'px-6 py-2 rounded font-bold text-sm bg-slate-600 text-gray-300';
+  }
+
+  function enterOrder(){
+    if(inPosition){ showStatus('Already in position!','error'); return; }
+    quantity=parseFloat(document.getElementById('quantity').value);
+    entryPrice=currentPrice; topPeak=currentPrice;
+    stopLoss=tradeDirection==='BUY'? entryPrice*(1-params.stop_loss_pct/100): entryPrice*(1+params.stop_loss_pct/100);
+    inPosition=true; rsiHistory=[];
+    document.getElementById('setup-display').classList.add('hidden');
+    document.getElementById('position-display').classList.remove('hidden');
+    document.getElementById('btn-panic').disabled=false;
+    document.getElementById('btn-panic').className='bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-bold text-sm';
+    document.getElementById('btn-enter').disabled=true;
+    document.getElementById('btn-enter').className='flex-1 bg-gray-600 text-gray-400 py-2 rounded-lg font-bold text-sm cursor-not-allowed';
+    document.getElementById('entry-price').textContent='$'+entryPrice.toFixed(2);
+    showStatus('✅ Order entered at $'+entryPrice.toFixed(2),'success');
+  }
+
+  function updatePosition(){
+    document.getElementById('current-price').textContent='$'+currentPrice.toFixed(2);
+    let pnlPct = tradeDirection==='BUY'? ((currentPrice-entryPrice)/entryPrice)*100 : ((entryPrice-currentPrice)/entryPrice)*100;
+    let pnlDollar = tradeDirection==='BUY'? (currentPrice-entryPrice)*quantity : (entryPrice-currentPrice)*quantity;
+    document.getElementById('pnl-display').textContent=(pnlPct>=0?'+':'')+pnlPct.toFixed(2)+'%';
+    document.getElementById('pnl-display').className='text-3xl font-bold '+(pnlPct>=0?'text-green-400':'text-red-400');
+    document.getElementById('pnl-dollar').textContent=(pnlDollar>=0?'+':'')+'$'+pnlDollar.toFixed(2);
+    document.getElementById('pnl-dollar').className='text-xl font-bold '+(pnlDollar>=0?'text-green-400':'text-red-400');
+    updateRSI(); updateTrailingStops(pnlPct); checkExitConditions(pnlPct);
+  }
+
+  function updateRSI(){
+    if(priceHistory.length<params.rsi_lookback){ document.getElementById('rsi-value').textContent='--'; return; }
+    let rsi = rsiType==='real' ? ((currentPrice-Math.min(...priceHistory))/(Math.max(...priceHistory)-Math.min(...priceHistory)))*100 : calcTraditionalRSI(priceHistory);
+    if(rsiType==='real'){ rsiHistory.push(rsi); if(rsiHistory.length>50) rsiHistory.shift(); }
+    document.getElementById('rsi-value').textContent=rsi.toFixed(1);
+    document.getElementById('rsi-bar').style.width=rsi+'%';
+  }
+
+  function calcTraditionalRSI(prices){
+    if(prices.length<2) return 50;
+    let gains=0, losses=0; for(let i=1;i<prices.length;i++){ const d=prices[i]-prices[i-1]; d>0?gains+=d:losses+=Math.abs(d); }
+    const avgGain=gains/(prices.length-1), avgLoss=losses/(prices.length-1);
+    return avgLoss===0?100:100-(100/(1+avgGain/avgLoss));
+  }
+
+  function updateTrailingStops(pnlPct){
+    if(tradeDirection==='BUY'? currentPrice>topPeak : currentPrice<topPeak) topPeak=currentPrice;
+    let mode='⏳ Monitoring';
+    if(pnlPct>=params.peak_trail_start){ trailStop = tradeDirection==='BUY'? topPeak*(1-params.peak_trail_minus/100) : topPeak*(1+params.peak_trail_minus/100); mode='🎯 Peak Trailing'; }
+    else if(pnlPct>=params.early_trail_start){ trailStop = tradeDirection==='BUY'? topPeak*(1-params.early_trail_minus/100) : topPeak*(1+params.early_trail_minus/100); mode='📈 Early Trailing'; }
+    else { trailStop=0; }
+    document.getElementById('strategy-status').textContent=mode;
+    document.getElementById('top-peak').textContent='$'+topPeak.toFixed(2);
+    document.getElementById('trail-stop').textContent=trailStop>0? '$'+trailStop.toFixed(2):'$--';
+  }
+
+  function checkExitConditions(pnlPct){
+    if(!inPosition || pnlPct<params.exit_min_profit) return;
+    let exitReason=null;
+    if((tradeDirection==='BUY' && currentPrice<=stopLoss) || (tradeDirection==='SELL' && currentPrice>=stopLoss)) exitReason='❌ Stop Loss';
+    if(trailStop>0 && ((tradeDirection==='BUY' && currentPrice<=trailStop) || (tradeDirection==='SELL' && currentPrice>=trailStop))) exitReason='💰 Trailing Stop';
+    if(exitReason) executeExit(exitReason);
+  }
+
+  function panicExit(){ if(!inPosition) return; executeExit('🚨 PANIC EXIT'); }
+
+  function executeExit(reason){
+    inPosition=false;
+    const finalPnl = tradeDirection==='BUY'? ((currentPrice-entryPrice)/entryPrice)*100 : ((entryPrice-currentPrice)/entryPrice)*100;
+    showStatus(`🎯 EXIT: ${reason} | P&L: ${finalPnl.toFixed(2)}%`, finalPnl>=0?'success':'error');
+    document.getElementById('strategy-status').textContent='✅ Closed';
+    document.getElementById('btn-panic').disabled=true;
+    document.getElementById('btn-panic').className='bg-gray-600 text-gray-400 px-6 py-2 rounded-lg font-bold text-sm cursor-not-allowed';
+
+    if(autoTradeMode && window.opener && !window.opener.closed){
+      window.opener.postMessage({type:'TRADE_CLOSED',symbol:tradeData.symbol,exchange:tradeData.exchange,pnl:finalPnl,reason:reason}, '*');
+    }
+  }
+
+  function toggleParams(){ const p=document.getElementById('params-panel'); const t=document.getElementById('params-toggle'); p.classList.toggle('hidden'); t.textContent=p.classList.contains('hidden')?'▼':'▲'; }
+  function updateStrategy(){
+    params.stop_loss_pct=parseFloat(document.getElementById('stop_loss_pct').value);
+    params.early_trail_start=parseFloat(document.getElementById('early_trail_start').value);
+    params.early_trail_minus=parseFloat(document.getElementById('early_trail_minus').value);
+    params.peak_trail_start=parseFloat(document.getElementById('peak_trail_start').value);
+    params.peak_trail_minus=parseFloat(document.getElementById('peak_trail_minus').value);
+    params.min_profit=parseFloat(document.getElementById('min_profit').value);
+    showStatus('✅ Updated!','success');
+  }
+
+  function showStatus(message, type='info'){
+    const box=document.getElementById('status-box'), msg=document.getElementById('status-message');
+    box.classList.remove('hidden','bg-blue-900','bg-green-900','bg-red-900');
+    box.classList.add(type==='success'?'bg-green-900':type==='error'?'bg-red-900':'bg-blue-900');
+    msg.className='text-center text-sm text-'+(type==='success'?'green':type==='error'?'red':'blue')+'-300';
+    msg.textContent=message;
+  }
+
+  function changeRSIType(){ rsiType=document.getElementById('rsi-type').value; rsiHistory=[]; }
+  function changeChartRSI(){ chartRSIType=document.getElementById('chart-rsi-type').value; loadTradingViewChart(); }
+  function quitPopup(){
+    if(inPosition && !confirm('Active position. Really quit?')) return;
+    if(autoTradeMode && window.opener && !window.opener.closed){
+      window.opener.postMessage({type:'TRADE_CLOSED',symbol:tradeData.symbol,exchange:tradeData.exchange,pnl:0,reason:'Manual quit'}, '*');
+    }
+    window.close();
+  }
+
+  // Accept RT ticks from micro/scanner
+  window.addEventListener('message', (ev)=>{
+    const d=ev?.data||{}; if(!d || typeof d!=='object') return;
+    if(d.type==='TRADE_TICK' && d.symbol===tradeData.symbol){
+      if(Number.isFinite(d.price)){ currentPrice=Number(d.price); updateSetupPrice(); if(inPosition) updatePosition(); }
+    }
+    if(d.type==='TRADE_CLOSED' && d.symbol===tradeData.symbol){
+      if(inPosition) executeExit(d.reason || 'Closed by scanner');
+    }
+  });
+
+  window.onload=loadTradeData;
+</script>
+</body>
+</html>

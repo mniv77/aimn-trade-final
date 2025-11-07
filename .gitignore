@@ -1,106 +1,48 @@
-# AIMn Trading System - Git Ignore File
-
-# ============================================================
-# SENSITIVE - NEVER COMMIT THESE!
-# ============================================================
-.env
-.env.local
-.env.production
-*.env
-.encryption.key
-**/api_credentials.py
-**/secrets.py
-config.py
-
-# ============================================================
-# Python
-# ============================================================
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg
-*.egg-info/
-dist/
-build/
-*.whl
-
-# ============================================================
-# Virtual Environments
-# ============================================================
-venv/
-env/
-.venv/
-ENV/
-env.bak/
-venv.bak/
-
-# ============================================================
-# Databases & Data Files
-# ============================================================
-*.db
-*.sqlite
-*.sqlite3
-*.log
-*.json.bak
-
-# ============================================================
-# IDE & Editors
-# ============================================================
+# .gitignore
+# OS / IDE
+.DS_Store
+Thumbs.db
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-.DS_Store
+.encryption.key
+data/.api_credentials.json
+# Python
+**pycache**/
+*.py[cod]
+*.egg-info/
+.venv/
+env/
+venv/
 
-# ============================================================
-# Testing
-# ============================================================
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.hypothesis/
-
-# ============================================================
-# Backup Files
-# ============================================================
-*_bak.*
-*-bak.*
-*_OLD.*
-*BACKUP*
-*.bak.*
-backup/
-temp/
-TEMP*
-Temp*
-
-# ============================================================
-# Compiled & Distribution
-# ============================================================
-*.pyc
-*.pyo
-*.pyd
-.Python
-pip-log.txt
-pip-delete-this-directory.txt
-
-# ============================================================
-# OS
-# ============================================================
-Thumbs.db
-.DS_Store
-desktop.ini
-
-# ============================================================
-# Project Specific
-# ============================================================
+# Project artifacts
+exports/
 snapshots/
-artifacts/*.png
-project-backup.zip
-repo_structure.txt
+data/
+*.log
+*.csv
+*.7z
+*.zip
+*.odt
+*.txt
+CLAUDE_CONTEXT.md
 
-# Keep example files
-!.env_example
+# Secrets
+.env
+=======
+__pycache__/
+*.pyc
+.env
+snapshots/
+*.sqlite
+*.db
+.venv/
+env/
+*.log
+*.7z
+*.zip
+*.exe
+EOF
+git add .gitignore
+git commit -m "chore: add .gitignore"
+>>>>>>> 0c0df91 (Initial push)
+.env.local

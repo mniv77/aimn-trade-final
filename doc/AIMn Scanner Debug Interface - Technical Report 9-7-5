@@ -1,0 +1,119 @@
+AIMn Scanner Debug Interface - Technical Report
+Overview
+The AIMn Scanner Debug Interface is a diagnostic tool designed to test and validate the communication protocol between the AIMn Scanner System and the Popup Trading UI. It simulates the signal detection process and displays the exact payload format that gets sent when Row 4 of the scanner detects BUY or SELL signals.
+Problem Statement
+The AIMn trading system consists of multiple components that need to communicate seamlessly:
+
+Scanner System (meirniv.pythonanywhere.com) - Detects trading opportunities
+Popup Trading UI (popup-trader-ui-meirniv.pythonanywhere.com) - Executes trades
+Database - Stores trade data and parameters
+
+Before implementing live trading integration, we needed a way to test the communication protocol and verify payload formats without affecting real trading operations.
+Solution: Debug Interface
+Core Functionality
+Signal Simulation: Creates a simulated scanner environment with 8 symbols across different exchanges (ALPACA, NYSE, CRYPTO) showing real-time market data simulation.
+Row 4 Testing Logic: Implements the "conveyor belt" concept where Row 4 is the fixed testing position that triggers signal detection when BUY or SELL conditions are met.
+Communication Payload Generation: Creates the exact JSON payload that should be sent to the Popup Trading UI when a signal is detected.
+Real-time Debugging: Shows the complete communication flow with visual feedback and logging.
+Technical Architecture
+Frontend: HTML interface with Tailwind CSS for styling and JavaScript for functionality
+File Location: templates/aimn_scanner_debug.html
+Flask Route: /scanner/debug
+Dependencies: Tailwind CDN for styling
+Key Components
+1. Simulated Scanner Display
+
+8-row scanner table showing symbols, exchanges, prices, RSI values, and signals
+Row 4 highlighted in blue with "TESTING" indicator
+Real-time signal changes and conveyor belt movement simulation
+
+2. Debug Controls
+
+Enable Signal Detection: Activates the debugging system
+Test Signal (Manual): Forces a BUY/SELL signal in Row 4 for testing
+Auto-send toggle: Option to automatically send signals to Popup system
+
+3. Signal Detection Popup
+
+Displays when Row 4 detects a BUY or SELL signal
+Shows signal details (symbol, exchange, price, RSI)
+Generates complete communication payload in JSON format
+Provides buttons to send signal or copy payload
+
+4. Signal Detection Log
+
+Maintains history of all detected signals
+Shows timestamp, symbol, signal type, and entry price
+Allows review of payload details for each signal
+
+Communication Protocol
+When Row 4 detects a signal, the system generates this payload:
+json{
+  "signal_id": 12345,
+  "symbol": "AAPL",
+  "exchange": "ALPACA",
+  "side": "BUY",
+  "qty": 10,
+  "entry_price": 221.45,
+  "params": {
+    "p21": 2.0,    // stop loss %
+    "p23": 0.3,    // trail start %
+    "p25": 1.5,    // early trail width %
+    "p27": 1.5,    // tighten threshold %
+    "p29": 1.0,    // late trail width %
+    "p31": 0.5     // RSI min profit %
+  }
+}
+Target Endpoint: POST https://popup-trader-ui-meirniv.pythonanywhere.com/api/trade_sessions
+Required Headers:
+
+Authorization: Bearer <API_KEY>
+Content-Type: application/json
+X-User-Id: default_user
+X-Tenant: public
+
+Expected Workflow
+
+Enable Debug Mode: User clicks "Enable Signal Detection"
+Signal Generation: Either automatic (every 3 seconds) or manual via "Test Signal" button
+Row 4 Analysis: System checks if Row 4 has BUY or SELL signal
+Popup Display: Debug popup appears showing signal details and payload
+Communication: Payload can be sent to Popup system or copied for testing
+Logging: Signal gets logged to detection history
+
+Strategy Parameters (p21-p31 Mapping)
+The debug interface uses the standard AIMn strategy parameters:
+
+p21: Stop loss percentage from entry
+p23: Trail start percentage
+p25: Early trailing width percentage
+p27: Profit threshold to tighten trailing
+p29: Late trailing width percentage
+p31: Minimum profit required for RSI exits
+
+Technical Issues Encountered
+During implementation, we encountered JavaScript timing issues where event listeners tried to execute before DOM elements were ready. The solution involved wrapping all JavaScript in a window.onload function to ensure proper initialization order.
+Common Error: Cannot read properties of null (reading 'addEventListener')
+Solution: Ensure all event listener setup occurs after DOM is fully loaded
+Usage Instructions
+
+Navigate to /scanner/debug endpoint
+Verify scanner rows display properly (8 rows with Row 4 highlighted)
+Click "Enable Signal Detection" (button should turn green)
+Click "Test Signal (Manual)" to force a signal
+Debug popup should appear with signal details and payload
+Use "Send to Popup" to test actual communication
+Review Signal Detection Log for history
+
+Integration Points
+This debug interface validates the communication protocol that will be used in the production scanner (aimn_flowing_scanner.html) when Row 4 signal detection is implemented. The payload format and endpoint configuration tested here will be directly applied to the live system.
+Future Enhancements
+
+Real-time connection testing to Popup system
+Response validation and error handling
+Multiple signal simulation scenarios
+Parameter tuning interface integration
+Historical signal replay functionality
+
+Conclusion
+The AIMn Scanner Debug Interface provides essential testing capabilities for validating the Scanner-to-Popup communication protocol. It ensures signal detection logic works correctly and payload formats match integration specifications before deployment to the live trading environment.

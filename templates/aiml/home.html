@@ -1,0 +1,61 @@
+{% extends "aiml/aiml_base.html" %}
+{% block title %}AI/ML Auto-Tuning Dashboard{% endblock %}
+{% block content %}
+
+<!-- BEGIN INTRODUCTION -->
+<div style="background:rgba(0,255,180,0.1);border-left:5px solid #00ffb3;padding:20px 28px;margin-bottom:32px;border-radius:12px;">
+    <h2 style="margin-top:0;">Welcome!</h2>
+    <p>
+        <strong>What is this?</strong><br>
+        This dashboard lets you use advanced <span style="color:#00ffb3;">AI and Machine Learning</span> to automatically tune and improve your trading strategies.
+    </p>
+    <ul>
+        <li><b>Why use it?</b> AI/ML tuning helps you find the best possible parameter settings for your trading, so you can maximize profits and minimize risk—no guesswork.</li>
+        <li><b>How does it work?</b> Our system tests hundreds of combinations, using your own historical data, and finds the settings that deliver the best results.</li>
+        <li><b>What do I do?</b> Choose your asset and broker, start a tuning job, and review the results—directly in your browser.</li>
+    </ul>
+    <p style="margin-top:18px;">
+        <em>Ready to trade smarter? Start by picking a symbol and launching your first auto-tuning session below!</em>
+    </p>
+</div>
+<!-- END INTRODUCTION -->
+
+<h1>🤖 AI/ML Auto-Tuning Dashboard</h1>
+<p>
+    Welcome! Here you can launch smart parameter tuning jobs for your trading strategies.<br>
+    Select your asset, broker, and trading mode, then let the AI optimizer find your edge!
+</p>
+
+#-------------------------------------
+
+
+#------------------------------------------
+
+
+
+
+
+
+<!-- Navigation Links -->
+<a href="/" style="color:#00ffb3; text-decoration:none; font-weight:bold;">← Back to Main Dashboard</a>
+<a href="{{ url_for('aiml_home') }}" style="margin-left:24px; color:#00ffb3; text-decoration:none; font-weight:bold;">
+  ← Back to AI/ML Dashboard Home
+</a>
+<!-- Manual Tuning Tool Button -->
+<div style="margin:28px 0 18px 0;">
+    <a href="{{ url_for('manual_tune') }}"
+       style="display:inline-block; padding:18px 38px; font-size:20px; border-radius:10px; background:#4CAF50; color:white; text-decoration:none; font-weight:bold;">
+        👉 Go to Manual Tuning Tool
+    </a>
+</div>
+
+<hr>
+<h3>🚧 More features coming soon!</h3>
+<ul>
+    <li>Symbol/broker selection</li>
+    <li>Tuning status and logs</li>
+    <li>Results and performance charts</li>
+    <li>Job history, versioning, export, and more</li>
+</ul>
+
+{% endblock %}

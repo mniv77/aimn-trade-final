@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trade Scanner Simulator</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #00ffff;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .method {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        h2 {
+            color: #00ffff;
+            margin-top: 0;
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: inline-block;
+            width: 180px;
+            font-weight: bold;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            background: #333;
+            color: #0f0;
+            border: 1px solid #555;
+            padding: 8px;
+            border-radius: 4px;
+            width: 250px;
+        }
+        
+        textarea {
+            width: 400px;
+            height: 80px;
+        }
+        
+        input[type="radio"] {
+            margin: 0 5px;
+        }
+        
+        button {
+            background: #00ff00;
+            color: black;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: #00ff99;
+        }
+        
+        .local-btn {
+            background: #0099ff;
+            color: white;
+        }
+        
+        .local-btn:hover {
+            background: #00ccff;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background: #004400;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .error {
+            background: #440000;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Trade Scanner Simulator</h1>
+        <div class="subtitle">
+            Use this form to manually trigger trade popups for testing the standalone window.
+        </div>
+        
+        <!-- Method 1 -->
+        <div class="method">
+            <h2>Method 1: Direct External Trigger</h2>
+            <form id="external-form">
+                <div class="form-group">
+                    <label><strong>Symbol:</strong></label>
+                    <input type="text" name="symbol" value="BTC/USD" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><strong>Exchange:</strong></label>
+                    <select name="exchange">
+                        <option value="Alpaca">Alpaca</option>
+                        <option value="Binance">Binance</option>
+                        <option value="Coinbase">Coinbase</option>
+                        <option value="NYSE">NYSE</option>
+                        <option value="NASDAQ">NASDAQ</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label><strong>Side:</strong></label>
+                    <input type="radio" name="side" value="BUY" checked> BUY
+                    <input type="radio" name="side" value="SELL"> SELL
+                </div>
+                
+                <div class="form-group">
+                    <label><strong>Quantity:</strong></label>
+                    <input type="number" name="quantity" value="0.5" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><strong>Entry Price (optional):</strong></label>
+                    <input type="number" name="price" placeholder="43250.00" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label style="vertical-align: top;"><strong>Parameters (JSON):</strong></label>
+                    <textarea name="params">{
+  "stop_loss": 2.0,
+  "take_profit": 5.0
+}</textarea>
+                </div>
+                
+                <button type="submit">🚀 Trigger Trade Pop-Up (External)</button>
+            </form>
+            <div id="result1" class="result"></div>
+        </div>
+        
+        <!-- Method 2 -->
+        <div class="method">
+            <h2>Method 2: Local Testing</h2>
+            <form id="local-form">
+                <div class="form-group">
+                    <label><strong>Symbol:</strong></label>
+                    <input type="text" name="symbol" value="ETH/USD" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><strong>Exchange:</strong></label>
+                    <select name="exchange">
+                        <option value="Alpaca">Alpaca</option>
+                        <option value="Binance">Binance</option>
+                        <option value="Coinbase">Coinbase</option>
+                        <option value="NYSE">NYSE</option>
+                        <option value="NASDAQ">NASDAQ</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label><strong>Side:</strong></label>
+                    <input type="radio" name="side" value="BUY" checked> BUY
+                    <input type="radio" name="side" value="SELL"> SELL
+                </div>
+                
+                <div class="form-group">
+                    <label><strong>Quantity:</strong></label>
+                    <input type="number" name="quantity" value="1.0" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><strong>Entry Price (optional):</strong></label>
+                    <input type="number" name="price" placeholder="2850.00" step="0.01">
+                </div>
+                
+                <button type="submit" class="local-btn">🧪 Test Locally</button>
+            </form>
+            <div id="result2" class="result"></div>
+        </div>
+        
+        <p style="text-align: center; margin-top: 40px;">
+            <a href="/" style="color: #00ff00; text-decoration: none; font-size: 1.2em;">← Back to Dashboard</a>
+        </p>
+    </div>
+    
+    <script>
+        // External form handler
+        document.getElementById('external-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const result = document.getElementById('result1');
+            
+            try {
+                // Open popup window
+                const popup = window.open('/popup', 'TradeMonitor', 
+                    'width=400,height=600,right=50,top=50');
+                
+                // Send data to popup
+                setTimeout(() => {
+                    if (popup) {
+                        popup.postMessage({
+                            type: 'TRADE_DATA',
+                            data: {
+                                symbol: formData.get('symbol'),
+                                exchange: formData.get('exchange'),
+                                side: formData.get('side'),
+                                quantity: parseFloat(formData.get('quantity')),
+                                price: formData.get('price') || 43250,
+                                parameters: JSON.parse(formData.get('params') || '{}')
+                            }
+                        }, '*');
+                        
+                        result.className = 'result success';
+                        result.style.display = 'block';
+                        result.textContent = '✅ Popup opened successfully!';
+                    }
+                }, 1000);
+            } catch (err) {
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.textContent = '❌ Error: ' + err.message;
+            }
+        });
+        
+        // Local form handler
+        document.getElementById('local-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const result = document.getElementById('result2');
+            
+            result.className = 'result success';
+            result.style.display = 'block';
+            result.innerHTML = `✅ Test Results:<br>
+                Symbol: ${formData.get('symbol')}<br>
+                Side: ${formData.get('side')}<br>
+                Quantity: ${formData.get('quantity')}<br>
+                Status: Test Successful`;
+        });
+    </script>
+</body>
+</html>

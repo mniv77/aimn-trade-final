@@ -1,0 +1,658 @@
+<!-- aimn_flowing_scanner.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Flowing Scanner Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        @keyframes scroll-reverse {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Enhanced testing row animations */
+        @keyframes scanPulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes scanGlow {
+            0%, 100% { 
+                border-color: #3b82f6;
+                background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.2) 50%, rgba(59, 130, 246, 0.1) 100%);
+            }
+            50% { 
+                border-color: #60a5fa;
+                background: linear-gradient(90deg, rgba(96, 165, 250, 0.2) 0%, rgba(96, 165, 250, 0.3) 50%, rgba(96, 165, 250, 0.2) 100%);
+            }
+        }
+
+        @keyframes scannerBeam {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .animate-scroll {
+            animation: scroll 80s linear infinite;
+        }
+        
+        .animate-scroll-reverse {
+            animation: scroll-reverse 60s linear infinite;
+        }
+
+        /* Testing row styles */
+        .row-testing {
+            animation: scanPulse 2s infinite, scanGlow 3s infinite;
+            border: 2px solid #3b82f6 !important;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.25) 50%, rgba(59, 130, 246, 0.15) 100%);
+            z-index: 10;
+        }
+
+        .row-testing::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+            animation: scannerBeam 2s infinite;
+            z-index: 1;
+        }
+
+        .row-testing::after {
+            content: 'ANALYZING...';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #3b82f6;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 2;
+            animation: pulse 1s infinite;
+        }
+
+        /* Broker status colors */
+        .broker-available {
+            background: rgba(0, 128, 0, 0.2);
+            border-color: #10b981;
+        }
+        
+        .broker-busy {
+            background: rgba(255, 140, 0, 0.2);
+            border-color: #f59e0b;
+        }
+
+        /* Symbol status colors */
+        .symbol-available {
+            background: rgba(0, 200, 0, 0.15);
+            border-left: 4px solid #10b981;
+        }
+        
+        .symbol-busy-active {
+            background: rgba(220, 38, 38, 0.2);
+            border-left: 4px solid #dc2626;
+        }
+        
+        .symbol-busy-blocked {
+            background: rgba(120, 53, 15, 0.2);
+            border-left: 4px solid #92400e;
+        }
+
+        /* Ticker colors */
+        .ticker-available {
+            background: #065f46;
+            border: 1px solid #10b981;
+            color: #d1fae5;
+        }
+        
+        .ticker-active-trade {
+            background: #7f1d1d;
+            border: 1px solid #dc2626;
+            color: #fecaca;
+        }
+        
+        .ticker-blocked {
+            background: #451a03;
+            border: 1px solid #92400e;
+            color: #fcd34d;
+            opacity: 0.7;
+        }
+
+        /* Enhanced status indicators */
+        .status-scanning {
+            background: linear-gradient(45deg, #3b82f6, #60a5fa);
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Header -->
+    <div class="p-4 mb-4">
+        <h1 class="text-3xl font-bold text-center mb-2">AIMn Multi-Professor Scanner</h1>
+        <p class="text-center text-gray-400">Live Multi-Exchange Market Scanning with Broker Trading Logic</p>
+        
+        <!-- Scanning Status Indicator -->
+        <div class="text-center mt-3">
+            <div class="inline-flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg">
+                <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                <span class="text-sm font-semibold">Currently Testing: <span id="current-testing-symbol" class="font-mono">--</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exchange Status Bar -->
+    <div class="mx-4 mb-4 bg-gray-800 rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-3">Broker Status</h2>
+        <div id="exchange-status" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <!-- Exchange status will be populated here -->
+        </div>
+    </div>
+
+    <!-- Flowing Ticker Lines -->
+    <div class="mb-4 bg-black border-y border-gray-700">
+        <!-- Main Ticker -->
+        <div class="relative overflow-hidden py-3">
+            <div id="main-ticker" class="flex animate-scroll whitespace-nowrap">
+                <!-- Ticker items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Secondary Flow Lines -->
+        <div class="space-y-1">
+            <div class="relative overflow-hidden bg-gray-900 py-2">
+                <div id="flow-1" class="flex animate-scroll-reverse whitespace-nowrap">
+                    <!-- Flow 1 items will be populated here -->
+                </div>
+            </div>
+            <div class="relative overflow-hidden bg-gray-900 py-2">
+                <div id="flow-2" class="flex animate-scroll whitespace-nowrap">
+                    <!-- Flow 2 items will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Scan Results Table -->
+    <div class="mx-4 bg-gray-800 rounded-lg p-4">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-xl font-semibold">Detailed Scan Results</h2>
+            <div class="flex items-center space-x-2 text-sm">
+                <div class="w-3 h-3 bg-blue-500 rounded animate-pulse"></div>
+                <span class="text-gray-400">Row <span id="testing-row-number">-</span> Currently Being Analyzed</span>
+            </div>
+        </div>
+        <div class="overflow-hidden">
+            <div class="grid grid-cols-9 gap-2 text-sm font-semibold text-gray-400 mb-2 px-2">
+                <div>Broker</div>
+                <div>Symbol</div>
+                <div>Status</div>
+                <div>Price</div>
+                <div>Change</div>
+                <div>Volume</div>
+                <div>RSI</div>
+                <div>Signal</div>
+                <div>Action</div>
+            </div>
+            <div id="scan-results" class="max-h-96 overflow-y-auto space-y-1">
+                <!-- Scan results will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="m-4 text-center">
+        <a href="/" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Enhanced Legend -->
+    <div class="m-4 bg-gray-800 rounded-lg p-4">
+        <h3 class="text-lg font-semibold mb-2">Broker Trading Logic & Status Legend</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div class="space-y-2">
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 bg-green-500 rounded"></div>
+                    <span><strong>GREEN</strong> - Broker available, symbols selectable</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 bg-red-600 rounded"></div>
+                    <span><strong>RED</strong> - Symbol currently trading</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 bg-yellow-700 rounded"></div>
+                    <span><strong>BROWN</strong> - Blocked (same broker has active trade)</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-2 bg-blue-500 rounded border-2 border-blue-300 animate-pulse"></div>
+                    <span><strong>4th Row - Fixed Testing Position</strong></span>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="text-xs bg-gray-700 p-2 rounded">
+                    <strong>Broker Rule:</strong> Only ONE trade per broker at a time
+                </div>
+                <div class="text-xs bg-gray-700 p-2 rounded">
+                    <strong>Conveyor Belt:</strong> Symbols move up, 4th row gets tested
+                </div>
+                <div class="text-xs bg-gray-700 p-2 rounded">
+                    <strong>When Trade Exits:</strong> All broker symbols turn GREEN
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs bg-blue-600 px-2 py-1 rounded animate-pulse">TESTING</span>
+                    <span>Symbol being analyzed for entry</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scanData = [];
+        let tickerItems = [];
+        let exchanges = {};
+        let currentTestingRow = 0;
+        let testingInterval;
+
+        // Initialize display
+        function init() {
+            updateExchangeStatus();
+            updateScanResults();
+            updateTickerDisplay();
+            startTestingSimulation();
+        }
+
+        // Start the testing row simulation
+        function startTestingSimulation() {
+            testingInterval = setInterval(() => {
+                if (scanData.length > 0) {
+                    currentTestingRow = (currentTestingRow + 1) % Math.min(scanData.length, 20);
+                    updateTestingIndicators();
+                    updateScanResultsDisplay();
+                }
+            }, 2500); // Change testing row every 2.5 seconds
+        }
+
+        // Update testing indicators
+        function updateTestingIndicators() {
+            const currentSymbol = scanData[currentTestingRow];
+            if (currentSymbol) {
+                document.getElementById('current-testing-symbol').textContent = 
+                    `${currentSymbol.exchange}:${currentSymbol.symbol}`;
+                document.getElementById('testing-row-number').textContent = currentTestingRow + 1;
+            }
+        }
+
+        // Update exchange status from Flask API
+        function updateExchangeStatus() {
+            fetch('/api/exchange-status')
+                .then(response => response.json())
+                .then(data => {
+                    exchanges = data;
+                    const container = document.getElementById('exchange-status');
+                    container.innerHTML = '';
+                    
+                    Object.entries(data).forEach(([exchangeId, exchange]) => {
+                        const div = document.createElement('div');
+                        div.className = `p-3 rounded-lg border-2 transition-all duration-500 ${
+                            exchange.scanning 
+                                ? 'broker-available' 
+                                : 'broker-busy'
+                        }`;
+                        
+                        div.innerHTML = `
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold">${exchangeId}</span>
+                                <div class="w-3 h-3 rounded-full ${
+                                    exchange.scanning ? 'bg-green-500 animate-pulse' : 'bg-orange-500'
+                                }"></div>
+                            </div>
+                            <div class="text-sm text-gray-300">
+                                ${exchange.scanning ? 
+                                    `Scanning ${exchange.symbolCount || 0} symbols` : 
+                                    `Trading: ${exchange.activeSymbol || 'Unknown'}`
+                                }
+                            </div>
+                            <div class="text-xs mt-1">
+                                Status: ${exchange.scanning ? 
+                                    '<span class="text-green-400 font-semibold">AVAILABLE</span>' : 
+                                    '<span class="text-orange-400 font-semibold">BUSY</span>'
+                                }
+                            </div>
+                        `;
+                        
+                        container.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching exchange status:', error);
+                    generateSampleExchangeData();
+                });
+        }
+
+        // Update scan results from Flask API
+        function updateScanResults() {
+            fetch('/api/flowing-scanner-data')
+                .then(response => response.json())
+                .then(data => {
+                    scanData = data.scanResults || [];
+                    updateScanResultsDisplay();
+                })
+                .catch(error => {
+                    console.error('Error fetching scanner data:', error);
+                    generateSampleScanData();
+                    updateScanResultsDisplay();
+                });
+        }
+
+        function updateScanResultsDisplay() {
+            const container = document.getElementById('scan-results');
+            container.innerHTML = '';
+            
+            scanData.slice(0, 20).forEach((item, index) => {
+                const div = document.createElement('div');
+                
+                // Determine symbol status and colors
+                let statusClass, statusText, statusColor;
+                if (item.isActivelyTrading) {
+                    statusClass = 'symbol-busy-active';
+                    statusText = 'TRADING';
+                    statusColor = 'text-red-400';
+                } else if (!item.isAvailable) {
+                    statusClass = 'symbol-busy-blocked';
+                    statusText = 'BLOCKED';
+                    statusColor = 'text-yellow-600';
+                } else {
+                    statusClass = 'symbol-available';
+                    statusText = 'AVAILABLE';
+                    statusColor = 'text-green-400';
+                }
+
+                // Add testing row styling
+                const isTestingRow = index === currentTestingRow;
+                if (isTestingRow) {
+                    statusClass += ' row-testing';
+                }
+                
+                div.className = `grid grid-cols-9 gap-2 p-2 rounded transition-all duration-700 transform ${statusClass} relative`;
+                
+                const signalColor = item.signal === 'BUY' ? 'rgb(0, 200, 0)' : 
+                                   item.signal === 'SELL' ? 'rgb(200, 0, 0)' : 'rgb(100, 100, 100)';
+                
+                div.innerHTML = `
+                    <div class="text-sm ${statusColor} font-medium relative z-10">
+                        ${item.exchange}
+                        ${isTestingRow ? '<div class="w-2 h-2 bg-blue-400 rounded-full animate-ping absolute -top-1 -right-1"></div>' : ''}
+                    </div>
+                    <div class="text-sm font-mono font-bold relative z-10">${item.symbol}</div>
+                    <div class="text-xs relative z-10">
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${
+                            item.isActivelyTrading ? 'bg-red-600 text-white' :
+                            !item.isAvailable ? 'bg-yellow-700 text-yellow-100' :
+                            'bg-green-600 text-white'
+                        }">${statusText}</span>
+                    </div>
+                    <div class="text-sm font-mono relative z-10">$${item.price}</div>
+                    <div class="text-sm font-mono ${
+                        parseFloat(item.change) >= 0 ? 'text-green-400' : 'text-red-400'
+                    } relative z-10">
+                        ${item.change > 0 ? '+' : ''}${item.change}%
+                    </div>
+                    <div class="text-sm font-mono text-gray-300 relative z-10">${item.volume}</div>
+                    <div class="text-sm font-mono relative z-10 ${isTestingRow ? 'font-bold text-blue-300' : ''}">${item.rsi}</div>
+                    <div class="text-sm font-bold relative z-10 ${isTestingRow ? 'text-white' : ''}" style="color: ${isTestingRow ? '#ffffff' : signalColor}">
+                        ${item.signal}
+                        ${isTestingRow ? '<span class="ml-1 text-xs bg-blue-500 px-1 rounded">TESTING</span>' : ''}
+                    </div>
+                    <div class="text-sm relative z-10">
+                        ${item.isAvailable && !item.isActivelyTrading ? 
+                            `<button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs ${isTestingRow ? 'animate-pulse' : ''}">SCAN</button>` :
+                            '<button class="bg-gray-600 text-gray-400 px-3 py-1 rounded text-xs cursor-not-allowed" disabled>-</button>'
+                        }
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        // Update ticker display from Flask API
+        function updateTickerDisplay() {
+            fetch('/api/ticker-feed')
+                .then(response => response.json())
+                .then(data => {
+                    tickerItems = data;
+                    updateTickerElements();
+                })
+                .catch(error => {
+                    console.error('Error fetching ticker data:', error);
+                    generateSampleTickerData();
+                    updateTickerElements();
+                });
+        }
+
+        function updateTickerElements() {
+            const mainTicker = document.getElementById('main-ticker');
+            const flow1 = document.getElementById('flow-1');
+            const flow2 = document.getElementById('flow-2');
+            
+            // Main ticker
+            mainTicker.innerHTML = '';
+            [...tickerItems, ...tickerItems, ...tickerItems].forEach(item => {
+                const div = document.createElement('div');
+                
+                // Determine ticker styling based on trading status
+                let tickerClass, statusBadge = '';
+                if (item.isActivelyTrading) {
+                    tickerClass = 'ticker-active-trade';
+                    statusBadge = '<span class="ml-2 text-xs bg-red-600 px-2 py-1 rounded">TRADING</span>';
+                } else if (!item.isAvailable) {
+                    tickerClass = 'ticker-blocked';
+                    statusBadge = '<span class="ml-2 text-xs bg-yellow-700 px-2 py-1 rounded">BLOCKED</span>';
+                } else {
+                    tickerClass = 'ticker-available';
+                }
+                
+                div.className = `inline-flex items-center mx-4 px-3 py-2 rounded-lg transition-all duration-500 ${tickerClass}`;
+                
+                div.innerHTML = `
+                    <div class="w-2 h-2 rounded-full mr-2 ${
+                        item.isActivelyTrading ? 'bg-red-400' : 
+                        !item.isAvailable ? 'bg-yellow-600' : 'bg-green-400'
+                    }"></div>
+                    <span class="font-bold text-xs mr-2">${item.exchange}</span>
+                    <span class="font-mono text-sm mr-2">${item.symbol}</span>
+                    <span class="font-mono text-sm mr-2">$${item.price}</span>
+                    <span class="font-mono text-sm ${
+                        parseFloat(item.change) >= 0 ? 'text-green-300' : 'text-red-300'
+                    }">
+                        ${item.change > 0 ? '+' : ''}${item.change}%
+                    </span>
+                    ${statusBadge}
+                `;
+                
+                mainTicker.appendChild(div);
+            });
+            
+            // Flow lines with similar logic
+            [flow1, flow2].forEach((container, index) => {
+                container.innerHTML = '';
+                const startIndex = index * 8;
+                const items = tickerItems.slice(startIndex, startIndex + 8);
+                [...items, ...items, ...items].forEach(item => {
+                    const div = document.createElement('div');
+                    
+                    let flowClass;
+                    if (item.isActivelyTrading) {
+                        flowClass = 'bg-red-800 text-red-100 border-l-2 border-red-400';
+                    } else if (!item.isAvailable) {
+                        flowClass = 'bg-yellow-800 text-yellow-200 border-l-2 border-yellow-600 line-through';
+                    } else {
+                        flowClass = 'bg-green-800 text-green-100 border-l-2 border-green-400';
+                    }
+                    
+                    div.className = `inline-flex items-center mx-3 px-2 py-1 rounded transition-all duration-300 ${flowClass}`;
+                    
+                    div.innerHTML = `
+                        <span class="text-xs font-bold mr-1">${item.exchange}</span>
+                        <span class="text-sm font-mono mr-1">${item.symbol}</span>
+                        <span class="text-xs">$${item.price}</span>
+                        ${item.signal && item.signal !== 'NEUTRAL' ? 
+                            `<span class="ml-1 text-xs ${
+                                item.signal === 'BUY' ? 'text-green-300' : 'text-red-300'
+                            }">${item.signal}</span>` : ''
+                        }
+                    `;
+                    
+                    container.appendChild(div);
+                });
+            });
+        }
+
+        // Fallback sample data functions
+        function generateSampleExchangeData() {
+            exchanges = {
+                'ALPACA': { scanning: true, activeSymbol: null, symbolCount: 250, status: 'ACTIVE' },
+                'CRYPTO': { scanning: false, activeSymbol: 'BTC/USD', symbolCount: 100, status: 'TRADING' },
+                'FOREX': { scanning: true, activeSymbol: null, symbolCount: 50, status: 'ACTIVE' },
+                'NYSE': { scanning: true, activeSymbol: null, symbolCount: 200, status: 'ACTIVE' },
+                'FUTURES': { scanning: true, activeSymbol: null, symbolCount: 30, status: 'ACTIVE' }
+            };
+        }
+
+        function generateSampleScanData() {
+            const symbols = [
+                {symbol: 'BTC/USD', exchange: 'CRYPTO'},
+                {symbol: 'ETH/USD', exchange: 'CRYPTO'},
+                {symbol: 'AAPL', exchange: 'ALPACA'},
+                {symbol: 'TSLA', exchange: 'ALPACA'},
+                {symbol: 'NVDA', exchange: 'ALPACA'},
+                {symbol: 'SPY', exchange: 'NYSE'},
+                {symbol: 'QQQ', exchange: 'NYSE'},
+                {symbol: 'MSFT', exchange: 'NYSE'},
+                {symbol: 'AMZN', exchange: 'NYSE'},
+                {symbol: 'GOOGL', exchange: 'ALPACA'},
+                {symbol: 'META', exchange: 'NYSE'},
+                {symbol: 'NFLX', exchange: 'ALPACA'}
+            ];
+            
+            scanData = [];
+            
+            // Set one broker as busy with active trade
+            const busyBroker = 'CRYPTO';
+            const activeSymbol = 'BTC/USD';
+            
+            symbols.forEach(({symbol, exchange}) => {
+                const price = (Math.random() * 500 + 50).toFixed(2);
+                const change = ((Math.random() - 0.5) * 10).toFixed(2);
+                const volume = Math.floor(Math.random() * 1000000).toLocaleString();
+                const rsi = (Math.random() * 100).toFixed(1);
+                const signal = rsi < 30 ? 'BUY' : rsi > 70 ? 'SELL' : 'NEUTRAL';
+                const signalStrength = signal !== 'NEUTRAL' ? (Math.random() * 0.8 + 0.2).toFixed(2) : 0;
+                
+                const isActivelyTrading = (exchange === busyBroker && symbol === activeSymbol);
+                const isAvailable = exchange !== busyBroker;
+                
+                scanData.push({
+                    symbol,
+                    exchange,
+                    price,
+                    change,
+                    volume,
+                    rsi,
+                    signal,
+                    signalStrength,
+                    isAvailable,
+                    isActivelyTrading
+                });
+            });
+        }
+
+        function generateSampleTickerData() {
+            const symbols = [
+                {symbol: 'BTC/USD', exchange: 'CRYPTO'},
+                {symbol: 'ETH/USD', exchange: 'CRYPTO'},
+                {symbol: 'AAPL', exchange: 'ALPACA'},
+                {symbol: 'TSLA', exchange: 'ALPACA'},
+                {symbol: 'NVDA', exchange: 'ALPACA'},
+                {symbol: 'SPY', exchange: 'NYSE'},
+                {symbol: 'QQQ', exchange: 'NYSE'},
+                {symbol: 'MSFT', exchange: 'NYSE'},
+                {symbol: 'AMZN', exchange: 'NYSE'},
+                {symbol: 'GOOGL', exchange: 'ALPACA'}
+            ];
+            
+            tickerItems = [];
+            
+            // Set one broker as busy
+            const busyBroker = 'CRYPTO';
+            const activeSymbol = 'BTC/USD';
+            
+            symbols.forEach(({symbol, exchange}) => {
+                const isActivelyTrading = (exchange === busyBroker && symbol === activeSymbol);
+                const isAvailable = exchange !== busyBroker;
+                
+                tickerItems.push({
+                    symbol,
+                    exchange,
+                    price: (Math.random() * 500 + 50).toFixed(2),
+                    change: ((Math.random() - 0.5) * 10).toFixed(2),
+                    signal: Math.random() > 0.7 ? (Math.random() > 0.5 ? 'BUY' : 'SELL') : 'NEUTRAL',
+                    isAvailable,
+                    isActivelyTrading
+                });
+            });
+        }
+
+        // Initialize and start updates
+        init();
+        
+        // Try to get real data every 3 seconds
+        setInterval(() => {
+            updateExchangeStatus();
+            updateScanResults();
+            updateTickerDisplay();
+        }, 3000);
+        
+        // Simulate changes for demo
+        setInterval(() => {
+            if (tickerItems.length > 0) {
+                tickerItems.forEach(item => {
+                    item.price = (parseFloat(item.price) + (Math.random() - 0.5) * 2).toFixed(2);
+                    item.change = ((Math.random() - 0.5) * 10).toFixed(2);
+                });
+                updateTickerElements();
+            }
+        }, 1500);
+    </script>
+</body>
+</html>

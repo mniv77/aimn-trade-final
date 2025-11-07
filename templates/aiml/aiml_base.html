@@ -1,0 +1,67 @@
+<!-- templates/aiml/aiml_base.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AIML Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #eee;
+        }
+        .navbar {
+            background: #222;
+            padding: 14px;
+            display: flex;
+            gap: 20px;
+        }
+        .navbar a {
+            color: #6cd4ff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .navbar a:hover {
+            color: #fff;
+        }
+        .content {
+            padding: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+
+    <!-- ✅ HOME -->
+    <a href="{{ url_for('aiml_home') }}">AI/ML Home</a>
+
+    <!-- ✅ MANUAL TUNING -->
+    <a href="{{ url_for('manual_tune') }}">Manual Tuning</a>
+
+    <!-- ✅ BACK TO MAIN DASHBOARD -->
+    <a href="https://meirniv.pythonanywhere.com/">Main Dashboard</a>
+
+</div>
+
+<!-- templates/aiml/aiml_base.html -->
+<nav class="navbar navbar-expand navbar-light bg-light mb-4">
+  <a class="navbar-brand" href="{{ url_for('aiml_home') }}">AI/ML Dashboard</a>
+  <div class="navbar-nav">
+    <a class="nav-item nav-link" href="{{ url_for('manual_tune') }}">Manual Tuning</a>
+    <a class="nav-item nav-link" href="{{ url_for('index') }}">Main Dashboard</a>
+  </div>
+</nav>
+
+
+<div class="content">
+    {% block content %}
+    {% endblock %}
+</div>
+
+</body>
+</html>

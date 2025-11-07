@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Scanner - Multi-Indicator Diagnostics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes scanPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+                transform: scale(1.02);
+            }
+        }
+
+        .row-testing {
+            animation: scanPulse 2s infinite;
+            border: 2px solid #3b82f6 !important;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.25) 50%, rgba(59, 130, 246, 0.15) 100%);
+        }
+
+        .indicator-pass { color: #10b981; }
+        .indicator-fail { color: #ef4444; }
+        .indicator-neutral { color: #6b7280; }
+
+        /* Conveyor Belt Animation */
+        .conveyor-container {
+            overflow: hidden;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            height: 400px;
+            position: relative;
+        }
+
+        .conveyor-belt {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            padding: 10px 0;
+        }
+
+        .belt-row {
+            display: flex;
+            white-space: nowrap;
+            overflow: hidden;
+            height: 60px;
+            position: relative;
+            align-items: center;
+        }
+
+        .belt-row:nth-child(1) { animation: scrollLeft1 25s linear infinite; }
+        .belt-row:nth-child(2) { animation: scrollLeft2 30s linear infinite; }
+        .belt-row:nth-child(3) { animation: scrollLeft3 22s linear infinite; }
+        .belt-row:nth-child(4) { animation: scrollLeft4 28s linear infinite; }
+        .belt-row:nth-child(5) { animation: scrollLeft5 24s linear infinite; }
+
+        @keyframes scrollLeft1 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft2 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft3 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft4 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft5 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .symbol-card {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(15, 209, 200, 0.1);
+            border: 1px solid rgba(15, 209, 200, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-right: 15px;
+            min-width: 180px;
+            height: 50px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .symbol-card:hover {
+            background: rgba(15, 209, 200, 0.2);
+            transform: scale(1.05);
+        }
+
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            font-size: 0.75rem;
+        }
+
+        .symbol-name {
+            font-weight: 700;
+            color: white;
+            min-width: 50px;
+        }
+
+        .symbol-price {
+            font-weight: 600;
+            color: #0FD1C8;
+            min-width: 60px;
+        }
+
+        .symbol-signal {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-align: center;
+            min-width: 35px;
+        }
+
+        .signal-buy {
+            background: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+
+        .signal-sell {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .signal-neutral {
+            background: rgba(107, 114, 128, 0.3);
+            color: #6b7280;
+            border: 1px solid #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Header -->
+    <div class="p-4 mb-4">
+        <h1 class="text-3xl font-bold text-center mb-2">AIMn Multi-Indicator Scanner Diagnostics</h1>
+        <p class="text-center text-gray-400">Real-time 4-Indicator Analysis: RSI + MACD + Volume + ATR</p>
+
+        <!-- Enhanced Testing Status -->
+        <div class="text-center mt-4">
+            <div class="inline-flex flex-col items-center space-y-2 bg-gray-800 px-6 py-4 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span class="text-sm font-semibold">Currently Testing: <span id="current-testing-symbol" class="font-mono text-blue-400">--</span></span>
+                </div>
+                
+                <!-- Multi-Indicator Status Display -->
+                <div id="indicator-status" class="grid grid-cols-4 gap-4 text-xs">
+                    <div class="text-center">
+                        <div class="font-semibold">RSI</div>
+                        <div id="rsi-status" class="indicator-neutral">--</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-semibold">MACD</div>
+                        <div id="macd-status" class="indicator-neutral">--</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-semibold">Volume</div>
+                        <div id="volume-status" class="indicator-neutral">--</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-semibold">ATR</div>
+                        <div id="atr-status" class="indicator-neutral">--</div>
+                    </div>
+                </div>
+                
+                <!-- Signal Decision Display -->
+                <div class="mt-2 p-2 bg-gray-700 rounded">
+                    <span class="text-xs font-semibold">Final Signal: </span>
+                    <span id="final-signal" class="font-mono">ANALYZING...</span>
+                    <span id="signal-reason" class="text-xs text-gray-400 ml-2"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- True Conveyor Belt Section -->
+    <div class="mx-4 mb-4 bg-gray-800 rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-3">Live Market Scanner - Conveyor Belt View</h2>
+        <div class="conveyor-container">
+            <div class="conveyor-belt">
+                <div class="belt-row" id="belt-row-1"></div>
+                <div class="belt-row" id="belt-row-2"></div>
+                <div class="belt-row" id="belt-row-3"></div>
+                <div class="belt-row" id="belt-row-4"></div>
+                <div class="belt-row" id="belt-row-5"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diagnostic Panel -->
+    <div class="mx-4 mb-4 bg-gray-800 rounded-lg p-4">
+        <h2 class="text-xl font-semibold mb-3">Signal Inhibitor Analysis</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Live Inhibitor Display -->
+            <div class="bg-gray-700 rounded p-3">
+                <h3 class="font-semibold text-red-400 mb-2">Current Inhibitors</h3>
+                <div id="inhibitor-list" class="space-y-1 text-sm">
+                    <div class="text-gray-400">Analyzing...</div>
+                </div>
+            </div>
+            
+            <!-- Signal Statistics -->
+            <div class="bg-gray-700 rounded p-3">
+                <h3 class="font-semibold text-green-400 mb-2">Signal Statistics</h3>
+                <div id="signal-stats" class="space-y-1 text-sm">
+                    <div>RSI Signals: <span id="rsi-count">0</span></div>
+                    <div>MACD Signals: <span id="macd-count">0</span></div>
+                    <div>Volume OK: <span id="volume-count">0</span></div>
+                    <div>ATR OK: <span id="atr-count">0</span></div>
+                    <div class="text-blue-400 font-semibold">All 4 Aligned: <span id="aligned-count">0</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="m-4 text-center">
+        <a href="/" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <script>
+        let scanData = [];
+        let signalStats = { rsi: 0, macd: 0, volume: 0, atr: 0, aligned: 0, total: 0 };
+
+        // Simulated tuning parameters
+        const tuningParams = {
+            rsi: { oversold: 30, overbought: 70, enabled: true },
+            macd: { enabled: true, sensitivity: 0.6 },
+            volume: { enabled: true, threshold: 1.2 },
+            atr: { enabled: true, minVolatility: 0.8 }
+        };
+
+        // Enhanced multi-indicator signal detection
+        function analyzeSymbol(symbol) {
+            const rsi = parseFloat(symbol.rsi);
+            
+            // RSI Analysis
+            const rsiSignal = tuningParams.rsi.enabled ? 
+                (rsi <= tuningParams.rsi.oversold ? 'BUY' : 
+                 rsi >= tuningParams.rsi.overbought ? 'SELL' : 'NEUTRAL') : 'NEUTRAL';
+            
+            // MACD Analysis (simulated)
+            const macdValue = (Math.random() - 0.5) * 2;
+            const macdSignal = tuningParams.macd.enabled ?
+                (macdValue > tuningParams.macd.sensitivity ? 'BUY' :
+                 macdValue < -tuningParams.macd.sensitivity ? 'SELL' : 'NEUTRAL') : 'NEUTRAL';
+            
+            // Volume Analysis (simulated)
+            const volumeMultiplier = 0.5 + Math.random() * 2;
+            const volumeOK = tuningParams.volume.enabled ? 
+                volumeMultiplier >= tuningParams.volume.threshold : true;
+            
+            // ATR Analysis (simulated volatility)
+            const atrValue = Math.random() * 2;
+            const atrOK = tuningParams.atr.enabled ?
+                atrValue >= tuningParams.atr.minVolatility : true;
+            
+            // Final signal decision
+            let finalSignal = 'NEUTRAL';
+            let signalReason = '';
+            
+            if (rsiSignal !== 'NEUTRAL' && macdSignal !== 'NEUTRAL' && 
+                rsiSignal === macdSignal && volumeOK && atrOK) {
+                finalSignal = rsiSignal;
+                signalReason = 'All indicators aligned';
+                signalStats.aligned++;
+            } else {
+                const blockers = [];
+                if (rsiSignal === 'NEUTRAL') blockers.push('RSI neutral');
+                if (macdSignal === 'NEUTRAL') blockers.push('MACD neutral');
+                if (rsiSignal !== 'NEUTRAL' && macdSignal !== 'NEUTRAL' && rsiSignal !== macdSignal) {
+                    blockers.push('RSI/MACD conflict');
+                }
+                if (!volumeOK) blockers.push('Low volume');
+                if (!atrOK) blockers.push('Low volatility');
+                
+                signalReason = blockers.length > 0 ? `Blocked: ${blockers.join(', ')}` : 'No signal';
+            }
+            
+            // Update stats
+            if (rsiSignal !== 'NEUTRAL') signalStats.rsi++;
+            if (macdSignal !== 'NEUTRAL') signalStats.macd++;
+            if (volumeOK) signalStats.volume++;
+            if (atrOK) signalStats.atr++;
+            signalStats.total++;
+            
+            return {
+                rsi: { value: rsi, signal: rsiSignal },
+                macd: { value: macdValue.toFixed(3), signal: macdSignal },
+                volume: { value: volumeMultiplier.toFixed(2), ok: volumeOK },
+                atr: { value: atrValue.toFixed(2), ok: atrOK },
+                finalSignal,
+                signalReason
+            };
+        }
+
+        // Render flowing scanner data with TRUE conveyor belt animation
+        function renderConveyorBelt() {
+            if (!scanData.length) return;
+            
+            // Split data into 5 rows for the conveyor belt
+            const rowCount = 5;
+            const itemsPerRow = Math.ceil(scanData.length / rowCount);
+            
+            for (let row = 0; row < rowCount; row++) {
+                const rowContainer = document.getElementById(`belt-row-${row + 1}`);
+                if (!rowContainer) continue;
+                
+                const startIndex = row * itemsPerRow;
+                const endIndex = Math.min(startIndex + itemsPerRow, scanData.length);
+                const rowData = scanData.slice(startIndex, endIndex);
+                
+                // Create multiple copies of the data for continuous scrolling
+                const repeatedData = [...rowData, ...rowData, ...rowData];
+                
+                rowContainer.innerHTML = repeatedData.map(item => {
+                    const analysis = analyzeSymbol(item);
+                    const signalClass = analysis.finalSignal === 'BUY' ? 'signal-buy' :
+                                       analysis.finalSignal === 'SELL' ? 'signal-sell' : 'signal-neutral';
+                    
+                    return `
+                        <div class="symbol-card">
+                            <div class="symbol-info">
+                                <div class="symbol-name">${item.symbol}</div>
+                                <div class="symbol-price">$${item.price}</div>
+                                <div class="symbol-signal ${signalClass}">${analysis.finalSignal}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Update testing indicators for row 4
+        function updateTestingIndicators() {
+            const row4Symbol = scanData[3];
+            if (!row4Symbol) return;
+            
+            const analysis = analyzeSymbol(row4Symbol);
+            
+            // Update symbol name
+            document.getElementById('current-testing-symbol').textContent = 
+                `${row4Symbol.exchange}:${row4Symbol.symbol}`;
+            
+            // Update individual indicator status
+            const rsiStatus = document.getElementById('rsi-status');
+            rsiStatus.textContent = `${analysis.rsi.value} (${analysis.rsi.signal})`;
+            rsiStatus.className = analysis.rsi.signal !== 'NEUTRAL' ? 'indicator-pass' : 'indicator-neutral';
+            
+            const macdStatus = document.getElementById('macd-status');
+            macdStatus.textContent = `${analysis.macd.value} (${analysis.macd.signal})`;
+            macdStatus.className = analysis.macd.signal !== 'NEUTRAL' ? 'indicator-pass' : 'indicator-neutral';
+            
+            const volumeStatus = document.getElementById('volume-status');
+            volumeStatus.textContent = `${analysis.volume.value}x (${analysis.volume.ok ? 'OK' : 'LOW'})`;
+            volumeStatus.className = analysis.volume.ok ? 'indicator-pass' : 'indicator-fail';
+            
+            const atrStatus = document.getElementById('atr-status');
+            atrStatus.textContent = `${analysis.atr.value} (${analysis.atr.ok ? 'OK' : 'LOW'})`;
+            atrStatus.className = analysis.atr.ok ? 'indicator-pass' : 'indicator-fail';
+            
+            // Update final signal
+            const finalSignal = document.getElementById('final-signal');
+            finalSignal.textContent = analysis.finalSignal;
+            finalSignal.className = analysis.finalSignal === 'BUY' ? 'text-green-400' :
+                                   analysis.finalSignal === 'SELL' ? 'text-red-400' : 'text-gray-400';
+            
+            document.getElementById('signal-reason').textContent = analysis.signalReason;
+            
+            // Update inhibitor list
+            updateInhibitorList(analysis);
+        }
+
+        function updateInhibitorList(analysis) {
+            const inhibitorList = document.getElementById('inhibitor-list');
+            const inhibitors = [];
+            
+            if (analysis.rsi.signal === 'NEUTRAL') {
+                inhibitors.push(`RSI: ${analysis.rsi.value} (need ≤${tuningParams.rsi.oversold} or ≥${tuningParams.rsi.overbought})`);
+            }
+            if (analysis.macd.signal === 'NEUTRAL') {
+                inhibitors.push(`MACD: ${analysis.macd.value} (need ≤-${tuningParams.macd.sensitivity} or ≥${tuningParams.macd.sensitivity})`);
+            }
+            if (!analysis.volume.ok) {
+                inhibitors.push(`Volume: ${analysis.volume.value}x (need ≥${tuningParams.volume.threshold}x)`);
+            }
+            if (!analysis.atr.ok) {
+                inhibitors.push(`ATR: ${analysis.atr.value} (need ≥${tuningParams.atr.minVolatility})`);
+            }
+            
+            if (inhibitors.length === 0) {
+                inhibitorList.innerHTML = '<div class="text-green-400">All indicators aligned!</div>';
+            } else {
+                inhibitorList.innerHTML = inhibitors.map(inhibitor => 
+                    `<div class="text-red-400">• ${inhibitor}</div>`
+                ).join('');
+            }
+        }
+
+        function updateSignalStats() {
+            document.getElementById('rsi-count').textContent = signalStats.rsi;
+            document.getElementById('macd-count').textContent = signalStats.macd;
+            document.getElementById('volume-count').textContent = signalStats.volume;
+            document.getElementById('atr-count').textContent = signalStats.atr;
+            document.getElementById('aligned-count').textContent = signalStats.aligned;
+        }
+
+        function generateSampleData() {
+            const symbols = [
+                {symbol: 'BTC/USD', exchange: 'CRYPTO'},
+                {symbol: 'ETH/USD', exchange: 'CRYPTO'},
+                {symbol: 'AAPL', exchange: 'ALPACA'},
+                {symbol: 'TSLA', exchange: 'ALPACA'},
+                {symbol: 'NVDA', exchange: 'ALPACA'},
+                {symbol: 'SPY', exchange: 'NYSE'},
+                {symbol: 'QQQ', exchange: 'NYSE'},
+                {symbol: 'MSFT', exchange: 'NYSE'},
+                {symbol: 'AMZN', exchange: 'NYSE'},
+                {symbol: 'GOOGL', exchange: 'ALPACA'},
+                {symbol: 'META', exchange: 'NYSE'},
+                {symbol: 'NFLX', exchange: 'ALPACA'},
+                {symbol: 'PLTR', exchange: 'NYSE'},
+                {symbol: 'ROKU', exchange: 'NASDAQ'},
+                {symbol: 'AMD', exchange: 'NASDAQ'},
+                {symbol: 'INTC', exchange: 'NASDAQ'}
+            ];
+
+            scanData = symbols.map(({symbol, exchange}) => ({
+                symbol,
+                exchange,
+                price: (Math.random() * 500 + 50).toFixed(2),
+                rsi: (Math.random() * 100).toFixed(1),
+                isAvailable: exchange !== 'CRYPTO',
+                isActivelyTrading: exchange === 'CRYPTO' && symbol === 'BTC/USD'
+            }));
+        }
+
+        // Initialize everything
+        function initialize() {
+            generateSampleData();
+            renderConveyorBelt();
+            updateTestingIndicators();
+            updateSignalStats();
+        }
+
+        // Start the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initialize();
+            
+            // Update testing indicators every 1 second
+            setInterval(updateTestingIndicators, 1000);
+            
+            // Refresh conveyor belt every 3 seconds
+            setInterval(() => {
+                // Reset stats
+                signalStats = { rsi: 0, macd: 0, volume: 0, atr: 0, aligned: 0, total: 0 };
+                renderConveyorBelt();
+                updateSignalStats();
+            }, 3000);
+            
+            // Generate new data every 5 seconds
+            setInterval(() => {
+                generateSampleData();
+                renderConveyorBelt();
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

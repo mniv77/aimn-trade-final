@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Strategy Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+        }
+        .rsi-bar { transition: width 0.3s ease; }
+        @keyframes priceFlash {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .price-update { animation: priceFlash 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen p-4">
+    <div class="max-w-3xl mx-auto">
+        
+        <!-- HEADER WITH CONTROL BUTTONS -->
+        <div class="bg-slate-800 rounded-t-lg p-4 border-b-4 border-blue-500">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">🎯 AIMn Strategy Trading</h1>
+                    <p class="text-gray-400 text-sm" id="symbol-display">--</p>
+                </div>
+                <button onclick="quitPopup()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">❌ Quit</button>
+            </div>
+            
+            <!-- TRADE DIRECTION & ACTION BUTTONS -->
+            <div class="flex gap-3">
+                <div class="flex gap-2 bg-slate-700 p-1 rounded-lg">
+                    <button onclick="setDirection('BUY')" id="btn-buy" class="px-6 py-2 rounded font-bold text-sm bg-green-600 text-white">📈 BUY</button>
+                    <button onclick="setDirection('SELL')" id="btn-sell" class="px-6 py-2 rounded font-bold text-sm bg-slate-600 text-gray-300">📉 SELL</button>
+                </div>
+                <button onclick="enterOrder()" id="btn-enter" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm">🚀 Enter Order</button>
+                <button onclick="panicExit()" id="btn-panic" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-bold text-sm" disabled>🚨 Panic Exit</button>
+            </div>
+        </div>
+
+        <div class="bg-slate-800 rounded-b-lg p-6">
+            
+            <div id="position-display" class="hidden mb-6">
+                <div class="bg-gradient-to-r from-blue-900 to-purple-900 border-2 border-blue-500 rounded-lg p-4">
+                    <div class="text-blue-300 text-xs font-semibold mb-2">📊 LIVE POSITION</div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <div class="text-gray-400 text-xs">Entry Price</div>
+                            <div id="entry-price" class="text-white font-mono text-xl font-bold">$--</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400 text-xs">Current Price</div>
+                            <div id="current-price" class="text-white font-mono text-xl font-bold">$--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 text-xs">P&L: </span>
+                                <span id="pnl-display" class="text-3xl font-bold">+0.00%</span>
+                            </div>
+                            <div id="pnl-dollar" class="text-xl font-bold text-green-400">+$0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-400 text-xs font-semibold">RSI</span>
+                                <select id="rsi-type" onchange="changeRSIType()" class="bg-slate-700 text-white text-xs px-2 py-1 rounded border border-slate-600">
+                                    <option value="real">Real (Relative)</option>
+                                    <option value="traditional">Traditional (Wilder)</option>
+                                </select>
+                            </div>
+                            <span id="rsi-value" class="text-white font-bold text-lg">--</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                            <div id="rsi-bar" class="rsi-bar h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500" style="width: 50%"></div>
+                        </div>
+                        <div id="rsi-warning" class="text-yellow-400 text-xs mt-1 hidden">⚠️ Approaching exit level</div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-700 rounded-lg p-3 mt-3">
+                    <div class="text-gray-300 text-xs font-semibold mb-2">Strategy Status</div>
+                    <div id="strategy-status" class="text-white text-sm">Monitoring position...</div>
+                    <div class="grid grid-cols-2 gap-2 mt-2 text-xs">
+                        <div>
+                            <span class="text-gray-400">Top Peak:</span>
+                            <span id="top-peak" class="text-green-400 font-mono ml-1">$--</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Trail Stop:</span>
+                            <span id="trail-stop" class="text-yellow-400 font-mono ml-1">$--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="setup-display" class="mb-6">
+                <div class="bg-slate-700 p-4 rounded-lg mb-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-gray-400 text-sm mb-2">Symbol</div>
+                            <div id="symbol-name" class="text-3xl font-bold text-white">--</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400 text-sm mb-2">Current Price</div>
+                            <div id="setup-price" class="text-3xl font-bold text-white">$--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-700 p-4 rounded-lg">
+                    <label class="text-gray-400 text-sm mb-2 block">Quantity</label>
+                    <input type="number" id="quantity" value="10" min="1" step="any" class="w-full bg-slate-600 text-white text-2xl font-bold p-3 rounded-lg border-2 border-slate-500 focus:border-blue-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="bg-slate-700 rounded-lg">
+                <button onclick="toggleParams()" class="w-full p-4 flex items-center justify-between text-left">
+                    <span class="text-gray-300 font-semibold">🎛️ Strategy Parameters</span>
+                    <span id="params-toggle" class="text-gray-400">▼</span>
+                </button>
+                
+                <div id="params-panel" class="hidden p-4 border-t border-slate-600">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">Stop Loss %</label>
+                            <input type="number" id="stop_loss_pct" value="2.0" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">Min Profit for Exit %</label>
+                            <input type="number" id="min_profit" value="1.0" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">Early Trail Start %</label>
+                            <input type="number" id="early_trail_start" value="1.0" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">Early Trail Minus %</label>
+                            <input type="number" id="early_trail_minus" value="1.5" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">Peak Trail Start %</label>
+                            <input type="number" id="peak_trail_start" value="5.0" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">Peak Trail Minus %</label>
+                            <input type="number" id="peak_trail_minus" value="0.5" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">RSI Overbought</label>
+                            <input type="number" id="rsi_overbought" value="70" step="1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">RSI Oversold</label>
+                            <input type="number" id="rsi_oversold" value="30" step="1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">RSI Lookback</label>
+                            <input type="number" id="rsi_lookback" value="14" step="1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs block mb-1">Exit Only Above % Profit</label>
+                            <input type="number" id="exit_min_profit" value="0.5" step="0.1" class="w-full bg-slate-600 text-white p-2 rounded">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 bg-slate-800 rounded-lg p-3">
+                        <div class="text-gray-300 text-xs font-semibold mb-2">📍 Chart Line Colors</div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-0.5 bg-blue-500"></div>
+                                <span class="text-gray-400">Entry Price</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-0.5 bg-red-500"></div>
+                                <span class="text-gray-400">Stop Loss</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-0.5 bg-green-500"></div>
+                                <span class="text-gray-400">Top Peak</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-0.5 bg-yellow-500"></div>
+                                <span class="text-gray-400">Trail Stop</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="updateStrategy()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold">✅ Update Strategy</button>
+                </div>
+            </div>
+
+            <div id="status-box" class="mt-4 p-3 rounded-lg hidden">
+                <div id="status-message" class="text-center text-sm"></div>
+            </div>
+        </div>
+
+        <div class="bg-slate-800 rounded-lg p-4 mt-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="text-gray-400 text-sm">Live Chart - Price on Right →</div>
+                    <select id="chart-rsi-type" onchange="changeChartRSI()" class="bg-slate-700 text-white text-sm px-3 py-2 rounded border border-slate-600">
+                        <option value="traditional">📈 Wilder RSI</option>
+                        <option value="real">📊 RSI Real</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 bg-green-900 px-3 py-1 rounded-lg">
+                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span class="text-green-300 text-xs font-bold">REAL-TIME</span>
+                </div>
+            </div>
+            
+            <div id="tradingview-widget" class="bg-slate-700 rounded-lg" style="height: 500px;"></div>
+            
+            <div id="rsi-real-chart" class="hidden mt-3 bg-slate-700 rounded-lg p-3">
+                <div class="text-gray-400 text-xs mb-2">RSI Real (Relative)</div>
+                <canvas id="rsi-canvas" width="800" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tradeData = {}, tradeDirection = 'BUY', inPosition = false;
+        let entryPrice = 0, currentPrice = 0, quantity = 10;
+        let topPeak = 0, trailStop = 0, stopLoss = 0;
+        let priceHistory = [], rsiHistory = [];
+        
+        let params = {
+            stop_loss_pct: 2.0, early_trail_start: 1.0, early_trail_minus: 1.5,
+            peak_trail_start: 5.0, peak_trail_minus: 0.5, min_profit: 1.0,
+            exit_min_profit: 0.5, rsi_overbought: 70, rsi_oversold: 30, rsi_lookback: 14
+        };
+        
+        let rsiType = 'real', chartRSIType = 'traditional';
+        let priceInterval = null, strategyInterval = null, chartWidget = null;
+
+        function loadTradeData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            tradeData = {
+                symbol: urlParams.get('symbol') || 'AAPL',
+                exchange: urlParams.get('exchange') || 'ALPACA',
+                price: parseFloat(urlParams.get('price')) || 175.50,
+                side: urlParams.get('side') || 'BUY',
+                qty: parseFloat(urlParams.get('qty')) || 10
+            };
+            
+            document.getElementById('symbol-display').textContent = `${tradeData.symbol} - ${tradeData.exchange}`;
+            document.getElementById('symbol-name').textContent = tradeData.symbol;
+            document.getElementById('setup-price').textContent = '$' + tradeData.price.toFixed(2);
+            document.getElementById('quantity').value = tradeData.qty;
+            currentPrice = tradeData.price;
+            quantity = tradeData.qty;
+            
+            loadTradingViewChart();
+            startPriceSimulation();
+        }
+
+        function loadTradingViewChart() {
+            const symbol = tradeData.symbol;
+            let tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
+            let exchangePrefix = tradeData.exchange === 'CRYPTO' ? 'BINANCE' : 'NASDAQ';
+            
+            const container = document.getElementById('tradingview-widget');
+            container.innerHTML = '';
+            
+            setTimeout(() => {
+                try {
+                    const studies = chartRSIType === 'traditional' 
+                        ? [{"id": "RSI@tv-basicstudies", "inputs": {"length": params.rsi_lookback}}]
+                        : [];
+                    
+                    new TradingView.widget({
+                        "width": "100%",
+                        "height": 500,
+                        "symbol": `${exchangePrefix}:${tvSymbol}`,
+                        "interval": "1",
+                        "timezone": "America/New_York",
+                        "theme": "dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "#1e293b",
+                        "enable_publishing": false,
+                        "allow_symbol_change": false,
+                        "container_id": "tradingview-widget",
+                        "studies": studies,
+                        "disabled_features": ["left_toolbar"],
+                        "enabled_features": ["hide_left_toolbar_by_default"],
+                        "overrides": {
+                            "volumePaneSize": "tiny"
+                        }
+                    });
+                    
+                    document.getElementById('rsi-real-chart').classList.toggle('hidden', chartRSIType !== 'real');
+                } catch (error) {
+                    console.error('Chart error:', error);
+                }
+            }, 200);
+        }
+
+        function drawRSIRealChart() {
+            if (rsiHistory.length < 2) return;
+            const canvas = document.getElementById('rsi-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 0.5;
+            [30, 50, 70].forEach(level => {
+                const y = canvas.height - (level * canvas.height / 100);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            });
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const pointSpacing = canvas.width / Math.min(rsiHistory.length, 50);
+            const startIndex = Math.max(0, rsiHistory.length - 50);
+            rsiHistory.slice(startIndex).forEach((rsi, i) => {
+                const x = i * pointSpacing;
+                const y = canvas.height - (rsi * canvas.height / 100);
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        }
+
+        function startPriceSimulation() {
+            priceInterval = setInterval(() => {
+                const volatility = tradeData.exchange === 'CRYPTO' ? 0.003 : 0.001;
+                currentPrice += currentPrice * (Math.random() - 0.5) * volatility;
+                priceHistory.push(currentPrice);
+                if (priceHistory.length > params.rsi_lookback) priceHistory.shift();
+                document.getElementById('setup-price').textContent = '$' + currentPrice.toFixed(2);
+                if (inPosition) updatePosition();
+            }, 2000);
+        }
+
+        function setDirection(dir) {
+            tradeDirection = dir;
+            document.getElementById('btn-buy').className = dir === 'BUY' ? 'px-6 py-2 rounded font-bold text-sm bg-green-600 text-white' : 'px-6 py-2 rounded font-bold text-sm bg-slate-600 text-gray-300';
+            document.getElementById('btn-sell').className = dir === 'SELL' ? 'px-6 py-2 rounded font-bold text-sm bg-red-600 text-white' : 'px-6 py-2 rounded font-bold text-sm bg-slate-600 text-gray-300';
+        }
+
+        function enterOrder() {
+            if (inPosition) { showStatus('Already in position!', 'error'); return; }
+            quantity = parseFloat(document.getElementById('quantity').value);
+            entryPrice = currentPrice;
+            topPeak = currentPrice;
+            stopLoss = tradeDirection === 'BUY' ? entryPrice * (1 - params.stop_loss_pct / 100) : entryPrice * (1 + params.stop_loss_pct / 100);
+            inPosition = true;
+            rsiHistory = [];
+            document.getElementById('setup-display').classList.add('hidden');
+            document.getElementById('position-display').classList.remove('hidden');
+            document.getElementById('btn-panic').disabled = false;
+            document.getElementById('btn-panic').className = 'bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-bold text-sm';
+            document.getElementById('btn-enter').disabled = true;
+            document.getElementById('btn-enter').className = 'flex-1 bg-gray-600 text-gray-400 py-2 rounded-lg font-bold text-sm cursor-not-allowed';
+            document.getElementById('entry-price').textContent = '$' + entryPrice.toFixed(2);
+            showStatus('✅ Order entered at $' + entryPrice.toFixed(2), 'success');
+            startStrategyMonitoring();
+        }
+
+        function updatePosition() {
+            document.getElementById('current-price').textContent = '$' + currentPrice.toFixed(2);
+            let pnlPct = tradeDirection === 'BUY' ? ((currentPrice - entryPrice) / entryPrice) * 100 : ((entryPrice - currentPrice) / entryPrice) * 100;
+            let pnlDollar = tradeDirection === 'BUY' ? (currentPrice - entryPrice) * quantity : (entryPrice - currentPrice) * quantity;
+            const pnlDisplay = document.getElementById('pnl-display');
+            pnlDisplay.textContent = (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
+            pnlDisplay.className = 'text-3xl font-bold ' + (pnlPct >= 0 ? 'text-green-400' : 'text-red-400');
+            const pnlDollarEl = document.getElementById('pnl-dollar');
+            pnlDollarEl.textContent = (pnlDollar >= 0 ? '+' : '') + '$' + pnlDollar.toFixed(2);
+            pnlDollarEl.className = 'text-xl font-bold ' + (pnlDollar >= 0 ? 'text-green-400' : 'text-red-400');
+            updateRSI();
+            updateTrailingStops(pnlPct);
+            checkExitConditions(pnlPct);
+        }
+
+        function updateRSI() {
+            if (priceHistory.length < params.rsi_lookback) {
+                document.getElementById('rsi-value').textContent = '--';
+                return;
+            }
+            let rsi;
+            if (rsiType === 'real') {
+                const high = Math.max(...priceHistory), low = Math.min(...priceHistory), range = high - low;
+                rsi = range > 0 ? ((currentPrice - low) / range) * 100 : 50;
+                rsiHistory.push(rsi);
+                if (rsiHistory.length > 50) rsiHistory.shift();
+                drawRSIRealChart();
+            } else {
+                rsi = calculateTraditionalRSI(priceHistory);
+            }
+            document.getElementById('rsi-value').textContent = rsi.toFixed(1);
+            document.getElementById('rsi-bar').style.width = rsi + '%';
+            const warning = document.getElementById('rsi-warning');
+            if ((tradeDirection === 'BUY' && rsi > params.rsi_overbought - 5) || (tradeDirection === 'SELL' && rsi < params.rsi_oversold + 5)) {
+                warning.classList.remove('hidden');
+                warning.textContent = `⚠️ RSI ${rsi.toFixed(1)} approaching ${tradeDirection === 'BUY' ? 'overbought' : 'oversold'}`;
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
+        
+        function calculateTraditionalRSI(prices) {
+            if (prices.length < 2) return 50;
+            let gains = 0, losses = 0;
+            for (let i = 1; i < prices.length; i++) {
+                const change = prices[i] - prices[i - 1];
+                change > 0 ? gains += change : losses += Math.abs(change);
+            }
+            const avgGain = gains / (prices.length - 1), avgLoss = losses / (prices.length - 1);
+            if (avgLoss === 0) return 100;
+            return 100 - (100 / (1 + avgGain / avgLoss));
+        }
+        
+        function changeRSIType() {
+            rsiType = document.getElementById('rsi-type').value;
+            rsiHistory = [];
+            if (inPosition) updateRSI();
+        }
+        
+        function changeChartRSI() {
+            chartRSIType = document.getElementById('chart-rsi-type').value;
+            loadTradingViewChart();
+        }
+
+        function updateTrailingStops(pnlPct) {
+            if (tradeDirection === 'BUY' ? currentPrice > topPeak : currentPrice < topPeak) topPeak = currentPrice;
+            let trailPct;
+            if (pnlPct >= params.peak_trail_start) {
+                trailPct = params.peak_trail_minus;
+                document.getElementById('strategy-status').textContent = '🎯 Peak Trailing Active (Tight Stop)';
+            } else if (pnlPct >= params.early_trail_start) {
+                trailPct = params.early_trail_minus;
+                document.getElementById('strategy-status').textContent = '📈 Early Trailing Active';
+            } else {
+                document.getElementById('strategy-status').textContent = '⏳ Monitoring (No trailing yet)';
+                trailStop = 0;
+                document.getElementById('top-peak').textContent = '$--';
+                document.getElementById('trail-stop').textContent = '$--';
+                return;
+            }
+            trailStop = tradeDirection === 'BUY' ? topPeak * (1 - trailPct / 100) : topPeak * (1 + trailPct / 100);
+            document.getElementById('top-peak').textContent = '$' + topPeak.toFixed(2);
+            document.getElementById('trail-stop').textContent = '$' + trailStop.toFixed(2);
+        }
+
+        function startStrategyMonitoring() {
+            strategyInterval = setInterval(() => {}, 2000);
+        }
+
+        function checkExitConditions(pnlPct) {
+            if (!inPosition || pnlPct < params.exit_min_profit) return;
+            let exitReason = null;
+            if ((tradeDirection === 'BUY' && currentPrice <= stopLoss) || (tradeDirection === 'SELL' && currentPrice >= stopLoss)) {
+                exitReason = '❌ Stop Loss Hit';
+            }
+            if (trailStop > 0) {
+                if ((tradeDirection === 'BUY' && currentPrice <= trailStop) || (tradeDirection === 'SELL' && currentPrice >= trailStop)) {
+                    exitReason = '💰 Trailing Stop Hit - Profit Secured!';
+                }
+            }
+            if (pnlPct >= params.min_profit && priceHistory.length >= params.rsi_lookback) {
+                let rsi = rsiType === 'real' ? ((currentPrice - Math.min(...priceHistory)) / (Math.max(...priceHistory) - Math.min(...priceHistory))) * 100 : calculateTraditionalRSI(priceHistory);
+                if ((tradeDirection === 'BUY' && rsi > params.rsi_overbought) || (tradeDirection === 'SELL' && rsi < params.rsi_oversold)) {
+                    exitReason = '📊 RSI Exit - ' + (tradeDirection === 'BUY' ? 'Overbought' : 'Oversold') + ' with profit';
+                }
+            }
+            if (exitReason) executeExit(exitReason);
+        }
+
+        function panicExit() {
+            if (!inPosition) return;
+            executeExit('🚨 PANIC EXIT - Manual Close');
+        }
+
+        function executeExit(reason) {
+            inPosition = false;
+            clearInterval(strategyInterval);
+            const finalPnl = tradeDirection === 'BUY' ? ((currentPrice - entryPrice) / entryPrice) * 100 : ((entryPrice - currentPrice) / entryPrice) * 100;
+            showStatus(`🎯 EXIT: ${reason} | Final P&L: ${finalPnl.toFixed(2)}%`, finalPnl >= 0 ? 'success' : 'error');
+            document.getElementById('strategy-status').textContent = '✅ Position Closed';
+            document.getElementById('btn-panic').disabled = true;
+            document.getElementById('btn-panic').className = 'bg-gray-600 text-gray-400 px-6 py-2 rounded-lg font-bold text-sm cursor-not-allowed';
+            setTimeout(() => {
+                document.getElementById('position-display').classList.add('hidden');
+                document.getElementById('setup-display').classList.remove('hidden');
+                document.getElementById('btn-enter').disabled = false;
+                document.getElementById('btn-enter').className = 'flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm';
+                rsiHistory = [];
+            }, 3000);
+        }
+
+        function toggleParams() {
+            const panel = document.getElementById('params-panel');
+            const toggle = document.getElementById('params-toggle');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                toggle.textContent = '▲';
+            } else {
+                panel.classList.add('hidden');
+                toggle.textContent = '▼';
+            }
+        }
+
+        function updateStrategy() {
+            params.stop_loss_pct = parseFloat(document.getElementById('stop_loss_pct').value);
+            params.early_trail_start = parseFloat(document.getElementById('early_trail_start').value);
+            params.early_trail_minus = parseFloat(document.getElementById('early_trail_minus').value);
+            params.peak_trail_start = parseFloat(document.getElementById('peak_trail_start').value);
+            params.peak_trail_minus = parseFloat(document.getElementById('peak_trail_minus').value);
+            params.min_profit = parseFloat(document.getElementById('min_profit').value);
+            params.exit_min_profit = parseFloat(document.getElementById('exit_min_profit').value);
+            params.rsi_overbought = parseInt(document.getElementById('rsi_overbought').value);
+            params.rsi_oversold = parseInt(document.getElementById('rsi_oversold').value);
+            params.rsi_lookback = parseInt(document.getElementById('rsi_lookback').value);
+            showStatus('✅ Strategy parameters updated!', 'success');
+        }
+
+        function showStatus(message, type = 'info') {
+            const box = document.getElementById('status-box');
+            const msg = document.getElementById('status-message');
+            box.classList.remove('hidden', 'bg-blue-900', 'bg-green-900', 'bg-red-900');
+            if (type === 'success') {
+                box.classList.add('bg-green-900');
+                msg.className = 'text-center text-sm text-green-300';
+            } else if (type === 'error') {
+                box.classList.add('bg-red-900');
+                msg.className = 'text-center text-sm text-red-300';
+            } else {
+                box.classList.add('bg-blue-900');
+                msg.className = 'text-center text-sm text-blue-300';
+            }
+            msg.textContent = message;
+        }
+
+        function quitPopup() {
+            if (inPosition && !confirm('You have an active position. Really quit?')) return;
+            window.close();
+        }
+
+        window.onload = loadTradeData;
+    </script>
+</body>
+</html>

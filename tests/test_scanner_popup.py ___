@@ -1,0 +1,133 @@
+# File: tests/test_scanner_popup.py
+"""
+Verify AIMn scanner opens/navigates the trade popup.
+
+Run:
+  pip install playwright
+  playwright install
+  python tests/test_scanner_popup.py --base https://meirniv.pythonanywhere.com
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+
+LIVE_SCANNER_TEXTS = [
+    re.compile(r"live\s*scanner", re.I),
+]
+ENABLE_POPUP_TEXT = re.compile(r"enable\s*auto-?popup", re.I)
+MANUAL_STOCK_TEXTS = [
+    re.compile(r"manual\s*test.*stock", re.I),
+    re.compile(r"manual\s*test.*AAPL", re.I),
+]
+TRADE_POPUP_URL = re.compile(r"/trade-popup-fixed\?.+", re.I)
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--base", default="http://127.0.0.1:5000")
+    ap.add_argument("--headed", action="store_true")
+    args = ap.parse_args()
+
+    outdir = Path("artifacts")
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    with sync_playwright() as pw:
+        browser = (pw.chromium if not args.headed else pw.chromium).launch(headless=not args.headed)
+        ctx = browser.new_context()
+        page = ctx.new_page()
+
+        page.goto(args.base, wait_until="domcontentloaded", timeout=30000)
+
+        # Go to Live Scanner if link exists; else try direct.
+        for rx in LIVE_SCANNER_TEXTS:
+            link = page.get_by_role("link", name=rx)
+            if link.count() > 0:
+                try:
+                    link.first.click(timeout=4000)
+                    break
+                except PWTimeout:
+                    pass
+        if "/scanner" not in page.url:
+            page.goto(args.base.rstrip("/") + "/scanner", wait_until="domcontentloaded", timeout=30000)
+
+        page.screenshot(path=str(outdir / "scanner_loaded.png"))
+
+        # Try to enable pre-opened popup (defeats blockers).
+        pre_popup = None
+        try:
+            btn = page.get_by_role("button", name=ENABLE_POPUP_TEXT)
+            if btn.count() > 0:
+                pre_count = len(ctx.pages)
+                btn.first.click(timeout=4000)
+                page.wait_for_timeout(300)  # why: give window.open time to attach
+                new_pages = [p for p in ctx.pages if p is not page]
+                if len(new_pages) > 0 and len(ctx.pages) > pre_count:
+                    pre_popup = new_pages[-1]
+        except PWTimeout:
+            pass
+
+        # Click Manual Test - Stock (fallback to any 'Manual Test - Stock' text node)
+        def click_manual_stock():
+            for rx in MANUAL_STOCK_TEXTS:
+                btn = page.get_by_role("button", name=rx)
+                if btn.count() > 0:
+                    btn.first.click(timeout=4000)
+                    return True
+            # Fallback: any element containing text
+            node = page.get_by_text(MANUAL_STOCK_TEXTS[0])
+            if node.count() > 0:
+                node.first.click(timeout=4000)
+                return True
+            return False
+
+        if not click_manual_stock():
+            page.screenshot(path=str(outdir / "no_manual_stock_button.png"))
+            print("ERR: Manual Test - Stock button not found.")
+            return 2
+
+        # Wait for popup creation or navigation of pre-opened handle.
+        popup = None
+        if pre_popup and not pre_popup.is_closed():
+            try:
+                pre_popup.wait_for_url(TRADE_POPUP_URL, timeout=10000)
+                popup = pre_popup
+            except PWTimeout:
+                # If it didn't navigate, try to capture a new popup as a fallback.
+                pass
+
+        if not popup:
+            try:
+                with page.context.expect_page(timeout=8000) as pinfo:
+                    # If a new popup is spawned late, allow an extra tick.
+                    page.wait_for_timeout(200)
+                popup = pinfo.value
+            except PWTimeout:
+                # Last chance: maybe the second page already exists.
+                others = [p for p in ctx.pages if p is not page]
+                if others:
+                    popup = others[-1]
+
+        if not popup:
+            page.screenshot(path=str(outdir / "popup_missing.png"))
+            print("ERR: No popup page detected (blocked?).")
+            return 3
+
+        # Ensure the popup reached the trade monitor URL.
+        try:
+            popup.wait_for_url(TRADE_POPUP_URL, timeout=10000)
+        except PWTimeout:
+            popup.screenshot(path=str(outdir / "popup_wrong_url.png"))
+            print(f"ERR: Popup did not navigate to trade popup. url={popup.url}")
+            return 4
+
+        popup.wait_for_load_state("domcontentloaded", timeout=10000)
+        popup.screenshot(path=str(outdir / "popup_ok.png"))
+        print(f"OK: Popup opened at {popup.url}")
+        browser.close()
+        return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

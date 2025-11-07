@@ -1,0 +1,251 @@
+<!-- filename: aimn-trade-final/templates/aiml/manual_tune.html -->
+
+{% extends "aiml/aiml_base.html" %}
+
+{% block content %}
+<h2>Manual Parameter Tuning</h2>
+<!-- filename: aimn-trade-final/templates/aiml/manual_tune.html -->
+
+<form method="POST" class="form">
+    <div>
+        <label>Symbol:</label>
+        <select name="symbol">
+            {% for sym in symbols %}
+                <option value="{{ sym }}">{{ sym }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label>Broker:</label>
+        <select name="broker">
+            {% for br in brokers %}
+                <option value="{{ br }}">{{ br }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+    <label>Trade Mode:</label>
+    <select name="trade_mode">
+        <option value="BUY">BUY</option>
+        <option value="SELL">SELL</option>
+    </select>
+    </div>
+    <div>
+        <label>RSI Window:</label>
+        <input type="number" name="rsi_window" value="100" min="10" max="200" step="1">
+    </div>
+    <div>
+        <label>Oversold Level:</label>
+        <input type="number" name="oversold_level_whole" min="1" max="99" value="30" step="1"> .
+        <input type="number" name="oversold_level_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>Overbought Level:</label>
+        <input type="number" name="overbought_level_whole" min="1" max="99" value="70" step="1"> .
+        <input type="number" name="overbought_level_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>RSI Exit Buy:</label>
+        <input type="number" name="rsi_exit_buy_whole" min="1" max="99" value="70" step="1"> .
+        <input type="number" name="rsi_exit_buy_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>RSI Exit Sell:</label>
+        <input type="number" name="rsi_exit_sell_whole" min="1" max="99" value="30" step="1"> .
+        <input type="number" name="rsi_exit_sell_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>MACD Fast Length:</label>
+        <input type="number" min="1" max="50" name="macd_fast_length" value="12" step="1">
+    </div>
+    <div>
+        <label>MACD Slow Length:</label>
+        <input type="number" min="1" max="100" name="macd_slow_length" value="26" step="1">
+    </div>
+    <div>
+        <label>MACD Signal Length:</label>
+        <input type="number" min="1" max="50" name="macd_signal_length" value="9" step="1">
+    </div>
+    <hr>
+    <h4>Volume Filter (Buy Mode)</h4>
+    <div>
+        <label>Volume MA Length (Buy):</label>
+        <input type="number" min="5" max="100" name="vol_ma_length_buy" value="20" step="1">
+    </div>
+    <div>
+        <label>Volume Threshold Multiplier (Buy):</label>
+        <input type="number" name="vol_threshold_buy_whole" min="1" max="9" value="1" step="1"> .
+        <input type="number" name="vol_threshold_buy_decimal" min="0" max="0.9" value="0.2" step="0.1">
+    </div>
+    <div>
+        <label>Use Volume Confirmation (Buy):</label>
+        <select name="use_volume_filter_buy">
+            <option value="true" selected>Yes</option>
+            <option value="false">No</option>
+        </select>
+    </div>
+    <h4>ATR Filter (Buy Mode)</h4>
+    <div>
+        <label>ATR Length (Buy):</label>
+        <input type="number" min="1" max="100" name="atr_length_buy" value="14" step="1">
+    </div>
+    <div>
+        <label>ATR MA Length (Buy):</label>
+        <input type="number" min="1" max="100" name="atr_ma_length_buy" value="20" step="1">
+    </div>
+    <div>
+        <label>ATR Expansion Multiplier (Buy):</label>
+        <input type="number" name="atr_threshold_buy_whole" min="1" max="9" value="1" step="1"> .
+        <input type="number" name="atr_threshold_buy_decimal" min="0" max="0.9" value="0.3" step="0.1">
+    </div>
+    <div>
+        <label>Use ATR Volatility Filter (Buy):</label>
+        <select name="use_atr_filter_buy">
+            <option value="true" selected>Yes</option>
+            <option value="false">No</option>
+        </select>
+    </div>
+    <hr>
+    <h4>Exits & Trailing (Buy Mode)</h4>
+    <div>
+        <label>Stop Loss % (Buy):</label>
+        <input type="number" name="stop_loss_percent_buy_whole" min="0" max="20" value="2" step="1"> .
+        <input type="number" name="stop_loss_percent_buy_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>Early Trail Start % (Buy):</label>
+        <input type="number" name="early_trail_start_percent_buy_whole" min="0" max="20" value="1" step="1"> .
+        <input type="number" name="early_trail_start_percent_buy_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>Early Trail Minus % (Buy):</label>
+        <input type="number" name="early_trail_minus_percent_buy_whole" min="0" max="20" value="1" step="1"> .
+        <input type="number" name="early_trail_minus_percent_buy_decimal" min="0" max="0.9" value="0.5" step="0.1">
+    </div>
+    <div>
+        <label>Peak Trail Start % (Buy):</label>
+        <input type="number" name="peak_trail_start_percent_buy_whole" min="0" max="50" value="5" step="1"> .
+        <input type="number" name="peak_trail_start_percent_buy_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>Peak Trail Minus % (Buy):</label>
+        <input type="number" name="peak_trail_minus_percent_buy_whole" min="0" max="20" value="0" step="1"> .
+        <input type="number" name="peak_trail_minus_percent_buy_decimal" min="0" max="0.9" value="0.5" step="0.1">
+    </div>
+    <div>
+        <label>Min Exit Profit % (Buy):</label>
+        <input type="number" step="0.1" min="0" max="50" name="min_exit_profit_pct_buy" value="1.0">
+    </div>
+
+    <hr>
+    <h4>Volume Filter (Sell Mode)</h4>
+    <div>
+        <label>Volume MA Length (Sell):</label>
+        <input type="number" min="5" max="100" name="vol_ma_length_sell" value="20" step="1">
+    </div>
+    <div>
+        <label>Volume Threshold Multiplier (Sell):</label>
+        <input type="number" name="vol_threshold_sell_whole" min="1" max="9" value="1" step="1"> .
+        <input type="number" name="vol_threshold_sell_decimal" min="0" max="0.9" value="0.2" step="0.1">
+    </div>
+    <div>
+        <label>Use Volume Confirmation (Sell):</label>
+        <select name="use_volume_filter_sell">
+            <option value="true" selected>Yes</option>
+            <option value="false">No</option>
+        </select>
+    </div>
+    <h4>ATR Filter (Sell Mode)</h4>
+    <div>
+        <label>ATR Length (Sell):</label>
+        <input type="number" min="1" max="100" name="atr_length_sell" value="14" step="1">
+    </div>
+    <div>
+        <label>ATR MA Length (Sell):</label>
+        <input type="number" min="1" max="100" name="atr_ma_length_sell" value="20" step="1">
+    </div>
+    <div>
+        <label>ATR Expansion Multiplier (Sell):</label>
+        <input type="number" name="atr_threshold_sell_whole" min="1" max="9" value="1" step="1"> .
+        <input type="number" name="atr_threshold_sell_decimal" min="0" max="0.9" value="0.3" step="0.1">
+    </div>
+    <div>
+        <label>Use ATR Volatility Filter (Sell):</label>
+        <select name="use_atr_filter_sell">
+            <option value="true" selected>Yes</option>
+            <option value="false">No</option>
+        </select>
+    </div>
+    <hr>
+    <h4>Exits & Trailing (Sell Mode)</h4>
+    <div>
+        <label>Stop Loss % (Sell):</label>
+        <input type="number" name="stop_loss_percent_sell_whole" min="0" max="20" value="2" step="1"> .
+        <input type="number" name="stop_loss_percent_sell_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>Early Trail Start % (Sell):</label>
+        <input type="number" name="early_trail_start_percent_sell_whole" min="0" max="20" value="1" step="1"> .
+        <input type="number" name="early_trail_start_percent_sell_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>Early Trail Minus % (Sell):</label>
+        <input type="number" name="early_trail_minus_percent_sell_whole" min="0" max="20" value="1" step="1"> .
+        <input type="number" name="early_trail_minus_percent_sell_decimal" min="0" max="0.9" value="0.5" step="0.1">
+    </div>
+    <div>
+        <label>Peak Trail Start % (Sell):</label>
+        <input type="number" name="peak_trail_start_percent_sell_whole" min="0" max="50" value="5" step="1"> .
+        <input type="number" name="peak_trail_start_percent_sell_decimal" min="0" max="0.9" value="0.0" step="0.1">
+    </div>
+    <div>
+        <label>Peak Trail Minus % (Sell):</label>
+        <input type="number" name="peak_trail_minus_percent_sell_whole" min="0" max="20" value="0" step="1"> .
+        <input type="number" name="peak_trail_minus_percent_sell_decimal" min="0" max="0.9" value="0.5" step="0.1">
+    </div>
+    <div>
+        <label>Min Exit Profit % (Sell):</label>
+        <input type="number" step="0.1" min="0" max="50" name="min_exit_profit_pct_sell" value="1.0">
+    </div>
+    <div style="margin-top:10px;">
+        <input type="submit" value="Run Backtest" class="btn btn-primary">
+    </div>
+</form>
+
+{% if pnl_pct is not none %}
+  <div style="margin-top:24px;">
+    <h3>Backtest Results</h3>
+    <table border="1" style="margin-bottom:15px;">
+      <tr><td><b>Total Compound P&amp;L</b></td><td><span style="color:{{ 'green' if pnl_pct >= 0 else 'red' }};">{{ pnl_pct | round(2) }}%</span></td></tr>
+      <tr><td><b>Number of Trades</b></td><td>{{ n_trades }}</td></tr>
+      <tr><td><b>Number of Wins</b></td><td>{{ n_wins }}</td></tr>
+      <tr><td><b>Number of Losses</b></td><td>{{ n_losses }}</td></tr>
+      <tr><td><b>Win Rate</b></td><td>{{ win_rate | round(1) }}%</td></tr>
+      <tr><td><b>Buy Orders</b></td><td>{{ n_buy_orders }}</td></tr>
+      <tr><td><b>Sell Orders</b></td><td>{{ n_sell_orders }}</td></tr>
+      <tr><td><b>Average Trade P&amp;L</b></td><td>{{ avg_trade_pct | round(2) }}%</td></tr>
+      <tr><td><b>Max Drawdown</b></td><td>{{ max_drawdown | round(2) }}%</td></tr>
+    </table>
+
+    <!-- Combined Price, Trades, and Equity Curve Chart -->
+    <h4>Price, Trades, and Equity Curve</h4>
+    <img src="/static/price_trades_equity.png?{{ range(1)|random }}" alt="Chart" style="max-width: 90%; border: 1px solid #333;">
+
+    <h4>Trades</h4>
+    <table>
+      <tr><th>Entry</th><th>Exit</th><th>P&L (%)</th><th>Direction</th><th>Reason</th></tr>
+      {% for trade in trades %}
+        <tr>
+          <td>{{ trade.entry_price }}</td>
+          <td>{{ trade.exit_price }}</td>
+          <td>{{ trade.profit_pct | round(2) }}</td>
+          <td>{{ trade.direction }}</td>
+          <td>{{ trade.exit_reason }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+{% else %}
+  <span>No results yet. Choose parameters and run backtest.</span>
+{% endif %}
+{% endblock %}

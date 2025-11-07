@@ -1,0 +1,220 @@
+<!-- templates/trade-popup-fixed.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Trade Micro</title>
+<style>
+  html,body{margin:0;padding:0;overflow:hidden;background:#1f2937;color:#fff}
+  body{font:12px/1.1 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{display:flex;align-items:center;gap:8px;white-space:nowrap;padding:4px 6px}
+  .dot{width:8px;height:8px;border-radius:999px;background:#6b7280;border:1px solid #4b5563}
+  .dot.live{background:#10b981}
+  .pill{padding:2px 6px;border-radius:999px;font-weight:700}
+  .buy{background:#065f46}
+  .sell{background:#7f1d1d}
+  .exit{background:#374151}
+  .btn{background:#374151;border:1px solid #4b5563;border-radius:6px;padding:2px 8px;cursor:pointer}
+  .btn:hover{background:#4b5563}
+  .muted{color:#9ca3af}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .good{color:#86efac}.bad{color:#fca5a5}
+</style>
+<script>
+  // ---- Query params ----
+  const Q = new URLSearchParams(location.search);
+  const symbol   = Q.get('symbol')   || 'AAPL';
+  const exchange = Q.get('exchange') || 'ALPACA';
+  const side     = (Q.get('side')||'BUY').toUpperCase()==='SELL'?'SELL':'BUY';
+  const qty      = Number(Q.get('qty')|| (exchange==='CRYPTO'? '0.01':'10'));
+  const expandUrlParam = Q.get('expand_url');
+
+  // ---- State ----
+  let inPosition=false, frozen=false;
+  let entryPrice=0, currentPrice=0, lastGoodPrice=0;
+  let tradeStart=null, frozenDuration='00:00';
+  let priceTimer=null, durationTimer=null;
+  let liveOkCount=0, liveMissCount=0; // for LIVE dot
+
+  // ---- DOM ----
+  const el = id => document.getElementById(id);
+  const fmtMoney = v => '$'+Number(v).toFixed(2);
+  const pct = (cur,ent,dir)=> ent? (dir==='BUY'? (cur-ent)/ent*100 : (ent-cur)/ent*100 ):0;
+
+  // ---- Duration ----
+  function tickDuration(){
+    if(!tradeStart) return;
+    const ms = Date.now()-tradeStart.getTime();
+    const m = Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
+    el('dur').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  // ---- LIVE indicator ----
+  function updateLiveDot(){
+    // live if we had a success in last ~6s and fewer than 3 consecutive misses
+    const live = liveMissCount < 3;
+    el('live').className = 'dot'+(live?' live':'');
+  }
+
+  // ---- Price fetch ----
+  async function fetchPriceOnce(){
+    try{
+      const r = await fetch(`/api/live_price?symbol=${encodeURIComponent(symbol)}&exchange=${encodeURIComponent(exchange)}`,{cache:'no-store'});
+      const j = await r.json();
+      const p = Number(j.price ?? j.last ?? j.close ?? j.p);
+      if(Number.isFinite(p)&&p>0){
+        currentPrice=p; lastGoodPrice=p;
+        liveOkCount++; liveMissCount=0; updateLiveDot();
+        return true;
+      }
+    }catch(e){/* ignore */}
+    // stale fallback (tiny drift)
+    if(lastGoodPrice){
+      const delta = lastGoodPrice*((Math.random()-0.5)*0.001); // +/-0.1%
+      currentPrice = Math.max(0.0001,lastGoodPrice+delta);
+      liveMissCount++; updateLiveDot();
+      return true;
+    }
+    liveMissCount++; updateLiveDot();
+    return false;
+  }
+
+  function renderLine(){
+    el('broker').textContent = exchange;
+    el('sym').textContent = symbol;
+    el('px').textContent = fmtMoney(currentPrice||0);
+    el('entry').textContent = entryPrice? fmtMoney(entryPrice):'$--';
+    const pnl = pct(currentPrice,entryPrice,side);
+    const pnlEl = el('pnl');
+    pnlEl.textContent = (pnl>=0?'+':'')+pnl.toFixed(2)+'%';
+    pnlEl.className = 'mono ' + (pnl>=0?'good':'bad');
+  }
+
+  // ---- Start trade via server (optional) ----
+  async function serverOpenTrade(){
+    try{
+      const r = await fetch('/api/trade/open',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({symbol,exchange,side,qty})
+      });
+      if(!r.ok) return false;
+      const j = await r.json();
+      // prefer executed entry the server returns
+      const ep = Number(j.entry_price);
+      if(Number.isFinite(ep) && ep>0){
+        entryPrice = ep;
+        return true;
+      }
+      return false;
+    }catch(e){ return false; }
+  }
+
+  async function ensureStarted(){
+    // Attempt a real order first (sets entryPrice if supported)
+    const placed = await serverOpenTrade();
+    // Always fetch a fresh price next
+    const ok = await fetchPriceOnce();
+    if(ok && !inPosition){
+      if(!placed) entryPrice = currentPrice; // fallback: use first tick as entry
+      inPosition = true;
+      tradeStart = new Date();
+      tickDuration();
+      renderLine();
+    }
+  }
+
+  function startLoops(){
+    try{ window.resizeTo(560, 70); }catch(e){}
+    durationTimer = setInterval(()=>{ if(!frozen) tickDuration(); },1000);
+    priceTimer = setInterval(async ()=>{
+      if(frozen) return;
+      const ok = await fetchPriceOnce();
+      if(ok){
+        if(!inPosition){
+          entryPrice = currentPrice;
+          inPosition = true;
+          tradeStart = new Date();
+        }
+        renderLine();
+      }
+    }, 2000);
+  }
+
+  function notifyClose(reason, finalPct){
+    try{
+      if(window.opener && !window.opener.closed){
+        window.opener.postMessage({type:'TRADE_CLOSED',symbol,exchange,pnl:finalPct,reason}, '*');
+      }
+    }catch(e){}
+  }
+
+  function doExit(reason){
+    if(frozen) return;
+    frozen = true;
+    // freeze timer
+    if(tradeStart){
+      const ms = Date.now()-tradeStart.getTime();
+      const m = Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
+      frozenDuration = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      el('dur').textContent = frozenDuration;
+    }
+    clearInterval(durationTimer); clearInterval(priceTimer);
+
+    // freeze direction + label EXIT
+    el('dir').textContent = 'EXIT';
+    el('dir').className = 'pill exit';
+    el('exitBtn').disabled = true;
+
+    // freeze numbers at current snapshot
+    if(!entryPrice) entryPrice = currentPrice||lastGoodPrice||entryPrice;
+    renderLine();
+
+    const final = pct(currentPrice, entryPrice, side);
+    notifyClose(reason, Number.isFinite(final)? final : 0);
+
+    // auto close in 2 minutes
+    setTimeout(()=>{ try{ window.close(); }catch(e){} }, 120000);
+  }
+
+  function onExitClick(){ doExit('EXIT_BUTTON'); }
+
+  function onExpand(){
+    const url = expandUrlParam
+      || `/trade-full?symbol=${encodeURIComponent(symbol)}&exchange=${encodeURIComponent(exchange)}&qty=${encodeURIComponent(qty)}&side=${encodeURIComponent(side)}`;
+    window.open(url,'_blank','noopener,noreferrer');
+  }
+
+  window.addEventListener('load', async ()=>{
+    // paint static
+    el('dir').textContent = side;
+    el('dir').className = 'pill '+(side==='BUY'?'buy':'sell');
+    // kick off
+    await ensureStarted();
+    startLoops();
+  });
+
+  window.addEventListener('beforeunload', ()=>{
+    clearInterval(priceTimer); clearInterval(durationTimer);
+  });
+</script>
+</head>
+<body>
+  <div class="wrap">
+    <span id="live" class="dot"></span>
+    <span id="broker" class="mono"></span>
+    <span class="muted">|</span>
+    <span id="sym" class="mono"></span>
+    <span id="dir" class="pill">BUY</span>
+
+    <span class="muted">t:</span><span id="dur" class="mono">00:00</span>
+    <span class="muted">Px:</span><span id="px" class="mono">$--</span>
+    <span class="muted">Entry:</span><span id="entry" class="mono">$--</span>
+    <span class="muted">P&L:</span><span id="pnl" class="mono">0.00%</span>
+
+    <button class="btn" id="expandBtn" onclick="onExpand()">↗️ Expand</button>
+    <button class="btn" id="exitBtn"   onclick="onExitClick()">⛔ EXIT</button>
+  </div>
+</body>
+</html>

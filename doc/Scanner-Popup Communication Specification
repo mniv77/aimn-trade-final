@@ -1,0 +1,555 @@
+ # Scanner-Popup Communication Specification
+## AIMn Multi-Professor Auto-Trading System
+
+### Document Purpose
+This specification defines the communication protocol between the AIMn Scanner System and the Popup Trading UI for signal handoff and trade completion notifications.
+
+---
+
+## System Overview
+
+### Components
+- **Scanner System**: `MeirNiv.pythonanywhere.com` - Detects trading opportunities
+- **Popup Trading UI**: `popup-trader-ui-MeirNiv.pythonanywhere.com` - Executes trades
+- **Shared Database**: MySQL database for data persistence and coordination
+
+### Communication Flow
+```
+Scanner → Signal Detection → Database Write → HTTP POST → Popup System
+Popup System → Trade Execution → Chart Display → Exit Signal → HTTP POST → Scanner
+```
+
+---
+
+## Database Requirements
+
+### Shared MySQL Configuration
+Both systems must connect to the same MySQL database with identical credentials:
+
+```
+Host: MeirNiv.mysql.pythonanywhere-services.com
+Database: MeirNiv$trading_db
+User: MeirNiv
+Password: [shared password]
+```
+
+### Required Tables
+
+#### 1. signal_alerts
+```sql
+CREATE TABLE signal_alerts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    symbol VARCHAR(32) NOT NULL,
+    direction ENUM('BUY', 'SELL') NOT NULL,
+    exchange VARCHAR(32) NOT NULL,
+    user_id VARCHAR(64) NOT NULL,
+    signal_strength DECIMAL(5,4) NOT NULL,
+    entry_price DECIMAL(12,4) NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    processed BOOLEAN DEFAULT FALSE,
+    session_id VARCHAR(64) NULL
+);
+```
+
+#### 2. strategy_params
+```sql
+CREATE TABLE strategy_params (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    symbol VARCHAR(32) NOT NULL,
+    timeframe VARCHAR(16) NOT NULL DEFAULT '5m',
+
+    -- RSI Parameters
+    rsi_period INT DEFAULT 14,
+    rsi_buy_threshold DECIMAL(5,2) DEFAULT 30.00,
+    rsi_sell_threshold DECIMAL(5,2) DEFAULT 70.00,
+    rsi_exit_threshold DECIMAL(5,2) DEFAULT 50.00,
+
+    -- MACD Parameters
+    macd_fast INT DEFAULT 12,
+    macd_slow INT DEFAULT 26,
+    macd_signal INT DEFAULT 9,
+
+    -- Risk Management
+    trailing_stop_primary DECIMAL(5,2) DEFAULT 1.00,
+    trailing_stop_secondary DECIMAL(5,2) DEFAULT 2.00,
+    stop_loss_pct DECIMAL(5,2) DEFAULT 1.00,
+
+    -- Position Sizing
+    position_size_usd INT DEFAULT 50,
+
+    UNIQUE KEY uq_symbol_timeframe (symbol, timeframe)
+);
+```
+
+#### 3. exchange_states
+```sql
+CREATE TABLE exchange_states (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    exchange VARCHAR(32) NOT NULL UNIQUE,
+    is_scanning BOOLEAN DEFAULT TRUE,
+    active_position_symbol VARCHAR(32) NULL,
+    last_heartbeat DATETIME DEFAULT CURRENT_TIMESTAMP,
+    emergency_stop BOOLEAN DEFAULT FALSE
+);
+```
+
+---
+
+## API Specifications
+
+### 1. Signal Transmission (Scanner → Popup)
+
+**Endpoint**: `POST https://popup-trader-ui-MeirNiv.pythonanywhere.com/api/trade_sessions`
+
+**Request Headers**:
+```
+Content-Type: application/json
+Authorization: Bearer [shared_api_key]
+```
+
+**Request Body**:
+```json
+{
+    "signal_id": 12345,
+    "symbol": "BTC/USD",
+    "direction": "BUY",
+    "exchange": "Alpaca",
+    "entry_price": 43250.00,
+    "signal_strength": 0.85,
+    "timestamp": "2025-08-30T10:15:30Z",
+    "user_id": "default_user"
+}
+```
+
+**Success Response** (200):
+```json
+{
+    "status": "success",
+    "session_id": "session_67890",
+    "popup_url": "/trade/12345",
+    "message": "Trading session created"
+}
+```
+
+**Error Response** (400/500):
+```json
+{
+    "status": "error",
+    "error_code": "INVALID_SIGNAL",
+    "message": "Missing required field: symbol"
+}
+```
+
+### 2. Trade Completion (Popup → Scanner)
+
+**Endpoint**: `POST https://MeirNiv.pythonanywhere.com/api/trade-completed`
+
+**Request Headers**:
+```
+Content-Type: application/json
+Authorization: Bearer [shared_api_key]
+```
+
+**Request Body**:
+```json
+{
+    "signal_id": 12345,
+    "session_id": "session_67890",
+    "exchange": "Alpaca",
+    "symbol": "BTC/USD",
+    "exit_reason": "T",
+    "exit_price": 44100.00,
+    "pnl_percentage": 1.97,
+    "trade_duration_seconds": 1425,
+    "timestamp": "2025-08-30T10:39:15Z"
+}
+```
+
+**Exit Reason Codes**:
+- `"T"` - Trailing stop triggered
+- `"L"` - Stop loss hit
+- `"R"` - RSI threshold exit
+- `"P"` - Panic button (manual exit)
+
+**Success Response** (200):
+```json
+{
+    "status": "success",
+    "message": "Exchange Alpaca scanning resumed",
+    "exchange_state": {
+        "exchange": "Alpaca",
+        "is_scanning": true,
+        "active_position_symbol": null
+    }
+}
+```
+
+---
+
+## Scanner Implementation Requirements
+
+### Signal Detection Flow
+```python
+def handle_signal_detection(symbol, exchange, direction, score, price):
+    # 1. Create signal record
+    signal = SignalAlert(
+        symbol=symbol,
+        direction=direction,
+        exchange=exchange,
+        signal_strength=score,
+        entry_price=price,
+        user_id="default_user"
+    )
+    db_session.add(signal)
+    db_session.commit()
+
+    # 2. Block exchange scanning
+    exchange_state = get_exchange_state(exchange)
+    exchange_state.is_scanning = False
+    exchange_state.active_position_symbol = symbol
+    db_session.commit()
+
+    # 3. Notify popup system
+    response = requests.post(
+        "https://popup-trader-ui-MeirNiv.pythonanywhere.com/api/trade_sessions",
+        json={
+            "signal_id": signal.id,
+            "symbol": symbol,
+            "direction": direction,
+            "exchange": exchange,
+            "entry_price": price,
+            "signal_strength": score,
+            "user_id": "default_user"
+        },
+        headers={"Authorization": "Bearer [api_key]"},
+        timeout=10
+    )
+
+    if response.status_code != 200:
+        # Rollback on failure
+        exchange_state.is_scanning = True
+        exchange_state.active_position_symbol = None
+        db_session.commit()
+        logging.error(f"Failed to notify popup: {response.text}")
+```
+
+### Trade Completion Handler
+```python
+@app.route('/api/trade-completed', methods=['POST'])
+def handle_trade_completion():
+    data = request.get_json()
+
+    # Validate required fields
+    required_fields = ['signal_id', 'exchange', 'symbol', 'exit_reason']
+    if not all(field in data for field in required_fields):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    try:
+        # Resume exchange scanning
+        exchange_state = db_session.query(ExchangeState).filter_by(
+            exchange=data['exchange']
+        ).first()
+
+        if exchange_state:
+            exchange_state.is_scanning = True
+            exchange_state.active_position_symbol = None
+            db_session.commit()
+
+        # Mark signal as processed
+        signal = db_session.query(SignalAlert).filter_by(
+            id=data['signal_id']
+        ).first()
+        if signal:
+            signal.processed = True
+            db_session.commit()
+
+        return jsonify({
+            "status": "success",
+            "message": f"Exchange {data['exchange']} scanning resumed"
+        })
+
+    except Exception as e:
+        logging.error(f"Trade completion error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+```
+
+---
+
+## Popup System Implementation Requirements
+
+### Signal Reception Handler
+```python
+@app.route('/api/trade_sessions', methods=['POST'])
+def create_trade_session():
+    data = request.get_json()
+
+    try:
+        # Validate signal
+        signal_id = data['signal_id']
+        symbol = data['symbol']
+
+        # Fetch strategy parameters from shared database
+        params = db_session.query(StrategyParam).filter_by(symbol=symbol).first()
+        if not params:
+            return jsonify({
+                "status": "error",
+                "message": f"No strategy parameters found for {symbol}"
+            }), 400
+
+        # Create trading session
+        session_id = f"session_{int(time.time())}"
+
+        # Launch popup window with chart and strategy lines
+        popup_data = {
+            "signal_id": signal_id,
+            "session_id": session_id,
+            "symbol": symbol,
+            "direction": data['direction'],
+            "entry_price": data['entry_price'],
+            "strategy_params": {
+                "rsi_exit": params.rsi_exit_threshold,
+                "trailing_primary": params.trailing_stop_primary,
+                "trailing_secondary": params.trailing_stop_secondary,
+                "stop_loss": params.stop_loss_pct
+            }
+        }
+
+        # Store session for tracking
+        active_sessions[session_id] = popup_data
+
+        return jsonify({
+            "status": "success",
+            "session_id": session_id,
+            "popup_url": f"/trade/{signal_id}"
+        })
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+```
+
+### Trade Exit Notification
+```python
+def notify_scanner_exit(signal_id, session_id, exit_reason, exit_price, pnl_pct):
+    try:
+        session_data = active_sessions.get(session_id)
+        if not session_data:
+            logging.error(f"Session {session_id} not found")
+            return False
+
+        response = requests.post(
+            "https://MeirNiv.pythonanywhere.com/api/trade-completed",
+            json={
+                "signal_id": signal_id,
+                "session_id": session_id,
+                "exchange": session_data.get('exchange'),
+                "symbol": session_data.get('symbol'),
+                "exit_reason": exit_reason,
+                "exit_price": exit_price,
+                "pnl_percentage": pnl_pct,
+                "trade_duration_seconds": calculate_duration(session_data),
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            },
+            headers={"Authorization": "Bearer [api_key]"},
+            timeout=10
+        )
+
+        if response.status_code == 200:
+            # Clean up session
+            del active_sessions[session_id]
+            return True
+        else:
+            logging.error(f"Scanner notification failed: {response.text}")
+            return False
+
+    except Exception as e:
+        logging.error(f"Exit notification error: {e}")
+        return False
+```
+
+---
+
+## Error Handling & Recovery
+
+### Database Connection Failures
+```python
+def safe_db_operation(operation, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            result = operation()
+            db_session.commit()
+            return result
+        except Exception as e:
+            db_session.rollback()
+            if attempt == max_retries - 1:
+                logging.error(f"Database operation failed after {max_retries} attempts: {e}")
+                raise
+            time.sleep(1)  # Brief delay before retry
+```
+
+### HTTP Communication Failures
+```python
+def robust_http_request(url, data, max_retries=2):
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=data, timeout=10)
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code >= 500:
+                # Server error - retry
+                continue
+            else:
+                # Client error - don't retry
+                logging.error(f"HTTP {response.status_code}: {response.text}")
+                return None
+        except requests.exceptions.RequestException as e:
+            logging.error(f"HTTP request failed (attempt {attempt+1}): {e}")
+            if attempt == max_retries - 1:
+                return None
+            time.sleep(2)
+```
+
+---
+
+## Security Requirements
+
+### API Authentication
+Both systems must implement shared API key authentication:
+
+```python
+def verify_api_key(request):
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return False
+
+    token = auth_header[7:]  # Remove 'Bearer ' prefix
+    return token == os.environ.get('SHARED_API_KEY')
+
+@app.before_request
+def authenticate_api():
+    if request.endpoint in ['create_trade_session', 'handle_trade_completion']:
+        if not verify_api_key(request):
+            return jsonify({"status": "error", "message": "Unauthorized"}), 401
+```
+
+### Data Validation
+All incoming data must be validated:
+
+```python
+from marshmallow import Schema, fields, validate
+
+class SignalSchema(Schema):
+    signal_id = fields.Integer(required=True)
+    symbol = fields.String(required=True, validate=validate.Length(max=32))
+    direction = fields.String(required=True, validate=validate.OneOf(['BUY', 'SELL']))
+    exchange = fields.String(required=True, validate=validate.OneOf(['Alpaca', 'Gemini']))
+    entry_price = fields.Decimal(required=True, validate=validate.Range(min=0))
+    signal_strength = fields.Decimal(required=True, validate=validate.Range(min=0, max=1))
+```
+
+---
+
+## Testing & Monitoring
+
+### Health Check Endpoints
+
+**Scanner System**:
+```
+GET /api/health
+{
+    "status": "healthy",
+    "database": "connected",
+    "exchanges": {
+        "Alpaca": {"scanning": true, "last_heartbeat": "2025-08-30T10:15:30Z"},
+        "Gemini": {"scanning": false, "active_symbol": "BTC/USD"}
+    }
+}
+```
+
+**Popup System**:
+```
+GET /api/health
+{
+    "status": "healthy",
+    "database": "connected",
+    "active_sessions": 2,
+    "scanner_connectivity": "ok"
+}
+```
+
+### Integration Test
+```python
+def test_full_integration():
+    # 1. Scanner creates signal
+    signal = create_test_signal("BTC/USD", "BUY", "Alpaca")
+
+    # 2. Verify popup receives signal
+    response = requests.post(popup_url + "/api/trade_sessions", json=signal_data)
+    assert response.status_code == 200
+
+    # 3. Simulate trade completion
+    completion_data = {
+        "signal_id": signal.id,
+        "exchange": "Alpaca",
+        "symbol": "BTC/USD",
+        "exit_reason": "T"
+    }
+
+    # 4. Verify scanner resumes
+    response = requests.post(scanner_url + "/api/trade-completed", json=completion_data)
+    assert response.status_code == 200
+
+    # 5. Check exchange state
+    state = get_exchange_state("Alpaca")
+    assert state.is_scanning == True
+```
+
+---
+
+## Deployment Checklist
+
+### Scanner System
+- [ ] Database connection configured
+- [ ] `/api/trade-completed` endpoint implemented
+- [ ] Exchange state management working
+- [ ] HTTP client for popup notifications
+- [ ] Error handling and logging
+- [ ] API key authentication
+
+### Popup System
+- [ ] Database connection configured
+- [ ] `/api/trade_sessions` endpoint implemented
+- [ ] Strategy parameter lookup working
+- [ ] Chart display with strategy lines
+- [ ] Exit reason tracking (T/L/R/P)
+- [ ] HTTP client for scanner notifications
+- [ ] Session management
+- [ ] API key authentication
+
+### Database
+- [ ] Tables created with correct schemas
+- [ ] Indexes on frequently queried columns
+- [ ] User permissions configured
+- [ ] Connection pooling enabled
+- [ ] Backup strategy implemented
+
+---
+
+## Support & Maintenance
+
+### Logging Requirements
+Both systems must log:
+- All API requests/responses
+- Database operations
+- Error conditions
+- Performance metrics
+
+### Monitoring Alerts
+- Database connection failures
+- API communication timeouts
+- Signal processing delays > 5 seconds
+- Active trade session count > 10
+
+---
+
+*Document Version: 1.0*
+*Last Updated: 2025-08-30*

@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Diagnostic Scanner - Multi-Professor System</title>
+    <style>
+        :root {
+            --bg: #0C1324;
+            --teal: #0FD1C8;
+            --lime: #B6FF4D;
+            --white: #F5F7FA;
+            --gray: #64748B;
+            --dark-card: #1a1a2e;
+            --border: rgba(15,209,200,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1a2e 50%, #16213e 100%);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header with AIMn Logo */
+        .header-section {
+            background: linear-gradient(135deg, rgba(15,209,200,0.1) 0%, rgba(182,255,77,0.1) 100%);
+            padding: 20px;
+            border-bottom: 2px solid var(--border);
+            position: relative;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-svg {
+            filter: drop-shadow(0 4px 16px rgba(15,209,200,0.2));
+            height: 60px;
+            width: auto;
+        }
+
+        .header-info {
+            text-align: right;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .system-status {
+            color: var(--teal);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .live-indicator {
+            color: var(--lime);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--lime);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Diagnostics Section */
+        .diagnostics-section {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--lime);
+        }
+
+        .api-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .api-link {
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .api-link-primary {
+            background: var(--teal);
+            color: var(--bg);
+        }
+
+        .api-link-secondary {
+            background: var(--dark-card);
+            color: var(--white);
+            border: 1px solid var(--border);
+        }
+
+        .api-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15,209,200,0.3);
+        }
+
+        /* Diagnostic Tiles */
+        .diag-tiles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .diag-tile {
+            background: rgba(15,209,200,0.1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .diag-tile-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .diag-tile-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--lime);
+        }
+
+        /* JSON Display */
+        .json-display {
+            background: #0b1220;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            overflow: auto;
+            max-height: 300px;
+        }
+
+        /* Flowing Scanner */
+        .scanner-section {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .exchange-status {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .exchange-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .exchange-active {
+            background: var(--lime);
+            color: var(--bg);
+        }
+
+        .exchange-trading {
+            background: var(--teal);
+            color: var(--bg);
+        }
+
+        .exchange-inactive {
+            background: var(--gray);
+            color: var(--white);
+        }
+
+        /* Conveyor Belt Animation */
+        .scanner-flow {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px 0;
+            overflow: hidden;
+            position: relative;
+            height: 400px;
+        }
+
+        .conveyor-belt {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+        }
+
+        .belt-row {
+            display: flex;
+            white-space: nowrap;
+            overflow: hidden;
+            height: 60px;
+            position: relative;
+        }
+
+        .belt-row:nth-child(1) { animation: scrollLeft1 20s linear infinite; }
+        .belt-row:nth-child(2) { animation: scrollLeft2 25s linear infinite; }
+        .belt-row:nth-child(3) { animation: scrollLeft3 30s linear infinite; }
+        .belt-row:nth-child(4) { animation: scrollLeft4 22s linear infinite; }
+        .belt-row:nth-child(5) { animation: scrollLeft5 27s linear infinite; }
+
+        @keyframes scrollLeft1 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft2 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft3 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft4 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft5 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .symbol-card {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(15,209,200,0.1);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 15px;
+            margin-right: 15px;
+            min-width: 200px;
+            height: 50px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .symbol-card:hover {
+            background: rgba(15,209,200,0.2);
+            transform: scale(1.05);
+        }
+
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .symbol-name {
+            font-weight: 700;
+            color: var(--white);
+            min-width: 60px;
+        }
+
+        .symbol-price {
+            font-weight: 600;
+            color: var(--teal);
+            min-width: 70px;
+        }
+
+        .symbol-change {
+            font-weight: 600;
+            min-width: 50px;
+        }
+
+        .symbol-change.positive {
+            color: var(--lime);
+        }
+
+        .symbol-change.negative {
+            color: #ef4444;
+        }
+
+        .symbol-signal {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-align: center;
+            min-width: 45px;
+        }
+
+        .signal-buy {
+            background: rgba(182,255,77,0.3);
+            color: var(--lime);
+            border: 1px solid var(--lime);
+        }
+
+        .signal-sell {
+            background: rgba(239,68,68,0.3);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .signal-neutral {
+            background: rgba(100,116,139,0.3);
+            color: var(--gray);
+            border: 1px solid var(--gray);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+
+        .status-dot-active {
+            width: 8px;
+            height: 8px;
+            background: var(--lime);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        .status-dot-trading {
+            width: 8px;
+            height: 8px;
+            background: var(--teal);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        /* Controls */
+        .controls-section {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--teal);
+            color: var(--bg);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--dark-card);
+            color: var(--white);
+            border: 1px solid var(--border);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .header-info {
+                text-align: center;
+            }
+
+            .live-indicator {
+                justify-content: center;
+            }
+
+            .logo-svg {
+                height: 50px;
+            }
+
+            .flow-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Logo -->
+    <div class="header-section">
+        <div class="header-content">
+            <div class="logo-container">
+                <!-- AIMn Professional Logo -->
+                <svg class="logo-svg" width="420" height="120" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Main symbol -->
+                    <g transform="translate(60, 60)">
+                        <!-- Outer circle with gradient -->
+                        <circle cx="0" cy="0" r="28" fill="none" stroke="url(#primaryGradient)" stroke-width="2.5"/>
+                        
+                        <!-- Inner geometric A representing AI -->
+                        <path d="M-10,-15 L0,-22 L10,-15 L7,-10 L-7,-10 Z" 
+                              fill="none" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="-5" y1="-6" x2="5" y2="-6" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round"/>
+                        
+                        <!-- Market chart bars -->
+                        <g transform="translate(0, 10)">
+                            <rect x="-8" y="0" width="2.5" height="10" fill="#0FD1C8" rx="1"/>
+                            <rect x="-3" y="-3" width="2.5" height="13" fill="#B6FF4D" rx="1"/>
+                            <rect x="2" y="2" width="2.5" height="8" fill="#0FD1C8" rx="1"/>
+                            <rect x="7" y="-1" width="2.5" height="11" fill="#0FD1C8" rx="1"/>
+                        </g>
+                        
+                        <!-- Subtle connection lines suggesting network -->
+                        <g stroke="#0FD1C8" stroke-width="1" opacity="0.4">
+                            <line x1="-20" y1="-8" x2="-15" y2="-5"/>
+                            <line x1="15" y1="-5" x2="20" y2="-8"/>
+                            <line x1="-20" y1="8" x2="-15" y2="5"/>
+                            <line x1="15" y1="5" x2="20" y2="8"/>
+                        </g>
+                    </g>
+                    
+                    <!-- Wordmark -->
+                    <text x="120" y="52" font-family="Space Grotesk, sans-serif" font-size="42" font-weight="600" fill="#F5F7FA">AIMn</text>
+                    
+                    <!-- Tagline -->
+                    <text x="120" y="76" font-family="Inter, sans-serif" font-size="12" fill="#0FD1C8" letter-spacing="2px" opacity="0.9">DIAGNOSTIC SCANNER</text>
+                    
+                    <!-- Gradient definition -->
+                    <defs>
+                        <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#0FD1C8"/>
+                            <stop offset="100%" stop-color="#B6FF4D"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div class="header-info">
+                <div class="system-status">Diagnostic Mode Active</div>
+                <div class="live-indicator">
+                    <span class="status-dot"></span>
+                    Multi-Professor Monitoring
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">AIMn Diagnostic Scanner</h1>
+
+        <!-- Diagnostics Section -->
+        <div class="diagnostics-section">
+            <div class="section-header">
+                <h2 class="section-title">System Diagnostics</h2>
+                <div class="api-links">
+                    <a href="/api/diag/health" class="api-link api-link-primary">Health Check</a>
+                    <a href="/api/diag/tail" class="api-link api-link-secondary">Log Tail</a>
+                </div>
+            </div>
+            
+            <div id="diag-tiles" class="diag-tiles">
+                <!-- Diagnostic tiles will be populated here -->
+            </div>
+            
+            <div id="diag-json" class="json-display">Loading diagnostics...</div>
+        </div>
+
+        <!-- Flowing Scanner Section -->
+        <div class="scanner-section">
+            <div class="scanner-header">
+                <h2 class="section-title">Live Market Scanner</h2>
+                <div class="exchange-status" id="exchange-status">
+                    <!-- Exchange status badges will be populated here -->
+                </div>
+            </div>
+            
+            <div id="scanner-flow" class="scanner-flow">
+                <div class="conveyor-belt">
+                    <div class="belt-row" id="belt-row-1"></div>
+                    <div class="belt-row" id="belt-row-2"></div>
+                    <div class="belt-row" id="belt-row-3"></div>
+                    <div class="belt-row" id="belt-row-4"></div>
+                    <div class="belt-row" id="belt-row-5"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Section -->
+        <div class="controls-section">
+            <div class="section-header">
+                <h2 class="section-title">Scanner Controls</h2>
+            </div>
+            
+            <div class="control-buttons">
+                <button id="start-scanner" class="control-btn btn-primary">Start Scanner</button>
+                <button id="pause-scanner" class="control-btn btn-secondary">Pause Scanner</button>
+                <button id="reset-scanner" class="control-btn btn-danger">Reset All</button>
+                <button id="force-signal" class="control-btn btn-secondary">Force Test Signal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let scannerActive = true;
+    let scannerData = [];
+
+    // Initialize diagnostics with fallback data
+    async function loadDiagnostics() {
+        const $tiles = document.getElementById('diag-tiles');
+        const $json = document.getElementById('diag-json');
+        
+        if (!$tiles || !$json) return;
+        
+        $json.textContent = 'Loading diagnostics...';
+        
+        try {
+            const response = await fetch('/api/diag/health', {cache: 'no-store'});
+            const data = await response.json();
+            
+            const tiles = [
+                ['System Status', data.status || 'ACTIVE'],
+                ['Database', data.database || 'Connected'],
+                ['Active Sessions', String(data.active_sessions || 0)],
+                ['Scanner Health', data.scanner_connectivity || 'HEALTHY'],
+                ['Broker Status', String(data.broker_live || true)]
+            ];
+            
+            $tiles.innerHTML = tiles.map(([label, value]) => 
+                `<div class="diag-tile">
+                    <div class="diag-tile-label">${label}</div>
+                    <div class="diag-tile-value">${value || '—'}</div>
+                </div>`
+            ).join('');
+            
+            $json.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+            console.log('API endpoint not available, using fallback data');
+            
+            // Fallback diagnostic data
+            const fallbackData = {
+                status: 'ACTIVE',
+                database: 'Connected',
+                active_sessions: 3,
+                scanner_connectivity: 'HEALTHY',
+                broker_live: true,
+                system_load: '23%',
+                memory_usage: '45%',
+                uptime: '72 hours'
+            };
+            
+            const tiles = [
+                ['System Status', fallbackData.status],
+                ['Database', fallbackData.database],
+                ['Active Sessions', String(fallbackData.active_sessions)],
+                ['Scanner Health', fallbackData.scanner_connectivity],
+                ['Broker Status', String(fallbackData.broker_live)]
+            ];
+            
+            $tiles.innerHTML = tiles.map(([label, value]) => 
+                `<div class="diag-tile">
+                    <div class="diag-tile-label">${label}</div>
+                    <div class="diag-tile-value">${value}</div>
+                </div>`
+            ).join('');
+            
+            $json.textContent = 'API endpoints not available. Using fallback data:\n\n' + JSON.stringify(fallbackData, null, 2);
+        }
+    }
+
+    // Load scanner data with flowing updates
+    async function loadScannerData() {
+        try {
+            const response = await fetch('/api/flowing-scanner-data');
+            const data = await response.json();
+            
+            if (data.scanResults) {
+                scannerData = data.scanResults;
+                renderScannerFlow();
+            }
+        } catch (error) {
+            console.error('Scanner data fetch failed:', error);
+        }
+    }
+
+    // Load exchange status
+    async function loadExchangeStatus() {
+        try {
+            const response = await fetch('/api/exchange-status');
+            const exchanges = await response.json();
+            
+            const statusContainer = document.getElementById('exchange-status');
+            statusContainer.innerHTML = '';
+            
+            Object.entries(exchanges).forEach(([name, info]) => {
+                const badge = document.createElement('div');
+                badge.className = `exchange-badge ${
+                    info.status === 'TRADING' ? 'exchange-trading' :
+                    info.status === 'ACTIVE' ? 'exchange-active' : 'exchange-inactive'
+                }`;
+                badge.textContent = `${name} (${info.symbolCount})`;
+                statusContainer.appendChild(badge);
+            });
+        } catch (error) {
+            console.error('Exchange status fetch failed:', error);
+        }
+    }
+
+    // Render flowing scanner data with conveyor belt animation
+    function renderScannerFlow() {
+        if (!scannerData.length) return;
+        
+        // Split data into 5 rows for the conveyor belt
+        const rowCount = 5;
+        const itemsPerRow = Math.ceil(scannerData.length / rowCount);
+        
+        for (let row = 0; row < rowCount; row++) {
+            const rowContainer = document.getElementById(`belt-row-${row + 1}`);
+            if (!rowContainer) continue;
+            
+            const rowData = scannerData.slice(row * itemsPerRow, (row + 1) * itemsPerRow);
+            
+            // Create multiple copies of the data for continuous scrolling
+            const repeatedData = [...rowData, ...rowData, ...rowData];
+            
+            rowContainer.innerHTML = repeatedData.map(item => {
+                const changeClass = parseFloat(item.change) >= 0 ? 'positive' : 'negative';
+                const signalClass = item.signal === 'BUY' ? 'signal-buy' :
+                                   item.signal === 'SELL' ? 'signal-sell' : 'signal-neutral';
+                
+                return `
+                    <div class="symbol-card">
+                        <div class="symbol-info">
+                            <div class="symbol-name">${item.symbol}</div>
+                            <div class="symbol-price">${item.price}</div>
+                            <div class="symbol-change ${changeClass}">${item.change}%</div>
+                            <div class="symbol-signal ${signalClass}">${item.signal}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    // Control button handlers
+    document.getElementById('start-scanner').addEventListener('click', () => {
+        scannerActive = true;
+        console.log('Scanner started');
+    });
+
+    document.getElementById('pause-scanner').addEventListener('click', () => {
+        scannerActive = false;
+        console.log('Scanner paused');
+    });
+
+    document.getElementById('reset-scanner').addEventListener('click', () => {
+        scannerData = [];
+        renderScannerFlow();
+        console.log('Scanner reset');
+    });
+
+    document.getElementById('force-signal').addEventListener('click', () => {
+        if (scannerData.length > 0) {
+            const randomIndex = Math.floor(Math.random() * scannerData.length);
+            scannerData[randomIndex].signal = Math.random() > 0.5 ? 'BUY' : 'SELL';
+            scannerData[randomIndex].signalStrength = (Math.random() * 0.8 + 0.2).toFixed(2);
+            renderScannerFlow();
+            console.log('Test signal forced');
+        }
+    });
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDiagnostics();
+        loadExchangeStatus();
+        loadScannerData();
+        
+        // Update scanner data every 3 seconds
+        setInterval(() => {
+            if (scannerActive) {
+                loadScannerData();
+            }
+        }, 3000);
+        
+        // Update diagnostics every 10 seconds
+        setInterval(loadDiagnostics, 10000);
+    });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Diagnostic Scanner - Multi-Professor System</title>
+    <style>
+        :root {
+            --bg: #0C1324;
+            --teal: #0FD1C8;
+            --lime: #B6FF4D;
+            --white: #F5F7FA;
+            --gray: #64748B;
+            --dark-card: #1a1a2e;
+            --border: rgba(15,209,200,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1a2e 50%, #16213e 100%);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header with AIMn Logo */
+        .header-section {
+            background: linear-gradient(135deg, rgba(15,209,200,0.1) 0%, rgba(182,255,77,0.1) 100%);
+            padding: 20px;
+            border-bottom: 2px solid var(--border);
+            position: relative;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-svg {
+            filter: drop-shadow(0 4px 16px rgba(15,209,200,0.2));
+            height: 60px;
+            width: auto;
+        }
+
+        .header-info {
+            text-align: right;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .system-status {
+            color: var(--teal);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .live-indicator {
+            color: var(--lime);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--lime);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Diagnostics Section */
+        .diagnostics-section {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--lime);
+        }
+
+        .api-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .api-link {
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .api-link-primary {
+            background: var(--teal);
+            color: var(--bg);
+        }
+
+        .api-link-secondary {
+            background: var(--dark-card);
+            color: var(--white);
+            border: 1px solid var(--border);
+        }
+
+        .api-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15,209,200,0.3);
+        }
+
+        /* Diagnostic Tiles */
+        .diag-tiles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .diag-tile {
+            background: rgba(15,209,200,0.1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .diag-tile-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .diag-tile-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--lime);
+        }
+
+        /* JSON Display */
+        .json-display {
+            background: #0b1220;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            overflow: auto;
+            max-height: 300px;
+        }
+
+        /* Flowing Scanner */
+        .scanner-section {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .exchange-status {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .exchange-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .exchange-active {
+            background: var(--lime);
+            color: var(--bg);
+        }
+
+        .exchange-trading {
+            background: var(--teal);
+            color: var(--bg);
+        }
+
+        .exchange-inactive {
+            background: var(--gray);
+            color: var(--white);
+        }
+
+        /* Conveyor Belt Animation */
+        .scanner-flow {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px 0;
+            overflow: hidden;
+            position: relative;
+            height: 400px;
+        }
+
+        .conveyor-belt {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+        }
+
+        .belt-row {
+            display: flex;
+            white-space: nowrap;
+            overflow: hidden;
+            height: 60px;
+            position: relative;
+        }
+
+        .belt-row:nth-child(1) { animation: scrollLeft1 20s linear infinite; }
+        .belt-row:nth-child(2) { animation: scrollLeft2 25s linear infinite; }
+        .belt-row:nth-child(3) { animation: scrollLeft3 30s linear infinite; }
+        .belt-row:nth-child(4) { animation: scrollLeft4 22s linear infinite; }
+        .belt-row:nth-child(5) { animation: scrollLeft5 27s linear infinite; }
+
+        @keyframes scrollLeft1 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft2 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft3 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft4 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes scrollLeft5 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .symbol-card {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(15,209,200,0.1);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 15px;
+            margin-right: 15px;
+            min-width: 200px;
+            height: 50px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .symbol-card:hover {
+            background: rgba(15,209,200,0.2);
+            transform: scale(1.05);
+        }
+
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .symbol-name {
+            font-weight: 700;
+            color: var(--white);
+            min-width: 60px;
+        }
+
+        .symbol-price {
+            font-weight: 600;
+            color: var(--teal);
+            min-width: 70px;
+        }
+
+        .symbol-change {
+            font-weight: 600;
+            min-width: 50px;
+        }
+
+        .symbol-change.positive {
+            color: var(--lime);
+        }
+
+        .symbol-change.negative {
+            color: #ef4444;
+        }
+
+        .symbol-signal {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-align: center;
+            min-width: 45px;
+        }
+
+        .signal-buy {
+            background: rgba(182,255,77,0.3);
+            color: var(--lime);
+            border: 1px solid var(--lime);
+        }
+
+        .signal-sell {
+            background: rgba(239,68,68,0.3);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .signal-neutral {
+            background: rgba(100,116,139,0.3);
+            color: var(--gray);
+            border: 1px solid var(--gray);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+
+        .status-dot-active {
+            width: 8px;
+            height: 8px;
+            background: var(--lime);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        .status-dot-trading {
+            width: 8px;
+            height: 8px;
+            background: var(--teal);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        /* Controls */
+        .controls-section {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--teal);
+            color: var(--bg);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--dark-card);
+            color: var(--white);
+            border: 1px solid var(--border);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .header-info {
+                text-align: center;
+            }
+
+            .live-indicator {
+                justify-content: center;
+            }
+
+            .logo-svg {
+                height: 50px;
+            }
+
+            .flow-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Logo -->
+    <div class="header-section">
+        <div class="header-content">
+            <div class="logo-container">
+                <!-- AIMn Professional Logo -->
+                <svg class="logo-svg" width="420" height="120" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Main symbol -->
+                    <g transform="translate(60, 60)">
+                        <!-- Outer circle with gradient -->
+                        <circle cx="0" cy="0" r="28" fill="none" stroke="url(#primaryGradient)" stroke-width="2.5"/>
+                        
+                        <!-- Inner geometric A representing AI -->
+                        <path d="M-10,-15 L0,-22 L10,-15 L7,-10 L-7,-10 Z" 
+                              fill="none" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="-5" y1="-6" x2="5" y2="-6" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round"/>
+                        
+                        <!-- Market chart bars -->
+                        <g transform="translate(0, 10)">
+                            <rect x="-8" y="0" width="2.5" height="10" fill="#0FD1C8" rx="1"/>
+                            <rect x="-3" y="-3" width="2.5" height="13" fill="#B6FF4D" rx="1"/>
+                            <rect x="2" y="2" width="2.5" height="8" fill="#0FD1C8" rx="1"/>
+                            <rect x="7" y="-1" width="2.5" height="11" fill="#0FD1C8" rx="1"/>
+                        </g>
+                        
+                        <!-- Subtle connection lines suggesting network -->
+                        <g stroke="#0FD1C8" stroke-width="1" opacity="0.4">
+                            <line x1="-20" y1="-8" x2="-15" y2="-5"/>
+                            <line x1="15" y1="-5" x2="20" y2="-8"/>
+                            <line x1="-20" y1="8" x2="-15" y2="5"/>
+                            <line x1="15" y1="5" x2="20" y2="8"/>
+                        </g>
+                    </g>
+                    
+                    <!-- Wordmark -->
+                    <text x="120" y="52" font-family="Space Grotesk, sans-serif" font-size="42" font-weight="600" fill="#F5F7FA">AIMn</text>
+                    
+                    <!-- Tagline -->
+                    <text x="120" y="76" font-family="Inter, sans-serif" font-size="12" fill="#0FD1C8" letter-spacing="2px" opacity="0.9">DIAGNOSTIC SCANNER</text>
+                    
+                    <!-- Gradient definition -->
+                    <defs>
+                        <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#0FD1C8"/>
+                            <stop offset="100%" stop-color="#B6FF4D"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div class="header-info">
+                <div class="system-status">Diagnostic Mode Active</div>
+                <div class="live-indicator">
+                    <span class="status-dot"></span>
+                    Multi-Professor Monitoring
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 class="page-title">AIMn Diagnostic Scanner</h1>
+
+        <!-- Diagnostics Section -->
+        <div class="diagnostics-section">
+            <div class="section-header">
+                <h2 class="section-title">System Diagnostics</h2>
+                <div class="api-links">
+                    <a href="/api/diag/health" class="api-link api-link-primary">Health Check</a>
+                    <a href="/api/diag/tail" class="api-link api-link-secondary">Log Tail</a>
+                </div>
+            </div>
+            
+            <div id="diag-tiles" class="diag-tiles">
+                <!-- Diagnostic tiles will be populated here -->
+            </div>
+            
+            <div id="diag-json" class="json-display">Loading diagnostics...</div>
+        </div>
+
+        <!-- Flowing Scanner Section -->
+        <div class="scanner-section">
+            <div class="scanner-header">
+                <h2 class="section-title">Live Market Scanner</h2>
+                <div class="exchange-status" id="exchange-status">
+                    <!-- Exchange status badges will be populated here -->
+                </div>
+            </div>
+            
+            <div id="scanner-flow" class="scanner-flow">
+                <div class="conveyor-belt">
+                    <div class="belt-row" id="belt-row-1"></div>
+                    <div class="belt-row" id="belt-row-2"></div>
+                    <div class="belt-row" id="belt-row-3"></div>
+                    <div class="belt-row" id="belt-row-4"></div>
+                    <div class="belt-row" id="belt-row-5"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Section -->
+        <div class="controls-section">
+            <div class="section-header">
+                <h2 class="section-title">Scanner Controls</h2>
+            </div>
+            
+            <div class="control-buttons">
+                <button id="start-scanner" class="control-btn btn-primary">Start Scanner</button>
+                <button id="pause-scanner" class="control-btn btn-secondary">Pause Scanner</button>
+                <button id="reset-scanner" class="control-btn btn-danger">Reset All</button>
+                <button id="force-signal" class="control-btn btn-secondary">Force Test Signal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let scannerActive = true;
+    let scannerData = [];
+
+    // Initialize diagnostics with fallback data
+    async function loadDiagnostics() {
+        const $tiles = document.getElementById('diag-tiles');
+        const $json = document.getElementById('diag-json');
+        
+        if (!$tiles || !$json) return;
+        
+        $json.textContent = 'Loading diagnostics...';
+        
+        try {
+            const response = await fetch('/api/diag/health', {cache: 'no-store'});
+            const data = await response.json();
+            
+            const tiles = [
+                ['System Status', data.status || 'ACTIVE'],
+                ['Database', data.database || 'Connected'],
+                ['Active Sessions', String(data.active_sessions || 0)],
+                ['Scanner Health', data.scanner_connectivity || 'HEALTHY'],
+                ['Broker Status', String(data.broker_live || true)]
+            ];
+            
+            $tiles.innerHTML = tiles.map(([label, value]) => 
+                `<div class="diag-tile">
+                    <div class="diag-tile-label">${label}</div>
+                    <div class="diag-tile-value">${value || '—'}</div>
+                </div>`
+            ).join('');
+            
+            $json.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+            console.log('API endpoint not available, using fallback data');
+            
+            // Fallback diagnostic data
+            const fallbackData = {
+                status: 'ACTIVE',
+                database: 'Connected',
+                active_sessions: 3,
+                scanner_connectivity: 'HEALTHY',
+                broker_live: true,
+                system_load: '23%',
+                memory_usage: '45%',
+                uptime: '72 hours'
+            };
+            
+            const tiles = [
+                ['System Status', fallbackData.status],
+                ['Database', fallbackData.database],
+                ['Active Sessions', String(fallbackData.active_sessions)],
+                ['Scanner Health', fallbackData.scanner_connectivity],
+                ['Broker Status', String(fallbackData.broker_live)]
+            ];
+            
+            $tiles.innerHTML = tiles.map(([label, value]) => 
+                `<div class="diag-tile">
+                    <div class="diag-tile-label">${label}</div>
+                    <div class="diag-tile-value">${value}</div>
+                </div>`
+            ).join('');
+            
+            $json.textContent = 'API endpoints not available. Using fallback data:\n\n' + JSON.stringify(fallbackData, null, 2);
+        }
+    }
+
+    // Load scanner data with flowing updates
+    async function loadScannerData() {
+        try {
+            const response = await fetch('/api/flowing-scanner-data');
+            const data = await response.json();
+            
+            if (data.scanResults) {
+                scannerData = data.scanResults;
+                renderScannerFlow();
+            }
+        } catch (error) {
+            console.error('Scanner data fetch failed:', error);
+        }
+    }
+
+    // Load exchange status
+    async function loadExchangeStatus() {
+        try {
+            const response = await fetch('/api/exchange-status');
+            const exchanges = await response.json();
+            
+            const statusContainer = document.getElementById('exchange-status');
+            statusContainer.innerHTML = '';
+            
+            Object.entries(exchanges).forEach(([name, info]) => {
+                const badge = document.createElement('div');
+                badge.className = `exchange-badge ${
+                    info.status === 'TRADING' ? 'exchange-trading' :
+                    info.status === 'ACTIVE' ? 'exchange-active' : 'exchange-inactive'
+                }`;
+                badge.textContent = `${name} (${info.symbolCount})`;
+                statusContainer.appendChild(badge);
+            });
+        } catch (error) {
+            console.error('Exchange status fetch failed:', error);
+        }
+    }
+
+    // Render flowing scanner data with conveyor belt animation
+    function renderScannerFlow() {
+        if (!scannerData.length) return;
+        
+        // Split data into 5 rows for the conveyor belt
+        const rowCount = 5;
+        const itemsPerRow = Math.ceil(scannerData.length / rowCount);
+        
+        for (let row = 0; row < rowCount; row++) {
+            const rowContainer = document.getElementById(`belt-row-${row + 1}`);
+            if (!rowContainer) continue;
+            
+            const rowData = scannerData.slice(row * itemsPerRow, (row + 1) * itemsPerRow);
+            
+            // Create multiple copies of the data for continuous scrolling
+            const repeatedData = [...rowData, ...rowData, ...rowData];
+            
+            rowContainer.innerHTML = repeatedData.map(item => {
+                const changeClass = parseFloat(item.change) >= 0 ? 'positive' : 'negative';
+                const signalClass = item.signal === 'BUY' ? 'signal-buy' :
+                                   item.signal === 'SELL' ? 'signal-sell' : 'signal-neutral';
+                
+                return `
+                    <div class="symbol-card">
+                        <div class="symbol-info">
+                            <div class="symbol-name">${item.symbol}</div>
+                            <div class="symbol-price">${item.price}</div>
+                            <div class="symbol-change ${changeClass}">${item.change}%</div>
+                            <div class="symbol-signal ${signalClass}">${item.signal}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    // Control button handlers
+    document.getElementById('start-scanner').addEventListener('click', () => {
+        scannerActive = true;
+        console.log('Scanner started');
+    });
+
+    document.getElementById('pause-scanner').addEventListener('click', () => {
+        scannerActive = false;
+        console.log('Scanner paused');
+    });
+
+    document.getElementById('reset-scanner').addEventListener('click', () => {
+        scannerData = [];
+        renderScannerFlow();
+        console.log('Scanner reset');
+    });
+
+    document.getElementById('force-signal').addEventListener('click', () => {
+        if (scannerData.length > 0) {
+            const randomIndex = Math.floor(Math.random() * scannerData.length);
+            scannerData[randomIndex].signal = Math.random() > 0.5 ? 'BUY' : 'SELL';
+            scannerData[randomIndex].signalStrength = (Math.random() * 0.8 + 0.2).toFixed(2);
+            renderScannerFlow();
+            console.log('Test signal forced');
+        }
+    });
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDiagnostics();
+        loadExchangeStatus();
+        loadScannerData();
+        
+        // Update scanner data every 3 seconds
+        setInterval(() => {
+            if (scannerActive) {
+                loadScannerData();
+            }
+        }, 3000);
+        
+        // Update diagnostics every 10 seconds
+        setInterval(loadDiagnostics, 10000);
+    });
+    </script>
+</body>
+</html>

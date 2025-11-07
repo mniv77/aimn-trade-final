@@ -1,0 +1,276 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+const FlowingScannerDashboard = () => {
+  const [exchanges, setExchanges] = useState([
+    { id: 'NASDAQ', name: 'NASDAQ', symbols: ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA'], scanning: true, activeSymbol: null },
+    { id: 'NYSE', name: 'NYSE', symbols: ['JPM', 'JNJ', 'PG', 'KO', 'DIS'], scanning: true, activeSymbol: null },
+    { id: 'CRYPTO', name: 'Crypto', symbols: ['BTC/USD', 'ETH/USD', 'ADA/USD', 'SOL/USD', 'DOT/USD'], scanning: true, activeSymbol: null },
+    { id: 'FOREX', name: 'Forex', symbols: ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD'], scanning: true, activeSymbol: null },
+    { id: 'FUTURES', name: 'Futures', symbols: ['ES', 'NQ', 'YM', 'RTY', 'CL'], scanning: true, activeSymbol: null }
+  ]);
+
+  const [scanData, setScanData] = useState([]);
+  const intervalRef = useRef();
+
+  // Generate realistic market data
+  const generateSymbolData = (symbol, exchange) => {
+    const basePrice = Math.random() * 500 + 50;
+    const change = (Math.random() - 0.5) * 10;
+    const volume = Math.floor(Math.random() * 1000000);
+    const rsi = Math.random() * 100;
+    const signal = rsi < 30 ? 'BUY' : rsi > 70 ? 'SELL' : 'NEUTRAL';
+    const signalStrength = signal !== 'NEUTRAL' ? Math.random() * 0.8 + 0.2 : 0;
+    
+    return {
+      symbol,
+      exchange,
+      price: basePrice.toFixed(2),
+      change: change.toFixed(2),
+      changePercent: ((change / basePrice) * 100).toFixed(2),
+      volume: volume.toLocaleString(),
+      rsi: rsi.toFixed(1),
+      signal,
+      signalStrength: signalStrength.toFixed(2),
+      timestamp: Date.now(),
+      id: `${exchange}-${symbol}-${Date.now()}`
+    };
+  };
+
+  // Initialize scan data
+  useEffect(() => {
+    const initialData = [];
+    exchanges.forEach(exchange => {
+      exchange.symbols.forEach(symbol => {
+        initialData.push(generateSymbolData(symbol, exchange.id));
+      });
+    });
+    setScanData(initialData);
+  }, []);
+
+  // Simulate live scanning
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      // Randomly start a trade on an exchange
+      if (Math.random() < 0.1) { // 10% chance each cycle
+        setExchanges(prev => prev.map(exchange => {
+          if (exchange.scanning && Math.random() < 0.3) {
+            const randomSymbol = exchange.symbols[Math.floor(Math.random() * exchange.symbols.length)];
+            return {
+              ...exchange,
+              scanning: false,
+              activeSymbol: randomSymbol
+            };
+          }
+          return exchange;
+        }));
+      }
+
+      // Randomly complete trades
+      if (Math.random() < 0.15) { // 15% chance each cycle
+        setExchanges(prev => prev.map(exchange => {
+          if (!exchange.scanning && Math.random() < 0.4) {
+            return {
+              ...exchange,
+              scanning: true,
+              activeSymbol: null
+            };
+          }
+          return exchange;
+        }));
+      }
+
+      // Update scan data for active exchanges
+      setScanData(prev => {
+        const updated = [...prev];
+        const activeExchanges = exchanges.filter(ex => ex.scanning).map(ex => ex.id);
+        
+        // Add new scan results for active exchanges
+        if (activeExchanges.length > 0 && Math.random() < 0.7) {
+          const randomExchange = activeExchanges[Math.floor(Math.random() * activeExchanges.length)];
+          const exchange = exchanges.find(ex => ex.id === randomExchange);
+          const randomSymbol = exchange.symbols[Math.floor(Math.random() * exchange.symbols.length)];
+          
+          updated.unshift(generateSymbolData(randomSymbol, randomExchange));
+          
+          // Keep only last 50 results
+          if (updated.length > 50) {
+            updated.splice(50);
+          }
+        }
+        
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalRef.current);
+  }, [exchanges]);
+
+  const getExchangeStatus = (exchangeId) => {
+    const exchange = exchanges.find(ex => ex.id === exchangeId);
+    return exchange ? { scanning: exchange.scanning, activeSymbol: exchange.activeSymbol } : { scanning: true, activeSymbol: null };
+  };
+
+  const getSignalColor = (signal, strength) => {
+    if (signal === 'BUY') {
+      const intensity = Math.floor(strength * 255);
+      return `rgb(0, ${intensity}, 0)`;
+    } else if (signal === 'SELL') {
+      const intensity = Math.floor(strength * 255);
+      return `rgb(${intensity}, 0, 0)`;
+    }
+    return 'rgb(100, 100, 100)';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white p-4">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-center mb-2">AIMn Multi-Professor Scanner</h1>
+        <p className="text-center text-gray-400">Live Multi-Exchange Market Scanning</p>
+      </div>
+
+      {/* Exchange Status Bar */}
+      <div className="mb-6 bg-gray-800 rounded-lg p-4">
+        <h2 className="text-xl font-semibold mb-3">Exchange Status</h2>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {exchanges.map(exchange => (
+            <div 
+              key={exchange.id}
+              className={`p-3 rounded-lg border-2 transition-all duration-500 ${
+                exchange.scanning 
+                  ? 'border-green-500 bg-green-900/20' 
+                  : 'border-orange-500 bg-orange-900/20'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold">{exchange.name}</span>
+                <div className={`w-3 h-3 rounded-full ${
+                  exchange.scanning ? 'bg-green-500 animate-pulse' : 'bg-orange-500'
+                }`}></div>
+              </div>
+              <div className="text-sm text-gray-400">
+                {exchange.scanning ? 
+                  `Scanning ${exchange.symbols.length} symbols` : 
+                  `Trading: ${exchange.activeSymbol}`
+                }
+              </div>
+              <div className="text-xs mt-1">
+                Status: {exchange.scanning ? 
+                  <span className="text-green-400">ACTIVE</span> : 
+                  <span className="text-orange-400">BUSY</span>
+                }
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Live Scan Results Stream */}
+      <div className="bg-gray-800 rounded-lg p-4">
+        <h2 className="text-xl font-semibold mb-3">Live Scan Results</h2>
+        <div className="overflow-hidden">
+          <div className="grid grid-cols-8 gap-2 text-sm font-semibold text-gray-400 mb-2 px-2">
+            <div>Exchange</div>
+            <div>Symbol</div>
+            <div>Price</div>
+            <div>Change</div>
+            <div>Volume</div>
+            <div>RSI</div>
+            <div>Signal</div>
+            <div>Strength</div>
+          </div>
+          <div className="max-h-96 overflow-y-auto space-y-1">
+            {scanData.map((data, index) => {
+              const status = getExchangeStatus(data.exchange);
+              const isSelectable = status.scanning;
+              
+              return (
+                <div 
+                  key={data.id}
+                  className={`grid grid-cols-8 gap-2 p-2 rounded transition-all duration-700 transform ${
+                    index === 0 ? 'animate-pulse' : ''
+                  } ${
+                    isSelectable 
+                      ? 'bg-gray-700 hover:bg-gray-600 border-l-4 border-green-500' 
+                      : 'bg-gray-800 opacity-60 border-l-4 border-orange-500'
+                  }`}
+                  style={{
+                    animation: index === 0 ? 'slideIn 0.5s ease-out' : 'none'
+                  }}
+                >
+                  <div className={`text-sm ${isSelectable ? 'text-green-400' : 'text-orange-400'}`}>
+                    {data.exchange}
+                  </div>
+                  <div className="text-sm font-mono">{data.symbol}</div>
+                  <div className="text-sm font-mono">${data.price}</div>
+                  <div className={`text-sm font-mono ${
+                    parseFloat(data.change) >= 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {data.change}%
+                  </div>
+                  <div className="text-sm font-mono text-gray-300">{data.volume}</div>
+                  <div className="text-sm font-mono">{data.rsi}</div>
+                  <div 
+                    className="text-sm font-bold"
+                    style={{ color: getSignalColor(data.signal, data.signalStrength) }}
+                  >
+                    {data.signal}
+                  </div>
+                  <div className="text-sm">
+                    <div className="w-full bg-gray-600 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${data.signalStrength * 100}%`,
+                          backgroundColor: getSignalColor(data.signal, data.signalStrength)
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="mt-4 bg-gray-800 rounded-lg p-4">
+        <h3 className="text-lg font-semibold mb-2">Status Legend</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-green-500 rounded"></div>
+            <span>Exchange Available - Scanning Active</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 bg-orange-500 rounded"></div>
+            <span>Exchange Busy - Active Trade in Progress</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-1 bg-green-500"></div>
+            <span>Selectable for Trading</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-1 bg-orange-500"></div>
+            <span>Skipped - Exchange Busy</span>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateY(-20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default FlowingScannerDashboard;

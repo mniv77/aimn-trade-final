@@ -1,0 +1,287 @@
+IMn Scanner ⇄ Popup Integration (Official v1.0)
+
+Date: 2025-09-03
+Scope: Define how the Scanner and Popup Trading UI talk to each other, what gets stored, and how we’ll evolve to multi-user + ML without breaking what’s live.
+
+1) Architecture (Phase 1 now, Phase 2 later)
+
+Scanner (meirniv.pythonanywhere.com): detects entries, pauses exchange scanning, calls Popup.
+
+Popup UI (popup-trader-ui-meirniv.pythonanywhere.com): opens order session, renders our real-time canvas chart, manages exits (T/L/R/P), stores everything.
+
+DB (Phase 1): SQLite (already live).
+
+DB (Phase 2): Shared MySQL (replicate schema; keep the same field names so code path stays the same).
+
+Scanner --POST /api/trade_sessions--> Popup
+Popup renders live chart + exit logic
+Popup --POST /api/trade-completed--> Scanner (exit + P&L + reason)
+
+2) Auth, Users, Tenants
+
+Auth: Authorization: Bearer <SHARED_API_KEY> (env var on both sides).
+
+User: X-User-Id: <string> (required; default "default_user" if omitted).
+
+Tenant (optional): X-Tenant: <string>; defaults to "public" (already supported in Popup).
+
+No broker keys in URLs/bodies. Broker creds are looked up server-side by (tenant, user_id) if/when live execution is added.
+
+3) API Contracts
+3.1 Scanner → Popup: Create a trade session
+
+POST /api/trade_sessions
+
+Headers
+
+Authorization: Bearer <SHARED_API_KEY>
+Content-Type: application/json
+X-User-Id: <user_id>
+X-Tenant: <tenant>   # optional
+Idempotency-Key: <uuid>  # optional but recommended
+
+
+Body
+
+{
+  "signal_id": 12345,
+  "symbol": "AAPL",
+  "exchange": "NASDAQ",
+  "side": "BUY",
+  "qty": 10,
+  "entry_price": 221.45,
+  "params": { "p21": 2.0, "p23": 0.3, "p25": 1.5, "p27": 1.5, "p29": 1.0, "p31": 0.5 }
+}
+
+
+Params are in % (not decimals): p21=2.0 means 2%.
+
+200 OK
+
+{
+  "ok": true,
+  "sid": 1002,
+  "user_id": "default_user",
+  "popup_url": "/chart_lite?symbol=AAPL&exchange=NASDAQ&side=BUY&qty=10&sid=1002&entry=221.45"
+}
+
+
+4xx
+
+{ "ok": false, "error": "Missing required field: symbol" }
+
+
+Notes
+
+Popup persists the session and immediately returns a URL that the scanner (or user) can open.
+
+If Idempotency-Key repeats, Popup returns the first session (no duplicate).
+
+3.2 Popup → Scanner: Trade completion callback
+
+POST https://meirniv.pythonanywhere.com/api/trade-completed
+
+Headers: same (Bearer + X-User-Id + X-Tenant)
+
+Body
+
+{
+  "signal_id": 12345,
+  "session_id": 1002,
+  "exchange": "NASDAQ",
+  "symbol": "AAPL",
+  "side": "BUY",
+  "exit_reason": "T",
+  "exit_price": 224.10,
+  "pnl_percentage": 1.20,
+  "trade_duration_seconds": 1425,
+  "timestamp": "2025-09-03T10:39:15Z",
+  "snapshot_url": "/static/snaps/sid1002-1693759150000.png"   // optional
+}
+
+
+Exit codes: T trailing, L stop, R RSI, P panic/manual.
+
+200 OK
+
+{
+  "status": "success",
+  "message": "Exchange NASDAQ scanning resumed",
+  "exchange_state": { "exchange": "NASDAQ", "is_scanning": true, "active_position_symbol": null }
+}
+
+
+Retries: Popup retries callback (max 2) with backoff if Scanner returns ≥500 or times out.
+
+4) Data to Persist (for reports & ML)
+4.1 Tables (Phase 1 — SQLite; same columns for MySQL Phase 2)
+
+trade_sessions (created at entry)
+
+id (PK, int)
+
+tenant (text)
+
+user_id (text) NEW (Phase 1 addition)
+
+signal_id (int) NEW (Phase 1 addition)
+
+symbol (text), exchange (text), side (text), qty (int)
+
+entry_price (real)
+
+params_json (text) — normalized strategy knobs (p21..p31 in % and named fields in decimals)
+
+status (text: OPEN/DONE/CANCELLED)
+
+Timestamps: created_at (ms), opened_at (ms), closed_at (ms)
+
+Computed (when closed): exit_price, exit_value, pnl_pct, pnl_amount, reason, snapshot_path
+
+SQLite migration (safe):
+
+ALTER TABLE trade_sessions ADD COLUMN user_id TEXT;
+ALTER TABLE trade_sessions ADD COLUMN signal_id INTEGER;
+ALTER TABLE trade_sessions ADD COLUMN status TEXT;
+ALTER TABLE trade_sessions ADD COLUMN opened_at INTEGER;
+ALTER TABLE trade_sessions ADD COLUMN closed_at INTEGER;
+ALTER TABLE trade_sessions ADD COLUMN exit_price REAL;
+ALTER TABLE trade_sessions ADD COLUMN exit_value REAL;
+ALTER TABLE trade_sessions ADD COLUMN pnl_pct REAL;
+ALTER TABLE trade_sessions ADD COLUMN pnl_amount REAL;
+ALTER TABLE trade_sessions ADD COLUMN reason TEXT;
+ALTER TABLE trade_sessions ADD COLUMN snapshot_path TEXT;
+CREATE INDEX IF NOT EXISTS idx_sessions_signal ON trade_sessions(signal_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON trade_sessions(user_id);
+
+
+orders (immutable exit record; already exists)
+
+Ensure we also store: session_id (FK) (add if missing), exit_time (ms)
+
+ALTER TABLE orders ADD COLUMN session_id INTEGER;
+ALTER TABLE orders ADD COLUMN exit_time INTEGER;
+CREATE INDEX IF NOT EXISTS idx_orders_session ON orders(session_id);
+
+
+trade_events (optional, Phase 2)
+
+id, session_id, t_ms, etype ('ARM'|'TRAIL_UPD'|'EXIT'|'PANIC'), data_json
+
+Use this for deep diagnostics & ML (trail peaks, stage switches, etc.)
+
+4.2 What we capture at minimum
+
+Who/Context: tenant, user_id, signal_id
+
+Order: symbol, exchange, side, qty
+
+Strategy inputs: raw p21..p31 (as given, in %) + normalized named decimals in params_json
+
+Prices: entry_price, exit_price, exit_value, pnl_pct, pnl_amount
+
+Times: created_at/opened_at/closed_at/exit_time
+
+Exit reason: T/L/R/P
+
+Artifacts: snapshot_path of the final chart frame (PNG via /api/trade_sessions/<sid>/snapshot)
+
+This is enough for reporting and a first ML pass (supervised labels by reason, features by params + context). Phase 2 can add per-bar summaries (e.g., max favorable excursion, max adverse excursion).
+
+5) Strategy Semantics (Exit-only, enforced in UI)
+
+Stop loss (p21): fixed vs entry.
+
+Trail start (p23): arms trailing when PnL ≥ p23.
+
+Trailing widths (p25,p29):
+
+Stage 1 width = p25, tightens to Stage 2 width = p29 once PnL ≥ p27.
+
+Trailing top only moves up for BUY (down for SELL). Minus trail = top minus width.
+
+Exit T triggers when price crosses the minus trail.
+
+RSI exit (p31 gating): RSI exit allowed only if PnL ≥ p31. (UI has placeholder; server engine supports it.)
+
+Panic (P): user close.
+
+6) Health/Ops
+
+Popup: GET /__ok, GET /healthz, GET /healthz/db, GET /healthz/lite
+
+Scanner: GET /api/health
+
+Basic logging on both sides: request line, user_id, signal_id, status, latency.
+
+7) Testing (happy path + exits)
+
+Session create: Scanner → Popup /api/trade_sessions → 200 + popup_url.
+
+Open URL: /chart_lite?...&sid=...&entry=... shows:
+
+Fixed Entry / Trail-Start / Stop lines (don’t move),
+
+Moving Last line,
+
+Trailing top/minus and exit when crossed.
+
+Exit T: Simulate move → verify /api/trade-completed POST from Popup.
+
+Exit L: Force stop loss cross → callback.
+
+Panic: Press Panic → callback with P.
+
+Persistence: Check SQLite trade_sessions + orders fields populated.
+
+Multi-user smoke: Send X-User-Id: demo1 and ensure it flows to DB rows.
+
+8) Action Items (Phase 1)
+
+Popup team
+
+ Add columns/migrations listed above (safe ALTER TABLE in SQLite).
+
+ Accept and store signal_id + user_id in /api/trade_sessions (attach to session row).
+
+ On exit (T/L/R/P), post to Scanner /api/trade-completed with snapshot (if available).
+
+ Keep chart snapshot on exit (/snapshot endpoint already exists).
+
+ Honor Authorization: Bearer and X-User-Id headers.
+
+Scanner team
+
+ Send unified payload (see §3.1) with X-User-Id and Bearer token.
+
+ Implement /api/trade-completed to resume scanning, mark signal_id processed.
+
+ Handle retries/idempotency.
+
+9) Phase 2 (Shared MySQL + richer analytics)
+
+Move schema (same columns) to MySQL (MeirNiv$trading_db).
+
+Add trade_events and per-bar aggregates (MFE/MAE).
+
+Centralize strategy_params and broker credential lookup by (tenant,user_id).
+
+Add dashboards (time to exit, win-rate by reason, params → outcome heatmaps).
+
+Export clean ML dataset (features at entry, labeled by exit_reason/P&L).
+
+Appendix A — Minimal code notes for current Popup
+
+Endpoints already present:
+
+POST /api/trade_sessions (create)
+
+POST /api/trade_sessions/<sid>/close (exit)
+
+POST /api/trade_sessions/<sid>/snapshot (PNG)
+
+GET /chart_lite (real-time canvas)
+
+The chart now locks Entry/Trail/Stop to fixed values, shows moving Last, and implements trailing top/minus + exit T.
+
+If both teams sign off on this, we can implement Phase 1 with tiny patches (mostly ALTER TABLE + headers + a small callback on exit). From there, Phase 2 is a straight DB migration and analytics add-ons.

@@ -1,0 +1,44 @@
+# file: templates/chart.html
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="margin-bottom:1rem;">
+  <h2>Real‑Time Chart</h2>
+  <form id="symform" class="row" style="gap:.5rem;align-items:flex-end;">
+    <label>Symbol<br><input id="sym" value="{{ symbol }}" /></label>
+    <button type="submit">Load</button>
+    <span class="muted">Tip: open <code>/chart?symbol=AAPL</code></span>
+  </form>
+  <div id="chart-wrap" style="margin-top:1rem;"><canvas id="rt-chart"></canvas></div>
+</div>
+<script>
+(() => {
+  const ctx = document.getElementById('rt-chart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: [], datasets: [{ label: 'Price', data: [], pointRadius: 0, borderWidth: 1, tension: 0.15 }] },
+    options: { animation:false, responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ticks:{maxRotation:0,autoSkip:true}}, y:{beginAtZero:false} } }
+  });
+  let es;
+  function start(sym){
+    if (es) { es.close(); es=null; }
+    es = new EventSource(`/price/${encodeURIComponent(sym)}`);
+    es.onmessage = (ev) => {
+      const d = JSON.parse(ev.data);
+      chart.data.labels.push(new Date(d.t).toLocaleTimeString());
+      chart.data.datasets[0].data.push(d.price);
+      if (chart.data.labels.length>600){ chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+      chart.update('none');
+    };
+    es.onerror = () => { es && es.close(); setTimeout(()=>start(sym), 1500); };
+  }
+  // boot with server-provided symbol
+  start('{{ symbol }}');
+  // form handler: reload page with new symbol
+  document.getElementById('symform').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const s = document.getElementById('sym').value.trim().toUpperCase() || 'AAPL';
+    window.location.search = `?symbol=${encodeURIComponent(s)}`;
+  });
+})();
+</script>
+{% endblock %}

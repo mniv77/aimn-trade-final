@@ -1,0 +1,181 @@
+# app.py
+from __future__ import annotations
+import os, random
+from pathlib import Path
+from flask import Flask, render_template, render_template_string, jsonify, request
+
+app = Flask(__name__, template_folder="templates", static_folder="static")
+TEMPLATES_DIR = Path(app.template_folder or "templates")
+
+# ---------------- Basic pages ----------------
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/scanner")
+def scanner():
+    return render_template("aimn_flowing_scanner_auto.html")
+
+@app.route("/trade-popup-fixed")
+def trade_popup_fixed():
+    return render_template("trade-popup-fixed.html")
+
+@app.route("/trade-full")
+def trade_full():
+    return render_template("trade-full.html")
+
+# ---------------- Blueprints (safe) ----------------
+def _safe_import(modname: str):
+    try:
+        module = __import__(modname, fromlist=["*"])
+        return module
+    except Exception:
+        return None
+
+_main_bp_mod = _safe_import("blueprints.main")
+_aiml_bp_mod = _safe_import("blueprints.aiml")
+_credentials_api_mod = _safe_import("blueprints.credentials_api")
+_trading_api_mod = _safe_import("blueprints.trading_api")
+
+if _main_bp_mod and hasattr(_main_bp_mod, "main_bp"):
+    app.register_blueprint(_main_bp_mod.main_bp, url_prefix="/main")
+if _aiml_bp_mod and hasattr(_aiml_bp_mod, "aiml_bp"):
+    app.register_blueprint(_aiml_bp_mod.aiml_bp, url_prefix="/aiml")
+if _credentials_api_mod and hasattr(_credentials_api_mod, "credentials_api"):
+    app.register_blueprint(_credentials_api_mod.credentials_api, url_prefix="")
+if _trading_api_mod and hasattr(_trading_api_mod, "trading_api"):
+    app.register_blueprint(_trading_api_mod.trading_api, url_prefix="")
+
+# ---------------- APIs (stable) ----------------
+@app.route("/api/live_price")
+def api_live_price():
+    symbol = request.args.get("symbol", "AAPL")
+    exchange = request.args.get("exchange", "ALPACA")
+    if "CRYPTO" in exchange.upper():
+        try:
+            import requests
+            clean = symbol.replace("/", "") + "T"
+            r = requests.get(f"https://api.binance.com/api/v3/ticker/price?symbol={clean}", timeout=5)
+            r.raise_for_status()
+            price = float(r.json()["price"])
+        except Exception:
+            price = 108000.0
+    else:
+        price = round(random.uniform(50, 500), 2)
+    return jsonify({"symbol": symbol, "exchange": exchange, "price": price})
+
+@app.route("/api/flowing-scanner-data")
+def flowing_scanner_data():
+    symbols = [
+        {"symbol": "BTC/USD", "exchange": "CRYPTO"},
+        {"symbol": "ETH/USD", "exchange": "CRYPTO"},
+        {"symbol": "AAPL", "exchange": "ALPACA"},
+        {"symbol": "TSLA", "exchange": "ALPACA"},
+        {"symbol": "NVDA", "exchange": "ALPACA"},
+        {"symbol": "SPY", "exchange": "NYSE"},
+        {"symbol": "QQQ", "exchange": "NYSE"},
+        {"symbol": "MSFT", "exchange": "NYSE"},
+        {"symbol": "AMZN", "exchange": "NYSE"},
+        {"symbol": "GOOGL", "exchange": "ALPACA"},
+    ]
+    out = []
+    for s in symbols:
+        rsi = round(random.uniform(0, 100), 1)
+        sig = "BUY" if rsi < 30 else ("SELL" if rsi > 70 else "NEUTRAL")
+        out.append({
+            "symbol": s["symbol"], "exchange": s["exchange"],
+            "price": str(round(random.uniform(50, 550), 2)),
+            "change": str(round(random.uniform(-10, 10), 2)),
+            "volume": f"{random.randint(100_000, 1_000_000):,}",
+            "rsi": str(rsi), "signal": sig,
+            "signalStrength": str(round(random.uniform(0.5, 1.0), 2) if sig != "NEUTRAL" else "0"),
+            "isAvailable": True, "isActivelyTrading": False,
+        })
+    return jsonify({"scanResults": out})
+
+@app.route("/api/exchange-status")
+def exchange_status():
+    return jsonify({
+        "ALPACA": {"status": "ACTIVE"},
+        "CRYPTO": {"status": "ACTIVE"},
+        "FOREX": {"status": "ACTIVE"},
+        "NYSE": {"status": "ACTIVE"},
+        "FUTURES": {"status": "ACTIVE"},
+    })
+
+# ---------------- Alias router ----------------
+LINK_ALIASES = {
+    # You asked for these:
+    "orders": "orders.html",
+    "trade-tester": "trade-tester.html",
+    "symbols": "symbols.html",
+    "simple-explanation": "simple-explanation.html",
+    "architectural-analysis": "architectural-analysis.html",
+    "scanner-analysis": "scanner-analysis.html",
+    "scanner-simulator": "scanner-simulator.html",
+    "beginner-guide": "beginner-guide.html",
+    "scanner/diagnostics": "scanner/diagnostics.html",
+    "aiml": "aiml.html",
+    "tuning": "tuning.html",
+
+    # Shortcuts
+    "home": "index.html",
+    "dashboard": "index.html",
+    "scanner": "aimn_flowing_scanner_auto.html",
+}
+
+@app.route("/go/<path:alias>")
+def go_alias(alias: str):
+    tpl = LINK_ALIASES.get(alias)
+    if tpl:
+        try:
+            return render_template(tpl)
+        except Exception:
+            pass
+    expected = tpl or f"{alias}.html"
+    return render_template_string(
+        """
+        <div style="background:#0b1220;color:#e5e7eb;padding:20px;border-radius:10px;
+                    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;">
+          <h2 style='margin:0 0 8px'>Page '{{ alias }}' not found</h2>
+          <div>Expected template: <code>templates/{{ expected }}</code></div>
+          <p style="opacity:.8;margin-top:10px">
+            Create that file (or update LINK_ALIASES in <code>app.py</code>).
+          </p>
+          <p><a href="/">← Back to Dashboard</a></p>
+        </div>
+        """,
+        alias=alias, expected=expected
+    ), 404
+
+# ---------------- Catch-all ----------------
+KNOWN_PAGES = {
+    "dashboard": "index.html",
+    "scanner": "aimn_flowing_scanner_auto.html",
+    "trade-popup-fixed": "trade-popup-fixed.html",
+    "trade-full": "trade-full.html",
+    "tuning": "tuning.html",
+}
+
+@app.route("/<path:page>")
+def smart_page(page: str):
+    if page in KNOWN_PAGES:
+        return render_template(KNOWN_PAGES[page])
+    candidate = f"{page}.html"
+    if (TEMPLATES_DIR / candidate).exists():
+        return render_template(candidate)
+    return render_template_string(
+        "<h2 style='color:white;background:#111;padding:20px;'>"
+        "Page '{{page}}' not found. Add templates/{{page}}.html."
+        "</h2><p><a href='/'>← Back to Dashboard</a></p>",
+        page=page
+    ), 404
+
+# ---------------- Health ----------------
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}, 200
+
+# ---------------- Dev runner ----------------
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True)

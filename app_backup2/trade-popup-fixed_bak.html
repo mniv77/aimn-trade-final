@@ -1,0 +1,192 @@
+<!-- templates/trade-popup-fixed.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Trade Micro</title>
+  <style>
+    html,body { margin:0; padding:0; overflow:hidden; background:#1f2937; color:#fff; }
+    body { font: 12px/1.1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .wrap { display:flex; align-items:center; gap:6px; white-space:nowrap; padding:4px 6px; }
+    .pill { padding:2px 6px; border-radius:999px; font-weight:700; }
+    .buy { background:#065f46; }
+    .sell { background:#7f1d1d; }
+    .btn { background:#374151; border:1px solid #4b5563; border-radius:6px; padding:2px 6px; cursor:pointer; }
+    .btn:hover { background:#4b5563; }
+    .danger { background:#7f1d1d; border-color:#dc2626; }
+    .danger:hover { background:#991b1b; }
+    .muted { color:#9ca3af; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .good { color:#86efac; } .bad { color:#fca5a5; }
+  </style>
+  <script>
+    // --- State ---
+    let q = new URLSearchParams(location.search);
+    const symbol   = q.get('symbol')   || 'AAPL';
+    const exchange = q.get('exchange') || 'ALPACA';
+    const side     = (q.get('side')||'BUY').toUpperCase() === 'SELL' ? 'SELL' : 'BUY';
+    const qty      = Number(q.get('qty')|| (exchange==='CRYPTO'? '0.01':'10'));
+    const expandUrlParam = q.get('expand_url'); // optional, preferred
+    let inPosition = false;
+    let entryPrice = 0;
+    let currentPrice = 0;
+    let tradeStart = null;
+    let priceTimer = null;
+    let durationTimer = null;
+    let frozen = false; // after exit
+    let lastGoodPrice = 0;
+
+    // --- DOM helpers ---
+    function el(id){ return document.getElementById(id); }
+
+    function fmtP(v){ return '$' + Number(v).toFixed(2); }
+    function pnlPct(cur, ent, side){
+      if(!ent) return 0;
+      return side==='BUY' ? ( (cur-ent)/ent*100 ) : ( (ent-cur)/ent*100 );
+    }
+
+    // --- Duration ---
+    function tickDuration(){
+      if(!tradeStart) return;
+      const ms = Date.now() - tradeStart.getTime();
+      const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000);
+      el('dur').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    // --- Price fetch (uses your Flask endpoint) ---
+    async function fetchPriceOnce(){
+      try {
+        const url = `/api/live_price?symbol=${encodeURIComponent(symbol)}&exchange=${encodeURIComponent(exchange)}`;
+        const r = await fetch(url, {cache:'no-store'});
+        const js = await r.json();
+        const p = Number(js.price || js.last || js.close || js.p);
+        if(Number.isFinite(p) && p>0){
+          currentPrice = p;
+          lastGoodPrice = p;
+          return true;
+        }
+      } catch(e) {
+        // ignore; we fallback below
+      }
+      // fallback tiny random walk around last good price (if any)
+      if(lastGoodPrice){
+        const delta = lastGoodPrice * ( (Math.random()-0.5) * 0.001 ); // +/-0.1%
+        currentPrice = Math.max(0.0001, lastGoodPrice + delta);
+        return true;
+      }
+      return false;
+    }
+
+    function updateLine(){
+      if(!el('px')) return;
+      el('px').textContent     = fmtP(currentPrice);
+      el('entry').textContent  = entryPrice ? fmtP(entryPrice) : '$--';
+      const pct = pnlPct(currentPrice, entryPrice, side);
+      const pnlEl = el('pnl');
+      pnlEl.textContent = (pct>=0? '+':'') + pct.toFixed(2) + '%';
+      pnlEl.className = 'mono ' + (pct>=0 ? 'good' : 'bad');
+    }
+
+    async function ensureStarted(){
+      // first clean price
+      const ok = await fetchPriceOnce();
+      if(!ok) return; // try again on next tick
+      updateLine();
+      if(!inPosition){
+        entryPrice = currentPrice;
+        inPosition = true;
+        tradeStart = new Date();
+        tickDuration();
+      }
+    }
+
+    function startLoops(){
+      // compact window
+      try { window.resizeTo(520, 70); } catch(e) {}
+      durationTimer = setInterval(tickDuration, 1000);
+      priceTimer = setInterval(async ()=>{
+        if(frozen) return;
+        const ok = await fetchPriceOnce();
+        if(ok){
+          // if still not in, set entry at first successful fetch
+          if(!inPosition){
+            entryPrice = currentPrice;
+            inPosition = true;
+            tradeStart = new Date();
+          }
+          updateLine();
+        }
+      }, 2000);
+    }
+
+    // --- Exit & notify ---
+    function notifyClose(reason, finalPct){
+      try {
+        if(window.opener && !window.opener.closed){
+          window.opener.postMessage({
+            type:'TRADE_CLOSED',
+            symbol, exchange, pnl: finalPct, reason
+          }, '*');
+        }
+      } catch(e) {}
+    }
+
+    function panicExit(){
+      if(frozen) return;
+      // freeze values
+      frozen = true;
+      if(!entryPrice) entryPrice = currentPrice || lastGoodPrice || entryPrice;
+      const pct = pnlPct(currentPrice, entryPrice, side);
+      updateLine();
+      el('dir').textContent = 'EXIT';
+      el('dir').className = 'pill';
+      el('panic').disabled = true;
+
+      notifyClose('PANIC', Number.isFinite(pct)? pct : 0);
+
+      // auto close after 2 minutes
+      setTimeout(()=>{ try{ window.close(); }catch(e){} }, 120000);
+    }
+
+    function expandFull(){
+      // prefer expand_url param (already formed by scanner)
+      const url = expandUrlParam
+        || `/trade-full?symbol=${encodeURIComponent(symbol)}&exchange=${encodeURIComponent(exchange)}&qty=${encodeURIComponent(qty)}&side=${encodeURIComponent(side)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    // --- Boot ---
+    window.addEventListener('load', async ()=>{
+      // fill static bits
+      el('broker').textContent = exchange;
+      el('sym').textContent = symbol;
+      el('dir').textContent = side;
+      el('dir').className = 'pill ' + (side==='BUY'?'buy':'sell');
+      // start fetching + autostart logic
+      await ensureStarted();
+      startLoops();
+    });
+
+    window.addEventListener('beforeunload', ()=>{
+      clearInterval(priceTimer); clearInterval(durationTimer);
+    });
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <span id="broker" class="mono"></span>
+    <span class="muted">|</span>
+    <span id="sym" class="mono"></span>
+    <span id="dir" class="pill">BUY</span>
+
+    <span class="muted">t:</span><span id="dur" class="mono">00:00</span>
+    <span class="muted">Px:</span><span id="px" class="mono">$--</span>
+    <span class="muted">Entry:</span><span id="entry" class="mono">$--</span>
+    <span class="muted">P&L:</span><span id="pnl" class="mono">0.00%</span>
+
+    <button id="expand" class="btn" onclick="expandFull()">↗️ Expand</button>
+    <button id="panic"  class="btn danger" onclick="panicExit()">❌ Panic</button>
+  </div>
+</body>
+</html>

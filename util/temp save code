@@ -1,0 +1,121 @@
+<!-- Add this button to your main dashboard page -->
+
+<!-- Option 1: Simple Button -->
+<div class="strategy-button-container" style="margin: 20px; text-align: center;">
+    <a href="/strategy/aimn_tuning_center_v52.html" class="strategy-button">
+        🎯 Strategy Tuning Center - V5.2
+    </a>
+</div>
+
+<!-- Option 2: Card-Style Button with Description -->
+<div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 25px; margin: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="color: white;">
+            <h3 style="margin: 0 0 10px 0; font-size: 1.5em;">🎯 Strategy Tuning Center</h3>
+            <p style="margin: 0; opacity: 0.9;">Transfer TradingView parameters to database</p>
+            <small style="opacity: 0.7;">Version 5.2 - Dual Trailing System</small>
+        </div>
+        <a href="/strategy/aimn_tuning_center_v52.html" 
+           style="background: rgba(255,255,255,0.2); color: white; padding: 15px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s ease;"
+           onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+           onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+            Open Tuning Center →
+        </a>
+    </div>
+</div>
+
+<!-- Option 3: Icon Button in Navigation Menu -->
+<div class="nav-menu-item">
+    <a href="/strategy/aimn_tuning_center_v52.html" class="nav-link">
+        <span class="nav-icon">🎯</span>
+        <span class="nav-text">Strategy Tuning</span>
+    </a>
+</div>
+
+<!-- CSS Styles for the buttons -->
+<style>
+.strategy-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.2em;
+    box-shadow: 0 5px 20px rgba(255,107,53,0.4);
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.strategy-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255,107,53,0.6);
+    color: white;
+    text-decoration: none;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.nav-link:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    text-decoration: none;
+}
+
+.nav-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.nav-text {
+    font-weight: 500;
+}
+</style>
+
+<!-- Python Flask Route (add to your app.py) -->
+<!--
+@app.route('/strategy')
+def strategy_dashboard():
+    return redirect('/strategy/aimn_tuning_center_v52.html')
+
+@app.route('/tuning')
+def tuning_center():
+    return redirect('/strategy/aimn_tuning_center_v52.html')
+-->
+
+<!-- Alternative: Quick Access Panel -->
+<div class="quick-access-panel" style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin: 20px;">
+    <h4 style="color: white; margin-bottom: 15px;">⚡ Quick Access</h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        
+        <a href="/strategy/aimn_tuning_center_v52.html" class="quick-access-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;">
+            🎯 Strategy Tuning<br>
+            <small style="opacity: 0.8;">Parameter Transfer</small>
+        </a>
+        
+        <a href="/scanner" class="quick-access-btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 15px; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;">
+            📡 Live Scanner<br>
+            <small style="opacity: 0.8;">Multi-Symbol Scan</small>
+        </a>
+        
+        <a href="/trades" class="quick-access-btn" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 15px; border-radius: 8px; text-decoration: none; text-align: center; font-weight: bold;">
+            📊 Active Orders<br>
+            <small style="opacity: 0.8;">Popup Management</small>
+        </a>
+        
+    </div>
+</div>

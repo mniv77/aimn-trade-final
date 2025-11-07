@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Scanner-Popup Handshaking Diagnostics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .signal-detected {
+            animation: signalPulse 1s infinite;
+            border: 2px solid #10b981 !important;
+        }
+
+        @keyframes signalPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+
+        .indicator-pass { color: #10b981; font-weight: bold; }
+        .indicator-fail { color: #ef4444; }
+        .indicator-neutral { color: #6b7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Header -->
+    <div class="p-6 bg-gray-800 border-b border-gray-700">
+        <h1 class="text-3xl font-bold text-center mb-2">AIMn Scanner-Popup Diagnostics</h1>
+        <p class="text-center text-gray-400">Test Scanner → Popup Handshaking & Signal Detection</p>
+    </div>
+
+    <!-- Scanner Status -->
+    <div class="p-6 bg-gray-800 m-4 rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Scanner Status & Broker Locks</h2>
+        <div class="grid grid-cols-4 gap-4 text-center mb-4">
+            <div class="bg-gray-700 p-4 rounded">
+                <div class="text-2xl font-bold text-green-400" id="signals-sent">0</div>
+                <div class="text-sm text-gray-400">Signals Sent to Popup</div>
+            </div>
+            <div class="bg-gray-700 p-4 rounded">
+                <div class="text-2xl font-bold text-blue-400" id="scanning-symbols">12</div>
+                <div class="text-sm text-gray-400">Symbols Scanning</div>
+            </div>
+            <div class="bg-gray-700 p-4 rounded">
+                <div class="text-2xl font-bold text-yellow-400" id="popup-responses">0</div>
+                <div class="text-sm text-gray-400">Popup Responses</div>
+            </div>
+            <div class="bg-gray-700 p-4 rounded">
+                <div class="text-2xl font-bold text-red-400" id="exit-messages">0</div>
+                <div class="text-sm text-gray-400">Exit Messages Received</div>
+            </div>
+        </div>
+        
+        <!-- Broker Lock Status -->
+        <div class="bg-gray-700 p-4 rounded">
+            <h3 class="font-semibold mb-2">Broker Lock Status</h3>
+            <div id="broker-status" class="grid grid-cols-5 gap-2 text-sm">
+                <!-- Broker status will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Symbol Analysis -->
+    <div class="p-6 bg-gray-800 m-4 rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Live Symbol Analysis - 4 Indicators</h2>
+        
+        <!-- Headers -->
+        <div class="grid grid-cols-10 gap-2 text-sm font-semibold text-gray-400 mb-3 p-2">
+            <div>Symbol</div>
+            <div>Broker</div>
+            <div>Price</div>
+            <div>RSI</div>
+            <div>MACD</div>
+            <div>Volume</div>
+            <div>ATR</div>
+            <div>Signal</div>
+            <div>Action</div>
+            <div>Status</div>
+        </div>
+        
+        <div id="symbol-analysis" class="space-y-2">
+            <!-- Symbol rows will be populated here -->
+        </div>
+    </div>
+
+    <!-- Signal Communication Log -->
+    <div class="p-6 bg-gray-800 m-4 rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Scanner → Popup Communication Log</h2>
+        <div id="communication-log" class="bg-gray-900 p-4 rounded max-h-96 overflow-y-auto">
+            <div class="text-gray-400 text-sm">Waiting for signals...</div>
+        </div>
+    </div>
+
+    <!-- Manual Test Controls -->
+    <div class="p-6 bg-gray-800 m-4 rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Manual Test Controls</h2>
+        <div class="flex gap-4 flex-wrap">
+            <button id="force-buy-signal" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold">
+                Force BUY Signal
+            </button>
+            <button id="force-sell-signal" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-semibold">
+                Force SELL Signal
+            </button>
+            <button id="simulate-exit" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded font-semibold">
+                Simulate Exit Message
+            </button>
+            <button id="test-popup-comm" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-semibold">
+                Test Popup Communication
+            </button>
+            <button id="clear-log" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded font-semibold">
+                Clear Log
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="m-4 text-center">
+        <a href="/" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <script>
+        let scanData = [];
+        let signalCounter = 0;
+        let popupResponses = 0;
+        let exitMessages = 0;
+        
+        // Broker lock state and active trading symbol
+        let brokerLocks = {
+            'ALPACA': false,
+            'NYSE': false,
+            'NASDAQ': false,
+            'CRYPTO': false,
+            'FOREX': false
+        };
+        
+        let activeTradeSymbol = null; // The specific symbol being traded
+
+        // Realistic market symbols for testing
+        const symbols = [
+            {symbol: 'AAPL', exchange: 'ALPACA'},
+            {symbol: 'MSFT', exchange: 'NYSE'},
+            {symbol: 'GOOGL', exchange: 'NASDAQ'},
+            {symbol: 'AMZN', exchange: 'NYSE'},
+            {symbol: 'TSLA', exchange: 'ALPACA'},
+            {symbol: 'META', exchange: 'NASDAQ'},
+            {symbol: 'NVDA', exchange: 'ALPACA'},
+            {symbol: 'NFLX', exchange: 'NYSE'},
+            {symbol: 'SPY', exchange: 'NYSE'},
+            {symbol: 'QQQ', exchange: 'NASDAQ'},
+            {symbol: 'BTC/USD', exchange: 'CRYPTO'},
+            {symbol: 'ETH/USD', exchange: 'CRYPTO'}
+        ];
+
+        // Current indicator thresholds (these determine BUY/SELL signals)
+        const thresholds = {
+            rsi: { buy: 30, sell: 70 },
+            macd: { buy: 0.5, sell: -0.5 },
+            volume: { min: 1.2 }, // 1.2x average volume required
+            atr: { min: 0.8 } // Minimum volatility required
+        };
+
+        // Generate realistic market data with proper status
+        function generateMarketData() {
+            return symbols.map(symbolObj => {
+                const basePrice = symbolObj.symbol.includes('/') ? 
+                    Math.random() * 50000 + 20000 : // Crypto prices
+                    Math.random() * 500 + 50; // Stock prices
+                
+                const isActiveTrade = activeTradeSymbol === symbolObj.symbol;
+                const isBrokerLocked = brokerLocks[symbolObj.exchange];
+                const isOtherSymbolLocked = isBrokerLocked && !isActiveTrade;
+                
+                const data = {
+                    symbol: symbolObj.symbol,
+                    exchange: symbolObj.exchange,
+                    price: basePrice.toFixed(2),
+                    rsi: Math.random() * 100,
+                    macd: (Math.random() - 0.5) * 2,
+                    volume: 0.5 + Math.random() * 2,
+                    atr: Math.random() * 2,
+                    timestamp: new Date().toLocaleTimeString(),
+                    status: isActiveTrade ? 'active_trade' : 
+                           isOtherSymbolLocked ? 'broker_locked' : 'available'
+                };
+                
+                // Debug log to check data structure
+                if (symbolObj.symbol === 'AAPL') {
+                    console.log('AAPL data:', data);
+                }
+                
+                return data;
+            });
+        }
+
+        // Lock broker when signal is sent
+        function lockBroker(exchange, symbol) {
+            brokerLocks[exchange] = true;
+            activeTradeSymbol = symbol;
+            logCommunication('LOCK', `${exchange} broker LOCKED - ${symbol} is now ACTIVE TRADE`, null);
+            updateBrokerStatus();
+        }
+
+        // Unlock broker when exit message received
+        function unlockBroker(exchange) {
+            brokerLocks[exchange] = false;
+            const previousSymbol = activeTradeSymbol;
+            activeTradeSymbol = null;
+            logCommunication('UNLOCK', `${exchange} broker UNLOCKED - ${previousSymbol} trade completed`, null);
+            updateBrokerStatus();
+        }
+
+        // Update broker lock status display
+        function updateBrokerStatus() {
+            const container = document.getElementById('broker-status');
+            container.innerHTML = '';
+            
+            Object.entries(brokerLocks).forEach(([exchange, isLocked]) => {
+                const statusDiv = document.createElement('div');
+                statusDiv.className = `p-2 rounded text-center text-xs font-semibold ${
+                    isLocked ? 'bg-red-600 text-white' : 'bg-green-600 text-white'
+                }`;
+                statusDiv.innerHTML = `
+                    <div>${exchange}</div>
+                    <div class="text-xs">${isLocked ? 'LOCKED' : 'SCANNING'}</div>
+                `;
+                container.appendChild(statusDiv);
+            });
+        }
+
+        // Analyze if symbol meets all 4 indicator criteria
+        function analyzeSignal(symbolData) {
+            const rsiSignal = symbolData.rsi <= thresholds.rsi.buy ? 'BUY' :
+                             symbolData.rsi >= thresholds.rsi.sell ? 'SELL' : 'NEUTRAL';
+            
+            const macdSignal = symbolData.macd >= thresholds.macd.buy ? 'BUY' :
+                              symbolData.macd <= thresholds.macd.sell ? 'SELL' : 'NEUTRAL';
+            
+            const volumeOK = symbolData.volume >= thresholds.volume.min;
+            const atrOK = symbolData.atr >= thresholds.atr.min;
+            
+            // All 4 indicators must align for a signal
+            let finalSignal = 'NEUTRAL';
+            let reason = '';
+            
+            if (rsiSignal !== 'NEUTRAL' && macdSignal !== 'NEUTRAL' && 
+                rsiSignal === macdSignal && volumeOK && atrOK) {
+                finalSignal = rsiSignal;
+                reason = 'ALL 4 INDICATORS ALIGNED';
+            } else {
+                const blockers = [];
+                if (rsiSignal === 'NEUTRAL') blockers.push('RSI neutral');
+                if (macdSignal === 'NEUTRAL') blockers.push('MACD neutral');
+                if (rsiSignal !== macdSignal && rsiSignal !== 'NEUTRAL' && macdSignal !== 'NEUTRAL') {
+                    blockers.push('RSI/MACD conflict');
+                }
+                if (!volumeOK) blockers.push('Low volume');
+                if (!atrOK) blockers.push('Low volatility');
+                reason = blockers.join(', ');
+            }
+            
+            return {
+                rsiSignal,
+                macdSignal,
+                volumeOK,
+                atrOK,
+                finalSignal,
+                reason,
+                checks: {
+                    rsi: rsiSignal !== 'NEUTRAL',
+                    macd: macdSignal !== 'NEUTRAL',
+                    volume: volumeOK,
+                    atr: atrOK
+                }
+            };
+        }
+
+        // Send signal to popup (this is the key handshaking function)
+        async function sendSignalToPopup(symbolData, signal) {
+            // Check if broker is locked
+            if (brokerLocks[symbolData.exchange]) {
+                logCommunication('BLOCKED', `Signal blocked - ${symbolData.exchange} broker is locked`, null);
+                return;
+            }
+
+            signalCounter++;
+            
+            // LOCK the broker and set active trade symbol
+            lockBroker(symbolData.exchange, symbolData.symbol);
+            
+            const payload = {
+                signal_id: signalCounter,
+                symbol: symbolData.symbol,
+                exchange: symbolData.exchange,
+                side: signal,
+                entry_price: parseFloat(symbolData.price),
+                qty: 10,
+                timestamp: new Date().toISOString(),
+                indicators: {
+                    rsi: symbolData.rsi.toFixed(1),
+                    macd: symbolData.macd.toFixed(3),
+                    volume: symbolData.volume.toFixed(2) + 'x',
+                    atr: symbolData.atr.toFixed(2)
+                }
+            };
+            
+            // Log the communication attempt
+            logCommunication('OUTGOING', `Scanner → Popup: ${signal} signal for ${symbolData.symbol}`, payload);
+            
+            try {
+                // This is where the real handshaking would happen
+                // In production: POST to /api/trade_sessions
+                
+                // Simulate popup communication
+                const response = await simulatePopupResponse(payload);
+                
+                if (response.success) {
+                    popupResponses++;
+                    logCommunication('SUCCESS', `Popup opened for ${symbolData.symbol}`, response);
+                    updateCounters();
+                } else {
+                    logCommunication('ERROR', `Failed to open popup for ${symbolData.symbol}`, response);
+                    // Unlock broker if popup fails
+                    unlockBroker(symbolData.exchange);
+                }
+                
+            } catch (error) {
+                logCommunication('ERROR', `Communication failed: ${error.message}`, null);
+                // Unlock broker on error
+                unlockBroker(symbolData.exchange);
+            }
+        }
+
+        // Simulate exit message from popup (this unlocks the broker)
+        function simulateExitMessage(exchange, reason, pnl) {
+            exitMessages++;
+            
+            const exitPayload = {
+                exchange: exchange,
+                exit_reason: reason || 'manual_close',
+                pnl_percentage: pnl || (Math.random() - 0.5) * 10, // Random P&L
+                timestamp: new Date().toISOString(),
+                message: 'Trade completed, unlocking broker'
+            };
+            
+            logCommunication('INCOMING', `Popup → Scanner: Exit message for ${exchange}`, exitPayload);
+            
+            // UNLOCK the broker
+            unlockBroker(exchange);
+            
+            updateCounters();
+        }
+
+        // Simulate popup response (in real system, this comes from your popup)
+        async function simulatePopupResponse(payload) {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 300));
+            
+            // Simulate success/failure
+            if (Math.random() > 0.1) { // 90% success rate
+                return {
+                    success: true,
+                    session_id: Math.floor(Math.random() * 10000),
+                    popup_url: `/chart_lite?symbol=${payload.symbol}&side=${payload.side}&sid=${Math.floor(Math.random() * 10000)}`,
+                    message: 'Popup window opened successfully'
+                };
+            } else {
+                return {
+                    success: false,
+                    error: 'Popup blocked or communication timeout',
+                    message: 'Failed to establish handshake'
+                };
+            }
+        }
+
+        // Log communication events
+        function logCommunication(type, message, data) {
+            const logContainer = document.getElementById('communication-log');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `mb-2 p-2 rounded text-sm ${
+                type === 'SUCCESS' ? 'bg-green-900 border-l-4 border-green-500' :
+                type === 'ERROR' ? 'bg-red-900 border-l-4 border-red-500' :
+                'bg-blue-900 border-l-4 border-blue-500'
+            }`;
+            
+            logEntry.innerHTML = `
+                <div class="font-semibold">[${timestamp}] ${message}</div>
+                ${data ? `<div class="mt-1 text-xs text-gray-300">${JSON.stringify(data, null, 2)}</div>` : ''}
+            `;
+            
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+            
+            // Keep only last 20 log entries
+            while (logContainer.children.length > 20) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        // Update counters in UI
+        function updateCounters() {
+            document.getElementById('signals-sent').textContent = signalCounter;
+            document.getElementById('popup-responses').textContent = popupResponses;
+            document.getElementById('exit-messages').textContent = exitMessages;
+            document.getElementById('scanning-symbols').textContent = scanData.length;
+        }
+
+        // Render symbol analysis table
+        function renderSymbolAnalysis() {
+            const container = document.getElementById('symbol-analysis');
+            container.innerHTML = '';
+            
+            scanData.forEach(symbolData => {
+                const analysis = analyzeSignal(symbolData);
+                const hasSignal = analysis.finalSignal !== 'NEUTRAL';
+                const isLocked = symbolData.isLocked;
+                
+                const row = document.createElement('div');
+                row.className = `grid grid-cols-9 gap-2 text-sm p-3 rounded transition-all ${
+                    isLocked ? 'bg-red-900 opacity-50' :
+                    hasSignal ? 'signal-detected bg-green-900' : 'bg-gray-700'
+                }`;
+                
+                row.innerHTML = `
+                    <div class="font-mono font-bold ${isLocked ? 'text-red-400' : ''}">${symbolData.symbol}</div>
+                    <div class="font-mono">${symbolData.price}</div>
+                    <div class="font-mono ${analysis.checks.rsi ? 'indicator-pass' : 'indicator-neutral'}">
+                        ${symbolData.rsi.toFixed(1)}
+                    </div>
+                    <div class="font-mono ${analysis.checks.macd ? 'indicator-pass' : 'indicator-neutral'}">
+                        ${symbolData.macd.toFixed(3)}
+                    </div>
+                    <div class="font-mono ${analysis.checks.volume ? 'indicator-pass' : 'indicator-fail'}">
+                        ${symbolData.volume.toFixed(2)}x
+                    </div>
+                    <div class="font-mono ${analysis.checks.atr ? 'indicator-pass' : 'indicator-fail'}">
+                        ${symbolData.atr.toFixed(2)}
+                    </div>
+                    <div class="font-bold ${
+                        analysis.finalSignal === 'BUY' ? 'text-green-400' :
+                        analysis.finalSignal === 'SELL' ? 'text-red-400' : 'text-gray-400'
+                    }">
+                        ${analysis.finalSignal}
+                    </div>
+                    <div class="text-xs">
+                        ${isLocked ? 
+                            '<span class="text-red-400 font-bold">BROKER LOCKED</span>' :
+                            hasSignal ? 
+                                `<button onclick="sendSignalToPopup(scanData[${scanData.indexOf(symbolData)}], '${analysis.finalSignal}')" 
+                                         class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs">
+                                    SEND TO POPUP
+                                 </button>` : 
+                                '<span class="text-gray-500">No Action</span>'
+                        }
+                    </div>
+                    <div class="text-xs text-gray-400">${isLocked ? 'Waiting for exit message' : analysis.reason}</div>
+                `;
+                
+                container.appendChild(row);
+            });
+        }
+
+        // Force manual signals for testing
+        function forceSignal(signalType) {
+            const testSymbol = {
+                symbol: 'TEST',
+                exchange: 'ALPACA', // Will test locking ALPACA
+                price: '100.00',
+                rsi: signalType === 'BUY' ? 25 : 75,
+                macd: signalType === 'BUY' ? 0.8 : -0.8,
+                volume: 1.5,
+                atr: 1.0,
+                timestamp: new Date().toLocaleTimeString(),
+                isLocked: false
+            };
+            
+            sendSignalToPopup(testSymbol, signalType);
+        }
+
+        // Initialize
+        function initialize() {
+            scanData = generateMarketData();
+            renderSymbolAnalysis();
+            updateCounters();
+            updateBrokerStatus();
+        }
+
+        // Event listeners
+        document.getElementById('force-buy-signal').addEventListener('click', () => forceSignal('BUY'));
+        document.getElementById('force-sell-signal').addEventListener('click', () => forceSignal('SELL'));
+        document.getElementById('simulate-exit').addEventListener('click', () => {
+            // Find a locked broker to unlock
+            const lockedBroker = Object.entries(brokerLocks).find(([broker, isLocked]) => isLocked);
+            if (lockedBroker) {
+                simulateExitMessage(lockedBroker[0], 'manual_close', 2.5);
+            } else {
+                logCommunication('INFO', 'No brokers are currently locked', null);
+            }
+        });
+        document.getElementById('test-popup-comm').addEventListener('click', () => {
+            logCommunication('TEST', 'Manual communication test initiated', {test: true});
+        });
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('communication-log').innerHTML = '<div class="text-gray-400 text-sm">Log cleared...</div>';
+        });
+
+        // Start application
+        document.addEventListener('DOMContentLoaded', function() {
+            initialize();
+            
+            // Refresh data every 3 seconds and check for signals
+            setInterval(() => {
+                scanData = generateMarketData();
+                renderSymbolAnalysis();
+                
+                // Auto-send signals when detected (in real system)
+                scanData.forEach(symbolData => {
+                    const analysis = analyzeSignal(symbolData);
+                    if (analysis.finalSignal !== 'NEUTRAL' && !symbolData.isLocked && Math.random() > 0.97) { // 3% chance to auto-send
+                        sendSignalToPopup(symbolData, analysis.finalSignal);
+                    }
+                });
+            }, 3000);
+            
+            // Auto-simulate exit messages occasionally for demo
+            setInterval(() => {
+                const lockedBrokers = Object.entries(brokerLocks).filter(([broker, isLocked]) => isLocked);
+                if (lockedBrokers.length > 0 && Math.random() > 0.8) { // 20% chance to auto-exit
+                    const randomBroker = lockedBrokers[Math.floor(Math.random() * lockedBrokers.length)];
+                    simulateExitMessage(randomBroker[0], 'profit_target', Math.random() * 5);
+                }
+            }, 4000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AIMn{% endblock %}</title>
+  <style>
+    :root{
+      --bg:#0C1324; --bg2:#16213e; --fg:#F5F7FA;
+      --a:#0FD1C8; --b:#B6FF4D; --mut:#9aa4b2; --panel:#10172a; --panel2:#0f172a;
+      --border: rgba(15,209,200,0.25);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      color:var(--fg);
+      background:linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
+      min-height:100vh;
+      display:flex; flex-direction:column;
+    }
+    a{ color: var(--a); text-decoration: none;}
+    a:hover{ color: var(--b); }
+    header{
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(135deg, rgba(15,209,200,0.08) 0%, rgba(182,255,77,0.08) 100%);
+      padding:14px 20px;
+      display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+    }
+    .brand{font-weight:700; letter-spacing:0.5px;}
+    nav{ display:flex; gap:12px; flex-wrap:wrap; }
+    nav a{ padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,0.15); }
+    nav a.active{ border-color: var(--b); box-shadow:0 0 0 1px rgba(182,255,77,0.3) inset; }
+    main{ width:100%; max-width:1200px; margin:24px auto; padding:0 16px; flex:1; }
+    .panel{ background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:12px; padding:16px; }
+    h1{ font-weight:800; margin:0 0 12px; }
+    h2{ margin:18px 0 8px; }
+    table{ width:100%; border-collapse: collapse; }
+    th, td{ padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.06); font-size:14px; }
+    th{ text-align:left; color:var(--a); }
+    .muted{ color: var(--mut); }
+    .btn{ display:inline-block; padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,0.2); color:var(--fg); cursor:pointer; }
+    .btn:hover{ border-color: var(--b); }
+    .grid{ display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    input, select{
+      background:#0b1224; color:var(--fg); border:1px solid var(--border);
+      border-radius:8px; padding:8px 10px; outline:none; width:100%;
+    }
+    code{ background:#0b1224; padding:2px 6px; border-radius:6px; border:1px solid var(--border); }
+    footer{ text-align:center; color:var(--mut); font-size:13px; padding:12px 0 18px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">⚡ AIMn Trading</div>
+<nav>
+  <a href="{{ url_for('scanner_primary') }}"   {% if request.path.startswith('/scanner') %}class="active"{% endif %}>Live Scanner</a>
+  <a href="{{ url_for('tuning') }}"            {% if request.path.startswith('/tuning') %}class="active"{% endif %}>Tuning</a>
+  <a href="{{ url_for('orders') }}"            {% if request.path.startswith('/orders') %}class="active"{% endif %}>Orders</a>
+  <a href="{{ url_for('trade_tester') }}"      {% if request.path.startswith('/trade-tester') %}class="active"{% endif %}>Trade Tester</a>
+  <a href="{{ url_for('symbols') }}"           {% if request.path.startswith('/symbols') %}class="active"{% endif %}>Symbols</a>
+  <a href="{{ url_for('diagnostics') }}"       {% if request.path.startswith('/diagnostics') or request.path.startswith('/scanner/analysis') %}class="active"{% endif %}>Diagnostics</a>
+  <a href="{{ url_for('aiml_home') }}"
+    {% if request.path.startswith('/aiml') or request.path.startswith('/system-overview') %}class="active"{% endif %}>
+    AI/ML
+  </a>
+  <a href="{{ url_for('simple_explanation') }}"{% if request.path.startswith('/simple-explanation') %}class="active"{% endif %}> Simple Explanation </a>
+</nav>
+
+
+
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>© 2025 AIMn</footer>
+</body>
+</html>

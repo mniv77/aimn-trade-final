@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h1>AIMn Auto-Trading AI/ML Dashboard</h1>
+  <p>Automated Strategy Optimization & Research Center</p>
+  <div class="btn-group mb-3">
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Go to Main Trading Dashboard</a>
+    <a href="{{ url_for('aiml.optimize') }}" class="btn btn-success">Start Parameter Optimization</a>
+    <a href="{{ url_for('aiml.results') }}" class="btn btn-info">View Optimization Results</a>
+    <a href="{{ url_for('aiml.manual_test') }}" class="btn btn-warning">Manual Parameter Test</a>
+    <a href="{{ url_for('aiml.docs') }}" class="btn btn-secondary">Research & Documentation</a>
+  </div>
+  <hr>
+  <!-- Summary panels here -->
+</div>
+{% endblock %}

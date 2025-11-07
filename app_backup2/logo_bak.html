@@ -1,0 +1,59 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <title>AIMn Logo – Concept C / Neural Candlestick</title> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name="description" content="AIMn Trading System Logo Concept C: Neural Candlestick (brain outline plus candlestick cluster)."> <style> :root { --bg:#0C1324; --teal:#0FD1C8; --lime:#B6FF4D; --white:#F5F7FA; } body { margin:0; font-family: "Inter", Arial, sans-serif; background:var(--bg); color:var(--white); display:flex; flex-direction:column; align-items:center; padding:2rem 1.25rem 3rem; -webkit-font-smoothing:antialiased; } h1 { font:600 1.2rem/1.25 "Space Grotesk", Arial, sans-serif; margin:0 0 1rem; letter-spacing:.5px; text-align:center; } .logo-wrapper { background:#0C1324; border:1px solid #1e2b41; border-radius:14px; padding:1rem 1.2rem 1.4rem; box-shadow:0 4px 16px -6px rgba(0,0,0,.55); max-width:460px; width:100%; } figure { margin:0; } figcaption { font-size:.7rem; opacity:.65; margin-top:.75rem; letter-spacing:.3px; line-height:1.2rem; } svg { display:block; width:100%; height:auto; } .note { margin-top:1.5rem; font-size:.65rem; opacity:.6; max-width:460px; line-height:1.15rem; text-align:center; } /* Optional: light mode preview toggle */ .toggle-btn { margin-top:1.75rem; background:var(--teal); color:#032021; font-weight:600; border:none; padding:.55rem .9rem; border-radius:6px; cursor:pointer; font-size:.75rem; letter-spacing:.4px; } .toggle-btn:active { transform:translateY(1px); } .light-mode { background:#F5F7FA; color:#0C1324; } .light-mode .logo-wrapper { background:#F5F7FA; border-color:#d4dbe5; box-shadow:0 4px 14px -4px rgba(0,0,0,.18); } </style> </head> <body> <h1>AIMn Trading System – Concept C (Neural Candlestick)</h1> <div class="logo-wrapper"> <figure> <!-- Full Logo (Dark Background Variant) --> <svg width="420" height="140" viewBox="0 0 420 140" role="img" aria-labelledby="aimnTitle aimnDesc" xmlns="http://www.w3.org/2000/svg"> <title id="aimnTitle">AIMn Trading System Logo – Concept C</title> <desc id="aimnDesc"> Neural brain outline with three candlesticks indicating AI-driven market analysis, to the left of the AIMn wordmark and tagline. </desc>
+Copy
+    <!-- Background -->
+    <rect width="420" height="140" fill="#0C1324"/>
+
+    <!-- Brain outline -->
+    <path
+      d="M90 90C55 90 40 65 40 50C40 30 55 10 85 10C95 10 105 14 112 20C120 12 132 8 145 10C168 13 182 33 182 52C182 70 170 90 145 90Z"
+      fill="none"
+      stroke="#0FD1C8"
+      stroke-width="3"
+      stroke-linecap="round" />
+
+    <!-- Candlestick cluster -->
+    <g stroke-linecap="round">
+      <!-- Candle 1 -->
+      <line x1="85" y1="34" x2="85" y2="40" stroke="#0FD1C8" stroke-width="2"/>
+      <rect x="82" y="40" width="6" height="28" fill="#0FD1C8"/>
+      <line x1="85" y1="68" x2="85" y2="72" stroke="#0FD1C8" stroke-width="2"/>
+
+      <!-- Candle 2 (highlighted) -->
+      <line x1="99" y1="26" x2="99" y2="32" stroke="#B6FF4D" stroke-width="2"/>
+      <rect x="96" y="32" width="6" height="36" fill="#B6FF4D"/>
+      <line x1="99" y1="68" x2="99" y2="74" stroke="#B6FF4D" stroke-width="2"/>
+
+      <!-- Candle 3 -->
+        <line x1="113" y1="40" x2="113" y2="44" stroke="#0FD1C8" stroke-width="2"/>
+      <rect x="110" y="44" width="6" height="22" fill="#0FD1C8"/>
+      <line x1="113" y1="66" x2="113" y2="70" stroke="#0FD1C8" stroke-width="2"/>
+    </g>
+
+    <!-- Wordmark -->
+    <text
+      x="210"
+      y="70"
+      font-family="Space Grotesk, Arial, sans-serif"
+      font-size="54"
+      font-weight="600"
+      fill="#F5F7FA">
+      AIMn
+    </text>
+
+    <!-- Tagline -->
+    <text
+      x="210"
+      y="98"
+      font-family="Inter, Arial, sans-serif"
+      font-size="14"
+      fill="#B6FF4D">
+      AI Ensemble • Market-Chosen Entries • Logic-Driven Exits
+    </text>
+  </svg>
+  <figcaption>
+    Concept C highlights the fusion of AI pattern recognition (brain outline)
+    with disciplined trading signals (candlestick cluster). The lime candle
+    represents the selected (model‑validated) entry.
+  </figcaption>
+</figure>
+</div> <button class="toggle-btn" id="modeBtn" type="button"> Toggle Light / Dark Preview </button> <div class="note"> Need a no‑tagline, monochrome, or favicon version in this same file? Just ask and I can extend it. </div> <script> const btn = document.getElementById('modeBtn'); btn.addEventListener('click', () => { document.body.classList.toggle('light-mode'); }); </script> </body> </html> END HTML

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trade History</title>
+    <style>
+        table {border-collapse: collapse; width: 100%;}
+        th, td {border: 1px solid #ccc; padding: 8px;}
+        th {background: #333; color: #fff;}
+    </style>
+</head>
+<body>
+    <h1>Trade History</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Symbol</th>
+            <th>Side</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>P&L</th>
+            <th>Timestamp</th>
+        </tr>
+        {% for trade in trades %}
+        <tr>
+            <td>{{ trade.id }}</td>
+            <td>{{ trade.symbol }}</td>
+            <td>{{ trade.side }}</td>
+            <td>{{ trade.qty }}</td>
+            <td>{{ trade.price }}</td>
+            <td>{{ trade.pnl }}</td>
+            <td>{{ trade.ts }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{{ url_for('aiml.aiml_home') }}">Back to Dashboard Home</a>
+</body>
+</html>

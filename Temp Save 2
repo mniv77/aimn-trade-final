@@ -1,0 +1,247 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+const FlowingScannerTicker = () => {
+  // Exchange status tracking
+  const [exchanges, setExchanges] = useState({
+    'NASDAQ': { scanning: true, activeSymbol: null, symbols: ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA'] },
+    'NYSE': { scanning: true, activeSymbol: null, symbols: ['JPM', 'JNJ', 'PG', 'KO', 'DIS'] },
+    'CRYPTO': { scanning: true, activeSymbol: null, symbols: ['BTC/USD', 'ETH/USD', 'ADA/USD', 'SOL/USD'] },
+    'FOREX': { scanning: true, activeSymbol: null, symbols: ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD'] },
+    'FUTURES': { scanning: true, activeSymbol: null, symbols: ['ES', 'NQ', 'YM', 'RTY'] }
+  });
+
+  // Flowing ticker data
+  const [tickerItems, setTickerItems] = useState([]);
+  const tickerRef = useRef();
+
+  // Generate flowing ticker items
+  useEffect(() => {
+    const generateTickerItems = () => {
+      const items = [];
+      Object.entries(exchanges).forEach(([exchangeId, exchange]) => {
+        exchange.symbols.forEach(symbol => {
+          const price = (Math.random() * 500 + 50).toFixed(2);
+          const change = ((Math.random() - 0.5) * 10).toFixed(2);
+          const isAvailable = exchange.scanning;
+          
+          items.push({
+            id: `${exchangeId}-${symbol}`,
+            exchange: exchangeId,
+            symbol,
+            price,
+            change,
+            isAvailable,
+            activeSymbol: exchange.activeSymbol
+          });
+        });
+      });
+      return items;
+    };
+
+    setTickerItems(generateTickerItems());
+  }, [exchanges]);
+
+  // Simulate exchange status changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setExchanges(prev => {
+        const updated = { ...prev };
+        const exchangeIds = Object.keys(updated);
+        
+        // Randomly start trades
+        if (Math.random() < 0.1) {
+          const availableExchanges = exchangeIds.filter(id => updated[id].scanning);
+          if (availableExchanges.length > 0) {
+            const randomExchange = availableExchanges[Math.floor(Math.random() * availableExchanges.length)];
+            const randomSymbol = updated[randomExchange].symbols[
+              Math.floor(Math.random() * updated[randomExchange].symbols.length)
+            ];
+            updated[randomExchange] = {
+              ...updated[randomExchange],
+              scanning: false,
+              activeSymbol: randomSymbol
+            };
+          }
+        }
+
+        // Randomly complete trades
+        if (Math.random() < 0.15) {
+          const busyExchanges = exchangeIds.filter(id => !updated[id].scanning);
+          if (busyExchanges.length > 0) {
+            const randomExchange = busyExchanges[Math.floor(Math.random() * busyExchanges.length)];
+            updated[randomExchange] = {
+              ...updated[randomExchange],
+              scanning: true,
+              activeSymbol: null
+            };
+          }
+        }
+
+        return updated;
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update ticker prices
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTickerItems(prev => prev.map(item => ({
+        ...item,
+        price: (parseFloat(item.price) + (Math.random() - 0.5) * 2).toFixed(2),
+        change: ((Math.random() - 0.5) * 10).toFixed(2),
+        isAvailable: exchanges[item.exchange]?.scanning || false,
+        activeSymbol: exchanges[item.exchange]?.activeSymbol
+      })));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [exchanges]);
+
+  return (
+    <div className="bg-gray-900 text-white">
+      {/* Exchange Status Header */}
+      <div className="bg-gray-800 p-4 border-b border-gray-700">
+        <h2 className="text-xl font-bold mb-3">Live Exchange Monitor</h2>
+        <div className="flex flex-wrap gap-4">
+          {Object.entries(exchanges).map(([exchangeId, exchange]) => (
+            <div 
+              key={exchangeId}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-500 ${
+                exchange.scanning 
+                  ? 'bg-green-900 border border-green-500' 
+                  : 'bg-red-900 border border-red-500'
+              }`}
+            >
+              <div className={`w-3 h-3 rounded-full ${
+                exchange.scanning ? 'bg-green-400 animate-pulse' : 'bg-red-400'
+              }`}></div>
+              <span className="font-semibold">{exchangeId}</span>
+              {!exchange.scanning && (
+                <span className="text-sm text-gray-300">({exchange.activeSymbol})</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Flowing Ticker */}
+      <div className="relative overflow-hidden bg-black py-4">
+        <div 
+          ref={tickerRef}
+          className="flex animate-scroll whitespace-nowrap"
+          style={{
+            animation: 'scroll 60s linear infinite'
+          }}
+        >
+          {[...tickerItems, ...tickerItems].map((item, index) => (
+            <div 
+              key={`${item.id}-${index}`}
+              className={`inline-flex items-center mx-6 px-4 py-2 rounded-lg transition-all duration-500 ${
+                item.isAvailable 
+                  ? 'bg-green-900 border border-green-500 text-green-100' 
+                  : 'bg-gray-700 border border-red-500 text-gray-400 opacity-60'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <div className={`w-2 h-2 rounded-full ${
+                  item.isAvailable ? 'bg-green-400' : 'bg-red-400'
+                }`}></div>
+                <span className="font-bold text-xs">{item.exchange}</span>
+                <span className="font-mono text-sm">{item.symbol}</span>
+                <span className="font-mono text-sm">${item.price}</span>
+                <span className={`font-mono text-sm ${
+                  parseFloat(item.change) >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {item.change > 0 ? '+' : ''}{item.change}%
+                </span>
+                {!item.isAvailable && item.activeSymbol === item.symbol && (
+                  <span className="text-xs bg-red-600 px-2 py-1 rounded">TRADING</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Multiple Flow Lines */}
+      <div className="space-y-2 bg-gray-900 p-4">
+        {['Line 1', 'Line 2', 'Line 3'].map((line, lineIndex) => (
+          <div key={line} className="relative overflow-hidden bg-gray-800 rounded-lg py-3">
+            <div 
+              className="flex animate-scroll-reverse whitespace-nowrap"
+              style={{
+                animation: `scroll-reverse ${40 + lineIndex * 10}s linear infinite`
+              }}
+            >
+              {tickerItems.slice(lineIndex * 7, (lineIndex + 1) * 7).concat(
+                tickerItems.slice(lineIndex * 7, (lineIndex + 1) * 7)
+              ).map((item, index) => (
+                <div 
+                  key={`${item.id}-line${lineIndex}-${index}`}
+                  className={`inline-flex items-center mx-4 px-3 py-1 rounded transition-all duration-300 ${
+                    item.isAvailable 
+                      ? 'bg-green-800 text-green-100 border-l-4 border-green-400' 
+                      : 'bg-gray-600 text-gray-300 border-l-4 border-red-400 line-through'
+                  }`}
+                >
+                  <span className="text-xs font-bold mr-2">{item.exchange}</span>
+                  <span className="text-sm font-mono mr-2">{item.symbol}</span>
+                  <span className="text-xs">${item.price}</span>
+                  {!item.isAvailable && (
+                    <span className="ml-2 text-xs text-red-400">SKIP</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Status Legend */}
+      <div className="bg-gray-800 p-4 border-t border-gray-700">
+        <div className="flex flex-wrap gap-6 text-sm">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+            <span>Available - Scanning Active</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+            <span>Busy - Trade in Progress</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-1 bg-green-400"></div>
+            <span>Selectable Symbol</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-1 bg-red-400"></div>
+            <span>Skipped Symbol</span>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes scroll {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
+        }
+        
+        @keyframes scroll-reverse {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
+        .animate-scroll {
+          animation: scroll 60s linear infinite;
+        }
+        
+        .animate-scroll-reverse {
+          animation: scroll-reverse 40s linear infinite;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default FlowingScannerTicker;

@@ -1,0 +1,82 @@
+AImn Auto Trade Tuning Python Project – Summary for Future Sessions
+Project Goal
+Recreate a TradingView auto-trading strategy in Python, allowing for manual parameter tuning as a first step, and later enabling AI/ML-based auto-tuning.
+Strategy Overview
+Entry: Uses RSI (Wilder or custom RSIReal), MACD (required), and optionally Volume and ATR filters. Entry occurs only if all enabled indicators agree.
+Exit: Multiple exit triggers—trailing take profit (with early/peak modes), optional stop loss, RSI exit, and a minimum profit requirement. Exits only occur if profit exceeds a threshold (except for a manual “panic” exit).
+Each indicator and parameter can be independently configured for buy/sell.
+Manual parameter tuning is the initial focus.
+Python Script Location
+File: /home/MeirNiv/aimn-trade-final/AImnMLResearch/templates/aimn_strategy.py
+Data: Place data.csv (OHLCV format) in the same folder.
+How to Use the Script
+Edit parameters at the top of the script for manual tuning.
+Make executable:
+bash chmod +x /home/MeirNiv/aimn-trade-final/AImnMLResearch/templates/aimn_strategy.py
+Run:
+bash ./templates/aimn_strategy.py or
+bash python3 templates/aimn_strategy.py
+Next Steps (To Be Done)
+Integrate with database for parameter/result storage.
+Expand for web-based user interface (PythonAnywhere/Flask).
+Add AI/ML parameter auto-tuning after manual system is validated.
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+AIMN TRADE FINAL — AI Assistant Handover Report
+Date: 2025-10-16
+User: MeirNiv
+Project Root: /home/MeirNiv/aimn-trade-final/
+
+Current Objective
+Fix import/model conflicts and restore full web dashboard functionality, especially the /aiml/manual-tune route and the trade history display.
+Recent Progress
+1. Model Consolidation
+StrategyParam and Trade models have been moved out of app_sub/models.py and are now only in shared_models.py.
+All codebase imports for these models should be: python from shared_models import StrategyParam, Trade
+Any reference to from .models import StrategyParam or from .models import Trade must be removed everywhere.
+2. Import Errors
+Duplicate model definitions were causing SQLAlchemy InvalidRequestError and import errors.
+Any remaining import from app_sub.models for these models must be updated as above.
+3. Jinja Manual Tune Form
+The HTML form at templates/aiml/manual_tune.html uses single float fields (e.g., oversold_level).
+The Python route in AImnMLResearch/aiml_dashboard.py now splits these into int/dec for the backtest.
+4. Web Links & UI
+/aiml/ and /aiml/trades routes are working or nearly working.
+Main dashboard blueprint and manual-tune route are correctly set up in Flask.
+Immediate Next Steps
+Ensure ALL imports for StrategyParam and Trade use shared_models.
+
+Search for from .models import StrategyParam and remove/fix any remaining occurrences (especially in /app_sub/views.py, possibly around line 484, and any other files).
+Use from shared_models import StrategyParam, Trade only.
+Restart the web server after EVERY code change.
+
+On PythonAnywhere, use the “Reload” button.
+Test /aiml/manual-tune.
+
+If you get a KeyError for any param, check the form field names in manual_tune.html and confirm they match the Python code in aiml_dashboard.py.
+Use Python’s .get() for robust param handling: python oversold_level = float(request.form.get('oversold_level', 30)) params['oversold_level_int'] = int(oversold_level) params['oversold_level_dec'] = oversold_level - int(oversold_level)
+If import errors persist:
+
+Double-check /app_sub/views.py and any other file for leftover bad imports.
+Delete all .pyc files in /app_sub/__pycache__/ and restart.
+What’s Working
+Models are correctly defined in a single place.
+Most web routes and Flask blueprints are set up.
+Trade logging and display logic is ready (pending above fixes).
+What Was Causing Trouble
+Duplicate model definitions/imports (StrategyParam, Trade) in both shared_models.py and app_sub/models.py.
+Leftover imports at the bottom or body of files.
+Mismatch between HTML form field names and Python param keys.
+If New Errors Appear
+Paste the full traceback here.
+Note what page/route or file was involved.
+Confirm which file(s) you edited last.
+Help for Next AI Assistant
+Please read this report fully.
+Ask the user if the /aiml/manual-tune and /aiml/trades pages render and function.
+Start by searching the codebase for any bad imports or duplicate model definitions.
+Proceed step by step, confirming each fix and restart.
+This handover should get the next assistant up to speed with minimal re-explanation. If you have any more context, add it here. Otherwise, you’re in a good position to continue tomorrow!
+
+

@@ -1,0 +1,136 @@
+<!-- =========================================================
+File: aimn-trade-final/templates/trade-popup-fixed.htm
+Micro popup: 1-line, top-right, draggable, RT watchdog, PANIC, ↗ resize.
+========================================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Trade</title>
+  <style>
+    html,body{margin:0;padding:0;overflow:hidden;background:#111827;color:#fff}
+    body{font:11px/1 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;padding:2px 6px}
+    .row{display:flex;align-items:center;gap:6px;white-space:nowrap;user-select:none;cursor:move}
+    .pill{padding:0 6px;border-radius:999px;font-weight:700}
+    .buy{background:#065f46;color:#a7f3d0}.sell{background:#7f1d1d;color:#fecaca}
+    .weak{opacity:.75}.kv{display:inline-flex;align-items:baseline;gap:4px}
+    .num{font-variant-numeric:tabular-nums}
+    .tag{font-size:9px;padding:0 4px;border-radius:3px;background:#374151;color:#e5e7eb;margin-left:4px}
+    .ok{color:#86efac}.bad{color:#fca5a5}
+    button{background:none;border:0;color:#e5e7eb;cursor:pointer;padding:0 4px}
+    button:hover{color:#fff}
+    .panic{background:#7f1d1d;color:#fff;border-radius:6px;padding:0 6px;font-weight:700}
+  </style>
+</head>
+<body>
+  <div id="bar" class="row">
+    <span id="broker" class="pill weak">--</span>
+    <span id="symbol" style="font-weight:700">--</span>
+    <span id="direction" class="pill">--</span>
+    <span class="kv"><span class="weak">t</span><span id="dur" class="num">0s</span></span>
+    <span class="kv"><span class="weak">e</span><span id="entry" class="num">--</span></span>
+    <span class="kv"><span class="weak">p</span><span id="px" class="num">--</span><span id="pxTag" class="tag">RT</span></span>
+    <span class="kv"><span class="weak">P&L%</span><span id="pnl" class="num">0.00</span><span id="pnlTag" class="tag">RT</span></span>
+    <button id="expand" title="Expand">↗</button>
+    <button id="panic" class="panic" title="Panic Exit">PANIC</button>
+  </div>
+  <script>
+    const peer=(()=>{try{return window.opener||window.parent||null}catch{return null}})();
+    let startedAt=Date.now(), frozen=false, autoCloseTimer=null, lastTickAt=0;
+    let symbol='--', exchange='--', side='BUY';
+    let entryPx=NaN, lastPrice=NaN, fullWin=null;
+
+    const qs=(k,d='')=>{try{return new URL(location.href).searchParams.get(k)??d}catch{return d}};
+    const qsn=(k,d=NaN)=>{const v=qs(k,''),n=Number(v);return Number.isFinite(n)?n:d};
+    const fmt2=n=>(Number.isFinite(n)?n:0).toFixed(2);
+    const isOpen=w=>{try{return !!(w&&!w.closed)}catch{return false}};
+
+    function microFitAndPin(){
+      try{
+        const bar=document.getElementById('bar');
+        const r=bar.getBoundingClientRect();
+        const margin=6, H=30, W=Math.ceil(r.width)+12;
+        if(window.opener){ window.resizeTo(W, H); window.moveTo(screen.availWidth - W - margin, margin); }
+      }catch{}
+    }
+    function enableDrag(){
+      const bar=document.getElementById('bar');
+      let dragging=false, sx=0, sy=0, wx=0, wy=0, raf=0;
+      function mm(e){ if(!dragging) return; const dx=e.screenX-sx, dy=e.screenY-sy; cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ try{ window.moveTo(wx+dx, wy+dy); }catch{} }); }
+      bar.addEventListener('mousedown', e=>{
+        if(!window.opener) return;
+        dragging=true; sx=e.screenX; sy=e.screenY; wx=window.screenX; wy=window.screenY;
+        window.addEventListener('mousemove', mm); window.addEventListener('mouseup', ()=>{dragging=false; window.removeEventListener('mousemove', mm);}, {once:true});
+      });
+    }
+
+    function renderSecs(){ if(frozen) return; const s=Math.max(0,Math.floor((Date.now()-startedAt)/1000)); document.getElementById('dur').textContent=`${s}s`; }
+    function calcPnlPct(px){ if(!Number.isFinite(px)||!Number.isFinite(entryPx)||entryPx===0) return NaN; const r=side==='SELL'?(entryPx-px)/entryPx:(px-entryPx)/entryPx; return r*100; }
+    function setLive(px){
+      if(frozen) return;
+      lastTickAt=Date.now();
+      lastPrice=Number(px);
+      document.getElementById('px').textContent=Number.isFinite(lastPrice)?fmt2(lastPrice):'--';
+      const p=calcPnlPct(lastPrice), n=document.getElementById('pnl');
+      n.textContent=Number.isFinite(p)?fmt2(p):'--'; n.classList.toggle('ok',Number.isFinite(p)&&p>=0); n.classList.toggle('bad',Number.isFinite(p)&&p<0);
+    }
+
+    function freezeExit({exitPrice,exitPnl}={}){
+      if(frozen) return;
+      frozen=true; clearInterval(_t); clearInterval(_watch); renderSecs();
+      document.getElementById('pxTag').textContent='EXIT'; document.getElementById('pnlTag').textContent='EXIT';
+      if(Number.isFinite(exitPrice)) document.getElementById('px').textContent=fmt2(exitPrice);
+      if(Number.isFinite(exitPnl)){ const n=document.getElementById('pnl'); n.textContent=fmt2(exitPnl); n.classList.toggle('ok',exitPnl>=0); n.classList.toggle('bad',exitPnl<0); }
+      try{ if(autoCloseTimer) clearTimeout(autoCloseTimer) }catch{} autoCloseTimer=setTimeout(()=>{ try{ window.close() }catch{} }, 120000);
+    }
+
+    function notifyPeer(msg){ try{ if(peer) peer.postMessage(msg,'*') }catch{} if(isOpen(fullWin)) try{ fullWin.postMessage(msg,'*') }catch{} }
+
+    function onPeerMessage(ev){
+      const d=ev?.data||{}; if(!d || typeof d!=='object') return;
+      if(d.type==='TRADE_TICK'||d.type==='PRICE_TICK'||d.type==='TRADE_UPDATE'){
+        if(Number.isFinite(d.price)) setLive(d.price);
+        if(Number.isFinite(d.pnl)){ const n=document.getElementById('pnl'); n.textContent=fmt2(d.pnl); n.classList.toggle('ok',d.pnl>=0); n.classList.toggle('bad',d.pnl<0); }
+        if(isOpen(fullWin)) try{ fullWin.postMessage(d,'*') }catch{}; return;
+      }
+      if(d.type==='TRADE_CLOSED' && (d.symbol===symbol || !d.symbol)){
+        const exitPx=Number.isFinite(d.exitPrice)?d.exitPrice:(Number.isFinite(d.price)?d.price:lastPrice);
+        const exitPnl=Number.isFinite(d.pnl)?d.pnl:calcPnlPct(exitPx);
+        freezeExit({exitPrice:exitPx,exitPnl}); if(isOpen(fullWin)) try{ fullWin.postMessage({...d,exitPrice:exitPx,pnl:exitPnl},'*') }catch{}; return;
+      }
+    }
+
+    function initFromQS(){
+      symbol=qs('symbol','--'); exchange=qs('exchange','--'); side=(qs('side',qs('signal','BUY'))||'BUY').toUpperCase(); entryPx=qsn('price',NaN);
+      document.getElementById('broker').textContent=exchange||'--';
+      document.getElementById('symbol').textContent=symbol||'--';
+      const dir=document.getElementById('direction'); dir.textContent=side; dir.classList.add(side==='SELL'?'sell':'buy');
+      document.getElementById('entry').textContent=Number.isFinite(entryPx)?fmt2(entryPx):'--';
+      if(Number.isFinite(entryPx)) setLive(entryPx);
+      notifyPeer({type:'TRADE_READY',symbol,exchange,side});
+      setTimeout(microFitAndPin, 40);
+    }
+
+    function wireUI(){
+      document.getElementById('panic').addEventListener('click',()=>{
+        const px=Number.isFinite(lastPrice)?lastPrice:entryPx;
+        notifyPeer({type:'TRADE_CLOSED',symbol,exchange,pnl:fmt2(calcPnlPct(px)||0),reason:'Panic exit',exitPrice:px});
+        freezeExit({exitPrice:px,exitPnl:calcPnlPct(px)});
+      });
+      document.getElementById('expand').addEventListener('click',()=>{
+        // resize only (no route)
+        try{ window.resizeTo(900,600) }catch{}
+      });
+      window.addEventListener('message', onPeerMessage);
+      window.addEventListener('beforeunload', ()=>{ if(!frozen) notifyPeer({type:'TRADE_CLOSED',symbol,exchange,pnl:document.getElementById('pnl').textContent||'0',reason:'Window unloaded'}) });
+      enableDrag();
+    }
+
+    // watchdog: if no RT tick for >3s, request snapshot
+    const _watch=setInterval(()=>{ if(frozen) return; if(Date.now()-lastTickAt>3000) notifyPeer({type:'TRADE_SNAPSHOT_REQ',symbol}); }, 1000);
+
+    initFromQS(); wireUI();
+    const _t=setInterval(renderSecs,1000);
+  </script>
+</body>
+</html>

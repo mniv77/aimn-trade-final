@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Final Logo - Primary Full Color</title>
+    <style>
+        :root {
+            --bg: #0C1324;
+            --teal: #0FD1C8;
+            --lime: #B6FF4D;
+            --white: #F5F7FA;
+        }
+        
+        body {
+            margin: 0;
+            font-family: "Inter", sans-serif;
+            background: var(--bg);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 2rem;
+            min-height: 100vh;
+        }
+        
+        .logo-showcase {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, var(--teal), var(--lime));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        .logo-container {
+            background: linear-gradient(135deg, rgba(15,209,200,0.08) 0%, rgba(182,255,77,0.08) 100%);
+            border: 1px solid rgba(15,209,200,0.25);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(15,209,200,0.1);
+        }
+        
+        .logo-svg {
+            filter: drop-shadow(0 4px 16px rgba(15,209,200,0.2));
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .logo-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+            text-align: left;
+        }
+        
+        .detail-card {
+            background: rgba(15,209,200,0.05);
+            border: 1px solid rgba(15,209,200,0.15);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .detail-card h3 {
+            color: var(--lime);
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .detail-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .svg-code {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: left;
+            overflow-x: auto;
+        }
+        
+        .svg-code h3 {
+            color: var(--lime);
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+        }
+        
+        .svg-code code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: #e2e8f0;
+            white-space: pre;
+            display: block;
+        }
+        
+        .copy-btn {
+            background: var(--teal);
+            color: #032021;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+        
+        .copy-btn:hover {
+            background: var(--lime);
+        }
+        
+        .usage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .usage-item {
+            background: rgba(182,255,77,0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.85rem;
+            border: 1px solid rgba(182,255,77,0.2);
+        }
+        
+        .specs {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .spec-item {
+            background: rgba(15,209,200,0.1);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(15,209,200,0.2);
+        }
+        
+        .spec-label {
+            color: var(--teal);
+            font-weight: 600;
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-showcase">
+        <h1>AIMn Final Logo</h1>
+        <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 2rem;">Professional Minimalist • Full Color • Primary Version</p>
+        
+        <div class="logo-container">
+            <svg class="logo-svg" width="420" height="120" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg">
+                <!-- Main symbol -->
+                <g transform="translate(60, 60)">
+                    <!-- Outer circle with gradient -->
+                    <circle cx="0" cy="0" r="28" fill="none" stroke="url(#primaryGradient)" stroke-width="2.5"/>
+                    
+                    <!-- Inner geometric A representing AI -->
+                    <path d="M-10,-15 L0,-22 L10,-15 L7,-10 L-7,-10 Z" 
+                          fill="none" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="-5" y1="-6" x2="5" y2="-6" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round"/>
+                    
+                    <!-- Market chart bars -->
+                    <g transform="translate(0, 10)">
+                        <rect x="-8" y="0" width="2.5" height="10" fill="#0FD1C8" rx="1"/>
+                        <rect x="-3" y="-3" width="2.5" height="13" fill="#B6FF4D" rx="1"/>
+                        <rect x="2" y="2" width="2.5" height="8" fill="#0FD1C8" rx="1"/>
+                        <rect x="7" y="-1" width="2.5" height="11" fill="#0FD1C8" rx="1"/>
+                    </g>
+                    
+                    <!-- Subtle connection lines suggesting network -->
+                    <g stroke="#0FD1C8" stroke-width="1" opacity="0.4">
+                        <line x1="-20" y1="-8" x2="-15" y2="-5"/>
+                        <line x1="15" y1="-5" x2="20" y2="-8"/>
+                        <line x1="-20" y1="8" x2="-15" y2="5"/>
+                        <line x1="15" y1="5" x2="20" y2="8"/>
+                    </g>
+                </g>
+                
+                <!-- Wordmark -->
+                <text x="120" y="52" font-family="Space Grotesk, sans-serif" font-size="42" font-weight="600" fill="#F5F7FA">AIMn</text>
+                
+                <!-- Tagline -->
+                <text x="120" y="76" font-family="Inter, sans-serif" font-size="12" fill="#0FD1C8" letter-spacing="2px" opacity="0.9">TRADING SYSTEM</text>
+                
+                <!-- Gradient definition -->
+                <defs>
+                    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#0FD1C8"/>
+                        <stop offset="100%" stop-color="#B6FF4D"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+        
+        <div class="specs">
+            <div class="spec-item">
+                <span class="spec-label">Format</span>
+                Scalable Vector (SVG)
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Colors</span>
+                Teal (#0FD1C8) • Lime (#B6FF4D)
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Typography</span>
+                Space Grotesk • Inter
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">Aspect</span>
+                3.5:1 Ratio
+            </div>
+        </div>
+        
+        <div class="logo-details">
+            <div class="detail-card">
+                <h3>Symbol Meaning</h3>
+                <p>The circular design represents systematic completeness. The stylized "A" embodies AI intelligence, while the chart bars below demonstrate market focus. Connection lines suggest the multi-professor ensemble approach.</p>
+            </div>
+            
+            <div class="detail-card">
+                <h3>Color Psychology</h3>
+                <p>Teal conveys trust, sophistication, and technology. Lime represents growth, innovation, and profit. The gradient suggests dynamic evolution and continuous improvement.</p>
+            </div>
+            
+            <div class="detail-card">
+                <h3>Typography Choice</h3>
+                <p>Space Grotesk for the wordmark provides modern geometric feel. Inter for the tagline ensures excellent readability across all sizes and platforms.</p>
+            </div>
+            
+            <div class="detail-card">
+                <h3>Professional Appeal</h3>
+                <p>Clean, minimalist design builds trust with institutional investors while clearly communicating technological sophistication and market expertise.</p>
+            </div>
+        </div>
+        
+        <div class="usage-grid">
+            <div class="usage-item">Website Headers</div>
+            <div class="usage-item">Marketing Materials</div>
+            <div class="usage-item">Presentations</div>
+            <div class="usage-item">Business Cards</div>
+            <div class="usage-item">Email Signatures</div>
+            <div class="usage-item">Social Media</div>
+            <div class="usage-item">App Icons</div>
+            <div class="usage-item">Document Headers</div>
+        </div>
+        
+        <div class="svg-code">
+            <h3>Clean SVG Code</h3>
+            <code id="svgCode">&lt;svg width="420" height="120" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;g transform="translate(60, 60)"&gt;
+    &lt;circle cx="0" cy="0" r="28" fill="none" stroke="url(#primaryGradient)" stroke-width="2.5"/&gt;
+    &lt;path d="M-10,-15 L0,-22 L10,-15 L7,-10 L-7,-10 Z" fill="none" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/&gt;
+    &lt;line x1="-5" y1="-6" x2="5" y2="-6" stroke="#B6FF4D" stroke-width="2.5" stroke-linecap="round"/&gt;
+    &lt;g transform="translate(0, 10)"&gt;
+      &lt;rect x="-8" y="0" width="2.5" height="10" fill="#0FD1C8" rx="1"/&gt;
+      &lt;rect x="-3" y="-3" width="2.5" height="13" fill="#B6FF4D" rx="1"/&gt;
+      &lt;rect x="2" y="2" width="2.5" height="8" fill="#0FD1C8" rx="1"/&gt;
+      &lt;rect x="7" y="-1" width="2.5" height="11" fill="#0FD1C8" rx="1"/&gt;
+    &lt;/g&gt;
+    &lt;g stroke="#0FD1C8" stroke-width="1" opacity="0.4"&gt;
+      &lt;line x1="-20" y1="-8" x2="-15" y2="-5"/&gt;
+      &lt;line x1="15" y1="-5" x2="20" y2="-8"/&gt;
+      &lt;line x1="-20" y1="8" x2="-15" y2="5"/&gt;
+      &lt;line x1="15" y1="5" x2="20" y2="8"/&gt;
+    &lt;/g&gt;
+  &lt;/g&gt;
+  &lt;text x="120" y="52" font-family="Space Grotesk, sans-serif" font-size="42" font-weight="600" fill="#F5F7FA"&gt;AIMn&lt;/text&gt;
+  &lt;text x="120" y="76" font-family="Inter, sans-serif" font-size="12" fill="#0FD1C8" letter-spacing="2px" opacity="0.9"&gt;TRADING SYSTEM&lt;/text&gt;
+  &lt;defs&gt;
+    &lt;linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%"&gt;
+      &lt;stop offset="0%" stop-color="#0FD1C8"/&gt;
+      &lt;stop offset="100%" stop-color="#B6FF4D"/&gt;
+    &lt;/defs&gt;
+  &lt;/defs&gt;
+&lt;/svg&gt;</code>
+            <button class="copy-btn" onclick="copyToClipboard()">Copy SVG Code</button>
+        </div>
+        
+        <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 2rem; line-height: 1.6;">
+            <strong>Ready to implement:</strong> This logo is production-ready and optimized for all digital and print applications. The SVG format ensures perfect scalability from favicon size (16px) to billboard size without quality loss.
+        </p>
+    </div>
+
+    <script>
+        function copyToClipboard() {
+            const svgCode = document.getElementById('svgCode').textContent;
+            navigator.clipboard.writeText(svgCode).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#B6FF4D';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#0FD1C8';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

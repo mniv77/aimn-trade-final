@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Symbol & API Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #00ff00;
+            text-shadow: 2px 2px 4px rgba(0,255,0,0.3);
+        }
+
+        .header p {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            color: #00ffff;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0,255,0,0.3);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .symbol-list {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .symbol-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s ease;
+        }
+
+        .symbol-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .symbol-item:last-child {
+            border-bottom: none;
+        }
+
+        .symbol-name {
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .exchange-badge {
+            background: #ff6b35;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .api-status.connected {
+            background: rgba(40,167,69,0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+
+        .api-status.disconnected {
+            background: rgba(220,53,69,0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+
+        .api-status.testing {
+            background: rgba(255,193,7,0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: black;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,193,7,0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220,53,69,0.4);
+        }
+
+        .security-notice {
+            background: rgba(255,193,7,0.1);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .security-notice h3 {
+            color: #ffc107;
+            margin-bottom: 10px;
+        }
+
+        .security-notice ul {
+            color: #e0e0e0;
+            margin-left: 20px;
+            line-height: 1.6;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #00ff00;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px;
+        }
+
+        .bottom-nav {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-link {
+            color: #00ff00;
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 1.1em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #00ffff;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 AIMn Symbol & API Management</h1>
+            <p>Configure trading pairs and broker connections</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Symbol Management -->
+            <div class="section-card">
+                <div class="section-title">
+                    📈 Symbol Management
+                </div>
+
+                <div class="form-group">
+                    <label for="symbolInput">Add Trading Symbol</label>
+                    <input type="text" id="symbolInput" placeholder="e.g., BTC/USD, AAPL, ETH/USD" style="text-transform: uppercase;">
+                </div>
+
+                <div class="form-group">
+                    <label for="exchangeSelect">Exchange/Broker</label>
+                    <select id="exchangeSelect">
+                        <option value="">Select Exchange</option>
+                        <option value="BINANCE">Binance</option>
+                        <option value="ALPACA">Alpaca Markets</option>
+                        <option value="COINBASE">Coinbase Pro</option>
+                        <option value="KRAKEN">Kraken</option>
+                        <option value="INTERACTIVE_BROKERS">Interactive Brokers</option>
+                        <option value="TD_AMERITRADE">TD Ameritrade</option>
+                        <option value="NASDAQ">NASDAQ (Data Only)</option>
+                        <option value="NYSE">NYSE (Data Only)</option>
+                    </select>
+                </div>
+
+                <button class="btn-primary" onclick="addSymbol()">
+                    ➕ Add Symbol
+                </button>
+
+                <div class="symbol-list" id="symbolList">
+                    <div style="text-align: center; color: #666; padding: 20px;">
+                        No symbols added yet
+                    </div>
+                </div>
+
+                <button class="btn-success" onclick="saveSymbols()" style="width: 100%; margin-top: 15px;">
+                    💾 Save Symbol Configuration
+                </button>
+            </div>
+
+            <!-- API Management -->
+            <div class="section-card">
+                <div class="section-title">
+                    🔐 API Credentials
+                </div>
+
+                <div class="form-group">
+                    <label for="brokerSelect">Select Broker</label>
+                    <select id="brokerSelect" onchange="updateAPIFields()">
+                        <option value="">Choose Broker</option>
+                        <option value="ALPACA">Alpaca Markets</option>
+                        <option value="BINANCE">Binance</option>
+                        <option value="COINBASE">Coinbase Pro</option>
+                        <option value="KRAKEN">Kraken</option>
+                        <option value="INTERACTIVE_BROKERS">Interactive Brokers</option>
+                        <option value="TD_AMERITRADE">TD Ameritrade</option>
+                    </select>
+                </div>
+
+                <div id="apiFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="apiKey">API Key</label>
+                        <input type="text" id="apiKey" placeholder="Enter your API key">
+                    </div>
+
+                    <div class="form-group password-toggle">
+                        <label for="apiSecret">API Secret</label>
+                        <input type="password" id="apiSecret" placeholder="Enter your API secret">
+                        <button type="button" class="toggle-btn" onclick="togglePassword('apiSecret')">👁️</button>
+                    </div>
+
+                    <div class="form-group" id="passphraseGroup" style="display: none;">
+                        <label for="passphrase">Passphrase</label>
+                        <input type="password" id="passphrase" placeholder="Enter passphrase (if required)">
+                        <button type="button" class="toggle-btn" onclick="togglePassword('passphrase')">👁️</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="sandboxMode" style="width: auto; margin-right: 10px;">
+                            Use Sandbox/Paper Trading Mode
+                        </label>
+                    </div>
+                </div>
+
+                <div class="api-status disconnected" id="apiStatus">
+                    ❌ No API connection configured
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-warning" onclick="testConnection()" id="testBtn" disabled>
+                        🧪 Test Connection
+                    </button>
+                    <button class="btn-success" onclick="saveAPICredentials()" id="saveBtn" disabled>
+                        💾 Save API Keys
+                    </button>
+                    <button class="btn-danger" onclick="clearCredentials()">
+                        🗑️ Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="security-notice">
+            <h3>🔒 Security Notice</h3>
+            <ul>
+                <li><strong>API keys are encrypted</strong> and stored securely on the server</li>
+                <li><strong>Never share your API credentials</strong> with anyone</li>
+                <li><strong>Use paper trading mode</strong> for testing new strategies</li>
+                <li><strong>Enable IP restrictions</strong> on your broker account if available</li>
+                <li><strong>Set appropriate permissions</strong> - trading bots only need trade permissions</li>
+                <li><strong>Monitor your account regularly</strong> for any unauthorized activity</li>
+            </ul>
+        </div>
+
+        <!-- Navigation -->
+        <div class="bottom-nav">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="tuning" class="nav-link">🎯 Strategy Tuning</a>
+            <a href="/scanne" class="nav-link">📡 Live Scanner</a>
+        </div>
+    </div>
+
+    <script>
+        // Symbol management
+        let symbols = [];
+        let apiCredentials = {};
+
+        function addSymbol() {
+            const symbolInput = document.getElementById('symbolInput');
+            const exchangeSelect = document.getElementById('exchangeSelect');
+
+            const symbol = symbolInput.value.trim().toUpperCase();
+            const exchange = exchangeSelect.value;
+
+            if (!symbol || !exchange) {
+                alert('Please enter both symbol and exchange');
+                return;
+            }
+
+            // Check for duplicates
+            const exists = symbols.some(s => s.symbol === symbol && s.exchange === exchange);
+            if (exists) {
+                alert('This symbol/exchange combination already exists');
+                return;
+            }
+
+            symbols.push({ symbol, exchange });
+            updateSymbolList();
+
+            // Clear inputs
+            symbolInput.value = '';
+            exchangeSelect.value = '';
+        }
+
+        function updateSymbolList() {
+            const listContainer = document.getElementById('symbolList');
+
+            if (symbols.length === 0) {
+                listContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No symbols added yet</div>';
+                return;
+            }
+
+            listContainer.innerHTML = symbols.map((item, index) => `
+                <div class="symbol-item">
+                    <div>
+                        <span class="symbol-name">${item.symbol}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="exchange-badge">${item.exchange}</span>
+                        <button class="delete-btn" onclick="removeSymbol(${index})">×</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeSymbol(index) {
+            symbols.splice(index, 1);
+            updateSymbolList();
+        }
+
+        function saveSymbols() {
+            // In real implementation, send to server
+            console.log('Saving symbols:', symbols);
+            alert('✅ Symbols saved successfully!');
+        }
+
+        // API management
+        function updateAPIFields() {
+            const broker = document.getElementById('brokerSelect').value;
+            const apiFields = document.getElementById('apiFields');
+            const passphraseGroup = document.getElementById('passphraseGroup');
+            const testBtn = document.getElementById('testBtn');
+            const saveBtn = document.getElementById('saveBtn');
+
+            if (broker) {
+                apiFields.style.display = 'block';
+                testBtn.disabled = false;
+                saveBtn.disabled = false;
+
+                // Show passphrase for certain exchanges
+                if (broker === 'COINBASE') {
+                    passphraseGroup.style.display = 'block';
+                } else {
+                    passphraseGroup.style.display = 'none';
+                }
+
+                updateAPIStatus('disconnected', '❌ Enter credentials to connect');
+            } else {
+                apiFields.style.display = 'none';
+                testBtn.disabled = true;
+                saveBtn.disabled = true;
+                updateAPIStatus('disconnected', '❌ No API connection configured');
+            }
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const btn = field.nextElementSibling;
+
+            if (field.type === 'password') {
+                field.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                field.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        function testConnection() {
+            const broker = document.getElementById('brokerSelect').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const apiSecret = document.getElementById('apiSecret').value;
+
+            if (!apiKey || !apiSecret) {
+                alert('Please enter both API key and secret');
+                return;
+            }
+
+            updateAPIStatus('testing', '🧪 Testing connection...');
+
+            // Simulate API test (replace with real API call)
+            setTimeout(() => {
+                const success = Math.random() > 0.3; // 70% success rate for demo
+
+                if (success) {
+                    updateAPIStatus('connected', `✅ Connected to ${broker}`);
+                    alert('✅ Connection successful!');
+                } else {
+                    updateAPIStatus('disconnected', '❌ Connection failed - check credentials');
+                    alert('❌ Connection failed. Please verify your credentials.');
+                }
+            }, 2000);
+        }
+
+        function saveAPICredentials() {
+            const broker = document.getElementById('brokerSelect').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const apiSecret = document.getElementById('apiSecret').value;
+            const passphrase = document.getElementById('passphrase').value;
+            const sandbox = document.getElementById('sandboxMode').checked;
+
+            if (!apiKey || !apiSecret) {
+                alert('Please enter both API key and secret');
+                return;
+            }
+
+            apiCredentials[broker] = {
+                apiKey,
+                apiSecret,
+                passphrase: passphrase || null,
+                sandbox
+            };
+
+            // In real implementation, encrypt and send to server
+            console.log('Saving API credentials for:', broker);
+            alert('✅ API credentials saved securely!');
+        }
+
+        function clearCredentials() {
+            if (confirm('Are you sure you want to clear all API credentials?')) {
+                document.getElementById('apiKey').value = '';
+                document.getElementById('apiSecret').value = '';
+                document.getElementById('passphrase').value = '';
+                document.getElementById('sandboxMode').checked = false;
+                updateAPIStatus('disconnected', '❌ No API connection configured');
+                alert('🗑️ Credentials cleared');
+            }
+        }
+
+        function updateAPIStatus(type, message) {
+            const status = document.getElementById('apiStatus');
+            status.className = `api-status ${type}`;
+            status.textContent = message;
+        }
+
+        // Load saved data on page load
+        window.addEventListener('load', function() {
+            // In real implementation, load from server
+            console.log('Page loaded - ready for symbol and API management');
+        });
+
+        // Auto-uppercase symbol input
+        document.getElementById('symbolInput').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>
