@@ -1,0 +1,64 @@
+# HaGOLEM Ideas Database Schema
+# Use your existing MySQL database - just add this table
+
+CREATE TABLE hagolem_ideas (
+    -- Primary key
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    -- The idea itself (unlimited text)
+    idea_title VARCHAR(500) NOT NULL,
+    idea_content TEXT NOT NULL,
+    
+    -- Categorization
+    idea_type VARCHAR(100),  -- 'Patent', 'Business Strategy', 'Technical', 'VC Pitch', 'Marketing', etc.
+    category VARCHAR(100),   -- 'Platform', 'RoboChef', 'Military', 'Fundraising', etc.
+    priority VARCHAR(50),    -- 'High', 'Medium', 'Low', 'Critical'
+    status VARCHAR(50),      -- 'New', 'In Progress', 'Implemented', 'On Hold', 'Archived'
+    
+    -- File tracking
+    source_file VARCHAR(500),     -- Original filename
+    file_location VARCHAR(1000),  -- Full path or URL
+    file_type VARCHAR(50),        -- 'Document', 'Presentation', 'Spreadsheet', 'Email', etc.
+    
+    -- Metadata
+    date_created DATETIME DEFAULT CURRENT_TIMESTAMP,
+    date_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(100) DEFAULT 'Meir',
+    
+    -- Related items
+    related_to VARCHAR(500),      -- IDs of related ideas (comma-separated or JSON)
+    tags TEXT,                     -- Keywords for searching (comma-separated)
+    
+    -- Implementation tracking
+    action_items TEXT,             -- Next steps or TODO items
+    deadline DATE,                 -- If there's a deadline
+    assigned_to VARCHAR(100),      -- Who's responsible
+    
+    -- Additional notes
+    notes TEXT,                    -- Any additional notes
+    attachments TEXT,              -- Links to files, images, etc. (JSON or comma-separated)
+    
+    -- Indexes for fast searching
+    INDEX idx_type (idea_type),
+    INDEX idx_category (category),
+    INDEX idx_status (status),
+    INDEX idx_date (date_created),
+    FULLTEXT INDEX idx_search (idea_title, idea_content, tags)
+);
+
+-- Example queries you can use:
+
+-- 1. Find all VC-related ideas
+-- SELECT * FROM hagolem_ideas WHERE idea_type = 'VC Pitch' ORDER BY date_created DESC;
+
+-- 2. Search for specific keywords
+-- SELECT * FROM hagolem_ideas WHERE MATCH(idea_title, idea_content, tags) AGAINST ('robot chef' IN NATURAL LANGUAGE MODE);
+
+-- 3. Get all high-priority items not yet implemented
+-- SELECT * FROM hagolem_ideas WHERE priority = 'High' AND status != 'Implemented' ORDER BY deadline;
+
+-- 4. Find ideas by category
+-- SELECT * FROM hagolem_ideas WHERE category = 'RoboChef' ORDER BY date_created DESC;
+
+-- 5. Get recent ideas (last 30 days)
+-- SELECT * FROM hagolem_ideas WHERE date_created >= DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY date_created DESC;

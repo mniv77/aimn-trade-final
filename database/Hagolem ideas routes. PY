@@ -1,0 +1,224 @@
+# HaGOLEM Ideas Manager - Add to your app.py or app_min.py
+
+from flask import Flask, render_template, request, jsonify
+import mysql.connector
+from datetime import datetime
+
+# Database connection (adjust credentials as needed)
+def get_db_connection():
+    return mysql.connector.connect(
+        host='your-mysql-host',
+        user='your-username',
+        password='your-password',
+        database='your-database-name'
+    )
+
+# ============================================================================
+# HaGOLEM IDEAS ROUTES
+# ============================================================================
+
+@app.route('/hagolem/ideas')
+def hagolem_ideas():
+    """Main ideas dashboard"""
+    return render_template('hagolem_ideas.html')
+
+@app.route('/api/hagolem/ideas', methods=['GET'])
+def get_ideas():
+    """Get all ideas or search/filter"""
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # Get filter parameters
+    idea_type = request.args.get('type')
+    category = request.args.get('category')
+    status = request.args.get('status')
+    search = request.args.get('search')
+    
+    # Build query
+    query = "SELECT * FROM hagolem_ideas WHERE 1=1"
+    params = []
+    
+    if idea_type:
+        query += " AND idea_type = %s"
+        params.append(idea_type)
+    
+    if category:
+        query += " AND category = %s"
+        params.append(category)
+    
+    if status:
+        query += " AND status = %s"
+        params.append(status)
+    
+    if search:
+        query += " AND (idea_title LIKE %s OR idea_content LIKE %s OR tags LIKE %s)"
+        search_term = f"%{search}%"
+        params.extend([search_term, search_term, search_term])
+    
+    query += " ORDER BY date_created DESC"
+    
+    cursor.execute(query, params)
+    ideas = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    return jsonify(ideas)
+
+@app.route('/api/hagolem/ideas', methods=['POST'])
+def add_idea():
+    """Add a new idea"""
+    data = request.json
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = """
+        INSERT INTO hagolem_ideas 
+        (idea_title, idea_content, idea_type, category, priority, status, 
+         source_file, file_location, file_type, tags, action_items, notes)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    
+    values = (
+        data.get('title'),
+        data.get('content'),
+        data.get('type'),
+        data.get('category'),
+        data.get('priority', 'Medium'),
+        data.get('status', 'New'),
+        data.get('source_file'),
+        data.get('file_location'),
+        data.get('file_type'),
+        data.get('tags'),
+        data.get('action_items'),
+        data.get('notes')
+    )
+    
+    cursor.execute(query, values)
+    conn.commit()
+    
+    idea_id = cursor.lastrowid
+    
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True, 'id': idea_id})
+
+@app.route('/api/hagolem/ideas/<int:idea_id>', methods=['PUT'])
+def update_idea(idea_id):
+    """Update an existing idea"""
+    data = request.json
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Build update query dynamically based on provided fields
+    update_fields = []
+    values = []
+    
+    for field in ['idea_title', 'idea_content', 'idea_type', 'category', 'priority', 
+                  'status', 'tags', 'action_items', 'notes']:
+        if field in data:
+            update_fields.append(f"{field} = %s")
+            values.append(data[field])
+    
+    if update_fields:
+        query = f"UPDATE hagolem_ideas SET {', '.join(update_fields)} WHERE id = %s"
+        values.append(idea_id)
+        
+        cursor.execute(query, values)
+        conn.commit()
+    
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+@app.route('/api/hagolem/ideas/<int:idea_id>', methods=['DELETE'])
+def delete_idea(idea_id):
+    """Delete an idea"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("DELETE FROM hagolem_ideas WHERE id = %s", (idea_id,))
+    conn.commit()
+    
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+@app.route('/api/hagolem/stats')
+def hagolem_stats():
+    """Get statistics about ideas"""
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    stats = {}
+    
+    # Total ideas
+    cursor.execute("SELECT COUNT(*) as total FROM hagolem_ideas")
+    stats['total'] = cursor.fetchone()['total']
+    
+    # By type
+    cursor.execute("SELECT idea_type, COUNT(*) as count FROM hagolem_ideas GROUP BY idea_type")
+    stats['by_type'] = cursor.fetchall()
+    
+    # By status
+    cursor.execute("SELECT status, COUNT(*) as count FROM hagolem_ideas GROUP BY status")
+    stats['by_status'] = cursor.fetchall()
+    
+    # By priority
+    cursor.execute("SELECT priority, COUNT(*) as count FROM hagolem_ideas GROUP BY priority")
+    stats['by_priority'] = cursor.fetchall()
+    
+    # Recent (last 7 days)
+    cursor.execute("SELECT COUNT(*) as count FROM hagolem_ideas WHERE date_created >= DATE_SUB(NOW(), INTERVAL 7 DAY)")
+    stats['recent'] = cursor.fetchone()['count']
+    
+    cursor.close()
+    conn.close()
+    
+    return jsonify(stats)
+
+# ============================================================================
+# BULK IMPORT - For importing existing ideas
+# ============================================================================
+
+@app.route('/api/hagolem/import', methods=['POST'])
+def import_ideas():
+    """Bulk import ideas from a list"""
+    ideas = request.json.get('ideas', [])
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    imported_count = 0
+    
+    for idea in ideas:
+        try:
+            query = """
+                INSERT INTO hagolem_ideas 
+                (idea_title, idea_content, idea_type, category, priority, status, tags)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                idea.get('title', 'Untitled'),
+                idea.get('content', ''),
+                idea.get('type', 'General'),
+                idea.get('category', 'Uncategorized'),
+                idea.get('priority', 'Medium'),
+                idea.get('status', 'New'),
+                idea.get('tags', '')
+            )
+            cursor.execute(query, values)
+            imported_count += 1
+        except Exception as e:
+            print(f"Error importing idea: {e}")
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True, 'imported': imported_count})
