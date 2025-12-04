@@ -1,0 +1,690 @@
+//@version=5
+strategy("AImn-Cl Looping Strategy - V6.3b (Hourly No-Loss - Ordered)", overlay=true)
+ 
+// ====================================================================
+// SECTION 1: MODE SELECTOR
+// ====================================================================
+tradeMode = input.string("SELL", title="🎯 Trade Mode", options=["BUY", "SELL"], group="🎮 Mode Selection")
+isBuyMode = tradeMode == "BUY"
+isSellMode = tradeMode == "SELL"
+
+// ====================================================================
+// SECTION 2: PROGRAMMABLE PARAMETERS - ORIGINAL ORDER PRESERVED
+// ====================================================================
+// RSI Real Configuration
+rsiWindow = input.int(100, title="RSI Real Window", minval=10, group="🎯 RSI Real Settings")
+
+// Buy Mode RSI Levels
+oversoldLevel_Int = input.int(30, title="Oversold Level (whole)", minval=1, maxval=99, group="🟢 BUY Mode - RSI Levels")
+oversoldLevel_Dec = input.float(0.0, title="Oversold Level (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - RSI Levels")
+oversoldLevel = oversoldLevel_Int + oversoldLevel_Dec
+
+rsiExitLevelBuy_Int = input.int(70, title="RSI Exit Level Buy (whole)", minval=1, maxval=99, group="🟢 BUY Mode - RSI Levels") 
+rsiExitLevelBuy_Dec = input.float(0.0, title="RSI Exit Level Buy (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - RSI Levels")
+rsiExitLevelBuy = rsiExitLevelBuy_Int + rsiExitLevelBuy_Dec
+
+// Sell Mode RSI Levels
+overboughtLevel_Int = input.int(70, title="Overbought Level (whole)", minval=1, maxval=99, group="🔴 SELL Mode - RSI Levels")
+overboughtLevel_Dec = input.float(0.0, title="Overbought Level (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - RSI Levels")
+overboughtLevel = overboughtLevel_Int + overboughtLevel_Dec
+
+rsiExitLevelSell_Int = input.int(30, title="RSI Exit Level Sell (whole)", minval=1, maxval=99, group="🔴 SELL Mode - RSI Levels") 
+rsiExitLevelSell_Dec = input.float(0.0, title="RSI Exit Level Sell (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - RSI Levels")
+rsiExitLevelSell = rsiExitLevelSell_Int + rsiExitLevelSell_Dec
+
+// MACD Configuration
+fastLength = input.int(12, title="MACD Fast Length", minval=1, group="📊 MACD Settings")
+slowLength = input.int(26, title="MACD Slow Length", minval=1, group="📊 MACD Settings")
+signalLength = input.int(9, title="MACD Signal Length", minval=1, group="📊 MACD Settings")
+
+// BUY Mode Volume Configuration
+volMALengthBuy = input.int(20, title="Volume MA Length", minval=5, group="🟢 BUY Mode - Volume Settings")
+volThresholdBuy = input.float(1.2, title="Volume Threshold Multiplier", minval=1.0, step=0.1, group="🟢 BUY Mode - Volume Settings")
+useVolumeFilterBuy = input.bool(true, title="Use Volume Confirmation", group="🟢 BUY Mode - Volume Settings")
+
+// SELL Mode Volume Configuration
+volMALengthSell = input.int(20, title="Volume MA Length", minval=5, group="🔴 SELL Mode - Volume Settings")
+volThresholdSell = input.float(1.2, title="Volume Threshold Multiplier", minval=1.0, step=0.1, group="🔴 SELL Mode - Volume Settings")
+useVolumeFilterSell = input.bool(true, title="Use Volume Confirmation", group="🔴 SELL Mode - Volume Settings")
+
+// BUY Mode ATR Volatility Configuration
+atrLengthBuy = input.int(14, title="ATR Length", minval=1, group="🟢 BUY Mode - Volatility Settings")
+atrMALengthBuy = input.int(20, title="ATR MA Length", minval=1, group="🟢 BUY Mode - Volatility Settings")
+atrThresholdBuy = input.float(1.3, title="ATR Expansion Multiplier", minval=1.0, step=0.1, group="🟢 BUY Mode - Volatility Settings")
+useATRFilterBuy = input.bool(true, title="Use ATR Volatility Filter", group="🟢 BUY Mode - Volatility Settings")
+
+// SELL Mode ATR Volatility Configuration
+atrLengthSell = input.int(14, title="ATR Length", minval=1, group="🔴 SELL Mode - Volatility Settings")
+atrMALengthSell = input.int(20, title="ATR MA Length", minval=1, group="🔴 SELL Mode - Volatility Settings")
+atrThresholdSell = input.float(1.3, title="ATR Expansion Multiplier", minval=1.0, step=0.1, group="🔴 SELL Mode - Volatility Settings")
+useATRFilterSell = input.bool(true, title="Use ATR Volatility Filter", group="🔴 SELL Mode - Volatility Settings")
+
+// 3-LINES PARAMETERS - BUY MODE
+stopLossPercentBuy_Int = input.int(2, title="Stop Loss % (whole)", minval=0, group="🟢 BUY Mode - 3-Lines Exit")
+stopLossPercentBuy_Dec = input.float(0.0, title="Stop Loss % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - 3-Lines Exit")
+stopLossPercentBuy = (stopLossPercentBuy_Int + stopLossPercentBuy_Dec) / 100
+
+// Early Trailing (Loose - for development phase)
+earlyTrailStartBuy_Int = input.int(1, title="Early Trail Start % (whole)", minval=0, group="🟢 BUY Mode - Early Trailing")
+earlyTrailStartBuy_Dec = input.float(0.0, title="Early Trail Start % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - Early Trailing")
+earlyTrailStartPercentBuy = (earlyTrailStartBuy_Int + earlyTrailStartBuy_Dec) / 100
+
+earlyTrailMinusBuy_Int = input.int(15, title="Early Trail Minus % (whole)", minval=0, group="🟢 BUY Mode - Early Trailing")
+earlyTrailMinusBuy_Dec = input.float(0.0, title="Early Trail Minus % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - Early Trailing")
+earlyTrailMinusPercentBuy = (earlyTrailMinusBuy_Int + earlyTrailMinusBuy_Dec) / 100
+
+// Peak Trailing (Tight - for profit protection)
+peakTrailStartBuy_Int = input.int(5, title="Peak Trail Start % (whole)", minval=1, group="🟢 BUY Mode - Peak Trailing")
+peakTrailStartBuy_Dec = input.float(0.0, title="Peak Trail Start % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - Peak Trailing")
+peakTrailStartPercentBuy = (peakTrailStartBuy_Int + peakTrailStartBuy_Dec) / 100
+
+peakTrailMinusBuy_Int = input.int(0, title="Peak Trail Minus % (whole)", minval=0, group="🟢 BUY Mode - Peak Trailing")
+peakTrailMinusBuy_Dec = input.float(0.5, title="Peak Trail Minus % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - Peak Trailing")
+peakTrailMinusPercentBuy = (peakTrailMinusBuy_Int + peakTrailMinusBuy_Dec) / 100
+
+// KEPT FROM ORIGINAL - RSI Exit Min Profit (now handled by hourly decay, but kept for compatibility)
+rsiProfitThresholdBuy_Int = input.int(1, title="RSI Exit Min Profit % (whole)", minval=0, group="🟢 BUY Mode - RSI Exit")
+rsiProfitThresholdBuy_Dec = input.float(0.0, title="RSI Exit Min Profit % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - RSI Exit")
+rsiProfitThresholdBuy = (rsiProfitThresholdBuy_Int + rsiProfitThresholdBuy_Dec)
+
+// 3-LINES PARAMETERS - SELL MODE
+stopLossPercentSell_Int = input.int(2, title="Stop Loss % (whole)", minval=0, group="🔴 SELL Mode - 3-Lines Exit")
+stopLossPercentSell_Dec = input.float(0.0, title="Stop Loss % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - 3-Lines Exit")
+stopLossPercentSell = (stopLossPercentSell_Int + stopLossPercentSell_Dec) / 100
+
+// Early Trailing (Loose - for development phase)
+earlyTrailStartSell_Int = input.int(1, title="Early Trail Start % (whole)", minval=0, group="🔴 SELL Mode - Early Trailing")
+earlyTrailStartSell_Dec = input.float(0.0, title="Early Trail Start % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - Early Trailing")
+earlyTrailStartPercentSell = (earlyTrailStartSell_Int + earlyTrailStartSell_Dec) / 100
+
+earlyTrailMinusSell_Int = input.int(15, title="Early Trail Minus % (whole)", minval=0, group="🔴 SELL Mode - Early Trailing")
+earlyTrailMinusSell_Dec = input.float(0.0, title="Early Trail Minus % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - Early Trailing")
+earlyTrailMinusPercentSell = (earlyTrailMinusSell_Int + earlyTrailMinusSell_Dec) / 100
+
+// Peak Trailing (Tight - for profit protection)
+peakTrailStartSell_Int = input.int(5, title="Peak Trail Start % (whole)", minval=1, group="🔴 SELL Mode - Peak Trailing")
+peakTrailStartSell_Dec = input.float(0.0, title="Peak Trail Start % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - Peak Trailing")
+peakTrailStartPercentSell = (peakTrailStartSell_Int + peakTrailStartSell_Dec) / 100
+
+peakTrailMinusSell_Int = input.int(0, title="Peak Trail Minus % (whole)", minval=0, group="🔴 SELL Mode - Peak Trailing")
+peakTrailMinusSell_Dec = input.float(0.5, title="Peak Trail Minus % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - Peak Trailing")
+peakTrailMinusPercentSell = (peakTrailMinusSell_Int + peakTrailMinusSell_Dec) / 100
+
+// KEPT FROM ORIGINAL - RSI Exit Min Profit (now handled by hourly decay, but kept for compatibility)
+rsiProfitThresholdSell_Int = input.int(1, title="RSI Exit Min Profit % (whole)", minval=0, group="🔴 SELL Mode - RSI Exit")
+rsiProfitThresholdSell_Dec = input.float(0.0, title="RSI Exit Min Profit % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - RSI Exit")
+rsiProfitThresholdSell = (rsiProfitThresholdSell_Int + rsiProfitThresholdSell_Dec)
+
+// Display & Alerts
+enableAlerts = input.bool(true, title="Enable Alerts", group="🔔 Settings")
+showLines = input.bool(true, title="Show All Lines", group="🔔 Settings")
+showSignals = input.bool(true, title="Show Entry/Exit Signals", group="🔔 Settings")
+
+// NEW: Parameter Display Control
+showParamDisplay = input.bool(false, title="📋 Show Parameter Display for Copy", group="🔔 Settings")
+
+// ====================================================================
+// NEW PARAMETERS ADDED AT THE END - HOURLY TIME-BASED DECAY
+// ====================================================================
+// BUY Mode Hourly Time Decay
+useHourlyDecayBuy = input.bool(true, title="✅ Enable HOURLY Time-Decay (Never Loss)", group="🟢 BUY Mode - ⏰ HOURLY Decay")
+
+initialProfitBuy_Int = input.int(3, title="Initial Profit Required %", minval=0, group="🟢 BUY Mode - ⏰ HOURLY Decay")
+initialProfitBuy_Dec = input.float(0.0, title="Initial Profit Decimal", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - ⏰ HOURLY Decay")
+initialProfitBuy = initialProfitBuy_Int + initialProfitBuy_Dec
+
+startLoweringAfterHoursBuy_Int = input.int(2, title="Start Lowering After HOURS", minval=0, group="🟢 BUY Mode - ⏰ HOURLY Decay")
+startLoweringAfterHoursBuy_Dec = input.float(0.0, title="Start Lowering Hours (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - ⏰ HOURLY Decay")
+startLoweringAfterHoursBuy = startLoweringAfterHoursBuy_Int + startLoweringAfterHoursBuy_Dec
+
+lowerByPercentPerHourBuy_Int = input.int(0, title="Lower By % Each HOUR (whole)", minval=0, group="🟢 BUY Mode - ⏰ HOURLY Decay")
+lowerByPercentPerHourBuy_Dec = input.float(0.5, title="Lower By % Each HOUR (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - ⏰ HOURLY Decay")
+lowerByPercentPerHourBuy = lowerByPercentPerHourBuy_Int + lowerByPercentPerHourBuy_Dec
+
+minProfitFloorBuy_Int = input.int(0, title="Minimum Profit Floor % (whole)", minval=0, group="🟢 BUY Mode - ⏰ HOURLY Decay")
+minProfitFloorBuy_Dec = input.float(0.0, title="Minimum Profit Floor % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🟢 BUY Mode - ⏰ HOURLY Decay")
+minProfitFloorBuy = minProfitFloorBuy_Int + minProfitFloorBuy_Dec
+
+// SELL Mode Hourly Time Decay
+useHourlyDecaySell = input.bool(true, title="✅ Enable HOURLY Time-Decay (Never Loss)", group="🔴 SELL Mode - ⏰ HOURLY Decay")
+
+initialProfitSell_Int = input.int(3, title="Initial Profit Required %", minval=0, group="🔴 SELL Mode - ⏰ HOURLY Decay")
+initialProfitSell_Dec = input.float(0.0, title="Initial Profit Decimal", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - ⏰ HOURLY Decay")
+initialProfitSell = initialProfitSell_Int + initialProfitSell_Dec
+
+startLoweringAfterHoursSell_Int = input.int(2, title="Start Lowering After HOURS", minval=0, group="🔴 SELL Mode - ⏰ HOURLY Decay")
+startLoweringAfterHoursSell_Dec = input.float(0.0, title="Start Lowering Hours (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - ⏰ HOURLY Decay")
+startLoweringAfterHoursSell = startLoweringAfterHoursSell_Int + startLoweringAfterHoursSell_Dec
+
+lowerByPercentPerHourSell_Int = input.int(0, title="Lower By % Each HOUR (whole)", minval=0, group="🔴 SELL Mode - ⏰ HOURLY Decay")
+lowerByPercentPerHourSell_Dec = input.float(0.5, title="Lower By % Each HOUR (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - ⏰ HOURLY Decay")
+lowerByPercentPerHourSell = lowerByPercentPerHourSell_Int + lowerByPercentPerHourSell_Dec
+
+minProfitFloorSell_Int = input.int(0, title="Minimum Profit Floor % (whole)", minval=0, group="🔴 SELL Mode - ⏰ HOURLY Decay")
+minProfitFloorSell_Dec = input.float(0.0, title="Minimum Profit Floor % (decimal)", minval=0.0, maxval=0.9, step=0.1, group="🔴 SELL Mode - ⏰ HOURLY Decay")
+minProfitFloorSell = minProfitFloorSell_Int + minProfitFloorSell_Dec
+
+// ====================================================================
+// SECTION 3: CALCULATIONS
+// ====================================================================
+// RSI Real Calculation
+recentHigh = ta.highest(high, rsiWindow)
+recentLow = ta.lowest(low, rsiWindow)
+rsiReal = (close - recentLow) / (recentHigh - recentLow) * 100
+rsiReal := na(rsiReal) ? 50 : rsiReal
+
+// MACD Calculation  
+[macdLine, signalLine, histLine] = ta.macd(close, fastLength, slowLength, signalLength)
+macdLine := na(macdLine) ? 0 : macdLine
+signalLine := na(signalLine) ? 0 : signalLine
+
+// Mode-specific Volume Analysis
+volMABuy = ta.sma(volume, volMALengthBuy)
+volRatioBuy = volume / volMABuy
+volMASell = ta.sma(volume, volMALengthSell)
+volRatioSell = volume / volMASell
+
+// OBV Calculation
+obv = ta.cum(math.sign(close - close[1]) * volume)
+obvMA = ta.sma(obv, 20)
+
+// Mode-specific Volume Direction Analysis
+priceChange = (close - close[1]) / close[1] * 100
+volumeDirectionBuy = 0.0
+volumeDirectionSell = 0.0
+
+if volume > volMABuy * volThresholdBuy
+    if priceChange > 0.1
+        volumeDirectionBuy := 1
+    else if priceChange < -0.1
+        volumeDirectionBuy := -1
+
+if volume > volMASell * volThresholdSell
+    if priceChange > 0.1
+        volumeDirectionSell := 1
+    else if priceChange < -0.1
+        volumeDirectionSell := -1
+
+// Mode-specific ATR Volatility Analysis
+atrBuy = ta.atr(atrLengthBuy)
+atrMABuy = ta.sma(atrBuy, atrMALengthBuy)
+atrRatioBuy = atrBuy / atrMABuy
+isHighVolatilityBuy = atrBuy > atrMABuy * atrThresholdBuy
+
+atrSell = ta.atr(atrLengthSell)
+atrMASell = ta.sma(atrSell, atrMALengthSell)
+atrRatioSell = atrSell / atrMASell
+isHighVolatilitySell = atrSell > atrMASell * atrThresholdSell
+
+// Market Movement Quality
+marketMovingBuy = not useATRFilterBuy or isHighVolatilityBuy
+marketMovingSell = not useATRFilterSell or isHighVolatilitySell
+
+// ====================================================================
+// SECTION 4: STATE MANAGEMENT
+// ====================================================================
+var bool isOrderActive = false
+var float orderEntryPrice = na
+var int orderEntryBar = na
+var int orderEntryTime = na
+var float trailingTop = na
+var bool trailingActive = false
+var int totalTrades = 0
+var float totalRealizedPnL = 0.0
+var string lastExitReason = ""
+var float lastExitPnL = na
+
+// Dual Trailing State
+var bool earlyTrailingActive = false
+var bool peakTrailingActive = false
+var float currentTrailingPercent = na
+
+// COMPOUND TRACKING VARIABLES
+var float initialBalance = 1000.0
+var float currentBalance = 1000.0
+var float compoundTotalPercent = 0.0
+
+// 3-Lines Variables
+var float entryPriceLine = na
+var float earlyTrailStartLine = na
+var float peakTrailStartLine = na
+var float stopLossLine = na
+var float trailingMinus = na
+var float requiredProfitLine = na
+
+// Clear lines when no position is active
+if not isOrderActive
+    entryPriceLine := na
+    earlyTrailStartLine := na
+    peakTrailStartLine := na
+    stopLossLine := na
+    trailingMinus := na
+    requiredProfitLine := na
+    orderEntryTime := na
+
+// ====================================================================
+// HOURLY TIME CALCULATION AND DYNAMIC PROFIT REQUIREMENT
+// ====================================================================
+hoursInTrade = 0.0
+dynamicProfitRequired = 0.0
+
+if isOrderActive and not na(orderEntryTime)
+    // Calculate hours elapsed since entry
+    millisecondsElapsed = time - orderEntryTime
+    hoursInTrade := millisecondsElapsed / 3600000.0
+    
+    if isBuyMode and useHourlyDecayBuy
+        // BUY Mode: Calculate profit requirement based on hours
+        if hoursInTrade < startLoweringAfterHoursBuy
+            dynamicProfitRequired := initialProfitBuy
+        else
+            hoursElapsed = hoursInTrade - startLoweringAfterHoursBuy
+            reduction = hoursElapsed * lowerByPercentPerHourBuy
+            dynamicProfitRequired := math.max(minProfitFloorBuy, initialProfitBuy - reduction)
+        
+        requiredProfitLine := orderEntryPrice * (1 + dynamicProfitRequired / 100)
+    
+    else if isSellMode and useHourlyDecaySell
+        // SELL Mode: Calculate profit requirement based on hours
+        if hoursInTrade < startLoweringAfterHoursSell
+            dynamicProfitRequired := initialProfitSell
+        else
+            hoursElapsed = hoursInTrade - startLoweringAfterHoursSell
+            reduction = hoursElapsed * lowerByPercentPerHourSell
+            dynamicProfitRequired := math.max(minProfitFloorSell, initialProfitSell - reduction)
+        
+        requiredProfitLine := orderEntryPrice * (1 - dynamicProfitRequired / 100)
+
+// ====================================================================
+// SECTION 5: ENTRY CONDITIONS - MODE DEPENDENT
+// ====================================================================
+buyRsiCondition = rsiReal <= oversoldLevel and not na(rsiReal)
+buyMacdCondition = ta.crossover(macdLine, signalLine) and not na(macdLine) and not na(signalLine)
+buyVolumeCondition = not useVolumeFilterBuy or (volumeDirectionBuy > 0 and obv > obvMA)
+buyATRCondition = marketMovingBuy
+buyEntry = isBuyMode and buyRsiCondition and buyMacdCondition and buyVolumeCondition and buyATRCondition and not isOrderActive and barstate.isconfirmed
+
+sellRsiCondition = rsiReal >= overboughtLevel and not na(rsiReal)
+sellMacdCondition = ta.crossunder(macdLine, signalLine) and not na(macdLine) and not na(signalLine)
+sellVolumeCondition = not useVolumeFilterSell or (volumeDirectionSell < 0 and obv < obvMA)
+sellATRCondition = marketMovingSell
+sellEntry = isSellMode and sellRsiCondition and sellMacdCondition and sellVolumeCondition and sellATRCondition and not isOrderActive and barstate.isconfirmed
+
+// ====================================================================
+// SECTION 6: ORDER ENTRY PROCESSING
+// ====================================================================
+if buyEntry or sellEntry
+    isOrderActive := true
+    orderEntryPrice := close
+    orderEntryBar := bar_index
+    orderEntryTime := time
+    trailingTop := na
+    trailingActive := false
+    earlyTrailingActive := false
+    peakTrailingActive := false
+    currentTrailingPercent := na
+    
+    if buyEntry
+        entryPriceLine := orderEntryPrice
+        earlyTrailStartLine := orderEntryPrice * (1 + earlyTrailStartPercentBuy)
+        peakTrailStartLine := orderEntryPrice * (1 + peakTrailStartPercentBuy)
+        stopLossLine := orderEntryPrice * (1 - stopLossPercentBuy)
+        requiredProfitLine := orderEntryPrice * (1 + initialProfitBuy / 100)
+        
+        strategy.entry("BUY", strategy.long, comment="RSI:" + str.tostring(rsiReal, "#.##") + " MACD:" + str.tostring(macdLine, "#.####"))
+    
+    else if sellEntry
+        entryPriceLine := orderEntryPrice
+        earlyTrailStartLine := orderEntryPrice * (1 - earlyTrailStartPercentSell)
+        peakTrailStartLine := orderEntryPrice * (1 - peakTrailStartPercentSell)
+        stopLossLine := orderEntryPrice * (1 + stopLossPercentSell)
+        requiredProfitLine := orderEntryPrice * (1 - initialProfitSell / 100)
+        
+        strategy.entry("SELL", strategy.short, comment="RSI:" + str.tostring(rsiReal, "#.##") + " MACD:" + str.tostring(macdLine, "#.####"))
+
+// ====================================================================
+// SECTION 7: PROFIT CALCULATIONS
+// ====================================================================
+closePLPercent = 0.0
+if isOrderActive and not na(orderEntryPrice) and orderEntryPrice > 0
+    if isBuyMode
+        closePLPercent := ((close - orderEntryPrice) / orderEntryPrice) * 100
+    else if isSellMode
+        closePLPercent := ((orderEntryPrice - close) / orderEntryPrice) * 100
+
+// ====================================================================
+// SECTION 8: DUAL TRAILING LOGIC
+// ====================================================================
+if isOrderActive
+    if isBuyMode
+        if closePLPercent >= peakTrailStartPercentBuy * 100
+            if not peakTrailingActive
+                peakTrailingActive := true
+                earlyTrailingActive := false
+                trailingActive := true
+                trailingTop := close
+            else
+                trailingTop := math.max(trailingTop, close)
+            currentTrailingPercent := peakTrailMinusPercentBuy
+            
+        else if closePLPercent >= earlyTrailStartPercentBuy * 100
+            if not earlyTrailingActive and not peakTrailingActive
+                earlyTrailingActive := true
+                trailingActive := true
+                trailingTop := close
+            else if earlyTrailingActive
+                trailingTop := math.max(trailingTop, close)
+            currentTrailingPercent := earlyTrailMinusPercentBuy
+        
+        if trailingActive and not na(trailingTop) and not na(currentTrailingPercent)
+            trailingMinus := trailingTop * (1 - currentTrailingPercent)
+    
+    else if isSellMode
+        if closePLPercent >= peakTrailStartPercentSell * 100
+            if not peakTrailingActive
+                peakTrailingActive := true
+                earlyTrailingActive := false
+                trailingActive := true
+                trailingTop := close
+            else
+                trailingTop := math.min(trailingTop, close)
+            currentTrailingPercent := peakTrailMinusPercentSell
+            
+        else if closePLPercent >= earlyTrailStartPercentSell * 100
+            if not earlyTrailingActive and not peakTrailingActive
+                earlyTrailingActive := true
+                trailingActive := true
+                trailingTop := close
+            else if earlyTrailingActive
+                trailingTop := math.min(trailingTop, close)
+            currentTrailingPercent := earlyTrailMinusPercentSell
+        
+        if trailingActive and not na(trailingTop) and not na(currentTrailingPercent)
+            trailingMinus := trailingTop * (1 + currentTrailingPercent)
+
+// ====================================================================
+// SECTION 9: EXIT CONDITIONS - WITH HOURLY PROFIT REQUIREMENT
+// ====================================================================
+exitTrailing = false
+exitStopLoss = false
+exitRSI = false
+
+if isOrderActive
+    // Check if current profit meets dynamic hourly requirement
+    profitMeetsRequirement = closePLPercent >= dynamicProfitRequired
+    
+    if isBuyMode
+        exitTrailing := trailingActive and not na(trailingMinus) and close < trailingMinus and profitMeetsRequirement
+        exitStopLoss := not na(stopLossLine) and close <= stopLossLine and profitMeetsRequirement
+        exitRSI := rsiReal >= rsiExitLevelBuy and profitMeetsRequirement
+    
+    else if isSellMode
+        exitTrailing := trailingActive and not na(trailingMinus) and close > trailingMinus and profitMeetsRequirement
+        exitStopLoss := not na(stopLossLine) and close >= stopLossLine and profitMeetsRequirement
+        exitRSI := rsiReal <= rsiExitLevelSell and profitMeetsRequirement
+
+orderExit = (exitTrailing or exitStopLoss or exitRSI) and barstate.isconfirmed
+
+// ====================================================================
+// SECTION 10: STRATEGY EXIT
+// ====================================================================
+if orderExit
+    if isBuyMode
+        strategy.close("BUY", comment="EXIT")
+    else if isSellMode
+        strategy.close("SELL", comment="EXIT")
+
+// ====================================================================
+// SECTION 11: EXIT PROCESSING
+// ====================================================================
+if orderExit
+    tradeProfit = closePLPercent
+    
+    exitReasonCode = ""
+    if exitTrailing
+        if peakTrailingActive
+            exitReasonCode := "P"
+        else if earlyTrailingActive
+            exitReasonCode := "E"
+        else
+            exitReasonCode := "T"
+    else if exitStopLoss
+        exitReasonCode := "S"
+    else if exitRSI
+        exitReasonCode := "R"
+    else
+        exitReasonCode := "?"
+    
+    exitTimeInfo = " (" + str.tostring(hoursInTrade, "#.#") + "h)"
+    
+    if showSignals
+        labelColor = tradeProfit >= 0 ? color.green : color.red
+        labelStyle = tradeProfit >= 0 ? label.style_label_up : label.style_label_down
+        labelPosition = tradeProfit >= 0 ? low - (ta.atr(14) * 0.05) : high + (ta.atr(14) * 0.05)
+        
+        label.new(bar_index, labelPosition,
+                  text=str.tostring(tradeProfit, "#.##") + "% " + exitReasonCode + exitTimeInfo,
+                  style=labelStyle,
+                  color=labelColor,
+                  textcolor=color.white,
+                  size=size.normal)
+    
+    if not na(tradeProfit)
+        dollarGain = currentBalance * (tradeProfit / 100)
+        currentBalance := currentBalance + dollarGain
+        compoundTotalPercent := ((currentBalance - initialBalance) / initialBalance) * 100
+    
+    lastExitPnL := tradeProfit
+    lastExitReason := exitReasonCode
+    
+    if not na(tradeProfit)
+        totalRealizedPnL += tradeProfit
+        totalTrades += 1
+    
+    isOrderActive := false
+    orderEntryPrice := na
+    orderEntryBar := na
+    orderEntryTime := na
+    trailingTop := na
+    trailingActive := false
+    earlyTrailingActive := false
+    peakTrailingActive := false
+    currentTrailingPercent := na
+    
+    entryPriceLine := na
+    earlyTrailStartLine := na
+    peakTrailStartLine := na
+    stopLossLine := na
+    trailingMinus := na
+    requiredProfitLine := na
+    
+    if enableAlerts
+        exitType = exitTrailing ? (peakTrailingActive ? "PEAK TRAIL" : earlyTrailingActive ? "EARLY TRAIL" : "TRAILING") : exitStopLoss ? "STOP LOSS" : "RSI"
+        alert("EXIT: " + str.tostring(tradeProfit, "#.##") + "% | " + exitType + " | Hours: " + str.tostring(hoursInTrade, "#.#") + " | Compound: " + str.tostring(compoundTotalPercent, "#.##") + "%", alert.freq_once_per_bar)
+
+if (buyEntry or sellEntry) and enableAlerts
+    direction = isBuyMode ? "BUY" : "SELL"
+    alert(direction + " ENTRY: RSI " + str.tostring(rsiReal, "#.##") + " | MACD " + str.tostring(macdLine, "#.####") + " | Price: $" + str.tostring(close, "#.####"), alert.freq_once_per_bar)
+
+// ====================================================================
+// SECTION 12: VISUAL SIGNALS & LINES
+// ====================================================================
+plotshape(showSignals and buyEntry, style=shape.triangleup, location=location.belowbar, color=color.green, size=size.large, title="BUY ENTRY")
+plotshape(showSignals and sellEntry, style=shape.triangledown, location=location.abovebar, color=color.red, size=size.large, title="SELL ENTRY")
+plotshape(showSignals and orderExit, style=shape.xcross, location=location.abovebar, color=color.yellow, size=size.normal, title="EXIT")
+
+plot(showLines and isOrderActive and not na(entryPriceLine) ? entryPriceLine : na, color=color.orange, linewidth=2, title="Entry Price")
+plot(showLines and isOrderActive and not na(earlyTrailStartLine) ? earlyTrailStartLine : na, color=color.purple, linewidth=1, title="Early Trail Start")
+plot(showLines and isOrderActive and not na(peakTrailStartLine) ? peakTrailStartLine : na, color=color.fuchsia, linewidth=2, title="Peak Trail Start")
+plot(showLines and isOrderActive and not na(stopLossLine) ? stopLossLine : na, color=color.red, linewidth=1, style=plot.style_circles, title="Stop Loss (Visual Only)")
+plot(showLines and isOrderActive and trailingActive and not na(trailingMinus) ? trailingMinus : na, 
+     color=peakTrailingActive ? color.lime : earlyTrailingActive ? color.aqua : color.blue, 
+     linewidth=2, title="Trailing Exit")
+plot(showLines and isOrderActive and not na(requiredProfitLine) ? requiredProfitLine : na, 
+     color=color.yellow, linewidth=3, style=plot.style_line, title="Required Profit (Hourly Decay)")
+
+// ====================================================================
+// SECTION 13: COMPOUND REPORTING TABLE
+// ====================================================================
+if barstate.islast
+    var table reportTable = table.new(position.top_left, 3, 14, bgcolor=color.white, border_width=2)
+    
+    modeColor = isBuyMode ? color.green : color.red
+    modeText = isBuyMode ? "BUY-ONLY" : "SELL-ONLY"
+    
+    table.cell(reportTable, 0, 0, "📊 " + modeText + " NO-LOSS", text_color=color.white, bgcolor=color.navy, text_size=size.large)
+    table.cell(reportTable, 1, 0, "⏰ HOURLY DECAY", text_color=color.white, bgcolor=modeColor, text_size=size.normal)
+    table.cell(reportTable, 2, 0, "NEVER EXIT NEG", text_color=color.white, bgcolor=color.purple, text_size=size.normal)
+    
+    compoundColor = compoundTotalPercent >= 0 ? color.green : color.red
+    table.cell(reportTable, 0, 1, "🏆 COMPOUND TOTAL %", text_color=color.white, bgcolor=color.black, text_size=size.large)
+    table.cell(reportTable, 1, 1, str.tostring(compoundTotalPercent, "#.##") + "%", 
+               text_color=color.white, bgcolor=compoundColor, text_size=size.huge)
+    table.cell(reportTable, 2, 1, totalTrades > 0 ? str.tostring(compoundTotalPercent / totalTrades, "#.##") + "% avg" : "0%", 
+               text_color=color.black, bgcolor=color.silver, text_size=size.normal)
+    
+    table.cell(reportTable, 0, 2, "💰 Balance", text_color=color.white, bgcolor=color.orange)
+    table.cell(reportTable, 1, 2, "Init: $" + str.tostring(initialBalance, "#.##"), text_color=color.black, bgcolor=color.white)
+    table.cell(reportTable, 2, 2, "Now: $" + str.tostring(currentBalance, "#.##"), text_color=compoundTotalPercent >= 0 ? color.green : color.red, bgcolor=color.white)
+    
+    simpleTotalColor = totalRealizedPnL >= 0 ? color.green : color.red
+    table.cell(reportTable, 0, 3, "📈 Simple Total %", text_color=color.white, bgcolor=color.gray)
+    table.cell(reportTable, 1, 3, str.tostring(totalRealizedPnL, "#.##") + "%", 
+               text_color=color.white, bgcolor=simpleTotalColor, text_size=size.normal)
+    
+    difference = compoundTotalPercent - totalRealizedPnL
+    table.cell(reportTable, 2, 3, "Diff: " + str.tostring(difference, "#.##") + "%", 
+               text_color=difference >= 0 ? color.green : color.red, bgcolor=color.white, text_size=size.small)
+    
+    table.cell(reportTable, 0, 4, "📊 Trades", text_color=color.white, bgcolor=modeColor)
+    table.cell(reportTable, 1, 4, str.tostring(totalTrades) + " trades", text_color=color.black, bgcolor=color.white)
+    table.cell(reportTable, 2, 4, str.tostring(totalRealizedPnL, "#.##") + "%", 
+               text_color=totalRealizedPnL >= 0 ? color.green : color.red, bgcolor=color.white)
+    
+    table.cell(reportTable, 0, 5, "⏰ Hourly Decay", text_color=color.white, bgcolor=color.yellow)
+    if isOrderActive
+        hourlyDecayEnabled = (isBuyMode and useHourlyDecayBuy) or (isSellMode and useHourlyDecaySell)
+        table.cell(reportTable, 1, 5, str.tostring(hoursInTrade, "#.#") + " hours", text_color=color.black, bgcolor=color.white)
+        table.cell(reportTable, 2, 5, "Need: " + str.tostring(dynamicProfitRequired, "#.##") + "%", 
+                   text_color=color.white, bgcolor=hourlyDecayEnabled ? color.green : color.gray)
+    else
+        table.cell(reportTable, 1, 5, "N/A", text_color=color.gray, bgcolor=color.white)
+        table.cell(reportTable, 2, 5, "N/A", text_color=color.gray, bgcolor=color.white)
+    
+    currentStateDisplay = isOrderActive ? "ACTIVE " + tradeMode : "HUNTING " + tradeMode
+    stateColor = isOrderActive ? modeColor : color.blue
+    
+    table.cell(reportTable, 0, 6, "⚡ State", text_color=color.black, bgcolor=color.orange)
+    table.cell(reportTable, 1, 6, currentStateDisplay, text_color=color.white, bgcolor=stateColor)
+    table.cell(reportTable, 2, 6, isOrderActive ? str.tostring(closePLPercent, "#.##") + "%" : "N/A", 
+               text_color=closePLPercent >= 0 ? color.green : color.red, bgcolor=color.white)
+    
+    table.cell(reportTable, 0, 7, "📊 RSI", text_color=color.white, bgcolor=color.purple)
+    table.cell(reportTable, 1, 7, str.tostring(rsiReal, "#.##"), text_color=color.black, bgcolor=color.white)
+    
+    rsiStatus = ""
+    rsiStatusColor = color.blue
+    if isBuyMode
+        rsiStatus := rsiReal <= oversoldLevel ? "OVERSOLD" : rsiReal >= rsiExitLevelBuy ? "EXIT" : "NEUTRAL"
+        rsiStatusColor := rsiReal <= oversoldLevel ? color.green : rsiReal >= rsiExitLevelBuy ? color.red : color.blue
+    else
+        rsiStatus := rsiReal >= overboughtLevel ? "OVERBOUGHT" : rsiReal <= rsiExitLevelSell ? "EXIT" : "NEUTRAL"
+        rsiStatusColor := rsiReal >= overboughtLevel ? color.red : rsiReal <= rsiExitLevelSell ? color.green : color.blue
+    
+    table.cell(reportTable, 2, 7, rsiStatus, text_color=color.white, bgcolor=rsiStatusColor)
+    
+    table.cell(reportTable, 0, 8, "📊 MACD", text_color=color.white, bgcolor=color.blue)
+    table.cell(reportTable, 1, 8, str.tostring(macdLine, "#.####"), text_color=color.black, bgcolor=color.white)
+    
+    macdStatus = macdLine < signalLine ? "BEARISH" : "BULLISH"
+    macdStatusColor = macdLine < signalLine ? color.red : color.green
+    table.cell(reportTable, 2, 8, macdStatus, text_color=color.white, bgcolor=macdStatusColor)
+    
+    table.cell(reportTable, 0, 9, "📊 Volume", text_color=color.white, bgcolor=color.orange)
+    
+    volStatus = ""
+    volStatusColor = color.gray
+    if isBuyMode
+        volStatus := volumeDirectionBuy > 0 ? "BULL VOL" : volumeDirectionBuy < 0 ? "BEAR VOL" : "NEUTRAL"
+        volStatusColor := volumeDirectionBuy > 0 ? color.green : volumeDirectionBuy < 0 ? color.red : color.gray
+    else
+        volStatus := volumeDirectionSell > 0 ? "BULL VOL" : volumeDirectionSell < 0 ? "BEAR VOL" : "NEUTRAL"
+        volStatusColor := volumeDirectionSell > 0 ? color.green : volumeDirectionSell < 0 ? color.red : color.gray
+    
+    table.cell(reportTable, 1, 9, volStatus, text_color=color.white, bgcolor=volStatusColor)
+    table.cell(reportTable, 2, 9, "OBV: " + (obv > obvMA ? "↑" : "↓"), text_color=obv > obvMA ? color.green : color.red, bgcolor=color.white)
+    
+    table.cell(reportTable, 0, 10, "💰 Last Exit", text_color=color.white, bgcolor=color.gray)
+    lastExitDisplay = not na(lastExitPnL) ? str.tostring(lastExitPnL, "#.##") + "% " + lastExitReason : "N/A"
+    lastExitColor = not na(lastExitPnL) and lastExitPnL >= 0 ? color.green : not na(lastExitPnL) ? color.red : color.gray
+    table.cell(reportTable, 1, 10, lastExitDisplay, text_color=color.white, bgcolor=lastExitColor)
+    table.cell(reportTable, 2, 10, totalTrades > 0 ? str.tostring(totalTrades) + " total" : "0", text_color=color.black, bgcolor=color.white)
+    
+    table.cell(reportTable, 0, 11, "🎯 Entry", text_color=color.black, bgcolor=color.yellow)
+    
+    rsiReadyStatus = ""
+    rsiReadyColor = color.gray
+    if isBuyMode
+        rsiReadyStatus := rsiReal <= oversoldLevel ? "RSI OK" : "RSI WAIT"
+        rsiReadyColor := rsiReal <= oversoldLevel ? color.green : color.gray
+    else
+        rsiReadyStatus := rsiReal >= overboughtLevel ? "RSI OK" : "RSI WAIT"
+        rsiReadyColor := rsiReal >= overboughtLevel ? color.red : color.gray
+    
+    table.cell(reportTable, 1, 11, rsiReadyStatus, text_color=color.white, bgcolor=rsiReadyColor)
+    
+    macdReadyStatus = ""
+    macdReadyColor = color.gray
+    if isBuyMode
+        macdReadyStatus := macdLine > signalLine ? "MACD OK" : "MACD WAIT"
+        macdReadyColor := macdLine > signalLine ? color.green : color.gray
+    else
+        macdReadyStatus := macdLine < signalLine ? "MACD OK" : "MACD WAIT"
+        macdReadyColor := macdLine < signalLine ? color.red : color.gray
+    
+    table.cell(reportTable, 2, 11, macdReadyStatus, text_color=color.white, bgcolor=macdReadyColor)
+    
+    table.cell(reportTable, 0, 12, "📊 Vol Filter", text_color=color.white, bgcolor=color.purple)
+    
+    volFilterStatus = ""
+    volFilterColor = color.gray
+    volConfirmStatus = ""
+    volConfirmColor = color.gray
+    
+    if isBuyMode
+        volFilterStatus := useVolumeFilterBuy ? "ON" : "OFF"
+        volFilterColor := useVolumeFilterBuy ? color.green : color.gray
+        if useVolumeFilterBuy
+            volConfirmStatus := (volumeDirectionBuy > 0 and obv > obvMA) ? "OK" : "WAIT"
+            volConfirmColor := (volumeDirectionBuy > 0 and obv > obvMA) ? color.green : color.red
+        else
+            volConfirmStatus := "N/A"
+    else
+        volFilterStatus := useVolumeFilterSell ? "ON" : "OFF"
+        volFilterColor := useVolumeFilterSell ? color.green : color.gray
+        if useVolumeFilterSell
+            volConfirmStatus := (volumeDirectionSell < 0 and obv < obvMA) ? "OK" : "WAIT"
+            volConfirmColor := (volumeDirectionSell < 0 and obv < obvMA) ? color.green : color.red
+        else
+            volConfirmStatus := "N/A"
+    
+    table.cell(reportTable, 1, 12, volFilterStatus, text_color=color.white, bgcolor=volFilterColor)
+    table.cell(reportTable, 2, 12, volConfirmStatus, text_color=color.white, bgcolor=volConfirmColor)
+    
+    table.cell(reportTable, 0, 13, "🌊 ATR", text_color=color.white, bgcolor=color.blue)
+    
+    atrStatus = ""
+    atrColor = color.gray
+    atrRatioDisplay = ""
+    
+    if isBuyMode
+        atrStatus := isHighVolatilityBuy ? "HIGH" : "LOW"
+        atrColor := isHighVolatilityBuy ? color.green : color.red
+        atrRatioDisplay := "x" + str.tostring(atrRatioBuy, "#.##")
+    else
+        atrStatus := isHighVolatilitySell ? "HIGH" : "LOW"
+        atrColor := isHighVolatilitySell ? color.green : color.red
+        atrRatioDisplay := "x" + str.tostring(atrRatioSell, "#.##")
+    
+    table.cell(reportTable, 1, 13, atrStatus, text_color=color.white, bgcolor=atrColor)
+    table.cell(reportTable, 2, 13, atrRatioDisplay, text_color=color.white, bgcolor=color.blue)
