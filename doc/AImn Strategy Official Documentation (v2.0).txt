@@ -1,0 +1,42 @@
+﻿AImn Strategy Official Documentation (v2.0)
+Project Name: AIMn Trading System
+Framework: Flask (Python) + MySQL + Tailwind CSS + TradingView (Pine Script v6)
+Core Objective: High-probability "Hot Picks" using normalized range positioning and momentum confirmation with a time-decaying exit safety net.
+
+1. The Indicators (The "Detection" Engine)
+    • RSI Real (Price Location 0-100): A custom normalization of price.
+        ◦ Formula: $RSI\_Real = \frac{Close - \text{Lowest}(Low, 100)}{\text{Highest}(High, 100) - \text{Lowest}(Low, 100)} \times 100$
+        ◦ 0 = Range Bottom (Oversold), 100 = Range Top (Overbought).
+    • MACD Confirmation: Standard Fast/Slow/Signal crossover/under to confirm the RSI extreme is ready to reverse.
+
+2. Parameter Synchronization (The "CSV Import")
+To maximize profit, parameters are tuned in TradingView and synced to the MySQL strategy_params table via a CSV string.
+Strict Parameter Order:
+    1. tradeMode (BUY/SELL)
+    2. macdFast | 3. macdSlow | 4. macdSig
+    3. rsiEntry (Trigger Level)
+    4. rsiExit (Target Level)
+    5. stopLoss
+    6. trailStart | 9. trailMinus
+    7. initProfit (Starting Floor)
+    8. decayStart (Hours until decay)
+    9. decayRate (% drop per hour)
+    10. useHardTP (True/False)
+
+3. Scanner UI: The "Conveyor Belt" Logic
+    • The Belt: Symbols move vertically in a rolling loop (Shift/Push array logic).
+    • Row 4 Inspection: The 4th row (Index [3]) is the Inspection Zone.
+    • Auto-Trigger: When a symbol enters Row 4, the system checks the "AImn Strategy" criteria. If Logic = TRUE, the belt pauses and the Order Confirmation Popup triggers automatically.
+
+4. The Exit Engine (The "Safety" Shield)
+The system checks four parallel exit conditions to protect capital:
+    1. RSI Exit: Triggers when RSI_Real hits rsiExit (provided P&L > reqFloor).
+    2. Trailing TP: Activates at trailStart; exits if price drops by trailMinus.
+    3. Time-Decay Floor: Profit target starts at initProfit. After decayStart hours, the target lowers by decayRate per hour toward 0%.
+    4. Panic Button (Override): Located only in the Order Popup. Immediately executes a Market Order to close the position, bypassing all profit/RSI rules.
+
+5. Summary of Rules
+    • Rule 1: Never exit with a loss unless the Stop Loss is hit or the Time Decay reaches 0.
+    • Rule 2: Only the symbol in Row 4 of the scanner can trigger the Auto-Popup.
+    • Rule 3: The Panic Button is the final authority for manual risk management.
+
