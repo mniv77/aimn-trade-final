@@ -420,6 +420,245 @@ def settings():
 
 
 
+# ===================== AUTO TUNER PAGES =====================
+
+@app.route("/auto_tuner")
+def auto_tuner_page():
+    return render_template("auto_tuner.html", brokers=[])
+
+@app.route("/tuning_runs")
+def tuning_runs_page():
+    return render_or_404("tuning_runs.html")
+
+
+# ===================== AUTO TUNER APIs =====================
+
+@app.route("/get_brokers_and_symbols")
+def get_brokers_and_symbols():
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        if not conn:
+            return jsonify({"brokers": [], "products": []})
+        cursor.execute("SELECT id, name FROM brokers WHERE is_active=1 ORDER BY name")
+        brokers = cursor.fetchall()
+        cursor.execute("""
+            SELECT bp.id, bp.broker_id, bp.local_ticker as symbol
+            FROM broker_products bp
+            WHERE bp.is_active = 1
+            ORDER BY bp.local_ticker
+        """)
+        products = cursor.fetchall()
+        conn.close()
+        return jsonify({"brokers": brokers, "products": products})
+    except Exception as e:
+        return jsonify({"brokers": [], "products": [], "error": str(e)})
+
+
+@app.route("/run_auto_tuner", methods=["POST"])
+def run_auto_tuner():
+    import threading
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        from db import get_db_connection
+        # Resolve strategy_id from symbol_id + direction
+        conn, cursor = get_db_connection()
+        symbol_id = data.get("symbol_id")
+        direction = data.get("direction", "LONG")
+        timeframe = data.get("timeframe", "1hr")
+
+        cursor.execute("SELECT local_ticker, broker_id FROM broker_products WHERE id=%s", (symbol_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return jsonify({"error": "Symbol not found"}), 400
+        symbol = row['local_ticker']
+        broker_id = row['broker_id']
+
+        cursor.execute("SELECT name FROM brokers WHERE id=%s", (broker_id,))
+        broker_row = cursor.fetchone()
+        broker_name = broker_row['name'] if broker_row else "Gemini"
+
+        cursor.execute("""
+            SELECT id FROM strategy_params
+            WHERE broker_product_id=%s AND direction=%s AND candle_time=%s
+            LIMIT 1
+        """, (symbol_id, direction, timeframe))
+        sp_row = cursor.fetchone()
+        if sp_row:
+            strategy_id = sp_row['id']
+        else:
+            cursor.execute("""
+                INSERT INTO strategy_params
+                    (broker_product_id, direction, candle_time, rsi_len, rsi_entry,
+                     stop_loss, trailing_start, trailing_drop, rsi_exit,
+                     init_profit, decay_start, decay_rate, active)
+                VALUES (%s,%s,%s,100,30,1.0,2.0,0.5,70,1.0,0.5,0.5,1)
+            """, (symbol_id, direction, timeframe))
+            strategy_id = cursor.lastrowid
+        conn.close()
+
+        cfg = {
+            'timeframe'          : timeframe,
+            'bars'               : int(data.get('bars', 2016)),
+            'rsi_len_options'    : data.get('rsi_len_options',     [20, 50, 100, 168, 200]),
+            'rsi_entry_options'  : data.get('rsi_entry_options',   [20, 30, 40]),
+            'macd_fast'          : int(data.get('macd_fast', 12)),
+            'macd_slow'          : int(data.get('macd_slow', 26)),
+            'macd_sig'           : int(data.get('macd_sig',  9)),
+            'stop_loss_options'  : data.get('stop_loss_options',   [0.3, 0.5, 0.7, 1.0]),
+            'trail_start_options': data.get('trail_start_options', [1.0, 2.0, 3.0]),
+            'trail_minus_options': data.get('trail_minus_options', [0.3, 0.5, 0.7]),
+            'rsi_exit_options'   : data.get('rsi_exit_options',    [65, 70, 75, 80]),
+            'init_profit_options': data.get('init_profit_options', [0.5, 1.0, 1.5, 2.0]),
+            'decay_start'        : float(data.get('decay_start', 0.5)),
+            'decay_rate'         : float(data.get('decay_rate',  0.5)),
+            'min_trades'         : int(data.get('min_trades', 5)),
+            'score_metric'       : data.get('score_metric', 'total_pnl'),
+        }
+
+        from engine.tuning.auto_tuner import tune_strategy
+        result = tune_strategy(strategy_id, symbol, direction, cfg=cfg, broker_name=broker_name)
+
+        if not result:
+            return jsonify({"error": "No valid combinations found — try fewer filters or more bars"})
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/run_all_tuning", methods=["POST"])
+def run_all_tuning():
+    import threading
+    def _run():
+        try:
+            from engine.tuning.run_tuning_all import run_all
+            run_all()
+        except Exception as e:
+            print(f"[run_all_tuning] Error: {e}")
+    threading.Thread(target=_run, daemon=True).start()
+    return jsonify({"status": "started", "message": "Full tuning run started in background. Check /tuning_runs for progress."})
+
+
+@app.route("/disable_old_strategies", methods=["POST"])
+def disable_old_strategies():
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            UPDATE strategy_params
+            SET active = 0
+            WHERE (last_tuned < '2025-04-08' OR last_tuned IS NULL OR pl_pct < 0)
+              AND active = 1
+        """)
+        affected = cursor.rowcount
+        conn.close()
+        return jsonify({"status": "success", "message": f"Disabled {affected} old/negative strategies"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/tuning_runs")
+def api_tuning_runs():
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT id, started_at, finished_at, status, summary
+            FROM tuning_runs ORDER BY id DESC LIMIT 50
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        for r in rows:
+            if r.get('started_at'):
+                r['started_at'] = str(r['started_at'])
+            if r.get('finished_at'):
+                r['finished_at'] = str(r['finished_at'])
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify([])
+
+
+@app.route("/api/tuning_runs/<int:run_id>")
+def api_tuning_run_detail(run_id):
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("SELECT * FROM tuning_runs WHERE id=%s", (run_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if not row:
+            return jsonify({"error": "Not found"}), 404
+        if row.get('started_at'):
+            row['started_at'] = str(row['started_at'])
+        if row.get('finished_at'):
+            row['finished_at'] = str(row['finished_at'])
+        return jsonify(row)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/performance")
+def api_performance():
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT bp.local_ticker as symbol, b.name as broker,
+                   sp.direction, sp.candle_time,
+                   COALESCE(sp.pl_pct, 0) as pl_pct,
+                   sp.rsi_len, sp.rsi_entry, sp.stop_loss,
+                   sp.trailing_start, sp.init_profit,
+                   sp.last_tuned
+            FROM strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            JOIN brokers b ON bp.broker_id = b.id
+            WHERE sp.active = 1
+            ORDER BY sp.pl_pct DESC
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        for r in rows:
+            if r.get('last_tuned'):
+                r['last_tuned'] = str(r['last_tuned'])
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify([])
+
+
+# Also create tuning DB tables on /api/db/init
+_TUNING_TABLES_SQL = [
+    """CREATE TABLE IF NOT EXISTS tuning_runs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        started_at DATETIME, finished_at DATETIME,
+        status VARCHAR(16) DEFAULT 'running',
+        summary TEXT, log_text LONGTEXT
+    )""",
+    """CREATE TABLE IF NOT EXISTS tuning_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        strategy_id INT, rsi_len INT, rsi_entry FLOAT,
+        stop_loss FLOAT, trailing_start FLOAT, trailing_drop FLOAT,
+        winrate FLOAT, avg_pnl FLOAT, pl_pct FLOAT,
+        trades_tested INT, tuned_at DATETIME
+    )""",
+]
+
+_orig_db_init = app.view_functions.get('api_db_init')
+
+@app.route("/api/db/init/tuning")
+def api_db_init_tuning():
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        for sql in _TUNING_TABLES_SQL:
+            cursor.execute(sql)
+        conn.close()
+        return jsonify({"ok": True, "tables": ["tuning_runs", "tuning_history"]})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)
