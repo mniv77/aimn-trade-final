@@ -10,6 +10,10 @@ def run_backtest(df, params):
     trade_mode = params.get('trade_mode', 'BUY')
     is_buy_mode = trade_mode == 'BUY'
     is_sell_mode = trade_mode == 'SELL'
+
+    # Support both old-style 'rsi_exit' and new-style 'rsi_exit_buy'/'rsi_exit_sell'
+    rsi_exit_buy  = params.get('rsi_exit_buy',  params.get('rsi_exit', 70))
+    rsi_exit_sell = params.get('rsi_exit_sell', params.get('rsi_exit', 30))
     # Indicator Calculation
     df['recent_high'] = df['high'].rolling(params['rsi_window']).max()
     df['recent_low'] = df['low'].rolling(params['rsi_window']).min()
@@ -66,14 +70,14 @@ def run_backtest(df, params):
             if direction == 'BUY':
                 profit_pct = (row['close'] - entry_price) / entry_price * 100
                 exit_condition = (
-                    ((row['rsi_real'] >= params['rsi_exit_buy']) or (i - entry_index > 10))
-                    and profit_pct >= params['min_exit_profit_pct_buy']
+                    ((row['rsi_real'] >= rsi_exit_buy) or (i - entry_index > 10))
+                    and profit_pct >= params.get('min_exit_profit_pct_buy', 0.0)
                 )
             else:
                 profit_pct = (entry_price - row['close']) / entry_price * 100
                 exit_condition = (
-                    ((row['rsi_real'] <= params['rsi_exit_sell']) or (i - entry_index > 10))
-                    and profit_pct >= params['min_exit_profit_pct_sell']
+                    ((row['rsi_real'] <= rsi_exit_sell) or (i - entry_index > 10))
+                    and profit_pct >= params.get('min_exit_profit_pct_sell', 0.0)
                 )
             if exit_condition:
                 exit_price = row['close']

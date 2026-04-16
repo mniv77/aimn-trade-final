@@ -39,23 +39,37 @@ class StrategyParam(Base):
     symbol    = Column(String(32), nullable=False)
     timeframe = Column(String(16), nullable=False)
 
+    # Mode
+    mode = Column(String(4), default="BUY")
+
     # RSI Parameters
     rsi_period       = Column(Integer, default=14)
     rsi_buy_whole    = Column(Integer, default=30)
     rsi_buy_decimal  = Column(Integer, default=0)
     rsi_sell_whole   = Column(Integer, default=70)
     rsi_sell_decimal = Column(Integer, default=0)
+    rsi_exit_whole   = Column(Integer, default=70)
+    rsi_exit_decimal = Column(Integer, default=0)
 
     # MACD Parameters
     macd_fast   = Column(Integer, default=12)
     macd_slow   = Column(Integer, default=26)
     macd_signal = Column(Integer, default=9)
 
+    # Volume / Scoring weights
+    vol_window   = Column(Integer, default=20)
+    weight_rsi   = Column(Float, default=0.4)
+    weight_macd  = Column(Float, default=0.4)
+    weight_vol   = Column(Float, default=0.2)
+    entry_threshold = Column(Float, default=0.6)
+
     # Risk Management
     trailing_pct_primary_whole     = Column(Integer, default=1)
     trailing_pct_primary_decimal   = Column(Integer, default=0)
     trailing_pct_secondary_whole   = Column(Integer, default=2)
     trailing_pct_secondary_decimal = Column(Integer, default=0)
+    trailing_start_whole           = Column(Integer, default=1)
+    trailing_start_decimal         = Column(Integer, default=0)
     stop_loss_whole                = Column(Integer, default=1)
     stop_loss_decimal              = Column(Integer, default=0)
 
@@ -76,6 +90,8 @@ class Trade(Base):
     qty = Column(Float, nullable=False)
     price = Column(Float, nullable=False)
     pnl = Column(Float)
+    pnl_pct = Column(Float)   # percentage P&L
+    reason = Column(String(128))
     meta = Column(JSON)
     ts = Column(DateTime, server_default=func.now())
 

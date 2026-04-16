@@ -212,6 +212,12 @@
     </div>
 </form>
 
+{% if backtest_error is defined and backtest_error %}
+  <div style="margin-top:24px; padding:16px; background:#2a0000; border:1px solid #f55; border-radius:8px; color:#f88;">
+    <b>Backtest Error:</b> {{ backtest_error }}
+  </div>
+{% endif %}
+
 {% if pnl_pct is not none %}
   <div style="margin-top:24px;">
     <h3>Backtest Results</h3>

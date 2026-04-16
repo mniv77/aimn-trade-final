@@ -4,9 +4,8 @@ import os, time, random
 
 from sqlalchemy import text
 from shared_models import Base
-  # you already use Base from app_sub.db in shared_models
 from app_sub.db import engine, db_session
-from shared_models import Base  # keep Base here ONLY for /api/db/init
+from shared_models import Base, Trade  # Trade for /api/trade/open
 
 
 
@@ -50,6 +49,13 @@ def results():
 
 # register the blueprint at /aiml
 app.register_blueprint(aiml, url_prefix="/aiml")
+
+# Register the full AI/ML dashboard blueprint (manual-tune, backtest, trades)
+try:
+    from AImnMLResearch.aiml_dashboard import aiml_bp
+    app.register_blueprint(aiml_bp)
+except Exception as _aiml_err:
+    print(f"[app] aiml_bp not registered: {_aiml_err}")
 
 
 
@@ -286,6 +292,84 @@ def api_trade_completed():
     # callback you set in WSGI env; just ack
     payload = request.get_json(force=True, silent=True) or {}
     return jsonify({"ok": True, "ack": True, "received": payload})
+
+
+# ---- Trade open / close — stores in shared MySQL trades table ----
+@app.route("/api/trade/open", methods=["POST"])
+def api_trade_open():
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        symbol   = (data.get("symbol") or "").upper()
+        exchange = (data.get("exchange") or data.get("broker") or "UNKNOWN").upper()
+        side     = (data.get("side") or "BUY").upper()
+        qty      = float(data.get("qty") or 1)
+
+        if not symbol or side not in ("BUY", "SELL"):
+            return jsonify({"ok": False, "error": "symbol and side required"}), 400
+
+        # Get a live price (fall back to 0 if unavailable)
+        base_prices = {
+            "BTCUSD": 68000, "BTC/USD": 68000,
+            "ETHUSD": 3400,  "ETH/USD": 3400,
+            "LTCUSD": 70,    "AAPL": 190, "TSLA": 240,
+        }
+        entry_price = base_prices.get(symbol, 100.0)
+
+        trade = Trade(
+            symbol=symbol,
+            side=side,
+            qty=qty,
+            price=entry_price,
+            meta={"exchange": exchange, "status": "open"},
+        )
+        db_session.add(trade)
+        db_session.commit()
+
+        return jsonify({
+            "ok": True,
+            "trade_id": trade.id,
+            "symbol": symbol,
+            "side": side,
+            "qty": qty,
+            "entry_price": entry_price,
+            "exchange": exchange,
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/trade/close", methods=["POST"])
+def api_trade_close():
+    try:
+        data     = request.get_json(force=True, silent=True) or {}
+        symbol   = (data.get("symbol") or "").upper()
+        pnl      = float(data.get("pnl") or data.get("pnl_pct") or 0)
+        reason   = str(data.get("reason") or "")
+        trade_id = data.get("trade_id")
+
+        if trade_id:
+            trade = db_session.get(Trade, int(trade_id))
+        else:
+            # Find latest open trade for this symbol
+            trade = (
+                db_session.query(Trade)
+                .filter(Trade.symbol == symbol,
+                        Trade.meta["status"].as_string() == "open")
+                .order_by(Trade.id.desc())
+                .first()
+            )
+
+        if trade:
+            trade.pnl = pnl
+            meta = dict(trade.meta or {})
+            meta["status"] = "closed"
+            meta["reason"] = reason
+            trade.meta = meta
+            db_session.commit()
+
+        return jsonify({"ok": True, "symbol": symbol, "pnl": pnl, "reason": reason})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 
