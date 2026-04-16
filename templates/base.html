@@ -56,7 +56,9 @@
     <div class="brand">⚡ AIMn Trading</div>
 <nav>
   <a href="{{ url_for('scanner_primary') }}"   {% if request.path.startswith('/scanner') %}class="active"{% endif %}>Live Scanner</a>
-  <a href="{{ url_for('tuning') }}"            {% if request.path.startswith('/tuning') %}class="active"{% endif %}>Tuning</a>
+  <a href="{{ url_for('tuning') }}"            {% if request.path.startswith('/tuning') and not request.path.startswith('/tuning_runs') %}class="active"{% endif %}>Tuning</a>
+  <a href="/auto_tuner"  {% if request.path.startswith('/auto_tuner') %}class="active"{% endif %}>Auto Tuner</a>
+  <a href="/tuning_runs" {% if request.path.startswith('/tuning_runs') %}class="active"{% endif %}>Tuning Runs</a>
   <a href="{{ url_for('orders') }}"            {% if request.path.startswith('/orders') %}class="active"{% endif %}>Orders</a>
   <a href="{{ url_for('trade_tester') }}"      {% if request.path.startswith('/trade-tester') %}class="active"{% endif %}>Trade Tester</a>
   <a href="{{ url_for('symbols') }}"           {% if request.path.startswith('/symbols') %}class="active"{% endif %}>Symbols</a>
