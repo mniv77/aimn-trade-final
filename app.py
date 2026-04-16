@@ -121,6 +121,37 @@ def aiml_home():
 def symbol_api_manager():
     return render_or_404("symbol_api_manager.html")
 
+@app.route("/api/broker-products", methods=["POST"])
+def api_add_broker_product():
+    from db import get_db_connection
+    data = request.get_json(force=True, silent=True) or {}
+    symbol = (data.get("symbol") or "").strip().upper()
+    broker_id = data.get("broker_id")
+    if not symbol or not broker_id:
+        return jsonify({"error": "symbol and broker_id required"}), 400
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute(
+            "INSERT INTO broker_products (broker_id, local_ticker) VALUES (%s, %s)",
+            (broker_id, symbol)
+        )
+        new_id = cursor.lastrowid
+        conn.close()
+        return jsonify({"ok": True, "id": new_id, "symbol": symbol, "broker_id": int(broker_id)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/broker-products/<int:product_id>", methods=["DELETE"])
+def api_delete_broker_product(product_id):
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("DELETE FROM broker_products WHERE id=%s", (product_id,))
+        conn.close()
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/trade_tester")
 def trade_tester_legacy():
     return redirect("/trade-tester", code=302)
