@@ -11,13 +11,9 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 
 aiml_bp = Blueprint(
-    'aiml', __name__, template_folder='templates',
+    'aiml_research', __name__, template_folder='templates',
     static_folder='static', url_prefix='/aiml'
 )
-
-@aiml_bp.route('/')
-def aiml_home():
-    return render_template('aiml/home.html')
 
 
 @aiml_bp.route('/manual-tune', methods=['GET', 'POST'])
@@ -26,9 +22,13 @@ def manual_tune():
     n_trades = n_wins = n_losses = win_rate = n_buy_orders = n_sell_orders = avg_trade_pct = max_drawdown = 0
     trades = []
     session = Session()
-    symbols = [row[0] for row in session.execute(text("SELECT DISTINCT symbol FROM strategy_params")).fetchall()]
-    brokers = [row[0] for row in session.execute(text("SELECT DISTINCT broker FROM strategy_params")).fetchall()]
-    session.close()
+    try:
+        symbols = [row[0] for row in session.execute(text("SELECT DISTINCT symbol FROM strategy_params")).fetchall()]
+    except Exception:
+        symbols = []
+    finally:
+        session.close()
+    brokers = ["Alpaca", "Gemini", "Auto"]
     if request.method == 'POST':
         try:
             rsi_exit_buy_val  = int(request.form.get('rsi_exit_buy_whole', 70))  + float(request.form.get('rsi_exit_buy_decimal', 0))
