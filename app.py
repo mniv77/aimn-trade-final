@@ -440,12 +440,11 @@ def get_brokers_and_symbols():
         conn, cursor = get_db_connection()
         if not conn:
             return jsonify({"brokers": [], "products": []})
-        cursor.execute("SELECT id, name FROM brokers WHERE is_active=1 ORDER BY name")
+        cursor.execute("SELECT id, name FROM brokers ORDER BY name")
         brokers = cursor.fetchall()
         cursor.execute("""
             SELECT bp.id, bp.broker_id, bp.local_ticker as symbol
             FROM broker_products bp
-            WHERE bp.is_active = 1
             ORDER BY bp.local_ticker
         """)
         products = cursor.fetchall()
