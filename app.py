@@ -654,7 +654,7 @@ def api_performance():
                 r['last_tuned'] = str(r['last_tuned'])
         return jsonify(rows)
     except Exception as e:
-        return jsonify([])
+        return jsonify({"error": str(e), "rows": []}), 500
 
 
 # Also create tuning DB tables on /api/db/init
