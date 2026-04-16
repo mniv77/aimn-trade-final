@@ -36,26 +36,10 @@
 <body>
 
 <div class="navbar">
-
-    <!-- ✅ HOME -->
-    <a href="{{ url_for('aiml_home') }}">AI/ML Home</a>
-
-    <!-- ✅ MANUAL TUNING -->
-    <a href="{{ url_for('manual_tune') }}">Manual Tuning</a>
-
-    <!-- ✅ BACK TO MAIN DASHBOARD -->
-    <a href="https://meirniv.pythonanywhere.com/">Main Dashboard</a>
-
+    <a href="/aiml">AI/ML Home</a>
+    <a href="/aiml/manual-tune">Manual Tuning</a>
+    <a href="/">Main Dashboard</a>
 </div>
-
-<!-- templates/aiml/aiml_base.html -->
-<nav class="navbar navbar-expand navbar-light bg-light mb-4">
-  <a class="navbar-brand" href="{{ url_for('aiml_home') }}">AI/ML Dashboard</a>
-  <div class="navbar-nav">
-    <a class="nav-item nav-link" href="{{ url_for('manual_tune') }}">Manual Tuning</a>
-    <a class="nav-item nav-link" href="{{ url_for('index') }}">Main Dashboard</a>
-  </div>
-</nav>
 
 
 <div class="content">
