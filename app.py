@@ -303,6 +303,25 @@ def api_open_orders():
     # empty list is OK; UI should handle it
     return jsonify([])
 
+@app.route("/api/trades/active")
+def api_trades_active():
+    try:
+        trades = db_session.query(Trade).filter(Trade.pnl == None).order_by(Trade.ts.desc()).limit(20).all()
+        result = []
+        for t in trades:
+            result.append({
+                "id": t.id,
+                "symbol": t.symbol,
+                "side": t.side,
+                "qty": t.qty,
+                "price": t.price,
+                "broker": (t.meta or {}).get("exchange", ""),
+                "ts": str(t.ts),
+            })
+        return jsonify(result)
+    except Exception as e:
+        return jsonify([])
+
 @app.route("/api/ticker")
 def api_ticker():
     # some UIs call this instead of /api/price
