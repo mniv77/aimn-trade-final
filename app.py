@@ -253,6 +253,48 @@ def api_scanner_sim():
 def api_scanner_last():
     return jsonify(_last_scan or {"ts": int(time.time()*1000), "best": None, "scores": []})
 
+@app.route("/api/scanner/symbols")
+def api_scanner_symbols():
+    try:
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT DISTINCT bp.local_ticker as symbol, b.name as broker
+            FROM strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            JOIN brokers b ON bp.broker_id = b.id
+            WHERE sp.active = 1
+            ORDER BY bp.local_ticker
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify({"symbols": rows})
+    except Exception as e:
+        return jsonify({"symbols": [], "error": str(e)}), 500
+
+@app.route("/api/scanner/strategies")
+def api_scanner_strategies():
+    try:
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT bp.local_ticker as symbol, b.name as broker,
+                   sp.direction, sp.candle_time,
+                   sp.rsi_entry, sp.rsi_exit, sp.stop_loss,
+                   sp.trailing_start, sp.init_profit
+            FROM strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            JOIN brokers b ON bp.broker_id = b.id
+            WHERE sp.active = 1
+            ORDER BY bp.local_ticker, sp.direction,
+                     CASE sp.candle_time WHEN '5m' THEN 1 WHEN '30m' THEN 2 ELSE 3 END
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify({"strategies": rows})
+    except Exception as e:
+        return jsonify({"strategies": [], "error": str(e)}), 500
+
 # Basic strategy/tuning settings
 _DEFAULT_SETTINGS = {
     "tp_percent": 5.0, "sl_percent": 2.0,
