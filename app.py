@@ -532,6 +532,10 @@ def api_scanner_snapshot():
                 atr_vals = [(candles[i]['high'] - candles[i]['low']) / candles[i]['close'] * 100
                             for i in range(-min(14, n), 0)]
                 atr_pct = round(sum(atr_vals) / len(atr_vals), 2)
+                # Use last candle close as price fallback (e.g. Binance blocked on this host)
+                if price is None and closes:
+                    price = closes[-1]
+                    feed = "CANDLE"
         except Exception as e:
             print(f"[snapshot] {symbol}: {e}")
 
