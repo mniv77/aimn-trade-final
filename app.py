@@ -119,7 +119,16 @@ def aiml_home():
 # EXTRA / ALIASES
 @app.route("/symbol-api-manager")
 def symbol_api_manager():
-    return render_or_404("symbol_api_manager.html")
+    broker_symbols = {
+        'GEMINI':     ['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','LTC/USD','LINK/USD','AVAX/USD','XRP/USD'],
+        'COINBASE':   ['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','ADA/USD','DOT/USD','MATIC/USD','XRP/USD'],
+        'ALPACA':     ['AAPL','TSLA','NVDA','MSFT','AMZN','GOOGL','META','NFLX','AMD','INTC'],
+        'ALPACA-ETF': ['SPY','QQQ','IWM','GLD','TLT','XLF','XLK','ARKK','VTI','VOO'],
+        'WEBULL':     ['AAPL','TSLA','NVDA','AMC','GME','PLTR','SOFI','NIO','RIVN','LCID'],
+        'FOREX':      ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CHF','NZD/USD','USD/CAD','EUR/GBP'],
+        'FUTURES':    ['GC-GOLD','ES-SPX','CL-OIL','NQ-NDX','YM-DOW','SI-SILVER','ZB-TBOND']
+    }
+    return render_template("symbol_api_manager.html", broker_symbols=broker_symbols)
 
 @app.route("/api/broker-products", methods=["POST"])
 def api_add_broker_product():
