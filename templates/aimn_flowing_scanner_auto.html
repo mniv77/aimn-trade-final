@@ -244,6 +244,30 @@
       }
     }
 
+    // --- Real RSI + ATR snapshot from backend (cached 10 min) ---
+    async function refreshScanSnapshot() {
+      try {
+        const resp = await fetch('/api/scanner/snapshot');
+        const data = await resp.json();
+        if (!data.symbols || !data.symbols.length) return;
+        const snapMap = {};
+        data.symbols.forEach(s => { snapMap[s.symbol] = s; });
+        scanData.forEach(item => {
+          const snap = snapMap[item.symbol];
+          if (!snap) return;
+          if (snap.price != null)   item.price   = snap.price > 1000 ? snap.price.toFixed(2) : snap.price.toFixed(4);
+          if (snap.rsi != null)     item.rsi     = snap.rsi;
+          if (snap.atr_pct != null) item.atr_pct = snap.atr_pct;
+          if (snap.change != null)  item.change  = snap.change;
+          item.signal = snap.rsi <= 30 ? 'BUY' : snap.rsi >= 70 ? 'SELL' : 'NEUTRAL';
+          item.last_trade_seconds = 30;  // always pass recentPass (no real data available)
+        });
+        updateScanResultsDisplay();
+      } catch(e) {
+        console.warn('refreshScanSnapshot failed', e);
+      }
+    }
+
     // --- Smart filter checker ---
     function checkFilters(item) {
       const longStrat  = strategyMap[`${item.symbol}:LONG`];
@@ -478,6 +502,12 @@
         const filterScore = `${row.filters.score}/4`;
         const filterColor = row.filters.score === 4 ? 'text-green-400' : row.filters.score >= 2 ? 'text-yellow-400' : 'text-red-400';
 
+        // Dynamic RSI thresholds from tuned strategy params
+        const longStrat  = strategyMap[`${row.symbol}:LONG`];
+        const shortStrat = strategyMap[`${row.symbol}:SHORT`];
+        const buyThresh  = longStrat  ? parseFloat(longStrat.rsi_entry)  : 30;
+        const sellThresh = shortStrat ? (100 - parseFloat(shortStrat.rsi_entry)) : 70;
+
         const div = document.createElement('div');
         div.className = `grid grid-cols-10 gap-2 p-2 mb-1 rounded ${statusClass} text-sm items-center`;
         div.innerHTML = `
@@ -487,7 +517,7 @@
           <div>$${row.price}</div>
           <div class="${parseFloat(row.change) >= 0 ? 'text-green-400' : 'text-red-400'}">${row.change}%</div>
           <div class="text-xs">${row.volume}</div>
-          <div class="${parseFloat(row.rsi) < 30 ? 'text-green-400 font-bold' : parseFloat(row.rsi) > 70 ? 'text-red-400 font-bold' : ''}">${row.rsi}</div>
+          <div class="${parseFloat(row.rsi) <= buyThresh ? 'text-green-400 font-bold' : parseFloat(row.rsi) >= sellThresh ? 'text-red-400 font-bold' : ''}">${row.rsi}</div>
           <div class="font-semibold ${row.signal === 'BUY' ? 'text-green-400' : row.signal === 'SELL' ? 'text-red-400' : 'text-gray-400'}">${row.signal}</div>
           <div class="text-xs font-bold ${filterColor}">${filterScore}</div>
           <div class="text-xs">
@@ -663,6 +693,7 @@
       generateSampleScanData();
       generateSampleTickerData();
       await refreshScanPrices();
+      await refreshScanSnapshot();
       updateExchangeStatusDisplay();
       updateTickerDisplay();
       updateScanResultsDisplay();
@@ -674,6 +705,7 @@
         updateTickerDisplay();
       }, 5000);
       setInterval(refreshScanPrices, 60000);
+      setInterval(refreshScanSnapshot, 600000);
     }
 
     async function refreshActiveOrders() {
