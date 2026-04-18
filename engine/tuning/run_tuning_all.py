@@ -9,31 +9,35 @@ from engine.tuning.auto_tuner import tune_strategy
 from db import get_db_connection
 from datetime import datetime
 
-SYMBOLS = [
-    {'symbol': 'BTC/USD',  'broker_product_id': 1,  'broker_name': 'Gemini'},
-    {'symbol': 'ETH/USD',  'broker_product_id': 2,  'broker_name': 'Gemini'},
-    {'symbol': 'SOL/USD',  'broker_product_id': 3,  'broker_name': 'Gemini'},
-    {'symbol': 'LINK/USD', 'broker_product_id': 4,  'broker_name': 'Gemini'},
-    {'symbol': 'GLD',      'broker_product_id': 13, 'broker_name': 'Alpaca-ETF'},
-    {'symbol': 'SLV',      'broker_product_id': 14, 'broker_name': 'Alpaca-ETF'},
-    {'symbol': 'USO',      'broker_product_id': 15, 'broker_name': 'Alpaca-ETF'},
-    {'symbol': 'UNG',      'broker_product_id': 16, 'broker_name': 'Alpaca-ETF'},
-    {'symbol': 'GDX',      'broker_product_id': 17, 'broker_name': 'Alpaca-ETF'},
-    {'symbol': 'SPY',      'broker_product_id': 5,  'broker_name': 'Alpaca'},
-    {'symbol': 'QQQ',      'broker_product_id': 6,  'broker_name': 'Alpaca'},
-    {'symbol': 'NVDA',     'broker_product_id': 7,  'broker_name': 'Alpaca'},
-    {'symbol': 'AAPL',     'broker_product_id': 8,  'broker_name': 'Alpaca'},
-    {'symbol': 'TSLA',     'broker_product_id': 9,  'broker_name': 'Alpaca'},
-    {'symbol': 'MSFT',     'broker_product_id': 10, 'broker_name': 'Alpaca'},
+# Timeframes by broker type
+CRYPTO_TFS = [
+    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 2016},
+    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 2016},
+    {'tf': '5m',  'candle_time': '5m',  'bar_minutes': 5,   'bars': 2016},
 ]
+STOCK_TFS = [
+    {'tf': '5m',  'candle_time': '5m',  'bar_minutes': 5,   'bars': 2016},
+]
+FOREX_TFS = [
+    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 1000},
+    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 1000},
+]
+FUTURES_TFS = [
+    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 1000},
+    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 1000},
+]
+
+BROKER_TFS = {
+    'GEMINI'    : CRYPTO_TFS,
+    'COINBASE'  : CRYPTO_TFS,
+    'ALPACA'    : STOCK_TFS,
+    'ALPACA-ETF': STOCK_TFS,
+    'WEBULL'    : STOCK_TFS,
+    'FOREX'     : FOREX_TFS,
+    'FUTURES'   : FUTURES_TFS,
+}
 
 DIRECTIONS = ['LONG', 'SHORT']
-
-TIMEFRAMES = [
-    {'tf': '1hr', 'candle_time': '1hr',  'bar_minutes': 60, 'bars': 2016},
-    {'tf': '30m', 'candle_time': '30m',  'bar_minutes': 30, 'bars': 2016},
-    {'tf': '5m',  'candle_time': '5m',   'bar_minutes': 5,  'bars': 2016},
-]
 
 DEFAULT_STRATEGY = {
     'rsi_len': 100, 'rsi_entry': 30.0, 'stop_loss': 1.0,
@@ -67,6 +71,24 @@ def log(msg):
     line = f"[{ts}] {msg}"
     print(line, flush=True)
     log_lines.append(line)
+
+def get_symbols():
+    """Load all symbols from DB dynamically."""
+    conn, cursor = get_db_connection()
+    try:
+        cursor.execute("""
+            SELECT bp.id as broker_product_id, bp.local_ticker as symbol, b.name as broker_name
+            FROM broker_products bp
+            JOIN brokers b ON bp.broker_id = b.id
+            ORDER BY b.name, bp.local_ticker
+        """)
+        rows = cursor.fetchall()
+        return rows
+    except Exception as e:
+        log(f"❌ get_symbols error: {e}")
+        return []
+    finally:
+        conn.close()
 
 def start_run_log():
     global run_id
@@ -114,7 +136,7 @@ def get_or_create_strategy(broker_product_id, direction, candle_time):
         if row:
             return row['id']
 
-        log(f"  ➕ Creating new strategy_params: broker_product_id={broker_product_id} {direction} {candle_time}")
+        log(f"  ➕ Creating new strategy_params: bp_id={broker_product_id} {direction} {candle_time}")
         cursor.execute("""
             INSERT INTO strategy_params (
                 broker_product_id, direction, candle_time,
@@ -148,14 +170,18 @@ def run_all():
     log("=" * 60)
     start_run_log()
 
+    symbols = get_symbols()
+    log(f"Found {len(symbols)} symbols in DB")
+
     total = success = failed = 0
     results = []
 
-    for sym in SYMBOLS:
+    for sym in symbols:
+        broker_upper = sym['broker_name'].upper()
+        timeframes = BROKER_TFS.get(broker_upper, STOCK_TFS)
+
         for direction in DIRECTIONS:
-            for tf in TIMEFRAMES:
-                if sym['broker_name'] in ('Alpaca', 'Alpaca-ETF') and tf['tf'] != '5m':
-                    continue
+            for tf in timeframes:
                 total += 1
                 label = f"{sym['symbol']} {direction} [{tf['tf']}]"
                 log(f"\n{'─'*50}")
@@ -195,3 +221,4 @@ def run_all():
 
 if __name__ == "__main__":
     run_all()
+
