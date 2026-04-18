@@ -29,6 +29,10 @@ def _get_provider():
         _quote_provider = get_provider()
     return _quote_provider
 
+# Scanner snapshot cache (real RSI + ATR from candles, cached 10 min)
+_scanner_snapshot_cache = None
+_scanner_snapshot_ts = 0.0
+
 from flask import Blueprint
 from flask import  url_for
 
@@ -451,6 +455,83 @@ def api_scanner_prices():
         result.append({"symbol": symbol, "broker": row['broker'], "price": price, "feed": feed})
 
     return jsonify({"prices": result, "ts": int(time.time()*1000)})
+
+@app.route("/api/scanner/snapshot")
+def api_scanner_snapshot():
+    global _scanner_snapshot_cache, _scanner_snapshot_ts
+    if _scanner_snapshot_cache and time.time() - _scanner_snapshot_ts < 600:
+        return jsonify(_scanner_snapshot_cache)
+
+    from db import get_db_connection
+    from engine.tuning.candle_fetcher import fetch_candles
+    from engine.tuning.auto_tuner import calc_rsi_real
+
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT bp.local_ticker as symbol, b.name as broker,
+                   sp.rsi_len, sp.candle_time, sp.pl_pct
+            FROM strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            JOIN brokers b ON bp.broker_id = b.id
+            WHERE sp.active = 1 AND b.name NOT IN ('Forex', 'Futures')
+            ORDER BY sp.pl_pct DESC
+        """)
+        all_rows = cursor.fetchall()
+        conn.close()
+    except Exception as e:
+        return jsonify({"symbols": [], "error": str(e)}), 500
+
+    # Best strategy per symbol (already sorted by pl_pct DESC)
+    seen, rows = set(), []
+    for r in all_rows:
+        if r['symbol'] not in seen:
+            seen.add(r['symbol'])
+            rows.append(r)
+
+    provider = _get_provider()
+    result = []
+    for row in rows:
+        symbol = row['symbol']
+        broker = row['broker']
+        rsi_len = int(row['rsi_len'] or 20)
+        candle_time = row['candle_time'] or '1hr'
+        exchange = "CRYPTO" if broker.upper() in ("GEMINI", "COINBASE") else broker.upper()
+
+        price = rsi = atr_pct = change = None
+        feed = "SIM"
+        try:
+            quote = provider.get_price(symbol, exchange)
+            if quote and quote.price:
+                price, feed = quote.price, quote.feed
+        except Exception:
+            pass
+
+        try:
+            candles = fetch_candles(symbol, timeframe=candle_time,
+                                    limit=rsi_len + 50, broker=broker)
+            if len(candles) > rsi_len + 1:
+                highs  = [c['high']  for c in candles]
+                lows   = [c['low']   for c in candles]
+                closes = [c['close'] for c in candles]
+                n = len(closes)
+                r_val = calc_rsi_real(highs, lows, closes, n - 1, rsi_len)
+                if r_val is not None:
+                    rsi = round(r_val, 1)
+                if closes[-2]:
+                    change = round((closes[-1] - closes[-2]) / closes[-2] * 100, 2)
+                atr_vals = [(candles[i]['high'] - candles[i]['low']) / candles[i]['close'] * 100
+                            for i in range(-min(14, n), 0)]
+                atr_pct = round(sum(atr_vals) / len(atr_vals), 2)
+        except Exception as e:
+            print(f"[snapshot] {symbol}: {e}")
+
+        result.append({'symbol': symbol, 'broker': broker, 'price': price,
+                       'rsi': rsi, 'atr_pct': atr_pct, 'change': change, 'feed': feed})
+
+    _scanner_snapshot_cache = {'symbols': result, 'ts': int(time.time() * 1000)}
+    _scanner_snapshot_ts = time.time()
+    return jsonify(_scanner_snapshot_cache)
 
 @app.route("/api/entry/start", methods=["POST"])
 def api_entry_start():
