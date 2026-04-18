@@ -520,6 +520,9 @@ def api_scanner_snapshot():
             candles = fetch_candles(symbol, timeframe=candle_time,
                                     limit=rsi_len + 50, broker=broker)
             if len(candles) > rsi_len + 1:
+                # Ensure oldest-first order (Gemini API returns newest-first)
+                if candles[0]['timestamp'] > candles[1]['timestamp']:
+                    candles = list(reversed(candles))
                 highs  = [c['high']  for c in candles]
                 lows   = [c['low']   for c in candles]
                 closes = [c['close'] for c in candles]
@@ -532,7 +535,7 @@ def api_scanner_snapshot():
                 atr_vals = [(candles[i]['high'] - candles[i]['low']) / candles[i]['close'] * 100
                             for i in range(-min(14, n), 0)]
                 atr_pct = round(sum(atr_vals) / len(atr_vals), 2)
-                # Use last candle close as price fallback (e.g. Binance blocked on this host)
+                # Use most recent candle close as price fallback
                 if price is None and closes:
                     price = closes[-1]
                     feed = "CANDLE"
