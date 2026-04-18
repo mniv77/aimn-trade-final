@@ -766,6 +766,47 @@ def seed_brokers():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+@app.route("/broker")
+def broker_settings():
+    from db import get_db_connection
+    from flask import flash
+    conn, cursor = get_db_connection()
+    cursor.execute("SELECT id, name, api_key FROM brokers ORDER BY id")
+    brokers = cursor.fetchall()
+    conn.close()
+    return render_template("brokers.html", brokers=brokers)
+
+@app.route("/add_broker", methods=["POST"])
+def add_broker():
+    from db import get_db_connection
+    from flask import flash
+    action = request.form.get("action_type")
+    conn, cursor = get_db_connection()
+    if action == "register_broker":
+        name = request.form.get("name", "").strip()
+        if name:
+            cursor.execute("INSERT IGNORE INTO brokers (name) VALUES (%s)", (name,))
+    elif action == "update_keys":
+        broker_id = request.form.get("broker_id")
+        api_key = request.form.get("api_key", "").strip()
+        api_secret = request.form.get("api_secret", "").strip()
+        cursor.execute(
+            "UPDATE brokers SET api_key=%s, api_secret=%s WHERE id=%s",
+            (api_key, api_secret, broker_id)
+        )
+    conn.close()
+    flash("Saved successfully")
+    return redirect(url_for("broker_settings"))
+
+@app.route("/delete_broker/<int:id>", methods=["POST"])
+def delete_broker(id):
+    from db import get_db_connection
+    conn, cursor = get_db_connection()
+    cursor.execute("DELETE FROM brokers WHERE id=%s", (id,))
+    conn.close()
+    return redirect(url_for("broker_settings"))
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)
