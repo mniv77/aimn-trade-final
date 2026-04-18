@@ -318,13 +318,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="symbolInput">Add Trading Symbol</label>
-                    <input type="text" id="symbolInput" placeholder="e.g., BTC/USD, AAPL, ETH/USD" style="text-transform: uppercase;">
-                </div>
-
-                <div class="form-group">
                     <label for="exchangeSelect">Exchange/Broker</label>
-                    <select id="exchangeSelect">
+                    <select id="exchangeSelect" onchange="updateSymbolSuggestions()">
                         <option value="">Select Exchange</option>
                         <option value="GEMINI">Gemini (Crypto)</option>
                         <option value="ALPACA">Alpaca (Stocks)</option>
@@ -334,6 +329,14 @@
                         <option value="FOREX">Forex</option>
                         <option value="FUTURES">Futures</option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="symbolInput">Add Trading Symbol</label>
+                    <input type="text" id="symbolInput" list="symbolSuggestions"
+                           placeholder="Select broker first, or type a symbol"
+                           style="text-transform: uppercase;">
+                    <datalist id="symbolSuggestions"></datalist>
                 </div>
 
                 <button class="btn-primary" onclick="addSymbol()">
@@ -441,6 +444,30 @@
         let symbols = [];
         let brokerMap = {};  // uppercase name -> id
         let apiCredentials = {};
+
+        const BROKER_SYMBOLS = {
+            'GEMINI':     ['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','LTC/USD','LINK/USD','AVAX/USD','XRP/USD'],
+            'COINBASE':   ['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','ADA/USD','DOT/USD','MATIC/USD','XRP/USD'],
+            'ALPACA':     ['AAPL','TSLA','NVDA','MSFT','AMZN','GOOGL','META','NFLX','AMD','INTC'],
+            'ALPACA-ETF': ['SPY','QQQ','IWM','GLD','TLT','XLF','XLK','ARKK','VTI','VOO'],
+            'WEBULL':     ['AAPL','TSLA','NVDA','AMC','GME','PLTR','SOFI','NIO','RIVN','LCID'],
+            'FOREX':      ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CHF','NZD/USD','USD/CAD','EUR/GBP'],
+            'FUTURES':    ['GC-GOLD','ES-SPX','CL-OIL','NQ-NDX','YM-DOW','SI-SILVER','ZB-TBOND']
+        };
+
+        function updateSymbolSuggestions() {
+            const broker = document.getElementById('exchangeSelect').value;
+            const dl = document.getElementById('symbolSuggestions');
+            dl.innerHTML = '';
+            (BROKER_SYMBOLS[broker] || []).forEach(sym => {
+                const opt = document.createElement('option');
+                opt.value = sym;
+                dl.appendChild(opt);
+            });
+            document.getElementById('symbolInput').value = '';
+            document.getElementById('symbolInput').placeholder =
+                broker ? `Choose or type (e.g. ${(BROKER_SYMBOLS[broker]||['symbol'])[0]})` : 'Select broker first';
+        }
 
         async function loadSymbols() {
             try {
