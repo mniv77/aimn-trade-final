@@ -42,19 +42,19 @@
     <p class="text-center text-gray-400">Fully Automated Multi-Exchange Market Scanning & Trading</p>
     <p class="text-center text-xs text-green-400 mt-1">⚡ AUTO MODE - Multi-Filter: RSI + ATR + Volume + Recency</p>
 
-    <div class="text-center mt-4">
-      <div class="flex justify-center gap-4">
-        <button onclick="openTradePopupTestStock()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all">
-          📊 Manual Test - Stock (AAPL)
-        </button>
-        <button onclick="openTradePopupTestCrypto()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all">
-          ₿ Manual Test - Crypto (BTC)
-        </button>
+    <!-- Active Orders Panel -->
+    <div class="mt-4 bg-gray-800 border border-gray-600 rounded-lg p-4">
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="font-semibold text-green-400">⚡ Active Orders</h3>
+        <span id="active-order-count" class="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded">0 open</span>
       </div>
-      <p class="text-gray-500 text-sm mt-2">
-        🟢 Green = Ready to trade | 🟡 Yellow = Needs improvement or closed | 🔴 Red = Trading | 🟤 Brown = Blocked
-      </p>
+      <div id="active-orders-list" class="space-y-1 text-sm">
+        <div class="text-gray-500 text-center py-2">No active orders</div>
+      </div>
     </div>
+    <p class="text-gray-500 text-sm mt-2 text-center">
+      🟢 Green = Ready to trade | 🟡 Yellow = Needs improvement or closed | 🔴 Red = Trading | 🟤 Brown = Blocked
+    </p>
 
     <div class="text-center mt-3">
       <div class="inline-flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg">
@@ -197,9 +197,44 @@
       return true; // Default to open for unknown exchanges
     }
 
+    // --- DB-driven strategy config ---
+    let symbols = [];
+    let strategyMap = {};  // "SYMBOL:DIRECTION" -> strategy params from tuner
+
+    async function loadScannerConfig() {
+      try {
+        const [symResp, stratResp] = await Promise.all([
+          fetch('/api/scanner/symbols'),
+          fetch('/api/scanner/strategies')
+        ]);
+        const symData = await symResp.json();
+        const stratData = await stratResp.json();
+
+        symbols = (symData.symbols || []).map(s => ({
+          symbol: s.symbol,
+          exchange: s.broker.toUpperCase()
+        }));
+
+        strategyMap = {};
+        (stratData.strategies || []).forEach(s => {
+          const key = `${s.symbol}:${s.direction}`;
+          if (!strategyMap[key]) strategyMap[key] = s;  // first = preferred (5m)
+        });
+      } catch(e) {
+        console.warn('loadScannerConfig failed, using fallback symbols', e);
+      }
+    }
+
     // --- Smart filter checker ---
     function checkFilters(item) {
-      const rsiPass = item.rsi < 25 || item.rsi > 75;
+      const longStrat  = strategyMap[`${item.symbol}:LONG`];
+      const shortStrat = strategyMap[`${item.symbol}:SHORT`];
+
+      // Use tuner rsi_entry if available, else fallback to 30/70
+      const buyThreshold  = longStrat  ? parseFloat(longStrat.rsi_entry)  : 30;
+      const sellThreshold = shortStrat ? (100 - parseFloat(shortStrat.rsi_entry)) : 70;
+
+      const rsiPass = item.rsi <= buyThreshold || item.rsi >= sellThreshold;
       const atrPass = item.atr_pct > 1.0;
       const volumePass = item.volume_ratio > 1.5 || Math.abs(item.change) > 2.0;
       const recentPass = item.last_trade_seconds < 60;
@@ -222,27 +257,18 @@
     }
 
     function generateSampleScanData() {
-      const symbols = [
+      // Use DB symbols if loaded; fallback to defaults if none
+      const symList = symbols.length ? symbols : [
         {symbol: 'BTC/USD', exchange: 'CRYPTO'},
         {symbol: 'ETH/USD', exchange: 'CRYPTO'},
         {symbol: 'AAPL',    exchange: 'ALPACA'},
         {symbol: 'TSLA',    exchange: 'ALPACA'},
         {symbol: 'NVDA',    exchange: 'ALPACA'},
         {symbol: 'SPY',     exchange: 'NYSE'},
-        {symbol: 'QQQ',     exchange: 'NYSE'},
-        {symbol: 'MSFT',    exchange: 'NYSE'},
-        {symbol: 'AMZN',    exchange: 'NYSE'},
-        {symbol: 'GOOGL',   exchange: 'ALPACA'},
-        {symbol: 'META',    exchange: 'NYSE'},
-        {symbol: 'NFLX',    exchange: 'ALPACA'},
-        {symbol: 'AMD',     exchange: 'NYSE'},
-        {symbol: 'INTC',    exchange: 'NASDAQ'},
-        {symbol: 'GC-GOLD', exchange: 'FUTURES'},  // Gold futures
-        {symbol: 'ES-SPX',  exchange: 'FUTURES'},  // S&P 500 E-mini futures
-        {symbol: 'CL-OIL',  exchange: 'FUTURES'}   // Crude Oil futures
+        {symbol: 'QQQ',     exchange: 'NYSE'}
       ];
 
-      scanData = symbols.map(({symbol, exchange}) => {
+      scanData = symList.map(({symbol, exchange}) => {
         let rsi, atr_pct, volume_ratio, last_trade_seconds;
 
         // Give BTC and ETH good values so they pass filters
@@ -612,7 +638,8 @@
     window.openTradePopupTestCrypto = openTradePopupTestCrypto;
 
     // --- Boot ---
-    function init() {
+    async function init() {
+      await loadScannerConfig();
       generateSampleExchangeData();
       generateSampleScanData();
       generateSampleTickerData();
@@ -627,6 +654,28 @@
         updateTickerDisplay();
       }, 5000);
     }
+
+    async function refreshActiveOrders() {
+      try {
+        const resp = await fetch('/api/trades/active');
+        const orders = await resp.json();
+        const list = document.getElementById('active-orders-list');
+        document.getElementById('active-order-count').textContent = `${orders.length} open`;
+        if (!orders.length) {
+          list.innerHTML = '<div class="text-gray-500 text-center py-2">No active orders</div>';
+          return;
+        }
+        list.innerHTML = orders.map(o => `
+          <div class="flex justify-between items-center bg-gray-700 rounded px-3 py-2">
+            <span class="font-bold text-white">${o.symbol}</span>
+            <span class="text-gray-300">${o.side} ${o.qty} @ ${o.price}</span>
+            <span class="text-xs text-gray-400">${o.broker}</span>
+            <span class="text-xs text-gray-500">${o.ts ? o.ts.slice(0,16) : ''}</span>
+          </div>`).join('');
+      } catch(e) {}
+    }
+    setInterval(refreshActiveOrders, 10000);
+    refreshActiveOrders();
 
     document.addEventListener('DOMContentLoaded', init);
   </script>

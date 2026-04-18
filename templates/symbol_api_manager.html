@@ -89,6 +89,11 @@
             transition: border-color 0.3s ease;
         }
 
+        .form-group select option {
+            background: #0d1526;
+            color: #e0e8f0;
+        }
+
         .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #00ff00;
@@ -297,6 +302,9 @@
 </head>
 <body>
     <div class="container">
+        <div style="margin-bottom:16px">
+            <a href="/" style="display:inline-block;padding:10px 22px;background:#1a3a5c;border:1px solid #0fd1c8;border-radius:10px;color:#0fd1c8;text-decoration:none;font-weight:700;font-size:14px;">← Back to Dashboard</a>
+        </div>
         <div class="header">
             <h1>🔧 AIMn Symbol & API Management</h1>
             <p>Configure trading pairs and broker connections</p>
@@ -310,23 +318,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="symbolInput">Add Trading Symbol</label>
-                    <input type="text" id="symbolInput" placeholder="e.g., BTC/USD, AAPL, ETH/USD" style="text-transform: uppercase;">
+                    <label for="exchangeSelect">Exchange/Broker</label>
+                    <select id="exchangeSelect" onchange="updateSymbolSuggestions()">
+                        <option value="">Select Exchange</option>
+                        <option value="GEMINI">Gemini (Crypto)</option>
+                        <option value="ALPACA">Alpaca (Stocks)</option>
+                        <option value="ALPACA-ETF">Alpaca ETF</option>
+                        <option value="WEBULL">Webull</option>
+                        <option value="COINBASE">Coinbase</option>
+                        <option value="FOREX">Forex</option>
+                        <option value="FUTURES">Futures</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="exchangeSelect">Exchange/Broker</label>
-                    <select id="exchangeSelect">
-                        <option value="">Select Exchange</option>
-                        <option value="BINANCE">Binance</option>
-                        <option value="ALPACA">Alpaca Markets</option>
-                        <option value="COINBASE">Coinbase Pro</option>
-                        <option value="KRAKEN">Kraken</option>
-                        <option value="INTERACTIVE_BROKERS">Interactive Brokers</option>
-                        <option value="TD_AMERITRADE">TD Ameritrade</option>
-                        <option value="NASDAQ">NASDAQ (Data Only)</option>
-                        <option value="NYSE">NYSE (Data Only)</option>
-                    </select>
+                    <label for="symbolInput">Add Trading Symbol</label>
+                    <input type="text" id="symbolInput" list="symbolSuggestions"
+                           placeholder="Select broker first, or type a symbol"
+                           style="text-transform: uppercase;">
+                    <datalist id="symbolSuggestions"></datalist>
                 </div>
 
                 <button class="btn-primary" onclick="addSymbol()">
@@ -354,12 +364,13 @@
                     <label for="brokerSelect">Select Broker</label>
                     <select id="brokerSelect" onchange="updateAPIFields()">
                         <option value="">Choose Broker</option>
-                        <option value="ALPACA">Alpaca Markets</option>
-                        <option value="BINANCE">Binance</option>
-                        <option value="COINBASE">Coinbase Pro</option>
-                        <option value="KRAKEN">Kraken</option>
-                        <option value="INTERACTIVE_BROKERS">Interactive Brokers</option>
-                        <option value="TD_AMERITRADE">TD Ameritrade</option>
+                        <option value="GEMINI">Gemini</option>
+                        <option value="ALPACA">Alpaca</option>
+                        <option value="ALPACA-ETF">Alpaca ETF</option>
+                        <option value="WEBULL">Webull</option>
+                        <option value="COINBASE">Coinbase</option>
+                        <option value="FOREX">Forex</option>
+                        <option value="FUTURES">Futures</option>
                     </select>
                 </div>
 
@@ -423,67 +434,123 @@
         <!-- Navigation -->
         <div class="bottom-nav">
             <a href="/" class="nav-link">🏠 Dashboard</a>
-            <a href="tuning" class="nav-link">🎯 Strategy Tuning</a>
-            <a href="/scanne" class="nav-link">📡 Live Scanner</a>
+            <a href="/tuning" class="nav-link">🎯 Strategy Tuning</a>
+            <a href="/scanner" class="nav-link">📡 Live Scanner</a>
         </div>
     </div>
 
     <script>
         // Symbol management
         let symbols = [];
+        let brokerMap = {};  // uppercase name -> id
         let apiCredentials = {};
 
-        function addSymbol() {
+        const BROKER_SYMBOLS = {
+            'GEMINI':     ['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','LTC/USD','LINK/USD','AVAX/USD','XRP/USD'],
+            'COINBASE':   ['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','ADA/USD','DOT/USD','MATIC/USD','XRP/USD'],
+            'ALPACA':     ['AAPL','TSLA','NVDA','MSFT','AMZN','GOOGL','META','NFLX','AMD','INTC'],
+            'ALPACA-ETF': ['SPY','QQQ','IWM','GLD','TLT','XLF','XLK','ARKK','VTI','VOO'],
+            'WEBULL':     ['AAPL','TSLA','NVDA','AMC','GME','PLTR','SOFI','NIO','RIVN','LCID'],
+            'FOREX':      ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CHF','NZD/USD','USD/CAD','EUR/GBP'],
+            'FUTURES':    ['GC-GOLD','ES-SPX','CL-OIL','NQ-NDX','YM-DOW','SI-SILVER','ZB-TBOND']
+        };
+
+        function updateSymbolSuggestions() {
+            const broker = document.getElementById('exchangeSelect').value;
+            const dl = document.getElementById('symbolSuggestions');
+            dl.innerHTML = '';
+            (BROKER_SYMBOLS[broker] || []).forEach(sym => {
+                const opt = document.createElement('option');
+                opt.value = sym;
+                dl.appendChild(opt);
+            });
+            document.getElementById('symbolInput').value = '';
+            document.getElementById('symbolInput').placeholder =
+                broker ? `Choose or type (e.g. ${(BROKER_SYMBOLS[broker]||['symbol'])[0]})` : 'Select broker first';
+        }
+
+        async function loadSymbols() {
+            try {
+                // Ensure Forex and Futures brokers exist in DB
+                await fetch('/api/db/seed-brokers', {method: 'POST'});
+
+                const resp = await fetch('/get_brokers_and_symbols');
+                const data = await resp.json();
+                brokerMap = {};
+                (data.brokers || []).forEach(b => brokerMap[b.name.toUpperCase()] = b.id);
+                symbols = (data.products || []).map(p => ({
+                    id: p.id,
+                    symbol: p.symbol,
+                    broker_id: p.broker_id,
+                    exchange: Object.keys(brokerMap).find(k => brokerMap[k] === p.broker_id) || String(p.broker_id)
+                }));
+                updateSymbolList();
+            } catch(e) {
+                console.error('Failed to load symbols:', e);
+            }
+        }
+
+        async function addSymbol() {
             const symbolInput = document.getElementById('symbolInput');
             const exchangeSelect = document.getElementById('exchangeSelect');
-
             const symbol = symbolInput.value.trim().toUpperCase();
-            const exchange = exchangeSelect.value;
-
-            if (!symbol || !exchange) {
+            const exchangeName = exchangeSelect.value;
+            if (!symbol || !exchangeName) {
                 alert('Please enter both symbol and exchange');
                 return;
             }
-
-            // Check for duplicates
-            const exists = symbols.some(s => s.symbol === symbol && s.exchange === exchange);
-            if (exists) {
-                alert('This symbol/exchange combination already exists');
-                return;
+            const broker_id = brokerMap[exchangeName];
+            if (!broker_id) { alert('Unknown broker'); return; }
+            const exists = symbols.some(s => s.symbol === symbol && s.broker_id === broker_id);
+            if (exists) { alert('This symbol/exchange combination already exists'); return; }
+            try {
+                const resp = await fetch('/api/broker-products', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({symbol, broker_id})
+                });
+                const data = await resp.json();
+                if (data.ok) {
+                    symbols.push({id: data.id, symbol, broker_id, exchange: exchangeName});
+                    updateSymbolList();
+                    symbolInput.value = '';
+                    exchangeSelect.value = '';
+                } else {
+                    alert('Error: ' + (data.error || 'failed'));
+                }
+            } catch(e) {
+                alert('Network error: ' + e.message);
             }
-
-            symbols.push({ symbol, exchange });
-            updateSymbolList();
-
-            // Clear inputs
-            symbolInput.value = '';
-            exchangeSelect.value = '';
         }
 
         function updateSymbolList() {
             const listContainer = document.getElementById('symbolList');
-
             if (symbols.length === 0) {
                 listContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No symbols added yet</div>';
                 return;
             }
-
-            listContainer.innerHTML = symbols.map((item, index) => `
+            listContainer.innerHTML = symbols.map(item => `
                 <div class="symbol-item">
                     <div>
                         <span class="symbol-name">${item.symbol}</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span class="exchange-badge">${item.exchange}</span>
-                        <button class="delete-btn" onclick="removeSymbol(${index})">×</button>
+                        <button class="delete-btn" onclick="removeSymbol(${item.id})">×</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function removeSymbol(index) {
-            symbols.splice(index, 1);
-            updateSymbolList();
+        async function removeSymbol(id) {
+            if (!confirm('Remove this symbol?')) return;
+            try {
+                await fetch('/api/broker-products/' + id, {method: 'DELETE'});
+                symbols = symbols.filter(s => s.id !== id);
+                updateSymbolList();
+            } catch(e) {
+                alert('Network error: ' + e.message);
+            }
         }
 
         function saveSymbols() {
@@ -601,11 +668,8 @@
             status.textContent = message;
         }
 
-        // Load saved data on page load
-        window.addEventListener('load', function() {
-            // In real implementation, load from server
-            console.log('Page loaded - ready for symbol and API management');
-        });
+        // Load symbols from DB on page load
+        window.addEventListener('load', loadSymbols);
 
         // Auto-uppercase symbol input
         document.getElementById('symbolInput').addEventListener('input', function(e) {

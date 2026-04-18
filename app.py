@@ -121,6 +121,37 @@ def aiml_home():
 def symbol_api_manager():
     return render_or_404("symbol_api_manager.html")
 
+@app.route("/api/broker-products", methods=["POST"])
+def api_add_broker_product():
+    from db import get_db_connection
+    data = request.get_json(force=True, silent=True) or {}
+    symbol = (data.get("symbol") or "").strip().upper()
+    broker_id = data.get("broker_id")
+    if not symbol or not broker_id:
+        return jsonify({"error": "symbol and broker_id required"}), 400
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute(
+            "INSERT INTO broker_products (broker_id, local_ticker) VALUES (%s, %s)",
+            (broker_id, symbol)
+        )
+        new_id = cursor.lastrowid
+        conn.close()
+        return jsonify({"ok": True, "id": new_id, "symbol": symbol, "broker_id": int(broker_id)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/broker-products/<int:product_id>", methods=["DELETE"])
+def api_delete_broker_product(product_id):
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("DELETE FROM broker_products WHERE id=%s", (product_id,))
+        conn.close()
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/trade_tester")
 def trade_tester_legacy():
     return redirect("/trade-tester", code=302)
@@ -222,6 +253,48 @@ def api_scanner_sim():
 def api_scanner_last():
     return jsonify(_last_scan or {"ts": int(time.time()*1000), "best": None, "scores": []})
 
+@app.route("/api/scanner/symbols")
+def api_scanner_symbols():
+    try:
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT DISTINCT bp.local_ticker as symbol, b.name as broker
+            FROM strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            JOIN brokers b ON bp.broker_id = b.id
+            WHERE sp.active = 1
+            ORDER BY bp.local_ticker
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify({"symbols": rows})
+    except Exception as e:
+        return jsonify({"symbols": [], "error": str(e)}), 500
+
+@app.route("/api/scanner/strategies")
+def api_scanner_strategies():
+    try:
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT bp.local_ticker as symbol, b.name as broker,
+                   sp.direction, sp.candle_time,
+                   sp.rsi_entry, sp.rsi_exit, sp.stop_loss,
+                   sp.trailing_start, sp.init_profit
+            FROM strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            JOIN brokers b ON bp.broker_id = b.id
+            WHERE sp.active = 1
+            ORDER BY bp.local_ticker, sp.direction,
+                     CASE sp.candle_time WHEN '5m' THEN 1 WHEN '30m' THEN 2 ELSE 3 END
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify({"strategies": rows})
+    except Exception as e:
+        return jsonify({"strategies": [], "error": str(e)}), 500
+
 # Basic strategy/tuning settings
 _DEFAULT_SETTINGS = {
     "tp_percent": 5.0, "sl_percent": 2.0,
@@ -271,6 +344,25 @@ def api_position():
 def api_open_orders():
     # empty list is OK; UI should handle it
     return jsonify([])
+
+@app.route("/api/trades/active")
+def api_trades_active():
+    try:
+        trades = db_session.query(Trade).filter(Trade.pnl == None).order_by(Trade.ts.desc()).limit(20).all()
+        result = []
+        for t in trades:
+            result.append({
+                "id": t.id,
+                "symbol": t.symbol,
+                "side": t.side,
+                "qty": t.qty,
+                "price": t.price,
+                "broker": (t.meta or {}).get("exchange", ""),
+                "ts": str(t.ts),
+            })
+        return jsonify(result)
+    except Exception as e:
+        return jsonify([])
 
 @app.route("/api/ticker")
 def api_ticker():
@@ -440,12 +532,11 @@ def get_brokers_and_symbols():
         conn, cursor = get_db_connection()
         if not conn:
             return jsonify({"brokers": [], "products": []})
-        cursor.execute("SELECT id, name FROM brokers WHERE is_active=1 ORDER BY name")
+        cursor.execute("SELECT id, name FROM brokers ORDER BY name")
         brokers = cursor.fetchall()
         cursor.execute("""
             SELECT bp.id, bp.broker_id, bp.local_ticker as symbol
             FROM broker_products bp
-            WHERE bp.is_active = 1
             ORDER BY bp.local_ticker
         """)
         products = cursor.fetchall()
@@ -624,7 +715,7 @@ def api_performance():
                 r['last_tuned'] = str(r['last_tuned'])
         return jsonify(rows)
     except Exception as e:
-        return jsonify([])
+        return jsonify({"error": str(e), "rows": []}), 500
 
 
 # Also create tuning DB tables on /api/db/init
@@ -655,6 +746,22 @@ def api_db_init_tuning():
             cursor.execute(sql)
         conn.close()
         return jsonify({"ok": True, "tables": ["tuning_runs", "tuning_history"]})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/db/seed-brokers", methods=["POST"])
+def seed_brokers():
+    """Ensure Forex and Futures brokers exist in brokers table."""
+    try:
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        for name in ("Forex", "Futures"):
+            cursor.execute("SELECT id FROM brokers WHERE name = %s", (name,))
+            if not cursor.fetchone():
+                cursor.execute("INSERT INTO brokers (name) VALUES (%s)", (name,))
+        conn.close()
+        return jsonify({"ok": True})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
