@@ -225,6 +225,25 @@
       }
     }
 
+    // --- Real price refresh from backend ---
+    async function refreshScanPrices() {
+      try {
+        const resp = await fetch('/api/scanner/prices');
+        const data = await resp.json();
+        if (!data.prices || !data.prices.length) return;
+        const priceMap = {};
+        data.prices.forEach(p => { if (p.price) priceMap[p.symbol] = p.price; });
+        scanData.forEach(item => {
+          if (priceMap[item.symbol]) {
+            const px = priceMap[item.symbol];
+            item.price = px > 1000 ? px.toFixed(2) : px > 10 ? px.toFixed(4) : px.toFixed(6);
+          }
+        });
+      } catch(e) {
+        console.warn('refreshScanPrices failed', e);
+      }
+    }
+
     // --- Smart filter checker ---
     function checkFilters(item) {
       const longStrat  = strategyMap[`${item.symbol}:LONG`];
@@ -643,6 +662,7 @@
       generateSampleExchangeData();
       generateSampleScanData();
       generateSampleTickerData();
+      await refreshScanPrices();
       updateExchangeStatusDisplay();
       updateTickerDisplay();
       updateScanResultsDisplay();
@@ -653,6 +673,7 @@
         updateExchangeStatusDisplay();
         updateTickerDisplay();
       }, 5000);
+      setInterval(refreshScanPrices, 60000);
     }
 
     async function refreshActiveOrders() {
