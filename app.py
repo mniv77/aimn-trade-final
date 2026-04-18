@@ -29,6 +29,15 @@ def _get_provider():
         _quote_provider = get_provider()
     return _quote_provider
 
+# Separate public provider for crypto (Binance API) — Alpaca can't fetch crypto prices
+_pub_provider = None
+def _get_pub_provider():
+    global _pub_provider
+    if _pub_provider is None:
+        from services.quote_provider import PublicQuoteProvider
+        _pub_provider = PublicQuoteProvider()
+    return _pub_provider
+
 # Scanner snapshot cache (real RSI + ATR from candles, cached 10 min)
 _scanner_snapshot_cache = None
 _scanner_snapshot_ts = 0.0
@@ -446,10 +455,10 @@ def api_scanner_prices():
         price = None
         feed = "SIM"
         try:
-            exchange = "CRYPTO" if broker_upper in ("GEMINI", "COINBASE") else broker_upper
-            quote = provider.get_price(symbol, exchange)
-            if quote and quote.price:
-                price, feed = quote.price, quote.feed
+            is_crypto = broker_upper in ("GEMINI", "COINBASE")
+            p = _get_pub_provider().get_price(symbol, "CRYPTO") if is_crypto else provider.get_price(symbol, broker_upper)
+            if p and p.price:
+                price, feed = p.price, p.feed
         except Exception:
             pass
         result.append({"symbol": symbol, "broker": row['broker'], "price": price, "feed": feed})
@@ -496,12 +505,12 @@ def api_scanner_snapshot():
         broker = row['broker']
         rsi_len = int(row['rsi_len'] or 20)
         candle_time = row['candle_time'] or '1hr'
-        exchange = "CRYPTO" if broker.upper() in ("GEMINI", "COINBASE") else broker.upper()
+        is_crypto = broker.upper() in ("GEMINI", "COINBASE")
 
         price = rsi = atr_pct = change = None
         feed = "SIM"
         try:
-            quote = provider.get_price(symbol, exchange)
+            quote = _get_pub_provider().get_price(symbol, "CRYPTO") if is_crypto else provider.get_price(symbol, broker.upper())
             if quote and quote.price:
                 price, feed = quote.price, quote.feed
         except Exception:
