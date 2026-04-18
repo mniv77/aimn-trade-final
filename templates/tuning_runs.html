@@ -110,6 +110,7 @@
 <div class="panel" id="performance_panel">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
         <div class="panel-title" style="margin-bottom:0; flex:1;">🏆 Strategy Performance — All Active</div>
+        <button onclick="loadPerformance()" style="background:var(--border); color:var(--text); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px 12px; font-size:11px; cursor:pointer; font-family:'Share Tech Mono',monospace; margin-right:8px;">↻ Refresh</button>
         <span id="perf_count" style="font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--green);"></span>
     </div>
     <div style="overflow-x:auto;">
@@ -272,6 +273,15 @@ async function loadLog(runId) {
 
 // ── Performance ────────────────────────────────────────────────
 
+function ageLabel(lastTuned) {
+    if (!lastTuned) return '<span style="color:var(--muted)">Never</span>';
+    const diff = Date.now() - new Date(lastTuned).getTime();
+    const days = Math.floor(diff / 86400000);
+    const color = days >= 3 ? '#f97316' : days >= 1 ? '#facc15' : '#4ade80';
+    const label = days === 0 ? 'Today' : days === 1 ? '1 day ago' : `${days} days ago`;
+    return `<span style="color:${color}">${label}</span>`;
+}
+
 async function loadPerformance() {
     try {
         const resp = await fetch('/api/performance');
@@ -299,7 +309,7 @@ async function loadPerformance() {
                 <td style="padding:8px; text-align:right; color:var(--muted);">${r.stop_loss}%</td>
                 <td style="padding:8px; text-align:right; color:var(--muted);">${r.trailing_start}%</td>
                 <td style="padding:8px; text-align:right; color:var(--gold);">${r.init_profit || '—'}%</td>
-                <td style="padding:8px; text-align:right; color:var(--muted);">${r.last_tuned}</td>
+                <td style="padding:8px; text-align:right;">${ageLabel(r.last_tuned)}</td>
             </tr>`;
         }).join('');
     } catch(e) {
@@ -310,6 +320,7 @@ async function loadPerformance() {
 // ── Start ──────────────────────────────────────────────────────
 loadPerformance();
 loadRuns();
+setInterval(loadPerformance, 60000);
 </script>
 </body>
 </html>
