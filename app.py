@@ -20,6 +20,15 @@ from shared_models import Base, Trade  # Trade for /api/trade/open
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+# Lazy singleton for quote provider (Alpaca → Binance/yfinance → SIM)
+_quote_provider = None
+def _get_provider():
+    global _quote_provider
+    if _quote_provider is None:
+        from services.quote_provider import get_provider
+        _quote_provider = get_provider()
+    return _quote_provider
+
 from flask import Blueprint
 from flask import  url_for
 
@@ -119,7 +128,16 @@ def aiml_home():
 # EXTRA / ALIASES
 @app.route("/symbol-api-manager")
 def symbol_api_manager():
-    return render_or_404("symbol_api_manager.html")
+    broker_symbols = {
+        'GEMINI':     ['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','LTC/USD','LINK/USD','AVAX/USD','XRP/USD'],
+        'COINBASE':   ['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','ADA/USD','DOT/USD','MATIC/USD','XRP/USD'],
+        'ALPACA':     ['AAPL','TSLA','NVDA','MSFT','AMZN','GOOGL','META','NFLX','AMD','INTC'],
+        'ALPACA-ETF': ['SPY','QQQ','IWM','GLD','TLT','XLF','XLK','ARKK','VTI','VOO'],
+        'WEBULL':     ['AAPL','TSLA','NVDA','AMC','GME','PLTR','SOFI','NIO','RIVN','LCID'],
+        'FOREX':      ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CHF','NZD/USD','USD/CAD','EUR/GBP'],
+        'FUTURES':    ['GC-GOLD','ES-SPX','CL-OIL','NQ-NDX','YM-DOW','SI-SILVER','ZB-TBOND']
+    }
+    return render_template("symbol_api_manager.html", broker_symbols=broker_symbols)
 
 @app.route("/api/broker-products", methods=["POST"])
 def api_add_broker_product():
@@ -209,13 +227,19 @@ def api_symbols_delete(symbol):
         _SYMBOLS.remove(s)
     return jsonify({"symbols": _SYMBOLS})
 
-# Simple price
+# Simple price — uses real provider (Binance for crypto, Alpaca/yfinance for stocks)
 @app.route("/api/price")
 def api_price():
     sym = (request.args.get("symbol") or "BTCUSD").upper()
+    exchange = request.args.get("exchange", "").upper()
+    try:
+        quote = _get_provider().get_price(sym, exchange)
+        if quote and quote.price:
+            return jsonify({"symbol": sym, "price": quote.price, "ts": quote.ts_ms, "feed": quote.feed})
+    except Exception:
+        pass
     base = {"BTCUSD": 68000, "ETHUSD": 3400, "LTCUSD": 70, "AAPL": 190, "TSLA": 240}.get(sym, 100)
-    px = round(base * (1 + random.uniform(-0.002, 0.002)), 2)
-    return jsonify({"symbol": sym, "price": px, "ts": int(time.time()*1000)})
+    return jsonify({"symbol": sym, "price": round(base * (1 + random.uniform(-0.002, 0.002)), 2), "ts": int(time.time()*1000), "feed": "SIM"})
 
 # Orders
 @app.route("/api/order", methods=["POST"])
@@ -366,11 +390,67 @@ def api_trades_active():
 
 @app.route("/api/ticker")
 def api_ticker():
-    # some UIs call this instead of /api/price
     sym = (request.args.get("symbol") or "BTCUSD").upper()
+    exchange = request.args.get("exchange", "").upper()
+    try:
+        quote = _get_provider().get_price(sym, exchange)
+        if quote and quote.price:
+            px = quote.price
+            return jsonify({"symbol": sym, "price": px, "bid": round(px - px*0.0001, 6), "ask": round(px + px*0.0001, 6), "ts": quote.ts_ms, "feed": quote.feed})
+    except Exception:
+        pass
     base = {"BTCUSD": 68000, "ETHUSD": 3400, "LTCUSD": 70, "AAPL": 190, "TSLA": 240}.get(sym, 100)
     px = round(base * (1 + random.uniform(-0.003, 0.003)), 2)
-    return jsonify({"symbol": sym, "price": px, "bid": px - 0.1, "ask": px + 0.1, "ts": int(time.time()*1000)})
+    return jsonify({"symbol": sym, "price": px, "bid": px - 0.1, "ask": px + 0.1, "ts": int(time.time()*1000), "feed": "SIM"})
+
+@app.route("/api/live_price")
+def api_live_price():
+    sym = (request.args.get("symbol") or "BTCUSD").upper()
+    exchange = request.args.get("exchange", "").upper()
+    try:
+        quote = _get_provider().get_price(sym, exchange)
+        if quote and quote.price:
+            return jsonify({"symbol": sym, "price": quote.price, "ts": quote.ts_ms, "feed": quote.feed})
+    except Exception:
+        pass
+    return jsonify({"symbol": sym, "price": None, "ts": int(time.time()*1000), "feed": "SIM"})
+
+@app.route("/api/scanner/prices")
+def api_scanner_prices():
+    try:
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT DISTINCT bp.local_ticker as symbol, b.name as broker
+            FROM strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            JOIN brokers b ON bp.broker_id = b.id
+            WHERE sp.active = 1
+              AND b.name NOT IN ('Forex', 'Futures')
+            ORDER BY b.name, bp.local_ticker
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+    except Exception as e:
+        return jsonify({"prices": [], "error": str(e)}), 500
+
+    provider = _get_provider()
+    result = []
+    for row in rows:
+        symbol = row['symbol']
+        broker_upper = row['broker'].upper()
+        price = None
+        feed = "SIM"
+        try:
+            exchange = "CRYPTO" if broker_upper in ("GEMINI", "COINBASE") else broker_upper
+            quote = provider.get_price(symbol, exchange)
+            if quote and quote.price:
+                price, feed = quote.price, quote.feed
+        except Exception:
+            pass
+        result.append({"symbol": symbol, "broker": row['broker'], "price": price, "feed": feed})
+
+    return jsonify({"prices": result, "ts": int(time.time()*1000)})
 
 @app.route("/api/entry/start", methods=["POST"])
 def api_entry_start():
@@ -764,6 +844,47 @@ def seed_brokers():
         return jsonify({"ok": True})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/broker")
+def broker_settings():
+    from db import get_db_connection
+    from flask import flash
+    conn, cursor = get_db_connection()
+    cursor.execute("SELECT id, name, api_key FROM brokers ORDER BY id")
+    brokers = cursor.fetchall()
+    conn.close()
+    return render_template("brokers.html", brokers=brokers)
+
+@app.route("/add_broker", methods=["POST"])
+def add_broker():
+    from db import get_db_connection
+    from flask import flash
+    action = request.form.get("action_type")
+    conn, cursor = get_db_connection()
+    if action == "register_broker":
+        name = request.form.get("name", "").strip()
+        if name:
+            cursor.execute("INSERT IGNORE INTO brokers (name) VALUES (%s)", (name,))
+    elif action == "update_keys":
+        broker_id = request.form.get("broker_id")
+        api_key = request.form.get("api_key", "").strip()
+        api_secret = request.form.get("api_secret", "").strip()
+        cursor.execute(
+            "UPDATE brokers SET api_key=%s, api_secret=%s WHERE id=%s",
+            (api_key, api_secret, broker_id)
+        )
+    conn.close()
+    flash("Saved successfully")
+    return redirect(url_for("broker_settings"))
+
+@app.route("/delete_broker/<int:id>", methods=["POST"])
+def delete_broker(id):
+    from db import get_db_connection
+    conn, cursor = get_db_connection()
+    cursor.execute("DELETE FROM brokers WHERE id=%s", (id,))
+    conn.close()
+    return redirect(url_for("broker_settings"))
 
 
 if __name__ == "__main__":

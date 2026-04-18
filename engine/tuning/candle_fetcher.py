@@ -108,6 +108,110 @@ def fetch_yahoo_candles(symbol, timeframe="1hr", limit=100):
         return []
 
 
+# ── Yahoo Finance Forex fetcher (currency pairs) ─────────────
+def fetch_yahoo_forex(symbol, timeframe="1hr", limit=100):
+    """Fetch Forex candles using yfinance (e.g. EUR/USD -> EURUSD=X)"""
+    try:
+        import yfinance as yf
+        import pandas as pd
+    except ImportError:
+        print("[candle_fetcher] ❌ yfinance not installed. Run: pip install yfinance")
+        return []
+
+    # Convert EUR/USD to EURUSD=X
+    ticker = symbol.replace("/", "") + "=X"
+
+    # Map timeframes
+    tf_map = {
+        '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m',
+        '1hr': '1h', '1h': '1h', '2h': '2h',
+        '1d': '1d', '1w': '1wk', '1mo': '1mo'
+    }
+    interval = tf_map.get(timeframe, '1h')
+
+    # Fetch last 60 days for enough bars
+    try:
+        df = yf.download(ticker, period="60d", interval=interval, progress=False)
+        if df.empty:
+            print(f"[candle_fetcher] ❌ No data from yfinance for {ticker}")
+            return []
+
+        candles = []
+        for idx, row in df.iterrows():
+            candles.append({
+                'symbol': symbol,
+                'timeframe': timeframe,
+                'timestamp': idx.to_pydatetime(),
+                'open': float(row['Open']),
+                'high': float(row['High']),
+                'low': float(row['Low']),
+                'close': float(row['Close']),
+                'volume': float(row['Volume']) if 'Volume' in row else 0
+            })
+
+        print(f"[candle_fetcher] ✅ yfinance Forex: {len(candles)} candles for {symbol}/{timeframe}")
+        return candles[-limit:] if limit else candles
+
+    except Exception as e:
+        print(f"[candle_fetcher] ❌ yfinance error for {symbol}: {e}")
+        return []
+
+
+# ── Yahoo Finance Futures fetcher ─────────────────────────────
+def fetch_yahoo_futures(symbol, timeframe="1hr", limit=100):
+    """Fetch Futures candles using yfinance (e.g. GC-GOLD -> GC=F)"""
+    # Map AiMN futures names to Yahoo Finance tickers
+    FUTURES_MAP = {
+        'GC-GOLD'  : 'GC=F',
+        'ES-SPX'   : 'ES=F',
+        'CL-OIL'   : 'CL=F',
+        'NQ-NDX'   : 'NQ=F',
+        'YM-DOW'   : 'YM=F',
+        'SI-SILVER' : 'SI=F',
+        'ZB-TBOND' : 'ZB=F',
+    }
+    ticker = FUTURES_MAP.get(symbol.upper(), symbol)
+    # Pass to the Forex fetcher — same yfinance logic, just different ticker
+    try:
+        import yfinance as yf
+    except ImportError:
+        print("[candle_fetcher] ❌ yfinance not installed. Run: pip install yfinance")
+        return []
+
+    tf_map = {
+        '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m',
+        '1hr': '1h', '1h': '1h', '2h': '2h',
+        '1d': '1d', '1w': '1wk',
+    }
+    interval = tf_map.get(timeframe, '1h')
+
+    try:
+        df = yf.download(ticker, period="60d", interval=interval, progress=False)
+        if df.empty:
+            print(f"[candle_fetcher] ❌ No data from yfinance for {ticker}")
+            return []
+
+        candles = []
+        for idx, row in df.iterrows():
+            candles.append({
+                'symbol'   : symbol,
+                'timeframe': timeframe,
+                'timestamp': idx.to_pydatetime(),
+                'open' : float(row['Open']),
+                'high' : float(row['High']),
+                'low'  : float(row['Low']),
+                'close': float(row['Close']),
+                'volume': float(row['Volume']) if 'Volume' in row else 0,
+            })
+
+        print(f"[candle_fetcher] ✅ yfinance Futures: {len(candles)} candles for {symbol} ({ticker})/{timeframe}")
+        return candles[-limit:] if limit else candles
+
+    except Exception as e:
+        print(f"[candle_fetcher] ❌ yfinance futures error for {symbol}: {e}")
+        return []
+
+
 # ── Smart fetcher — auto detects broker/symbol type ──────────
 def fetch_candles(symbol, timeframe="1hr", limit=100, broker="Gemini"):
     """
@@ -120,6 +224,12 @@ def fetch_candles(symbol, timeframe="1hr", limit=100, broker="Gemini"):
         # Convert symbol format: BTC/USD -> btcusd
         clean = symbol.replace("/", "").lower()
         return fetch_gemini_candles(clean, timeframe, limit)
+
+    elif broker == "FOREX":
+        return fetch_yahoo_forex(symbol, timeframe, limit)
+
+    elif broker == "FUTURES":
+        return fetch_yahoo_futures(symbol, timeframe, limit)
 
     elif broker in ("ALPACA", "ALPACA-ETF", "WEBULL", "COINBASE", "YAHOO"):
         return fetch_yahoo_candles(symbol, timeframe, limit)

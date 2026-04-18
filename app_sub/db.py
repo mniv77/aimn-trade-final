@@ -4,13 +4,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import scoped_session, sessionmaker, declarative_base
 
-MYSQL_USER = os.environ.get("PA_MYSQL_USER")
-MYSQL_DB   = os.environ.get("PA_MYSQL_DB")
-MYSQL_PW   = os.environ.get("PA_MYSQL_PW")
-MYSQL_HOST = os.environ.get("PA_MYSQL_HOST")
-
-if not all([MYSQL_USER, MYSQL_DB, MYSQL_PW, MYSQL_HOST]):
-    raise RuntimeError("Missing PA_MYSQL_* env vars")
+MYSQL_USER = os.environ.get("PA_MYSQL_USER", "MeirNiv")
+MYSQL_DB   = os.environ.get("PA_MYSQL_DB", "MeirNiv$default")
+MYSQL_PW   = os.environ.get("PA_MYSQL_PW", "")
+MYSQL_HOST = os.environ.get("PA_MYSQL_HOST", "MeirNiv.mysql.pythonanywhere-services.com")
 
 # --- one-time table creation helper ---
 def init_db(app=None):

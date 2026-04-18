@@ -332,12 +332,22 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="symbolInput">Add Trading Symbol</label>
-                    <input type="text" id="symbolInput" list="symbolSuggestions"
-                           placeholder="Select broker first, or type a symbol"
-                           style="text-transform: uppercase;">
-                    <datalist id="symbolSuggestions"></datalist>
+                    <label for="symbolInput">Symbol</label>
+                    <select id="symbolInput">
+                        <option value="">-- Select broker first --</option>
+                    </select>
                 </div>
+
+                <script>
+                var _BS = {{ broker_symbols | tojson }};
+                document.getElementById('exchangeSelect').addEventListener('change', function(){
+                    var list = _BS[this.value] || [];
+                    var sel = document.getElementById('symbolInput');
+                    sel.innerHTML = list.length
+                        ? '<option value="">-- Pick a symbol --</option>' + list.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('')
+                        : '<option value="">-- Select broker first --</option>';
+                });
+                </script>
 
                 <button class="btn-primary" onclick="addSymbol()">
                     ➕ Add Symbol
@@ -457,16 +467,24 @@
 
         function updateSymbolSuggestions() {
             const broker = document.getElementById('exchangeSelect').value;
-            const dl = document.getElementById('symbolSuggestions');
-            dl.innerHTML = '';
-            (BROKER_SYMBOLS[broker] || []).forEach(sym => {
+            const list = BROKER_SYMBOLS[broker] || [];
+            const sel = document.getElementById('symbolInput');
+
+            sel.innerHTML = '';
+            if (!list.length) {
+                sel.innerHTML = '<option value="">-- Select broker first --</option>';
+                return;
+            }
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = '-- Pick a symbol --';
+            sel.appendChild(placeholder);
+            list.forEach(sym => {
                 const opt = document.createElement('option');
                 opt.value = sym;
-                dl.appendChild(opt);
+                opt.textContent = sym;
+                sel.appendChild(opt);
             });
-            document.getElementById('symbolInput').value = '';
-            document.getElementById('symbolInput').placeholder =
-                broker ? `Choose or type (e.g. ${(BROKER_SYMBOLS[broker]||['symbol'])[0]})` : 'Select broker first';
         }
 
         async function loadSymbols() {
