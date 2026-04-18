@@ -338,6 +338,27 @@
                     </select>
                 </div>
 
+                <script>
+                (function(){
+                    var BS = {
+                        'GEMINI':['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','LTC/USD','LINK/USD','AVAX/USD','XRP/USD'],
+                        'COINBASE':['BTC/USD','ETH/USD','SOL/USD','DOGE/USD','ADA/USD','DOT/USD','MATIC/USD','XRP/USD'],
+                        'ALPACA':['AAPL','TSLA','NVDA','MSFT','AMZN','GOOGL','META','NFLX','AMD','INTC'],
+                        'ALPACA-ETF':['SPY','QQQ','IWM','GLD','TLT','XLF','XLK','ARKK','VTI','VOO'],
+                        'WEBULL':['AAPL','TSLA','NVDA','AMC','GME','PLTR','SOFI','NIO','RIVN','LCID'],
+                        'FOREX':['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CHF','NZD/USD','USD/CAD','EUR/GBP'],
+                        'FUTURES':['GC-GOLD','ES-SPX','CL-OIL','NQ-NDX','YM-DOW','SI-SILVER','ZB-TBOND']
+                    };
+                    document.getElementById('exchangeSelect').addEventListener('change', function(){
+                        var list = BS[this.value] || [];
+                        var sel = document.getElementById('symbolInput');
+                        sel.innerHTML = list.length
+                            ? '<option value="">-- Pick a symbol --</option>' + list.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('')
+                            : '<option value="">-- Select broker first --</option>';
+                    });
+                })();
+                </script>
+
                 <button class="btn-primary" onclick="addSymbol()">
                     ➕ Add Symbol
                 </button>
