@@ -331,6 +331,8 @@
                         <option value="ALPACA-ETF">Alpaca ETF</option>
                         <option value="WEBULL">Webull</option>
                         <option value="COINBASE">Coinbase</option>
+                        <option value="FOREX">Forex</option>
+                        <option value="FUTURES">Futures</option>
                     </select>
                 </div>
 
@@ -364,6 +366,8 @@
                         <option value="ALPACA-ETF">Alpaca ETF</option>
                         <option value="WEBULL">Webull</option>
                         <option value="COINBASE">Coinbase</option>
+                        <option value="FOREX">Forex</option>
+                        <option value="FUTURES">Futures</option>
                     </select>
                 </div>
 
@@ -440,6 +444,9 @@
 
         async function loadSymbols() {
             try {
+                // Ensure Forex and Futures brokers exist in DB
+                await fetch('/api/db/seed-brokers', {method: 'POST'});
+
                 const resp = await fetch('/get_brokers_and_symbols');
                 const data = await resp.json();
                 brokerMap = {};

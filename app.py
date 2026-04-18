@@ -750,6 +750,22 @@ def api_db_init_tuning():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+@app.route("/api/db/seed-brokers", methods=["POST"])
+def seed_brokers():
+    """Ensure Forex and Futures brokers exist in brokers table."""
+    try:
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        for name in ("Forex", "Futures"):
+            cursor.execute("SELECT id FROM brokers WHERE name = %s", (name,))
+            if not cursor.fetchone():
+                cursor.execute("INSERT INTO brokers (name) VALUES (%s)", (name,))
+        conn.close()
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)
