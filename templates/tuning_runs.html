@@ -110,7 +110,8 @@
 <div class="panel" id="performance_panel">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
         <div class="panel-title" style="margin-bottom:0; flex:1;">🏆 Strategy Performance — All Active</div>
-        <button onclick="loadPerformance()" style="background:var(--border); color:var(--text); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px 12px; font-size:11px; cursor:pointer; font-family:'Share Tech Mono',monospace; margin-right:8px;">↻ Refresh</button>
+        <button id="perf_refresh_btn" onclick="loadPerformance()" style="background:var(--border); color:var(--text); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px 12px; font-size:11px; cursor:pointer; font-family:'Share Tech Mono',monospace; margin-right:8px;">↻ Refresh</button>
+        <span id="perf_updated" style="font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--muted); margin-right:8px;"></span>
         <span id="perf_count" style="font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--green);"></span>
     </div>
     <div style="overflow-x:auto;">
@@ -283,12 +284,16 @@ function ageLabel(lastTuned) {
 }
 
 async function loadPerformance() {
+    const btn = document.getElementById('perf_refresh_btn');
+    if (btn) { btn.textContent = '⟳ Loading...'; btn.disabled = true; }
     try {
         const resp = await fetch('/api/performance');
         const data = await resp.json();
         const rows = Array.isArray(data) ? data : (data.rows || []);
         document.getElementById('perf_count').textContent =
-            `${rows.length} active strategies — all green ✅`;
+            `${rows.length} active strategies ✅`;
+        const now = new Date().toLocaleTimeString();
+        document.getElementById('perf_updated').textContent = `Updated ${now}`;
         const tbody = document.getElementById('perf_body');
         tbody.innerHTML = rows.map((r, i) => {
             const pnl = parseFloat(r.pl_pct).toFixed(2);
@@ -314,6 +319,9 @@ async function loadPerformance() {
         }).join('');
     } catch(e) {
         console.error('Performance load error:', e);
+        document.getElementById('perf_updated').textContent = 'Error loading';
+    } finally {
+        if (btn) { btn.textContent = '↻ Refresh'; btn.disabled = false; }
     }
 }
 
