@@ -643,7 +643,6 @@
       stripSignalData = signalData;
       stripDirection = signalData.signal || 'BUY';
 
-      el('strip-idle').classList.add('hidden');
       el('strip-signal').classList.remove('hidden');
       el('strip-symbol').textContent = signalData.symbol;
       const dirEl = el('strip-direction');
@@ -695,7 +694,6 @@
       stripSignalData = null;
       activeTradeSymbol = null; activeTradeExchange = null; activeTradeExchangeNorm = null;
       el('strip-signal').classList.add('hidden');
-      el('strip-idle').classList.remove('hidden');
       isOpening = false;
       updateExchangeStatusDisplay(); updateScanResultsDisplay(); updateTickerDisplay();
       setTimeout(processPopupQueue, 300);
