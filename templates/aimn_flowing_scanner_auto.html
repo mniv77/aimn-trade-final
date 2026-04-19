@@ -678,7 +678,7 @@
           stripTradeId = d.trade_id;
           _ordersCache.push({id: d.trade_id, symbol: stripSignalData.symbol,
             broker: stripSignalData.exchange, direction: stripDirection === 'BUY' ? 'LONG' : 'SHORT',
-            entry_price: stripEntryPrice, last_price: stripEntryPrice, entry_time: new Date().toISOString()});
+            entry_price: stripEntryPrice, last_price: stripEntryPrice, entry_time: Date.now()});
           livePriceMap[d.trade_id] = stripEntryPrice;
           renderOrderRows(_ordersCache);
           el('active-order-count').textContent = `${_ordersCache.length} open`;
@@ -787,8 +787,8 @@
         const pnlStr = (pnl>=0?'+':'') + pnl.toFixed(2) + '%';
 
         // Time duration - frozen at exit time if closed
-        const entryMs = new Date(o.entry_time).getTime();
-        const endMs = isClosed ? new Date(o.exit_time).getTime() : Date.now();
+        const entryMs = typeof o.entry_time === 'number' ? o.entry_time : new Date(o.entry_time).getTime();
+        const endMs = isClosed ? (typeof o.exit_time === 'number' ? o.exit_time : new Date(o.exit_time).getTime()) : Date.now();
         const mins = Math.floor((endMs - entryMs) / 60000);
         const durStr = mins >= 60 ? `${Math.floor(mins/60)}h${mins%60}m` : `${mins}m`;
 
@@ -869,7 +869,7 @@
       }
       // Mark as closed with frozen exit data
       order.status = 'CLOSED';
-      order.exit_time = exitTime.toISOString();
+      order.exit_time = exitTime.getTime();
       order.exit_price = cur;
       order.final_pnl = pnl;
       renderOrderRows(_ordersCache);

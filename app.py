@@ -399,13 +399,16 @@ def api_trades_active():
         conn.close()
         result = []
         for r in rows:
+            # Convert entry_time to Unix timestamp (ms) to avoid timezone issues
+            import datetime
+            entry_ms = int(r['entry_time'].timestamp() * 1000) if isinstance(r['entry_time'], datetime.datetime) else None
             result.append({
                 "id": r['id'], "symbol": r['symbol'],
                 "direction": r['direction'],
                 "side": "BUY" if r['direction'] == "LONG" else "SELL",
                 "entry_price": r['entry_price'], "last_price": r['last_price'],
                 "peak_profit": r['peak_profit'], "broker": r['broker_name'],
-                "entry_time": str(r['entry_time']),
+                "entry_time": entry_ms or str(r['entry_time']),
             })
         return jsonify(result)
     except Exception as e:
