@@ -134,6 +134,7 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
   let rsiType='real', chartRSIType='traditional', priceInterval=null;
 
   let autoTradeMode=false;
+  let activeTradeId=null;
 
   function loadTradeData(){
     const urlParams=new URLSearchParams(window.location.search);
@@ -220,6 +221,11 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     document.getElementById('btn-enter').className='flex-1 bg-gray-600 text-gray-400 py-2 rounded-lg font-bold text-sm cursor-not-allowed';
     document.getElementById('entry-price').textContent='$'+entryPrice.toFixed(2);
     showStatus('✅ Order entered at $'+entryPrice.toFixed(2),'success');
+    fetch('/api/trade/open', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({symbol:tradeData.symbol, exchange:tradeData.exchange,
+                           side:tradeDirection, qty:quantity, price:entryPrice})
+    }).then(r=>r.json()).then(d=>{ if(d.ok) activeTradeId=d.trade_id; }).catch(()=>{});
   }
 
   function updatePosition(){
@@ -276,6 +282,13 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     document.getElementById('strategy-status').textContent='✅ Closed';
     document.getElementById('btn-panic').disabled=true;
     document.getElementById('btn-panic').className='bg-gray-600 text-gray-400 px-6 py-2 rounded-lg font-bold text-sm cursor-not-allowed';
+
+    fetch('/api/trade/close', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({trade_id:activeTradeId, symbol:tradeData.symbol,
+                           pnl:finalPnl, reason:reason, exit_price:currentPrice})
+    }).catch(()=>{});
+    activeTradeId=null;
 
     if(autoTradeMode && window.opener && !window.opener.closed){
       window.opener.postMessage({type:'TRADE_CLOSED',symbol:tradeData.symbol,exchange:tradeData.exchange,pnl:finalPnl,reason:reason}, '*');
