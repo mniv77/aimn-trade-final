@@ -770,41 +770,45 @@
       const list = el('active-orders-list');
       if (!orders.length) { list.innerHTML = ''; return; }
       list.innerHTML = orders.map(o => {
+        const isClosed = o.status === 'CLOSED';
+        const bgClass = isClosed ? 'bg-gray-800' : 'bg-red-950';
+        const indicatorColor = isClosed ? 'text-gray-500' : 'text-red-400';
+        const indicatorIcon = isClosed ? '⚫' : '🔴';
+
         // Seed livePriceMap from last_price if not yet fetched
-        if (livePriceMap[o.id] == null) livePriceMap[o.id] = parseFloat(o.last_price || o.entry_price || 0);
-        const cur = livePriceMap[o.id];
+        if (!isClosed && livePriceMap[o.id] == null) livePriceMap[o.id] = parseFloat(o.last_price || o.entry_price || 0);
+        const cur = isClosed ? parseFloat(o.exit_price || 0) : livePriceMap[o.id];
         const entry = parseFloat(o.entry_price || 0);
         const peak = parseFloat(o.peak_profit || 0);
         const dir = o.direction === 'LONG' ? 'BUY' : 'SELL';
-        const pnl = dir === 'BUY' ? (cur - entry) / entry * 100 : (entry - cur) / entry * 100;
-        const pnlColor = pnl >= 0 ? 'text-green-400' : 'text-red-400';
-        const dirClass = dir === 'BUY' ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200';
+        const pnl = isClosed ? o.final_pnl : (dir === 'BUY' ? (cur - entry) / entry * 100 : (entry - cur) / entry * 100);
+        const pnlColor = pnl >= 0 ? (isClosed ? 'text-gray-400' : 'text-green-400') : (isClosed ? 'text-gray-400' : 'text-red-400');
+        const dirClass = isClosed ? 'bg-gray-700 text-gray-400' : (dir === 'BUY' ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200');
         const pnlStr = (pnl>=0?'+':'') + pnl.toFixed(2) + '%';
 
-        // Time duration
+        // Time duration - frozen at exit time if closed
         const entryMs = new Date(o.entry_time).getTime();
-        const mins = Math.floor((Date.now() - entryMs) / 60000);
+        const endMs = isClosed ? new Date(o.exit_time).getTime() : Date.now();
+        const mins = Math.floor((endMs - entryMs) / 60000);
         const durStr = mins >= 60 ? `${Math.floor(mins/60)}h${mins%60}m` : `${mins}m`;
 
         // Strategy params
         const strat = strategyMap[`${o.symbol}:${o.direction}`];
         const trailDrop = strat ? parseFloat(strat.trailing_drop || 0.5) : 0.5;
-        // Trailing stop price: entry moved by peak, minus trailing_drop
         let trailStr = '--';
-        if (peak > 0 && entry > 0) {
+        if (!isClosed && peak > 0 && entry > 0) {
           const trailPx = dir === 'BUY'
             ? entry * (1 + (peak - trailDrop) / 100)
             : entry * (1 - (peak - trailDrop) / 100);
           trailStr = '$' + trailPx.toFixed(2);
         }
-        // Current RSI from scanData (live)
         const scanRow = scanData.find(s => s.symbol === o.symbol);
-        const rsiVal = scanRow ? parseFloat(scanRow.rsi||0).toFixed(1) : '--';
-        const rsiColor = scanRow && scanRow.rsi <= 30 ? 'text-green-300' : scanRow && scanRow.rsi >= 70 ? 'text-red-300' : 'text-purple-300';
+        const rsiVal = isClosed ? '--' : (scanRow ? parseFloat(scanRow.rsi||0).toFixed(1) : '--');
+        const rsiColor = isClosed ? 'text-gray-500' : (scanRow && scanRow.rsi <= 30 ? 'text-green-300' : scanRow && scanRow.rsi >= 70 ? 'text-red-300' : 'text-purple-300');
         const initProfit = strat ? parseFloat(strat.init_profit || 0).toFixed(1) + '%' : '--';
 
-        return `<div class="flex items-center gap-2 px-4 py-1.5 border-t border-gray-700 bg-red-950 text-xs">
-          <span class="text-red-400 font-bold">🔴</span>
+        return `<div class="flex items-center gap-2 px-4 py-1.5 border-t border-gray-700 ${bgClass} text-xs">
+          <span class="${indicatorColor} font-bold">${indicatorIcon}</span>
           <span class="text-white font-bold w-16">${o.symbol}</span>
           <span class="px-1.5 py-0.5 rounded font-bold ${dirClass}">${dir}</span>
           <span class="text-gray-500">${durStr}</span>
@@ -820,13 +824,13 @@
           <span class="text-gray-500">Init</span>
           <span class="text-yellow-300">${initProfit}</span>
           <span class="text-gray-600">${o.broker}</span>
-          <button onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
-            class="bg-blue-700 hover:bg-blue-600 text-white px-2 py-0.5 rounded font-bold">
+          <button ${isClosed?'disabled':''} onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
+            class="${isClosed?'bg-gray-600 cursor-not-allowed':'bg-blue-700 hover:bg-blue-600'} text-white px-2 py-0.5 rounded font-bold">
             📊
           </button>
-          <button onclick="panicExitTrade(${o.id},'${o.symbol}','${o.broker}')"
-            class="bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded font-bold">
-            🚨
+          <button ${isClosed?'disabled':''} onclick="panicExitTrade(${o.id},'${o.symbol}','${o.broker}')"
+            class="${isClosed?'bg-gray-600 cursor-not-allowed':'bg-red-600 hover:bg-red-700'} text-white px-2 py-0.5 rounded font-bold">
+            ${isClosed?'✓':'🚨'}
           </button>
         </div>`;
       }).join('');
@@ -852,25 +856,34 @@
       const entry = parseFloat(order.entry_price || 0);
       const dir = order.direction === 'LONG' ? 'BUY' : 'SELL';
       const pnl = dir === 'BUY' ? (cur - entry) / entry * 100 : (entry - cur) / entry * 100;
+      const exitTime = new Date();
       await fetch('/api/trade/close', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({trade_id: tradeId, symbol, pnl, reason: '🚨 PANIC EXIT', exit_price: cur})
       });
       const nex = normEx(broker);
       lastByBroker[nex] = Date.now();
-      // If this was the strip's tracked trade, clear it
       if (stripTradeId === tradeId) {
         stripTradeId = null; stripSignalData = null;
         clearInterval(stripPriceInterval); stripPriceInterval = null;
       }
-      delete livePriceMap[tradeId];
-      _ordersCache = _ordersCache.filter(o => o.id !== tradeId);
-      // Update active trade state
-      activeTradeSymbol = _ordersCache.length ? _ordersCache[0].symbol : null;
-      activeTradeExchange = _ordersCache.length ? _ordersCache[0].broker : null;
-      activeTradeExchangeNorm = activeTradeExchange ? normEx(activeTradeExchange) : null;
+      // Mark as closed with frozen exit data
+      order.status = 'CLOSED';
+      order.exit_time = exitTime.toISOString();
+      order.exit_price = cur;
+      order.final_pnl = pnl;
       renderOrderRows(_ordersCache);
-      el('active-order-count').textContent = `${_ordersCache.length} open`;
+      el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
+      // Remove after 10 seconds
+      setTimeout(() => {
+        _ordersCache = _ordersCache.filter(o => o.id !== tradeId);
+        delete livePriceMap[tradeId];
+        renderOrderRows(_ordersCache);
+        el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
+      }, 10000);
+      activeTradeSymbol = _ordersCache.filter(o=>o.status!=='CLOSED').length ? _ordersCache[0].symbol : null;
+      activeTradeExchange = _ordersCache.filter(o=>o.status!=='CLOSED').length ? _ordersCache[0].broker : null;
+      activeTradeExchangeNorm = activeTradeExchange ? normEx(activeTradeExchange) : null;
       updateExchangeStatusDisplay(); updateScanResultsDisplay(); updateTickerDisplay();
       setTimeout(processPopupQueue, 300);
     }
