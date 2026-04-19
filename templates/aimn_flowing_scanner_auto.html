@@ -874,13 +874,13 @@
       order.final_pnl = pnl;
       renderOrderRows(_ordersCache);
       el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
-      // Remove after 10 seconds
+      // Remove after 2 minutes
       setTimeout(() => {
         _ordersCache = _ordersCache.filter(o => o.id !== tradeId);
         delete livePriceMap[tradeId];
         renderOrderRows(_ordersCache);
         el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
-      }, 10000);
+      }, 120000);
       activeTradeSymbol = _ordersCache.filter(o=>o.status!=='CLOSED').length ? _ordersCache[0].symbol : null;
       activeTradeExchange = _ordersCache.filter(o=>o.status!=='CLOSED').length ? _ordersCache[0].broker : null;
       activeTradeExchangeNorm = activeTradeExchange ? normEx(activeTradeExchange) : null;
