@@ -700,8 +700,11 @@
     }
 
     async function stripUpdatePosition() {
+      if (!stripSignalData) return;
       try {
-        const r = await fetch(`/api/live_price?symbol=${encodeURIComponent(stripSignalData.symbol)}&exchange=${encodeURIComponent(stripSignalData.exchange)}`);
+        const broker = (stripSignalData.exchange || '').toUpperCase();
+        const exchange = (broker === 'GEMINI' || broker === 'COINBASE') ? 'CRYPTO' : broker;
+        const r = await fetch(`/api/live_price?symbol=${encodeURIComponent(stripSignalData.symbol)}&exchange=${encodeURIComponent(exchange)}`);
         const d = await r.json();
         if (d.price) stripCurrentPrice = d.price;
       } catch(e) {}
