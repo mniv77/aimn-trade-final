@@ -676,7 +676,6 @@
       }).then(r=>r.json()).then(d=>{
         if (d.ok) {
           stripTradeId = d.trade_id;
-          // Add to local cache immediately so row renders without waiting for DB poll
           _ordersCache.push({id: d.trade_id, symbol: stripSignalData.symbol,
             broker: stripSignalData.exchange, direction: stripDirection === 'BUY' ? 'LONG' : 'SHORT',
             entry_price: stripEntryPrice, last_price: stripEntryPrice, entry_time: new Date().toISOString()});
@@ -684,10 +683,18 @@
           renderOrderRows(_ordersCache);
           el('active-order-count').textContent = `${_ordersCache.length} open`;
           if (!_ordersInterval) { _ordersInterval = setInterval(tickOrderPrices, 3000); tickOrderPrices(); }
+          el('strip-signal').classList.add('hidden');
+          stripSignalData = null;
+        } else {
+          el('strip-enter-btn').disabled = false;
+          el('strip-enter-btn').textContent = '🚀 Enter Order';
+          alert('Failed to open trade: ' + (d.error || 'Unknown error'));
         }
+      }).catch(e=>{
+        el('strip-enter-btn').disabled = false;
+        el('strip-enter-btn').textContent = '🚀 Enter Order';
+        alert('Network error: ' + e.message);
       });
-
-      el('strip-signal').classList.add('hidden');
     }
 
     function stripDismiss() {
