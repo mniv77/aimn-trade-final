@@ -714,6 +714,29 @@
         const orders = await resp.json();
         const list = document.getElementById('active-orders-list');
         document.getElementById('active-order-count').textContent = `${orders.length} open`;
+
+        // Restore active-trade state from DB (survives page reload)
+        if (!activePopupWin || activePopupWin.closed) {
+          if (orders.length > 0) {
+            const t = orders[0];
+            if (!activeTradeSymbol || activeTradeSymbol !== t.symbol) {
+              activeTradeSymbol = t.symbol;
+              activeTradeExchange = t.broker || '';
+              activeTradeExchangeNorm = normEx(t.broker || '');
+              updateExchangeStatusDisplay();
+              updateScanResultsDisplay();
+              updateTickerDisplay();
+            }
+          } else if (activeTradeSymbol) {
+            activeTradeSymbol = null;
+            activeTradeExchange = null;
+            activeTradeExchangeNorm = null;
+            updateExchangeStatusDisplay();
+            updateScanResultsDisplay();
+            updateTickerDisplay();
+          }
+        }
+
         if (!orders.length) {
           list.innerHTML = '<div class="text-gray-500 text-center py-2">No active orders</div>';
           return;
@@ -721,9 +744,9 @@
         list.innerHTML = orders.map(o => `
           <div class="flex justify-between items-center bg-gray-700 rounded px-3 py-2">
             <span class="font-bold text-white">${o.symbol}</span>
-            <span class="text-gray-300">${o.side} ${o.qty} @ ${o.price}</span>
+            <span class="text-gray-300">${o.direction} @ $${parseFloat(o.entry_price||0).toFixed(2)}</span>
             <span class="text-xs text-gray-400">${o.broker}</span>
-            <span class="text-xs text-gray-500">${o.ts ? o.ts.slice(0,16) : ''}</span>
+            <span class="text-xs text-gray-500">${o.entry_time ? o.entry_time.slice(0,16) : ''}</span>
           </div>`).join('');
       } catch(e) {}
     }
