@@ -770,25 +770,37 @@
       const list = el('active-orders-list');
       if (!orders.length) { list.innerHTML = ''; return; }
       list.innerHTML = orders.map(o => {
-        const cur = livePriceMap[o.id] ?? parseFloat(o.last_price || o.entry_price || 0);
+        // Seed livePriceMap from last_price if not yet fetched
+        if (livePriceMap[o.id] == null) livePriceMap[o.id] = parseFloat(o.last_price || o.entry_price || 0);
+        const cur = livePriceMap[o.id];
         const entry = parseFloat(o.entry_price || 0);
+        const peak = parseFloat(o.peak_profit || 0);
         const dir = o.direction === 'LONG' ? 'BUY' : 'SELL';
         const pnl = dir === 'BUY' ? (cur - entry) / entry * 100 : (entry - cur) / entry * 100;
         const pnlColor = pnl >= 0 ? 'text-green-400' : 'text-red-400';
         const dirClass = dir === 'BUY' ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200';
-        const pnlStr = livePriceMap[o.id] != null ? ((pnl>=0?'+':'')+pnl.toFixed(2)+'%') : '...';
+        const pnlStr = (pnl>=0?'+':'') + pnl.toFixed(2) + '%';
 
         // Time duration
         const entryMs = new Date(o.entry_time).getTime();
-        const durationMs = Date.now() - entryMs;
-        const mins = Math.floor(durationMs / 60000);
-        const hrs = Math.floor(mins / 60);
-        const durStr = hrs > 0 ? `${hrs}h${mins%60}m` : `${mins}m`;
+        const mins = Math.floor((Date.now() - entryMs) / 60000);
+        const durStr = mins >= 60 ? `${Math.floor(mins/60)}h${mins%60}m` : `${mins}m`;
 
         // Strategy params
         const strat = strategyMap[`${o.symbol}:${o.direction}`];
-        const trailStart = strat ? parseFloat(strat.trailing_start || 0).toFixed(1) + '%' : '--';
-        const rsiEntry = strat ? parseFloat(strat.rsi_entry || 0).toFixed(0) : '--';
+        const trailDrop = strat ? parseFloat(strat.trailing_drop || 0.5) : 0.5;
+        // Trailing stop price: entry moved by peak, minus trailing_drop
+        let trailStr = '--';
+        if (peak > 0 && entry > 0) {
+          const trailPx = dir === 'BUY'
+            ? entry * (1 + (peak - trailDrop) / 100)
+            : entry * (1 - (peak - trailDrop) / 100);
+          trailStr = '$' + trailPx.toFixed(2);
+        }
+        // Current RSI from scanData (live)
+        const scanRow = scanData.find(s => s.symbol === o.symbol);
+        const rsiVal = scanRow ? parseFloat(scanRow.rsi||0).toFixed(1) : '--';
+        const rsiColor = scanRow && scanRow.rsi <= 30 ? 'text-green-300' : scanRow && scanRow.rsi >= 70 ? 'text-red-300' : 'text-purple-300';
         const initProfit = strat ? parseFloat(strat.init_profit || 0).toFixed(1) + '%' : '--';
 
         return `<div class="flex items-center gap-2 px-4 py-1.5 border-t border-gray-700 bg-red-950 text-xs">
@@ -802,9 +814,9 @@
           <span class="font-mono text-white" id="now-${o.id}">$${cur.toFixed(2)}</span>
           <span class="font-bold ${pnlColor} w-12" id="pnl-${o.id}">${pnlStr}</span>
           <span class="text-gray-500">Trail</span>
-          <span class="text-blue-300">${trailStart}</span>
+          <span class="text-blue-300" id="trail-${o.id}">${trailStr}</span>
           <span class="text-gray-500">RSI</span>
-          <span class="text-purple-300">${rsiEntry}</span>
+          <span class="${rsiColor}" id="rsi-${o.id}">${rsiVal}</span>
           <span class="text-gray-500">Init</span>
           <span class="text-yellow-300">${initProfit}</span>
           <span class="text-gray-600">${o.broker}</span>
