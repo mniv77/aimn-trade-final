@@ -759,19 +759,44 @@
         const pnlColor = pnl >= 0 ? 'text-green-400' : 'text-red-400';
         const dirClass = dir === 'BUY' ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200';
         const pnlStr = livePriceMap[o.id] != null ? ((pnl>=0?'+':'')+pnl.toFixed(2)+'%') : '...';
-        return `<div class="flex items-center gap-3 px-4 py-2 border-t border-gray-700 bg-red-950 text-sm">
-          <span class="text-red-400 text-xs font-bold">🔴</span>
-          <span class="text-white font-bold w-20">${o.symbol}</span>
-          <span class="text-xs px-1.5 py-0.5 rounded font-bold ${dirClass}">${dir}</span>
-          <span class="text-gray-400 text-xs">Entry</span>
+
+        // Time duration
+        const entryMs = new Date(o.entry_time).getTime();
+        const durationMs = Date.now() - entryMs;
+        const mins = Math.floor(durationMs / 60000);
+        const hrs = Math.floor(mins / 60);
+        const durStr = hrs > 0 ? `${hrs}h${mins%60}m` : `${mins}m`;
+
+        // Strategy params
+        const strat = strategyMap[`${o.symbol}:${o.direction}`];
+        const trailStart = strat ? parseFloat(strat.trailing_start || 0).toFixed(1) + '%' : '--';
+        const rsiEntry = strat ? parseFloat(strat.rsi_entry || 0).toFixed(0) : '--';
+        const initProfit = strat ? parseFloat(strat.init_profit || 0).toFixed(1) + '%' : '--';
+
+        return `<div class="flex items-center gap-2 px-4 py-1.5 border-t border-gray-700 bg-red-950 text-xs">
+          <span class="text-red-400 font-bold">🔴</span>
+          <span class="text-white font-bold w-16">${o.symbol}</span>
+          <span class="px-1.5 py-0.5 rounded font-bold ${dirClass}">${dir}</span>
+          <span class="text-gray-500">${durStr}</span>
+          <span class="text-gray-500">Entry</span>
           <span class="font-mono text-white">$${entry.toFixed(2)}</span>
-          <span class="text-gray-400 text-xs">Now</span>
+          <span class="text-gray-500">Now</span>
           <span class="font-mono text-white" id="now-${o.id}">$${cur.toFixed(2)}</span>
-          <span class="font-bold ${pnlColor} w-16" id="pnl-${o.id}">${pnlStr}</span>
-          <span class="text-gray-500 text-xs">${o.broker}</span>
+          <span class="font-bold ${pnlColor} w-12" id="pnl-${o.id}">${pnlStr}</span>
+          <span class="text-gray-500">Trail</span>
+          <span class="text-blue-300">${trailStart}</span>
+          <span class="text-gray-500">RSI</span>
+          <span class="text-purple-300">${rsiEntry}</span>
+          <span class="text-gray-500">Init</span>
+          <span class="text-yellow-300">${initProfit}</span>
+          <span class="text-gray-600">${o.broker}</span>
+          <button onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
+            class="bg-blue-700 hover:bg-blue-600 text-white px-2 py-0.5 rounded font-bold">
+            📊
+          </button>
           <button onclick="panicExitTrade(${o.id},'${o.symbol}','${o.broker}')"
-            class="ml-auto bg-red-600 hover:bg-red-700 text-white px-3 py-0.5 rounded text-xs font-bold">
-            🚨 Exit
+            class="bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded font-bold">
+            🚨
           </button>
         </div>`;
       }).join('');
