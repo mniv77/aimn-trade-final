@@ -204,11 +204,11 @@
         return day !== 0 && day !== 6;
       }
 
-      // Stock markets (NYSE, NASDAQ, ALPACA): Mon-Fri, 9:30 AM - 4:00 PM ET
+      // Stock markets (NYSE, NASDAQ, ALPACA, ALPACA-ETF): Mon-Fri, 9:30 AM - 4:00 PM ET
       // Converting to your local time (PST/PDT) - assuming this runs in browser local time
       // For simplicity, using a basic weekday + hour check
       // NYSE/NASDAQ: Closed on weekends
-      if (exNorm === 'NYSE' || exNorm === 'NASDAQ' || exNorm === 'ALPACA') {
+      if (exNorm === 'NYSE' || exNorm === 'NASDAQ' || exNorm === 'ALPACA' || exNorm === 'ALPACAETF' || exNorm === 'WEBULL') {
         if (day === 0 || day === 6) return false; // Weekend
         // Market hours: 9:30 AM - 4:00 PM ET (convert if needed)
         // Using 6:30 AM - 1:00 PM PST as approximate conversion
