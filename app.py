@@ -542,7 +542,7 @@ def api_scanner_snapshot():
                 n = len(closes)
                 r_val = calc_rsi_real(highs, lows, closes, n - 1, rsi_len)
                 if r_val is not None:
-                    rsi = round(r_val, 1)
+                    rsi = round(max(0.0, min(100.0, r_val)), 1)
                 if closes[-2]:
                     change = round((closes[-1] - closes[-2]) / closes[-2] * 100, 2)
                 atr_vals = [(candles[i]['high'] - candles[i]['low']) / candles[i]['close'] * 100

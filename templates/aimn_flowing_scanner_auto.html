@@ -308,8 +308,11 @@
       const sellThreshold = shortStrat ? (100 - parseFloat(shortStrat.rsi_entry)) : 70;
 
       const rsiPass = item.rsi <= buyThreshold || item.rsi >= sellThreshold;
-      const atrPass = item.atr_pct > 1.0;
-      const volumePass = item.volume_ratio > 1.5 || Math.abs(item.change) > 2.0;
+      const isCrypto = (String(item.exchange||'').toUpperCase().includes('GEMINI') ||
+                        String(item.exchange||'').toUpperCase().includes('CRYPTO'));
+      const atrMin  = isCrypto ? 0.3 : 0.05;
+      const atrPass = (item.atr_pct || 0) > atrMin;
+      const volumePass = (item.volume_ratio > 1.2) || (Math.abs(item.change || 0) > 0.3) || !item.volume_ratio;
       const recentPass = item.last_trade_seconds < 60;
 
       const allPassed = rsiPass && atrPass && volumePass && recentPass;

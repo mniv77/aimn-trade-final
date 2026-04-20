@@ -46,11 +46,11 @@ def log(msg):
 
 def calc_rsi_real(highs, lows, closes, i, lookback):
     start = max(0, i - lookback)
-    hi = max(highs[start:i])
-    lo = min(lows[start:i])
+    hi = max(highs[start:i+1])   # include current bar
+    lo = min(lows[start:i+1])    # include current bar
     if hi == lo:
         return None
-    return ((closes[i] - lo) / (hi - lo)) * 100
+    return max(0.0, min(100.0, ((closes[i] - lo) / (hi - lo)) * 100))
 
 
 def calc_macd_series(closes, fast, slow, sig):
