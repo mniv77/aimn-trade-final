@@ -17,7 +17,7 @@ DEFAULT = {
     'macd_fast'          : 12,
     'macd_slow'          : 26,
     'macd_sig'           : 9,
-    'stop_loss_options'  : [0.3, 0.5, 0.7, 1.0],
+    'stop_loss_options'  : [0.3, 0.5, 1.0, 2.0],
     'trail_start_options': [1.0, 2.0, 3.0],
     'trail_minus_options': [0.3, 0.5, 0.7],
     'rsi_exit_options'   : [65.0, 70.0, 75.0, 80.0],
