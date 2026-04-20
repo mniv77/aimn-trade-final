@@ -170,6 +170,7 @@
     let stripPriceInterval = null;
     // Per-trade live price map: tradeId → currentPrice
     let livePriceMap = {};
+    let peakProfitMap = {};  // tradeId → peak P&L % reached
 
     const MAX_CONCURRENT = 1;
     const MIN_GAP_BETWEEN_MS = 45_000;
@@ -680,6 +681,7 @@
             broker: stripSignalData.exchange, direction: stripDirection === 'BUY' ? 'LONG' : 'SHORT',
             entry_price: stripEntryPrice, last_price: stripEntryPrice, entry_time: Date.now()});
           livePriceMap[d.trade_id] = stripEntryPrice;
+          peakProfitMap[d.trade_id] = 0;
           renderOrderRows(_ordersCache);
           el('active-order-count').textContent = `${_ordersCache.length} open`;
           if (!_ordersInterval) { _ordersInterval = setInterval(tickOrderPrices, 3000); tickOrderPrices(); }
@@ -794,13 +796,18 @@
 
         // Strategy params
         const strat = strategyMap[`${o.symbol}:${o.direction}`];
-        const trailDrop = strat ? parseFloat(strat.trailing_drop || 0.5) : 0.5;
+        const trailStart = strat ? parseFloat(strat.trailing_start || 1.0) : 1.0;
+        const trailDrop  = strat ? parseFloat(strat.trailing_drop  || 0.5) : 0.5;
+        const localPeak  = peakProfitMap[o.id] || 0;
         let trailStr = '--';
-        if (!isClosed && peak > 0 && entry > 0) {
+        if (!isClosed && localPeak >= trailStart && entry > 0) {
           const trailPx = dir === 'BUY'
-            ? entry * (1 + (peak - trailDrop) / 100)
-            : entry * (1 - (peak - trailDrop) / 100);
-          trailStr = '$' + trailPx.toFixed(2);
+            ? entry * (1 + (localPeak - trailDrop) / 100)
+            : entry * (1 - (localPeak - trailDrop) / 100);
+          // Sanity: trail must not cross entry
+          if ((dir === 'BUY' && trailPx >= entry) || (dir === 'SELL' && trailPx <= entry)) {
+            trailStr = '$' + trailPx.toFixed(2);
+          }
         }
         const scanRow = scanData.find(s => s.symbol === o.symbol);
         const rsiVal = isClosed ? '--' : (scanRow ? parseFloat(scanRow.rsi||0).toFixed(1) : '--');
@@ -843,7 +850,17 @@
           const exchange = (broker === 'GEMINI' || broker === 'COINBASE') ? 'CRYPTO' : broker;
           const r = await fetch(`/api/live_price?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(exchange)}`);
           const d = await r.json();
-          if (d.price) livePriceMap[o.id] = d.price;
+          if (d.price) {
+            livePriceMap[o.id] = d.price;
+            const oEntry = parseFloat(o.entry_price || 0);
+            if (oEntry > 0) {
+              const oDir = o.direction === 'LONG' ? 'BUY' : 'SELL';
+              const oPnl = oDir === 'BUY'
+                ? (d.price - oEntry) / oEntry * 100
+                : (oEntry - d.price) / oEntry * 100;
+              if (!peakProfitMap[o.id] || oPnl > peakProfitMap[o.id]) peakProfitMap[o.id] = oPnl;
+            }
+          }
         } catch(e) {}
       }
       renderOrderRows(_ordersCache);
@@ -878,6 +895,7 @@
       setTimeout(() => {
         _ordersCache = _ordersCache.filter(o => o.id !== tradeId);
         delete livePriceMap[tradeId];
+        delete peakProfitMap[tradeId];
         renderOrderRows(_ordersCache);
         el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
       }, 120000);
