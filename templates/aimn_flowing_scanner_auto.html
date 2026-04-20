@@ -660,6 +660,9 @@
 
     async function stripEnterOrder() {
       if (!stripSignalData) return;
+      // Block if symbol already has an open trade
+      const alreadyOpen = _ordersCache.find(o => o.symbol === stripSignalData.symbol && o.status !== 'CLOSED');
+      if (alreadyOpen) { alert(`${stripSignalData.symbol} already has an open trade.`); stripDismiss(); return; }
       el('strip-enter-btn').disabled = true;
       el('strip-enter-btn').textContent = '⏳ Entering...';
 

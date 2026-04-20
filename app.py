@@ -601,6 +601,12 @@ def api_trade_open():
         from db import get_db_connection
         conn, cursor = get_db_connection()
 
+        # Block duplicate: same symbol already has an open trade
+        cursor.execute("SELECT id FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({"ok": False, "error": f"{symbol} already has an open trade"}), 409
+
         bp_id = None
         try:
             cursor.execute("""
