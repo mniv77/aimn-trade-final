@@ -319,7 +319,8 @@ def api_scanner_strategies():
                    sp.direction, sp.candle_time,
                    sp.rsi_entry, sp.rsi_exit, sp.stop_loss,
                    sp.trailing_start, sp.trailing_drop, sp.init_profit,
-                   sp.decay_start, sp.decay_rate
+                   sp.decay_start, sp.decay_rate,
+                   sp.macd_fast, sp.macd_slow, sp.macd_signal
             FROM strategy_params sp
             JOIN broker_products bp ON sp.broker_product_id = bp.id
             JOIN brokers b ON bp.broker_id = b.id
@@ -487,13 +488,14 @@ def api_scanner_snapshot():
 
     from db import get_db_connection
     from engine.tuning.candle_fetcher import fetch_candles
-    from engine.tuning.auto_tuner import calc_rsi_real
+    from engine.tuning.auto_tuner import calc_rsi_real, calc_macd_series
 
     try:
         conn, cursor = get_db_connection()
         cursor.execute("""
             SELECT bp.local_ticker as symbol, b.name as broker,
-                   sp.rsi_len, sp.candle_time, sp.pl_pct
+                   sp.rsi_len, sp.candle_time, sp.pl_pct,
+                   sp.macd_fast, sp.macd_slow, sp.macd_signal
             FROM strategy_params sp
             JOIN broker_products bp ON sp.broker_product_id = bp.id
             JOIN brokers b ON bp.broker_id = b.id
@@ -521,7 +523,7 @@ def api_scanner_snapshot():
         candle_time = row['candle_time'] or '1hr'
         is_crypto = broker.upper() in ("GEMINI", "COINBASE")
 
-        price = rsi = atr_pct = change = None
+        price = rsi = atr_pct = change = macd = None
         feed = "SIM"
         try:
             quote = _get_pub_provider().get_price(symbol, "CRYPTO") if is_crypto else provider.get_price(symbol, broker.upper())
@@ -549,6 +551,16 @@ def api_scanner_snapshot():
                 atr_vals = [(candles[i]['high'] - candles[i]['low']) / candles[i]['close'] * 100
                             for i in range(-min(14, n), 0)]
                 atr_pct = round(sum(atr_vals) / len(atr_vals), 2)
+                # MACD
+                try:
+                    mf = int(row.get('macd_fast') or 12)
+                    ms = int(row.get('macd_slow') or 26)
+                    mg = int(row.get('macd_signal') or 9)
+                    macd_series = calc_macd_series(closes, mf, ms, mg)
+                    if macd_series:
+                        macd = round(macd_series[-1], 4)
+                except Exception:
+                    pass
                 # Use most recent candle close as price fallback
                 if price is None and closes:
                     price = closes[-1]
@@ -557,7 +569,8 @@ def api_scanner_snapshot():
             print(f"[snapshot] {symbol}: {e}")
 
         result.append({'symbol': symbol, 'broker': broker, 'price': price,
-                       'rsi': rsi, 'atr_pct': atr_pct, 'change': change, 'feed': feed})
+                       'rsi': rsi, 'atr_pct': atr_pct, 'change': change,
+                       'macd': macd, 'feed': feed})
 
     _scanner_snapshot_cache = {'symbols': result, 'ts': int(time.time() * 1000)}
     _scanner_snapshot_ts = time.time()

@@ -136,7 +136,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
             exit_reason = None
             exit_hit    = False
 
-            if current_pnl <= -0.3:
+            if current_pnl <= -stop_loss:
                 exit_reason = 'STOP'
                 exit_hit    = True
             elif dur_hours < decay_start:

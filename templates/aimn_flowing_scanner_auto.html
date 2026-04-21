@@ -286,10 +286,15 @@
           const snap = snapMap[item.symbol];
           if (!snap) return;
           if (snap.price != null)   item.price   = snap.price > 1000 ? snap.price.toFixed(2) : snap.price.toFixed(4);
-          if (snap.rsi != null)     item.rsi     = snap.rsi;
+          if (snap.rsi  != null) item.rsi     = snap.rsi;
           if (snap.atr_pct != null) item.atr_pct = snap.atr_pct;
           if (snap.change != null)  item.change  = snap.change;
-          item.signal = snap.rsi <= 30 ? 'BUY' : snap.rsi >= 70 ? 'SELL' : 'NEUTRAL';
+          if (snap.macd != null)    item.macd    = snap.macd;
+          const longS  = strategyMap[`${item.symbol}:LONG`];
+          const shortS = strategyMap[`${item.symbol}:SHORT`];
+          const bt = longS  ? parseFloat(longS.rsi_entry)  : 30;
+          const st = shortS ? (100 - parseFloat(shortS.rsi_entry)) : 70;
+          item.signal = snap.rsi <= bt ? 'BUY' : snap.rsi >= st ? 'SELL' : 'NEUTRAL';
           item.last_trade_seconds = 30;  // always pass recentPass (no real data available)
         });
         updateScanResultsDisplay();
@@ -303,22 +308,24 @@
       const longStrat  = strategyMap[`${item.symbol}:LONG`];
       const shortStrat = strategyMap[`${item.symbol}:SHORT`];
 
-      // Use tuner rsi_entry if available, else fallback to 30/70
       const buyThreshold  = longStrat  ? parseFloat(longStrat.rsi_entry)  : 30;
       const sellThreshold = shortStrat ? (100 - parseFloat(shortStrat.rsi_entry)) : 70;
 
-      const rsiPass = item.rsi <= buyThreshold || item.rsi >= sellThreshold;
-      const isCrypto = (String(item.exchange||'').toUpperCase().includes('GEMINI') ||
-                        String(item.exchange||'').toUpperCase().includes('CRYPTO'));
-      const atrMin  = isCrypto ? 0.3 : 0.05;
-      const atrPass = (item.atr_pct || 0) > atrMin;
-      const volumePass = (item.volume_ratio > 1.2) || (Math.abs(item.change || 0) > 0.3) || !item.volume_ratio;
-      const recentPass = item.last_trade_seconds < 60;
+      const isBuySignal  = parseFloat(item.rsi) <= buyThreshold;
+      const isSellSignal = parseFloat(item.rsi) >= sellThreshold;
+      const rsiPass = isBuySignal || isSellSignal;
 
-      const allPassed = rsiPass && atrPass && volumePass && recentPass;
-      const score = [rsiPass, atrPass, volumePass, recentPass].filter(Boolean).length;
+      // MACD direction confirmation — matches tuner entry logic exactly
+      let macdPass = true;
+      if (item.macd != null) {
+        if (isBuySignal  && longStrat)  macdPass = item.macd > 0;  // LONG needs upward MACD
+        if (isSellSignal && shortStrat) macdPass = item.macd < 0;  // SHORT needs downward MACD
+      }
 
-      return { allPassed, score, rsiPass, atrPass, volumePass, recentPass };
+      const allPassed = rsiPass && macdPass;
+      const score = [rsiPass, macdPass].filter(Boolean).length;
+
+      return { allPassed, score, rsiPass, macdPass };
     }
 
     // --- Generate sample data (KEEP ORIGINAL) ---
@@ -889,7 +896,20 @@
           reason = `📉 Trail Exit (peak +${peak.toFixed(2)}%, trail ${trailLevel.toFixed(2)}%)`;
         }
       }
-      // 3. Decay exit (init_profit decays over time, exit when P&L exceeds decayed threshold)
+      // 3. RSI exit (early phase only — before decay_start, needs min profit)
+      else if (elapsedHours < decayStart && pnl >= initProfit) {
+        const scanRow = scanData.find(s => s.symbol === order.symbol);
+        if (scanRow && scanRow.rsi != null) {
+          const curRsi = parseFloat(scanRow.rsi);
+          const rsiExit = parseFloat(strat.rsi_exit || 70);
+          if (order.direction === 'LONG'  && curRsi >= rsiExit) {
+            reason = `📊 RSI Exit (RSI ${curRsi.toFixed(1)} ≥ ${rsiExit})`;
+          } else if (order.direction === 'SHORT' && curRsi <= (100 - rsiExit)) {
+            reason = `📊 RSI Exit (RSI ${curRsi.toFixed(1)} ≤ ${(100 - rsiExit).toFixed(1)})`;
+          }
+        }
+      }
+      // 4. Decay exit (after decay_start hours, threshold decays toward 0)
       else if (elapsedHours > decayStart) {
         const decayed = Math.max(0, initProfit - (elapsedHours - decayStart) * decayRate);
         if (pnl > 0 && pnl >= decayed) {
