@@ -888,6 +888,26 @@ def api_tuning_runs():
         return jsonify([])
 
 
+@app.route("/api/tuning_runs/cleanup", methods=["POST"])
+def api_tuning_runs_cleanup():
+    """Mark any run stuck in 'running' status for >2 hours as 'failed'."""
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            UPDATE tuning_runs
+            SET status='failed', finished_at=NOW(),
+                summary=CONCAT(IFNULL(summary,''), ' [auto-cancelled: stuck]')
+            WHERE status='running'
+              AND started_at < DATE_SUB(NOW(), INTERVAL 2 HOUR)
+        """)
+        affected = cursor.rowcount
+        conn.close()
+        return jsonify({"ok": True, "cancelled": affected})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 @app.route("/api/tuning_runs/<int:run_id>")
 def api_tuning_run_detail(run_id):
     from db import get_db_connection
