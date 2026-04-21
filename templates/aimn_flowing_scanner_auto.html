@@ -175,9 +175,11 @@
     const MAX_CONCURRENT = 1;
     const MIN_GAP_BETWEEN_MS = 45_000;
     const BROKER_COOLDOWN_MS = 120_000;
+    const SYMBOL_COOLDOWN_MS = 180_000;  // 3 min cooldown per symbol after exit
 
     let lastPopupAt = 0;
     let lastByBroker = {};
+    let lastBySymbol = {};  // symbol → last exit timestamp
     let popupQueue = [];
     let isOpening = false;
 
@@ -608,6 +610,8 @@
       if (activeTradeExchangeNorm && nex === activeTradeExchangeNorm) return false;
       if (Date.now() - lastPopupAt < MIN_GAP_BETWEEN_MS) return false;
       if (brokerCooling(nex)) return false;
+      // Per-symbol cooldown (3 min after exit)
+      if (lastBySymbol[row.symbol] && (Date.now() - lastBySymbol[row.symbol] < SYMBOL_COOLDOWN_MS)) return false;
       return true;
     }
 
@@ -959,6 +963,7 @@
       });
       const nex = normEx(broker);
       lastByBroker[nex] = Date.now();
+      lastBySymbol[symbol] = Date.now();  // 3-min cooldown for this symbol
       if (stripTradeId === tradeId) {
         stripTradeId = null; stripSignalData = null;
         clearInterval(stripPriceInterval); stripPriceInterval = null;
