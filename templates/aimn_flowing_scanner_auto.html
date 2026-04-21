@@ -818,7 +818,19 @@
         const scanRow = scanData.find(s => s.symbol === o.symbol);
         const rsiVal = isClosed ? '--' : (scanRow ? parseFloat(scanRow.rsi||0).toFixed(1) : '--');
         const rsiColor = isClosed ? 'text-gray-500' : (scanRow && scanRow.rsi <= 30 ? 'text-green-300' : scanRow && scanRow.rsi >= 70 ? 'text-red-300' : 'text-purple-300');
-        const initProfit = strat ? parseFloat(strat.init_profit || 0).toFixed(1) + '%' : '--';
+        // Show live decayed init_profit threshold
+        let initProfit = '--';
+        if (strat && !isClosed) {
+          const _initP = parseFloat(strat.init_profit || 1.0);
+          const _decayStart = parseFloat(strat.decay_start || 0.5);
+          const _decayRate  = parseFloat(strat.decay_rate  || 0.5);
+          const _entMs = typeof o.entry_time === 'number' ? o.entry_time : new Date(o.entry_time).getTime();
+          const _hrs = (Date.now() - _entMs) / 3600000;
+          const _decayed = _hrs > _decayStart ? Math.max(0, _initP - (_hrs - _decayStart) * _decayRate) : _initP;
+          initProfit = _decayed.toFixed(2) + '%' + (_hrs > _decayStart ? ' ↓' : '');
+        } else if (strat) {
+          initProfit = parseFloat(strat.init_profit || 0).toFixed(1) + '%';
+        }
 
         return `<div class="flex items-center gap-2 px-4 py-1.5 border-t border-gray-700 ${bgClass} text-xs">
           <span class="${indicatorColor} font-bold">${indicatorIcon}</span>
@@ -849,6 +861,45 @@
       }).join('');
     }
 
+    function checkAutoExit(order, pnl) {
+      const strat = strategyMap[`${order.symbol}:${order.direction}`];
+      if (!strat) return;
+
+      const stopLoss   = parseFloat(strat.stop_loss      || 0.5);
+      const trailStart = parseFloat(strat.trailing_start || 1.0);
+      const trailDrop  = parseFloat(strat.trailing_drop  || 0.5);
+      const initProfit = parseFloat(strat.init_profit    || 1.0);
+      const decayStart = parseFloat(strat.decay_start    || 0.5);  // hours
+      const decayRate  = parseFloat(strat.decay_rate     || 0.5);  // % per hour
+
+      const entryMs = typeof order.entry_time === 'number' ? order.entry_time : new Date(order.entry_time).getTime();
+      const elapsedHours = (Date.now() - entryMs) / 3600000;
+      const peak = peakProfitMap[order.id] || 0;
+
+      let reason = null;
+
+      // 1. Stop loss
+      if (pnl <= -stopLoss) {
+        reason = `🛑 Stop Loss (-${stopLoss.toFixed(2)}%)`;
+      }
+      // 2. Trailing stop (only after peak reaches trail_start)
+      else if (peak >= trailStart) {
+        const trailLevel = peak - trailDrop;
+        if (pnl <= trailLevel && trailLevel > 0) {
+          reason = `📉 Trail Exit (peak +${peak.toFixed(2)}%, trail ${trailLevel.toFixed(2)}%)`;
+        }
+      }
+      // 3. Decay exit (init_profit decays over time, exit when P&L exceeds decayed threshold)
+      else if (elapsedHours > decayStart) {
+        const decayed = Math.max(0, initProfit - (elapsedHours - decayStart) * decayRate);
+        if (pnl > 0 && pnl >= decayed) {
+          reason = `⏳ Decay Exit (+${pnl.toFixed(2)}%, thresh ${decayed.toFixed(2)}% after ${elapsedHours.toFixed(1)}h)`;
+        }
+      }
+
+      if (reason) panicExitTrade(order.id, order.symbol, order.broker, reason);
+    }
+
     async function tickOrderPrices() {
       for (const o of _ordersCache) {
         try {
@@ -865,6 +916,8 @@
                 ? (d.price - oEntry) / oEntry * 100
                 : (oEntry - d.price) / oEntry * 100;
               if (!peakProfitMap[o.id] || oPnl > peakProfitMap[o.id]) peakProfitMap[o.id] = oPnl;
+              // Auto-exit check
+              if (o.status !== 'CLOSED') checkAutoExit(o, oPnl);
             }
           }
         } catch(e) {}
@@ -872,7 +925,7 @@
       renderOrderRows(_ordersCache);
     }
 
-    async function panicExitTrade(tradeId, symbol, broker) {
+    async function panicExitTrade(tradeId, symbol, broker, autoReason) {
       const cur = livePriceMap[tradeId];
       const order = _ordersCache.find(o => o.id === tradeId);
       if (!order) return;
@@ -882,7 +935,7 @@
       const exitTime = new Date();
       await fetch('/api/trade/close', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({trade_id: tradeId, symbol, pnl, reason: '🚨 PANIC EXIT', exit_price: cur})
+        body: JSON.stringify({trade_id: tradeId, symbol, pnl, reason: autoReason || '🚨 PANIC EXIT', exit_price: cur})
       });
       const nex = normEx(broker);
       lastByBroker[nex] = Date.now();

@@ -318,7 +318,8 @@ def api_scanner_strategies():
             SELECT bp.local_ticker as symbol, b.name as broker,
                    sp.direction, sp.candle_time,
                    sp.rsi_entry, sp.rsi_exit, sp.stop_loss,
-                   sp.trailing_start, sp.init_profit
+                   sp.trailing_start, sp.trailing_drop, sp.init_profit,
+                   sp.decay_start, sp.decay_rate
             FROM strategy_params sp
             JOIN broker_products bp ON sp.broker_product_id = bp.id
             JOIN brokers b ON bp.broker_id = b.id
