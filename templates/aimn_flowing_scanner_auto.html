@@ -48,6 +48,10 @@
       <div class="flex items-center gap-3 px-4 py-2 border-b border-gray-700">
         <span id="strip-idle-text" class="text-gray-500 text-sm">📡 Scanning for signals...</span>
         <span id="active-order-count" class="text-xs bg-gray-700 px-2 py-1 rounded">0 open</span>
+        <label class="ml-auto flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+          <input type="checkbox" id="auto-enter-toggle" onchange="toggleAutoEnter()" class="cursor-pointer">
+          <span>⚡ Auto-Enter</span>
+        </label>
       </div>
       <!-- Signal detected -->
       <div id="strip-signal" class="hidden flex items-center gap-3 px-4 py-2 bg-blue-950 border-b border-blue-800">
@@ -168,6 +172,7 @@
     let stripCurrentPrice = 0;
     let stripDirection = '';
     let stripPriceInterval = null;
+    let autoEnterSignals = false;  // auto-enter when signal fires (no manual click)
     // Per-trade live price map: tradeId → currentPrice
     let livePriceMap = {};
     let peakProfitMap = {};  // tradeId → peak P&L % reached
@@ -670,6 +675,11 @@
       updateExchangeStatusDisplay();
       updateTickerDisplay();
       setTimeout(() => { isOpening = false; }, 200);
+
+      // Auto-enter if enabled
+      if (autoEnterSignals) {
+        setTimeout(() => { stripEnterOrder(); }, 1000);  // 1-sec delay so user sees signal
+      }
     }
 
     async function stripEnterOrder() {
@@ -723,6 +733,12 @@
       isOpening = false;
       updateExchangeStatusDisplay(); updateScanResultsDisplay(); updateTickerDisplay();
       setTimeout(processPopupQueue, 300);
+    }
+
+    function toggleAutoEnter() {
+      autoEnterSignals = el('auto-enter-toggle').checked;
+      const label = autoEnterSignals ? '⚡ Auto-Enter: ON' : '⚡ Auto-Enter';
+      el('auto-enter-toggle').nextElementSibling.textContent = label;
     }
 
     function stripPanicExit() {
