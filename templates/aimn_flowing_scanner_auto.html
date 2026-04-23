@@ -742,7 +742,7 @@
     }
 
     function stripPanicExit() {
-      if (stripTradeId) panicExitTrade(stripTradeId, stripSignalData?.symbol, stripSignalData?.exchange);
+      // trade stays open after dismiss — executor handles exit
     }
 
     // --- Manual test buttons ---
