@@ -966,6 +966,10 @@
     }
 
     async function panicExitTrade(tradeId, symbol, broker, autoReason) {
+      console.log("[Scanner] exit disabled - executor handles:", symbol, autoReason); return;
+      console.log("[Scanner] exit disabled - executor handles:", symbol, autoReason); return;
+      // DISABLED — executor handles all exits
+      console.log("[Scanner] panicExitTrade disabled", symbol, autoReason); return;
       const cur = livePriceMap[tradeId];
       const order = _ordersCache.find(o => o.id === tradeId);
       if (!order) return;
