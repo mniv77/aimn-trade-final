@@ -172,7 +172,7 @@
     let stripCurrentPrice = 0;
     let stripDirection = '';
     let stripPriceInterval = null;
-    let autoEnterSignals = false;  // auto-enter when signal fires (no manual click)
+    let autoEnterSignals = true;  // auto-enter when signal fires (no manual click)
     // Per-trade live price map: tradeId → currentPrice
     let livePriceMap = {};
     let peakProfitMap = {};  // tradeId → peak P&L % reached
