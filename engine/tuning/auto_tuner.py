@@ -12,21 +12,21 @@ from datetime import datetime
 from itertools import product
 
 DEFAULT = {
-    'rsi_len_options'    : [20, 50, 100, 168, 200],
-    'rsi_entry_options'  : [20, 30, 40],
+    'rsi_len_options'    : [20, 50, 100],
+    'rsi_entry_options'  : [25, 30, 35],
     'macd_fast'          : 12,
     'macd_slow'          : 26,
     'macd_sig'           : 9,
-    'stop_loss_options'  : [0.3, 0.5, 1.0, 2.0],
-    'trail_start_options': [1.0, 2.0, 3.0],
-    'trail_minus_options': [0.3, 0.5, 0.7],
-    'rsi_exit_options'   : [65.0, 70.0, 75.0, 80.0],
-    'init_profit_options': [0.5, 1.0, 1.5, 2.0],
-    'decay_start'        : 0.5,
-    'decay_rate'         : 0.5,
-    'timeframe'          : '1hr',
-    'bars'               : 2016,
-    'min_trades'         : 5,
+    'stop_loss_options'  : [0.3, 0.5, 0.7],
+    'trail_start_options': [0.3, 0.5, 0.7],
+    'trail_minus_options': [0.1, 0.2, 0.3],
+    'rsi_exit_options'   : [60.0, 65.0, 70.0],
+    'init_profit_options': [0.3, 1.0, 2.0, 3.0],
+    'decay_start'        : 4.0,
+    'decay_rate'         : 0.3,
+    'timeframe'          : '5m',
+    'bars'               : 2000,
+    'min_trades'         : 10,
     'score_metric'       : 'total_pnl',
 }
 
@@ -133,8 +133,9 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
 
             peak_profit = max(peak_profit, current_pnl)
             dur_hours   = (i - entry_bar) * bar_minutes / 60.0
-            exit_reason = None
-            exit_hit    = False
+            exit_reason  = None
+            exit_hit     = False
+            current_gate = 0.0
 
             if current_pnl <= -stop_loss:
                 exit_reason = 'STOP'
@@ -154,13 +155,28 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
                         elif direction == 'SHORT' and rsi <= (100 - rsi_exit) and current_pnl >= init_profit:
                             exit_reason = 'RSI'
                             exit_hit    = True
-            else:
-                current_gate = max(0, init_profit - (dur_hours - decay_start) * decay_rate)
-                if current_pnl >= current_gate:
-                    exit_reason = 'DECAY'
-                    exit_hit    = True
-                elif current_gate == 0 and current_pnl <= -stop_loss:
+
+                else:
+                    current_gate = max(0, init_profit - (dur_hours - decay_start) * decay_rate)
+                if current_pnl <= -stop_loss:
                     exit_reason = 'STOP'
+                    exit_hit    = True
+                elif peak_profit >= trail_start:
+                    trail_level = peak_profit - trail_minus
+                    if current_pnl <= trail_level and trail_level >= init_profit:
+                        exit_reason = 'TRAIL'
+                        exit_hit    = True
+                if not exit_hit:
+                    rsi = calc_rsi_real(highs, lows, closes, i, rsi_len)
+                    if rsi is not None:
+                        if direction == 'LONG' and rsi >= rsi_exit and current_pnl >= init_profit:
+                            exit_reason = 'RSI'
+                            exit_hit    = True
+                        elif direction == 'SHORT' and rsi <= (100 - rsi_exit) and current_pnl >= init_profit:
+                            exit_reason = 'RSI'
+                            exit_hit    = True
+                if not exit_hit and current_pnl >= current_gate:
+                    exit_reason = 'DECAY'
                     exit_hit    = True
 
             if exit_hit:

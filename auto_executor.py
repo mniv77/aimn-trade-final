@@ -1,0 +1,687 @@
+# /home/MeirNiv/aimn-trade-final/auto_executor.py
+# AiMN V3.1 - HaGolem Auto Trading by AiMN
+# CORRECT strategy implementation matching auto_tuner.py exactly
+#
+# PHASE 1 (dur < decay_start):
+#   - Trail: activates when peak >= trail_start
+#            exit when pnl <= (peak - trail_drop) AND (peak - trail_drop) >= init_profit
+#   - RSI exit: active
+#   - Stop loss: BLOCKED
+#
+# PHASE 2 (dur >= decay_start):
+#   - gate = max(0, init_profit - (dur - decay_start) * decay_rate)
+#   - Exit when pnl >= gate
+#   - Stop loss: only when gate==0 AND pnl <= -stop_loss
+#   - Trail: IGNORED
+#   - RSI:   IGNORED
+
+import mysql.connector
+import requests
+import time
+from datetime import datetime, timedelta
+import pytz
+import db_config as config
+
+# ── Fallback defaults ─────────────────────────────────────────
+DEFAULT_PARAMS = {
+    'stop_loss'     : 0.5,
+    'trailing_start': 2.0,
+    'trailing_drop' : 0.5,
+    'init_profit'   : 1.5,
+    'decay_start'   : 0.5,
+    'decay_rate'    : 0.5,
+    'rsi_entry'     : 30.0,
+    'rsi_exit'      : 70.0,
+    'rsi_len'       : 100,
+    'candle_time'   : '1hr',
+}
+
+# ── Fixed operational settings ────────────────────────────────
+COOLDOWN_SECONDS      = 120
+MAX_PRICE_AGE_SECONDS = 120
+REENTRY_BLOCK_SECONDS = 60
+REENTRY_BLOCK_PCT     = 0.3
+
+# ── Gemini interval map ───────────────────────────────────────
+INTERVAL_MAP = {
+    '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m',
+    '1h': '1hr', '1hr': '1hr', '2h': '2hr', '6h': '6hr', '1d': '1day'
+}
+
+cooldown_until = {}
+reentry_block  = {}
+
+def get_db():
+    return mysql.connector.connect(
+        host=config.DB_HOST, user=config.DB_USER,
+        password=config.DB_PASSWORD, database=config.DB_NAME,
+        autocommit=True
+    )
+
+def log(msg):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+
+# ==========================================
+# CANDLE FETCHER
+# ==========================================
+
+def fetch_closes_gemini(symbol, candle_time, bars):
+    """Fetch closing prices from Gemini for RSI calculation"""
+    try:
+        clean    = symbol.replace('/', '').lower()
+        interval = INTERVAL_MAP.get(candle_time, '1hr')
+        url      = f"https://api.gemini.com/v2/candles/{clean}/{interval}"
+        r        = requests.get(url, timeout=10)
+        if r.status_code == 200:
+            data = r.json()
+            if not isinstance(data, list):
+                return None
+            candles = sorted(data, key=lambda x: x[0])
+            highs  = [float(c[2]) for c in candles[-bars:]]
+            lows   = [float(c[3]) for c in candles[-bars:]]
+            closes = [float(c[4]) for c in candles[-bars:]]
+            return {'highs': highs, 'lows': lows, 'closes': closes}
+        return None
+    except Exception as e:
+        log(f"  ❌ fetch_closes_gemini error {symbol}: {e}")
+        return None
+
+# ==========================================
+# INDICATORS
+# ==========================================
+
+def calc_rsi_real(highs, lows, closes, lookback):
+    """RSI Real: price position within recent high/low range (0=low, 100=high)"""
+    try:
+        hi = max(highs[-lookback:])
+        lo = min(lows[-lookback:])
+        if hi <= lo:
+            return None
+        current = closes[-1]
+        return round(max(0, min(100, ((current - lo) / (hi - lo)) * 100)), 2)
+    except:
+        return None
+
+def calc_macd(closes, fast=12, slow=26, signal=9):
+    """Calculate MACD line value"""
+    try:
+        if len(closes) < slow + signal:
+            return None
+        def ema(prices, period):
+            mult = 2 / (period + 1)
+            e = sum(prices[:period]) / period
+            for p in prices[period:]:
+                e = (p - e) * mult + e
+            return e
+        macd_values = []
+        for i in range(slow, len(closes)):
+            ef = ema(closes[:i+1], fast)
+            es = ema(closes[:i+1], slow)
+            macd_values.append(ef - es)
+        if len(macd_values) < signal:
+            return None
+        return macd_values[-1]
+    except:
+        return None
+
+# ==========================================
+# CANDLE CACHE
+# ==========================================
+
+_candle_cache = {}
+_cache_time   = {}
+CACHE_SECONDS = 60
+
+def get_candles_cached(symbol, candle_time, bars, broker="Gemini"):
+    """Fetch candles with caching — routes to correct source by broker"""
+    key = f"{symbol}_{candle_time}"
+    now = datetime.now()
+
+    if key in _cache_time:
+        age = (now - _cache_time[key]).total_seconds()
+        if age < CACHE_SECONDS and key in _candle_cache:
+            return _candle_cache[key]
+
+    if broker.upper() == "GEMINI":
+        data = fetch_closes_gemini(symbol, candle_time, bars)
+    else:
+        try:
+            from engine.tuning.candle_fetcher import fetch_candles as fetch_etf
+            raw = fetch_etf(symbol, candle_time, bars, broker=broker)
+            if raw:
+                highs  = [float(c['high'])  for c in raw]
+                lows   = [float(c['low'])   for c in raw]
+                closes = [float(c['close']) for c in raw]
+                data = {'highs': highs, 'lows': lows, 'closes': closes}
+            else:
+                data = None
+        except Exception as e:
+            log(f"  ❌ candle fetch error {symbol}: {e}")
+            data = None
+
+    if data:
+        _candle_cache[key] = data
+        _cache_time[key]   = now
+    return data
+
+# ==========================================
+# LOAD STRATEGIES
+# ==========================================
+
+def load_all_strategies(cursor):
+    cursor.execute("""
+        SELECT
+            sp.id as strategy_id,
+            bp.id as product_id,
+            bp.local_ticker as symbol,
+            b.name as broker_name,
+            sp.direction,
+            sp.candle_time,
+            sp.rsi_len,
+            sp.rsi_entry,
+            sp.rsi_exit,
+            sp.stop_loss,
+            sp.trailing_start,
+            sp.trailing_drop,
+            sp.init_profit,
+            sp.decay_start,
+            sp.decay_rate,
+            sp.pl_pct,
+            bp.last_price,
+            bp.price_updated_at,
+            ms.is_24_7,
+            ms.start_time,
+            ms.end_time,
+            ms.timezone,
+            ms.trade_weekends
+        FROM strategy_params sp
+        JOIN broker_products bp ON sp.broker_product_id = bp.id
+        JOIN brokers b ON bp.broker_id = b.id
+        LEFT JOIN market_sessions ms ON bp.session_id = ms.id
+        WHERE sp.active = 1
+          AND bp.is_active = 1
+          AND b.name IN ('Gemini', 'Alpaca')
+        ORDER BY sp.pl_pct DESC
+    """)
+    return cursor.fetchall()
+
+# ==========================================
+# MARKET HOURS
+# ==========================================
+
+def is_market_open(session):
+    if not session or session.get('is_24_7'):
+        return True
+    try:
+        tz  = pytz.timezone(session['timezone'] or 'US/Eastern')
+        now = datetime.now(tz)
+        if now.weekday() >= 5 and not session['trade_weekends']:
+            return False
+        start = datetime.strptime(str(session['start_time']), '%H:%M:%S').time()
+        end   = datetime.strptime(str(session['end_time']),   '%H:%M:%S').time()
+        return start <= now.time() <= end
+    except:
+        return False
+
+# ==========================================
+# COOLDOWN & RE-ENTRY
+# ==========================================
+
+def is_in_cooldown(broker):
+    until = cooldown_until.get(broker)
+    if until and datetime.now() < until:
+        log(f"  COOLDOWN: {broker} {(until-datetime.now()).total_seconds():.0f}s remaining")
+        return True
+    return False
+
+def set_cooldown(broker):
+    cooldown_until[broker] = datetime.now() + timedelta(seconds=COOLDOWN_SECONDS)
+    log(f"  COOLDOWN SET: {broker} locked for {COOLDOWN_SECONDS}s")
+
+def set_reentry_block(broker, exit_price):
+    reentry_block[broker] = {
+        'price': exit_price,
+        'until': datetime.now() + timedelta(seconds=REENTRY_BLOCK_SECONDS)
+    }
+
+def is_reentry_blocked(broker, price):
+    block = reentry_block.get(broker)
+    if not block:
+        return False
+    if datetime.now() > block['until']:
+        del reentry_block[broker]
+        return False
+    pct_diff = abs(price - block['price']) / block['price'] * 100
+    if pct_diff < REENTRY_BLOCK_PCT:
+        log(f"  RE-ENTRY BLOCKED: {broker} {pct_diff:.2f}% from last exit")
+        return True
+    return False
+
+exit_reason = None
+
+# ==========================================
+# ALPACA ORDER
+# ==========================================
+
+def place_alpaca_order(symbol, side, api_key, api_secret):
+    try:
+        url     = "https://paper-api.alpaca.markets/v2/orders"
+        headers = {
+            'APCA-API-KEY-ID':     api_key,
+            'APCA-API-SECRET-KEY': api_secret,
+            'Content-Type':        'application/json'
+        }
+        payload = {
+            'symbol'        : symbol,
+            'qty'           : 1,
+            'side'          : side.lower(),
+            'type'          : 'market',
+            'time_in_force' : 'day'
+        }
+        r = requests.post(url, json=payload, headers=headers, timeout=10)
+        if r.status_code in (200, 201):
+            return r.json().get('id', '')
+        log(f"  Alpaca order failed {symbol}: {r.status_code}")
+        return None
+    except Exception as e:
+        log(f"  Alpaca order error {symbol}: {e}")
+        return None
+
+# ==========================================
+# ENTRY SIGNALS
+# ==========================================
+
+def check_and_execute_signals():
+    conn   = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Load Alpaca credentials
+        cursor.execute("SELECT api_key, api_secret FROM brokers WHERE name='Alpaca' LIMIT 1")
+        row           = cursor.fetchone()
+        alpaca_key    = row['api_key']    if row else None
+        alpaca_secret = row['api_secret'] if row else None
+
+        # Get locked brokers
+        cursor.execute("SELECT DISTINCT broker_name FROM active_trades WHERE status='OPEN'")
+        locked_brokers = {r['broker_name'] for r in cursor.fetchall()}
+
+        strategies = load_all_strategies(cursor)
+        log(f"  Checking {len(strategies)} active strategies")
+
+        for s in strategies:
+            broker      = s['broker_name']
+            symbol      = s['symbol']
+            direction   = s['direction']
+            product_id  = s['product_id']
+            rsi_len     = int(s['rsi_len']    or DEFAULT_PARAMS['rsi_len'])
+            rsi_entry   = float(s['rsi_entry'] or DEFAULT_PARAMS['rsi_entry'])
+            candle_time = s['candle_time']     or DEFAULT_PARAMS['candle_time']
+            price       = float(s['last_price'] or 0)
+
+            if price <= 0:
+                continue
+            if not is_market_open(s):
+                continue
+            if is_in_cooldown(broker):
+                continue
+            if broker in locked_brokers:
+                continue
+
+            # Stale price check
+            price_updated_at = s.get('price_updated_at')
+            if price_updated_at:
+                age = (datetime.now() - price_updated_at).total_seconds()
+                if age > MAX_PRICE_AGE_SECONDS:
+                    log(f"  STALE: {symbol} {age:.0f}s old")
+                    continue
+
+            if is_reentry_blocked(broker, price):
+                continue
+
+            # Duplicate guard — check by symbol AND broker
+            cursor.execute("""
+                SELECT COUNT(*) as cnt FROM active_trades
+                WHERE symbol=%s AND broker_name=%s AND status='OPEN'
+            """, (symbol, broker))
+            if cursor.fetchone()['cnt'] > 0:
+                log(f"  SKIP: {symbol} already has open trade")
+                continue
+
+            # Fetch candles and calculate indicators
+            data = get_candles_cached(symbol, candle_time, rsi_len + 50, broker=broker)
+            if not data or len(data['closes']) < rsi_len:
+                log(f"  ⚠️ Insufficient candles for {symbol} {candle_time}")
+                continue
+
+            rsi = calc_rsi_real(data['highs'], data['lows'], data['closes'], rsi_len)
+            if rsi is None:
+                continue
+
+            macd_val = calc_macd(data['closes'])
+            if macd_val is None:
+                continue
+
+            # Entry condition
+            if direction == 'LONG':
+                entry_cond = (rsi <= rsi_entry) and (macd_val > 0)
+            else:
+                entry_cond = (rsi >= (100 - rsi_entry)) and (macd_val < 0)
+
+            log(f"  {symbol} {direction} [{candle_time}] RSI={rsi:.1f} "
+                f"entry={rsi_entry} MACD={macd_val:.4f} "
+                f"→ {'✅ SIGNAL!' if entry_cond else '⏳ waiting'}")
+
+            if not entry_cond:
+                continue
+
+            # ENTER TRADE
+            log(f"SIGNAL: {broker} {symbol} {direction} @ ${price:,.2f}")
+
+            broker_order_id = None
+            if broker == 'Alpaca' and alpaca_key:
+                alpaca_side     = 'buy' if direction == 'LONG' else 'sell'
+                broker_order_id = place_alpaca_order(
+                    symbol, alpaca_side, alpaca_key, alpaca_secret)
+
+            cursor.execute("""
+                INSERT INTO active_trades
+                (broker_product_id, broker_name, symbol, direction,
+                 entry_price, entry_time, last_price, peak_profit, status)
+                VALUES (%s,%s,%s,%s,%s,NOW(),%s,-999.0,'OPEN')
+            """, (product_id, broker, symbol, direction, price, price))
+
+            log(f"OPENED: {broker} {symbol} {direction} @ ${price:,.2f} "
+                f"| stop={s['stop_loss']}% "
+                f"trailStart={s['trailing_start']}% "
+                f"trailDrop={s['trailing_drop']}% "
+                f"initProfit={s['init_profit']}%")
+            locked_brokers.add(broker)
+
+    except Exception as e:
+        log(f"Entry error: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+# ==========================================
+# EXIT MONITOR
+# ==========================================
+
+def monitor_and_exit_trades():
+    conn   = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT * FROM active_trades WHERE status='OPEN'")
+        trades = cursor.fetchall()
+        if not trades:
+            return
+
+        for trade in trades:
+            try:
+                trade_id      = trade['id']
+                symbol        = trade['symbol']
+                broker        = trade['broker_name']
+                direction     = trade['direction']
+                entry_price   = float(trade['entry_price'] or 0)
+                current_price = float(trade['last_price']  or 0)
+                entry_time    = trade['entry_time']
+                product_id    = trade['broker_product_id']
+
+                if entry_price <= 0 or current_price <= 0:
+                    continue
+
+                # Load strategy params
+                cursor.execute("""
+                    SELECT stop_loss, trailing_start, trailing_drop,
+                           init_profit, decay_start, decay_rate,
+                           candle_time, rsi_len, rsi_exit, pl_pct
+                    FROM strategy_params
+                    WHERE broker_product_id = %s
+                      AND direction = %s
+                      AND active = 1
+                    ORDER BY pl_pct DESC
+                    LIMIT 1
+                """, (product_id, direction))
+                sp = cursor.fetchone()
+
+                # Read all params from DB
+                stop_loss      = float(sp['stop_loss']      if sp else DEFAULT_PARAMS['stop_loss'])
+                trailing_start = float(sp['trailing_start'] if sp else DEFAULT_PARAMS['trailing_start'])
+                trailing_drop  = float(sp['trailing_drop']  if sp else DEFAULT_PARAMS['trailing_drop'])
+                init_profit    = float(sp['init_profit']    if sp else DEFAULT_PARAMS['init_profit'])
+                decay_start    = float(sp['decay_start']    if sp else DEFAULT_PARAMS['decay_start'])
+                decay_rate     = float(sp['decay_rate']     if sp else DEFAULT_PARAMS['decay_rate'])
+                rsi_exit_val   = float(sp['rsi_exit']       if sp else DEFAULT_PARAMS['rsi_exit'])
+                rsi_len        = int(sp['rsi_len']          if sp else DEFAULT_PARAMS['rsi_len'])
+                candle_time    = sp['candle_time']          if sp else DEFAULT_PARAMS['candle_time']
+
+                # Calculate P&L
+                if direction == 'LONG':
+                    pnl = ((current_price - entry_price) / entry_price) * 100
+                else:
+                    pnl = ((entry_price - current_price) / entry_price) * 100
+
+                # Duration
+                duration_seconds = (datetime.now() - entry_time).total_seconds() \
+                                   if entry_time else 0
+                duration_hours   = duration_seconds / 3600.0
+                dur_str          = f"{int(duration_hours)}h{int((duration_hours%1)*60)}m"
+
+                # Track peak profit
+                peak_profit = float(trade['peak_profit'] or -999.0)
+                if pnl > peak_profit:
+                    peak_profit = pnl
+                    cursor.execute(
+                        "UPDATE active_trades SET peak_profit=%s WHERE id=%s",
+                        (peak_profit, trade_id)
+                    )
+
+                log(f"  {broker} {symbol} {direction} "
+                    f"P&L:{pnl:+.2f}% Peak:{peak_profit:.2f}% "
+                    f"dur:{dur_str}")
+
+                # ─────────────────────────────────────────────
+                # EXIT LOGIC — matches auto_tuner.py exactly
+                # ─────────────────────────────────────────────
+                exit_reason = None
+
+                if duration_hours < decay_start:
+                    # ── PHASE 1 ──────────────────────────────
+                    # Stop loss BLOCKED
+                    # Trail exit
+                    if peak_profit >= trailing_start:
+                        trail_level = peak_profit - trailing_drop
+                        if (pnl <= trail_level) and (trail_level >= init_profit):
+                            exit_reason = "TRAIL-EXIT"
+
+                    # RSI exit (only if trail did not fire)
+                    if not exit_reason:
+                        data = get_candles_cached(
+                            symbol, candle_time, rsi_len + 50, broker=broker)
+                        if data and len(data['closes']) >= rsi_len:
+                            rsi = calc_rsi_real(
+                                data['highs'], data['lows'],
+                                data['closes'], rsi_len)
+                            if rsi is not None:
+                                if direction == 'LONG' and rsi >= rsi_exit_val and pnl >= init_profit:
+                                    exit_reason = "RSI-EXIT"
+                                elif direction == 'SHORT' and rsi <= (100 - rsi_exit_val) and pnl >= init_profit:
+                                    exit_reason = "RSI-EXIT"
+
+                else:
+                    # ── PHASE 2 — Trail + RSI still active ──
+                    current_gate = max(
+                        0,
+                        init_profit - (duration_hours - decay_start) * decay_rate
+                    )
+                    log(f"    Gate:{current_gate:.2f}% decayStart:{decay_start}h decayRate:{decay_rate}%/h")
+                    if pnl <= -stop_loss:
+                        exit_reason = "STOP"
+                    elif peak_profit >= trailing_start:
+                        trail_level = peak_profit - trailing_drop
+                        if pnl <= trail_level and trail_level >= init_profit:
+                            exit_reason = "TRAIL-EXIT"
+                    if not exit_reason:
+                        data = get_candles_cached(symbol, candle_time, rsi_len + 50, broker=broker)
+                        if data and len(data['closes']) >= rsi_len:
+                            rsi = calc_rsi_real(data['highs'], data['lows'], data['closes'], rsi_len)
+                            if rsi is not None:
+                                if direction == 'LONG' and rsi >= rsi_exit_val and pnl >= init_profit:
+                                    exit_reason = "RSI-EXIT"
+                                elif direction == 'SHORT' and rsi <= (100 - rsi_exit_val) and pnl >= init_profit:
+                                    exit_reason = "RSI-EXIT"
+                    if not exit_reason and pnl >= current_gate:
+                        exit_reason = "DECAY-EXIT"
+
+                # ── CLOSE TRADE ───────────────────────────────
+                cursor.execute("""
+                    INSERT INTO orders (
+                        strategy_id, symbol, broker, side, candle_time,
+                        entry_price, exit_price, pnl_percent,
+                        duration_seconds, status, exit_reason,
+                        rsi_real_entry, macd_agrees, created_at
+                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
+                """, (
+                    product_id, symbol, broker, direction, candle_time,
+                    entry_price, current_price, round(pnl, 4),
+                    int(duration_seconds), 'CLOSED', exit_reason,
+                    float(trade.get('rsi_real') or 0), 1
+                ))
+
+                cursor.execute("""
+                    UPDATE active_trades
+                    SET status='CLOSED', exit_price=%s,
+                        exit_time=NOW(), exit_reason=%s
+                    WHERE id=%s
+                """, (current_price, exit_reason, trade_id))
+
+                log(f"  CLOSED: {broker} {symbol} {direction} "
+                    f"{exit_reason} P&L:{pnl:+.2f}% {dur_str}")
+
+                if exit_reason == "STOP":
+                    set_cooldown(broker)
+                set_reentry_block(broker, current_price)
+
+            except Exception as e:
+                log(f"  Error trade #{trade.get('id','?')}: {e}")
+                continue
+
+    except Exception as e:
+        log(f"Monitor error: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+# ==========================================
+# MAIN LOOP
+# ==========================================
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("HaGolem Auto Trading by AiMN — AUTO EXECUTOR V3.1")
+    print("✅ Phase 1: Trail + RSI exits | Stop BLOCKED")
+    print("✅ Phase 2: Decay exit only | Trail + RSI IGNORED")
+    print("✅ All params from strategy_params per symbol/direction")
+    print("=" * 60)
+    while True:
+        try:
+            check_and_execute_signals()
+            monitor_and_exit_trades()
+            force_close_after_market()
+            time.sleep(1)
+        except KeyboardInterrupt:
+            print("\nStopped")
+            break
+        except Exception as e:
+            log(f"ERROR: {e}")
+            time.sleep(5)
+
+#================================================================================
+
+def force_close_after_market():
+    """Force close any Alpaca trades when NYSE is closed"""
+    conn   = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Get open Alpaca trades
+        cursor.execute("""
+            SELECT at.*, sp.decay_start, sp.decay_rate,
+                   sp.init_profit, sp.stop_loss,
+                   sp.candle_time, sp.rsi_len, sp.rsi_exit,
+                   sp.trailing_start, sp.trailing_drop,
+                   ms.is_24_7, ms.start_time, ms.end_time,
+                   ms.timezone, ms.trade_weekends
+            FROM active_trades at
+            JOIN broker_products bp ON at.broker_product_id = bp.id
+            JOIN brokers b ON bp.broker_id = b.id
+            LEFT JOIN market_sessions ms ON bp.session_id = ms.id
+            WHERE at.status = 'OPEN'
+              AND b.name IN ('Alpaca', 'Alpaca-ETF')
+        """)
+        trades = cursor.fetchall()
+
+        for trade in trades:
+            # Skip if market is still open
+            if is_market_open(trade):
+                continue
+
+            # Market is closed — force exit
+            trade_id      = trade['id']
+            symbol        = trade['symbol']
+            broker        = trade['broker_name']
+            direction     = trade['direction']
+            entry_price   = float(trade['entry_price'] or 0)
+            current_price = float(trade['last_price']  or 0)
+            entry_time    = trade['entry_time']
+
+            if entry_price <= 0 or current_price <= 0:
+                continue
+
+            if direction == 'LONG':
+                pnl = ((current_price - entry_price) / entry_price) * 100
+            else:
+                pnl = ((entry_price - current_price) / entry_price) * 100
+
+            duration_seconds = (datetime.now() - entry_time).total_seconds() \
+                               if entry_time else 0
+
+            log(f"  MARKET CLOSED — force exit: {broker} {symbol} {direction} "
+                f"P&L:{pnl:+.2f}%")
+
+            # Save to orders
+            cursor.execute("""
+                INSERT INTO orders (
+                    strategy_id, symbol, broker, side, candle_time,
+                    entry_price, exit_price, pnl_percent,
+                    duration_seconds, status, exit_reason,
+                    rsi_real_entry, macd_agrees, created_at
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
+            """, (
+                trade['broker_product_id'],
+                symbol, broker, direction,
+                trade.get('candle_time', '5m'),
+                entry_price, current_price,
+                round(pnl, 4),
+                int(duration_seconds),
+                'CLOSED', 'MARKET-CLOSE',
+                0, 1
+            ))
+
+            # Close trade
+            cursor.execute("""
+                UPDATE active_trades
+                SET status='CLOSED', exit_price=%s,
+                    exit_time=NOW(), exit_reason='MARKET-CLOSE'
+                WHERE id=%s
+            """, (current_price, trade_id))
+
+            log(f"  CLOSED at market close: {symbol} {direction} "
+                f"P&L:{pnl:+.2f}%")
+
+            set_reentry_block(broker, current_price)
+
+    except Exception as e:
+        log(f"force_close_after_market error: {e}")
+    finally:
+        cursor.close()
+        conn.close()

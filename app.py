@@ -53,7 +53,7 @@ def system_overview():
 aiml = Blueprint("aiml", __name__, template_folder="templates")
 
 @aiml.route("/")
-def aiml_home():
+def aiml_page():
     return render_or_404("aiml/home.html")
 
 @aiml.route("/manual")
