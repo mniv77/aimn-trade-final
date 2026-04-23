@@ -957,7 +957,7 @@
                 : (oEntry - d.price) / oEntry * 100;
               if (!peakProfitMap[o.id] || oPnl > peakProfitMap[o.id]) peakProfitMap[o.id] = oPnl;
               // Auto-exit check
-              if (o.status !== 'CLOSED') checkAutoExit(o, oPnl);
+              // checkAutoExit disabled — executor handles all exits
             }
           }
         } catch(e) {}
