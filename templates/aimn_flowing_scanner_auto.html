@@ -1014,7 +1014,7 @@
       try {
         const resp = await fetch('/api/trades/active');
         const orders = await resp.json();
-        _ordersCache = orders;
+        _ordersCache = orders.length ? orders : _ordersCache.filter(o => o.status !== "CLOSED");
         el('active-order-count').textContent = `${orders.length} open`;
 
         // Sync activeTradeSymbol for scanner display
