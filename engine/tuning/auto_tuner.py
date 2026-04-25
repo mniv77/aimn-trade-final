@@ -1,7 +1,7 @@
 # /home/MeirNiv/aimn-trade-final/engine/tuning/auto_tuner.py
-# AiMN V3.1 - Auto Tuner
-# Phase 1: Trail + RSI exits, Stop BLOCKED
-# Phase 2: Decay exit only, Trail + RSI IGNORED
+# AiMN V3.1 - Auto Tuner - FIXED backtest logic
+# Phase 1 (dur < decay_start): Trail + RSI exits active, Stop always active
+# Phase 2 (dur >= decay_start): Decay gate active, Trail + RSI still work
 
 import sys
 sys.path.insert(0, '/home/MeirNiv/aimn-trade-final')
@@ -12,21 +12,21 @@ from datetime import datetime
 from itertools import product
 
 DEFAULT = {
-    'rsi_len_options'    : [20, 50, 100],
-    'rsi_entry_options'  : [25, 30, 35],
+    'rsi_len_options'    : [50, 100, 168],
+    'rsi_entry_options'  : [25, 35, 40],
     'macd_fast'          : 12,
     'macd_slow'          : 26,
     'macd_sig'           : 9,
-    'stop_loss_options'  : [0.3, 0.5, 0.7],
-    'trail_start_options': [0.3, 0.5, 0.7],
+    'stop_loss_options'  : [0.3, 1.0, 2.0],
+    'trail_start_options': [0.2, 0.5, 1.0],
     'trail_minus_options': [0.1, 0.2, 0.3],
-    'rsi_exit_options'   : [60.0, 65.0, 70.0],
-    'init_profit_options': [0.3, 1.0, 2.0, 3.0],
-    'decay_start'        : 4.0,
-    'decay_rate'         : 0.3,
+    'rsi_exit_options'   : [65.0, 70.0, 75.0],
+    'init_profit_options': [0.1, 0.5, 1.5],
+    'decay_start_options': [0.5, 1.0, 2.0],
+    'decay_rate'         : 0.5,
     'timeframe'          : '5m',
     'bars'               : 2000,
-    'min_trades'         : 10,
+    'min_trades'         : 3,
     'score_metric'       : 'total_pnl',
 }
 
@@ -46,8 +46,8 @@ def log(msg):
 
 def calc_rsi_real(highs, lows, closes, i, lookback):
     start = max(0, i - lookback)
-    hi = max(highs[start:i+1])   # include current bar
-    lo = min(lows[start:i+1])    # include current bar
+    hi = max(highs[start:i+1])
+    lo = min(lows[start:i+1])
     if hi == lo:
         return None
     return max(0.0, min(100.0, ((closes[i] - lo) / (hi - lo)) * 100))
@@ -112,6 +112,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
 
     for i in range(start_bar, n - 1):
         if not in_trade:
+            # ── ENTRY ────────────────────────────────────
             rsi = calc_rsi_real(highs, lows, closes, i, rsi_len)
             if rsi is None:
                 continue
@@ -126,6 +127,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
                 peak_profit = -999.0
                 entry_bar   = i
         else:
+            # ── EXIT ─────────────────────────────────────
             if direction == 'LONG':
                 current_pnl = (closes[i] - entry_price) / entry_price * 100
             else:
@@ -133,49 +135,45 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
 
             peak_profit = max(peak_profit, current_pnl)
             dur_hours   = (i - entry_bar) * bar_minutes / 60.0
-            exit_reason  = None
-            exit_hit     = False
-            current_gate = 0.0
 
+            # Current gate — decays after decay_start hours
+            if dur_hours >= decay_start:
+                current_gate = max(0.0, init_profit - (dur_hours - decay_start) * decay_rate)
+            else:
+                current_gate = init_profit
+
+            exit_reason = None
+            exit_hit    = False
+
+            # ── RULE 1: STOP LOSS — always active ────────
             if current_pnl <= -stop_loss:
                 exit_reason = 'STOP'
                 exit_hit    = True
-            elif dur_hours < decay_start:
-                if peak_profit >= trail_start:
-                    trail_level = peak_profit - trail_minus
-                    if (current_pnl <= trail_level) and (trail_level >= init_profit):
-                        exit_reason = 'TRAIL'
-                        exit_hit    = True
-                if not exit_hit:
-                    rsi = calc_rsi_real(highs, lows, closes, i, rsi_len)
-                    if rsi is not None:
-                        if direction == 'LONG' and rsi >= rsi_exit and current_pnl >= init_profit:
-                            exit_reason = 'RSI'
-                            exit_hit    = True
-                        elif direction == 'SHORT' and rsi <= (100 - rsi_exit) and current_pnl >= init_profit:
-                            exit_reason = 'RSI'
-                            exit_hit    = True
 
-                else:
-                    current_gate = max(0, init_profit - (dur_hours - decay_start) * decay_rate)
-                if current_pnl <= -stop_loss:
-                    exit_reason = 'STOP'
+            # ── RULE 2: TRAIL EXIT ────────────────────────
+            # Trail exits whenever peak drops by trail_minus — NO gate check!
+            # The trail IS the exit signal — gate should not block it
+            elif peak_profit >= trail_start:
+                trail_level = peak_profit - trail_minus
+                if current_pnl <= trail_level:
+                    exit_reason = 'TRAIL'
                     exit_hit    = True
-                elif peak_profit >= trail_start:
-                    trail_level = peak_profit - trail_minus
-                    if current_pnl <= trail_level and trail_level >= init_profit:
-                        exit_reason = 'TRAIL'
+
+            # ── RULE 3: RSI EXIT ──────────────────────────
+            if not exit_hit:
+                rsi = calc_rsi_real(highs, lows, closes, i, rsi_len)
+                if rsi is not None:
+                    if direction == 'LONG' and rsi >= rsi_exit and current_pnl >= current_gate:
+                        exit_reason = 'RSI'
                         exit_hit    = True
-                if not exit_hit:
-                    rsi = calc_rsi_real(highs, lows, closes, i, rsi_len)
-                    if rsi is not None:
-                        if direction == 'LONG' and rsi >= rsi_exit and current_pnl >= init_profit:
-                            exit_reason = 'RSI'
-                            exit_hit    = True
-                        elif direction == 'SHORT' and rsi <= (100 - rsi_exit) and current_pnl >= init_profit:
-                            exit_reason = 'RSI'
-                            exit_hit    = True
-                if not exit_hit and current_pnl >= current_gate:
+                    elif direction == 'SHORT' and rsi <= (100 - rsi_exit) and current_pnl >= current_gate:
+                        exit_reason = 'RSI'
+                        exit_hit    = True
+
+            # ── RULE 4: DECAY EXIT ────────────────────────
+            # Only after decay_start hours, when gate reaches 0
+            if not exit_hit and dur_hours >= decay_start:
+                if current_pnl >= current_gate:
                     exit_reason = 'DECAY'
                     exit_hit    = True
 
@@ -272,8 +270,8 @@ def tune_strategy(strategy_id, symbol, direction, candle_time=None, cfg=None, br
     trail_minus_options = cfg.get('trail_minus_options', DEFAULT['trail_minus_options'])
     init_profit_options = cfg.get('init_profit_options') or [cfg.get('init_profit', 1.0)]
     rsi_exit_options    = cfg.get('rsi_exit_options')    or [cfg.get('rsi_exit', 70.0)]
+    decay_start_options = cfg.get('decay_start_options') or [cfg.get('decay_start', 0.5)]
     fixed = {
-        'decay_start': cfg.get('decay_start', DEFAULT['decay_start']),
         'decay_rate' : cfg.get('decay_rate',  DEFAULT['decay_rate']),
         'min_trades' : cfg.get('min_trades',  DEFAULT['min_trades']),
         'macd_fast'  : cfg.get('macd_fast',   DEFAULT['macd_fast']),
@@ -299,12 +297,17 @@ def tune_strategy(strategy_id, symbol, direction, candle_time=None, cfg=None, br
     best_params = None
     best_score  = -999
 
-    for init_profit, rsi_exit, rsi_len, rsi_entry, stop_loss, trail_start, trail_minus in product(
-        init_profit_options, rsi_exit_options, rsi_len_options,
+    for init_profit, rsi_exit, decay_start, rsi_len, rsi_entry, stop_loss, trail_start, trail_minus in product(
+        init_profit_options, rsi_exit_options, decay_start_options, rsi_len_options,
         rsi_entry_options, stop_loss_options, trail_start_options, trail_minus_options
     ):
+        # Skip invalid combinations where trail_minus >= trail_start
+        if trail_minus >= trail_start:
+            continue
+
         params = {
             'init_profit': init_profit, 'rsi_exit': rsi_exit,
+            'decay_start': decay_start,
             'rsi_len': rsi_len, 'rsi_entry': rsi_entry,
             'stop_loss': stop_loss, 'trail_start': trail_start,
             'trail_minus': trail_minus, **fixed

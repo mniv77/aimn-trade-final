@@ -22,76 +22,52 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 14px; min-height: 100vh; padding: 24px; }
         .mono { font-family: 'Share Tech Mono', monospace; }
-
-        /* Header */
         .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
         .header-logo  { font-family: 'Share Tech Mono', monospace; color: var(--accent2); font-size: 22px; letter-spacing: 3px; }
         .header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: white; letter-spacing: 1px; }
         .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
         .header-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 3px; }
         #default_indicator { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--green); display: none; }
-
-        /* Panels */
         .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
         .panel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-        /* Grids */
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
         .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
-
-        /* Fields */
         .field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--label); margin-bottom: 6px; }
         .field-hint  { font-size: 10px; color: var(--muted); margin-top: 4px; }
         select, input[type="text"] { width: 100%; padding: 9px 12px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 13px; outline: none; transition: border-color 0.2s; }
         select:focus, input[type="text"]:focus { border-color: var(--accent); }
         select:disabled { opacity: 0.35; cursor: not-allowed; }
-
-        /* Direction buttons */
         .dir-group { display: flex; gap: 8px; }
         .dir-btn { flex: 1; padding: 9px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-align: center; transition: all 0.2s; user-select: none; }
         .dir-btn:hover { border-color: var(--accent); color: var(--text); }
         .dir-btn.active-long  { background: #052e16; border-color: var(--green); color: var(--green); }
         .dir-btn.active-short { background: #450a0a; border-color: var(--red);   color: var(--red); }
-
-        /* Score buttons */
         .score-group { display: flex; gap: 8px; flex-wrap: wrap; }
         .score-btn { padding: 7px 14px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; user-select: none; }
         .score-btn.active { background: #1e3a5f; border-color: var(--accent2); color: var(--accent2); }
-
-        /* Run button */
         #run_btn { width: 100%; padding: 13px; background: var(--accent); border: none; border-radius: 5px; color: white; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 2px; cursor: pointer; transition: background 0.2s, transform 0.1s; text-transform: uppercase; }
         #run_btn:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); }
         #run_btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-        /* Default / Reset buttons */
         #set_default_btn { padding: 8px 18px; background: #1a3a1a; border: 1px solid var(--green); border-radius: 4px; color: var(--green); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; display: none; }
         #set_default_btn:hover { background: #052e16; }
         #reset_default_btn { padding: 8px 18px; background: #1a1500; border: 1px solid var(--gold); border-radius: 4px; color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
         #reset_default_btn:hover { background: #2a2000; }
-
-        /* Results */
         #result_box { font-family: 'Share Tech Mono', monospace; font-size: 13px; line-height: 1.8; white-space: pre-wrap; min-height: 140px; }
         .log-ok   { color: var(--green); }
         .log-err  { color: var(--red); }
         .log-info { color: var(--accent2); }
         .log-best { color: var(--gold); font-weight: bold; }
         .log-sep  { color: var(--border); }
-
-        /* Status badge */
         .status-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 3px 10px; border-radius: 3px; border: 1px solid; }
         .status-blue  { background: #1e3a5f; border-color: var(--accent2); color: var(--accent2); }
         .status-green { background: #052e16; border-color: var(--green);   color: var(--green); }
         .status-red   { background: #450a0a; border-color: var(--red);     color: var(--red); }
-
-        /* Spinner */
         .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
-    <!-- Header -->
     <div class="header">
         <div class="header-logo">AiMN</div>
         <div class="header-title">Auto Tuner</div>
@@ -103,45 +79,32 @@
         </div>
     </div>
 
-
-
-<!-- Quick Actions Panel -->
-<div class="panel" style="margin-bottom:16px;">
-    <div class="panel-title">⚡ Quick Actions</div>
-    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-
-        <!-- Run All Tuning -->
-        <button id="run_all_btn" onclick="runAllTuning()"
-            style="padding:10px 24px; background:#1d4ed8; border:none; border-radius:4px;
-                   color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700;
-                   font-size:15px; letter-spacing:1px; cursor:pointer;">
-            ▶ Run All Tuning
-        </button>
-
-        <!-- Disable Old Strategies -->
-        <button id="disable_old_btn" onclick="disableOldStrategies()"
-            style="padding:10px 24px; background:#1a0a0a; border:1px solid #ef4444;
-                   border-radius:4px; color:#ef4444; font-family:'Barlow Condensed',sans-serif;
-                   font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
-            🧹 Disable Old Strategies
-        </button>
-
-        <!-- View Tuning Runs -->
-        <a href="/tuning_runs"
-            style="padding:10px 24px; background:#1a2a4a; border:1px solid #0ea5e9;
-                   border-radius:4px; color:#0ea5e9; font-family:'Barlow Condensed',sans-serif;
-                   font-weight:700; font-size:15px; letter-spacing:1px; text-decoration:none;">
-            📋 View Tuning Runs
-        </a>
-
-        <!-- Status message -->
-        <span id="action_status" style="font-family:'Share Tech Mono',monospace;
-              font-size:12px; color:#f59e0b; display:none;"></span>
+    <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-title">⚡ Quick Actions</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <button id="run_all_btn" onclick="runAllTuning()"
+                style="padding:10px 24px; background:#1d4ed8; border:none; border-radius:4px;
+                       color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700;
+                       font-size:15px; letter-spacing:1px; cursor:pointer;">
+                ▶ Run All Tuning
+            </button>
+            <button id="disable_old_btn" onclick="disableOldStrategies()"
+                style="padding:10px 24px; background:#1a0a0a; border:1px solid #ef4444;
+                       border-radius:4px; color:#ef4444; font-family:'Barlow Condensed',sans-serif;
+                       font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
+                🧹 Disable Old Strategies
+            </button>
+            <a href="/tuning_runs"
+                style="padding:10px 24px; background:#1a2a4a; border:1px solid #0ea5e9;
+                       border-radius:4px; color:#0ea5e9; font-family:'Barlow Condensed',sans-serif;
+                       font-weight:700; font-size:15px; letter-spacing:1px; text-decoration:none;">
+                📋 View Tuning Runs
+            </a>
+            <span id="action_status" style="font-family:'Share Tech Mono',monospace;
+                  font-size:12px; color:#f59e0b; display:none;"></span>
+        </div>
     </div>
-</div>
 
-
-    <!-- ROW 1: Target -->
     <div class="panel">
         <div class="panel-title">🎯 Target</div>
         <div class="grid-4">
@@ -180,18 +143,17 @@
         </div>
     </div>
 
-    <!-- ROW 2: Entry Grid -->
     <div class="panel">
         <div class="panel-title">📈 Entry Parameters (Grid Search)</div>
         <div class="grid-3">
             <div>
                 <label class="field-label">RSI Lookback Options</label>
-                <input type="text" id="rsi_len_options" value="20,50,100,168,200">
+                <input type="text" id="rsi_len_options" value="50,100,168">
                 <div class="field-hint">Comma-separated bar values</div>
             </div>
             <div>
                 <label class="field-label">RSI Entry Threshold Options</label>
-                <input type="text" id="rsi_entry_options" value="20,30,40">
+                <input type="text" id="rsi_entry_options" value="25,35,40">
                 <div class="field-hint">Lower = more selective entry</div>
             </div>
             <div>
@@ -206,45 +168,43 @@
         </div>
     </div>
 
-    <!-- ROW 3: Exit Grid -->
     <div class="panel">
         <div class="panel-title">🛡️ Exit Parameters (Grid Search)</div>
         <div class="grid-3">
             <div>
                 <label class="field-label">Stop Loss % Options</label>
-                <input type="text" id="stop_loss_options" value="0.3,0.5,0.7,1.0">
-                <div class="field-hint">Blocked until decay starts</div>
+                <input type="text" id="stop_loss_options" value="0.3,1.0,2.0">
+                <div class="field-hint">Max loss before exit</div>
             </div>
             <div>
                 <label class="field-label">Trail Start % Options</label>
-                <input type="text" id="trail_start_options" value="1.0,2.0,3.0">
+                <input type="text" id="trail_start_options" value="0.2,0.5">
                 <div class="field-hint">Peak profit to activate trail</div>
             </div>
             <div>
                 <label class="field-label">Trail Drop % Options</label>
-                <input type="text" id="trail_minus_options" value="0.3,0.5,0.7">
+                <input type="text" id="trail_minus_options" value="0.1,0.2">
                 <div class="field-hint">Drop from peak to trigger exit</div>
             </div>
             <div>
                 <label class="field-label">RSI Exit Threshold Options</label>
-                <input type="text" id="rsi_exit_options" value="65,70,75,80">
-                <div class="field-hint">Exit when RSI reaches overbought/oversold</div>
+                <input type="text" id="rsi_exit_options" value="65,70">
+                <div class="field-hint">Exit when RSI reaches this level</div>
             </div>
         </div>
     </div>
 
-    <!-- ROW 4: Fixed Decay -->
     <div class="panel">
-        <div class="panel-title">⏱️ Profit Floor & Decay (Fixed)</div>
+        <div class="panel-title">⏱️ Profit Floor & Decay (Grid Search)</div>
         <div class="grid-4">
             <div>
-                <label class="field-label">Init Profit %</label>
-                <input type="text" id="init_profit_options" value="0.5,1.0,1.5,2.0">
-                <div class="field-hint">Minimum profit floor</div>
+                <label class="field-label">Init Profit % Options</label>
+                <input type="text" id="init_profit_options" value="0.1,0.5">
+                <div class="field-hint">Minimum profit floor options</div>
             </div>
             <div>
-                <label class="field-label">Decay Start (hours)</label>
-                <input type="text" id="decay_start" value="0.5">
+                <label class="field-label">Decay Start Options (hours)</label>
+                <input type="text" id="decay_start_options" value="0.5,1.0,2.0">
                 <div class="field-hint">Hours before floor decays</div>
             </div>
             <div>
@@ -255,7 +215,6 @@
         </div>
     </div>
 
-    <!-- ROW 5: Backtest Settings -->
     <div class="panel">
         <div class="panel-title">⚙️ Backtest Settings</div>
         <div class="grid-4">
@@ -266,7 +225,7 @@
             </div>
             <div>
                 <label class="field-label">Min Trades Required</label>
-                <input type="text" id="min_trades" value="5">
+                <input type="text" id="min_trades" value="3">
                 <div class="field-hint">Skip combos below this</div>
             </div>
             <div style="grid-column: span 2;">
@@ -281,7 +240,6 @@
         </div>
     </div>
 
-    <!-- Combo Count + Run -->
     <div class="panel">
         <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
             <div style="flex:1;">
@@ -294,7 +252,6 @@
         <button id="run_btn" disabled>▶ RUN AUTO TUNER</button>
     </div>
 
-    <!-- Results -->
     <div class="panel">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
             <div class="panel-title" style="margin-bottom:0; flex:1;">📊 Results</div>
@@ -304,34 +261,33 @@
     </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────
 let allProducts = [];
 let direction   = null;
 let scoreMetric = 'total_pnl';
 let lastResult  = null;
 
-const STORAGE_KEY = 'aimn_tuner_defaults_v2';
+const STORAGE_KEY = 'aimn_tuner_defaults_v3';
 
+// ★ UPDATED BASELINE — 128 combinations max, no timeout!
 const BASELINE = {
     timeframe          : '1hr',
-    rsi_len_options    : '20,50,100,168,200',
-    rsi_entry_options  : '20,30,40',
+    rsi_len_options    : '50,100,168',
+    rsi_entry_options  : '25,35,40',
     macd_fast          : '12',
     macd_slow          : '26',
     macd_sig           : '9',
-    stop_loss_options  : '0.3,0.5,0.7,1.0',
-    trail_start_options: '1.0,2.0,3.0',
-    trail_minus_options: '0.3,0.5,0.7',
-    rsi_exit           : '65,70,75,80',
-    init_profit        : '1.0',
-    decay_start        : '0.5',
+    stop_loss_options  : '0.3,1.0,2.0',
+    trail_start_options: '0.2,0.5',
+    trail_minus_options: '0.1,0.2',
+    rsi_exit_options   : '65,70',
+    init_profit_options: '0.1,0.5',
+    decay_start_options: '0.5,1.0,2.0',
     decay_rate         : '0.5',
     bars               : '2016',
-    min_trades         : '5',
+    min_trades         : '3',
     score_metric       : 'total_pnl',
 };
 
-// ── Element refs ───────────────────────────────────────────────
 const brokerSelect    = document.getElementById("broker_select");
 const symbolSelect    = document.getElementById("symbol_select");
 const timeframeSelect = document.getElementById("timeframe_select");
@@ -343,9 +299,11 @@ const comboEst        = document.getElementById("combo_est");
 const setDefaultBtn   = document.getElementById("set_default_btn");
 const defaultIndicator= document.getElementById("default_indicator");
 
-// ── Apply config to UI fields ──────────────────────────────────
 function applyConfig(cfg) {
-    const v = (id, key) => { document.getElementById(id).value = cfg[key] || BASELINE[key]; };
+    const v = (id, key) => {
+        const el = document.getElementById(id);
+        if (el) el.value = cfg[key] || BASELINE[key] || '';
+    };
     v("timeframe_select",    "timeframe");
     v("rsi_len_options",     "rsi_len_options");
     v("rsi_entry_options",   "rsi_entry_options");
@@ -355,24 +313,21 @@ function applyConfig(cfg) {
     v("stop_loss_options",   "stop_loss_options");
     v("trail_start_options", "trail_start_options");
     v("trail_minus_options", "trail_minus_options");
-    v("rsi_exi_optionst",    "rsi_exit_options");
-    v("init_profit",         "init_profit");
-    v("decay_start",         "decay_start");
+    v("rsi_exit_options",    "rsi_exit_options");
+    v("init_profit_options", "init_profit_options");
+    v("decay_start_options", "decay_start_options");
     v("decay_rate",          "decay_rate");
     v("bars",                "bars");
     v("min_trades",          "min_trades");
 
-    // Score metric
     scoreMetric = cfg.score_metric || BASELINE.score_metric;
     document.getElementById("score_metric").value = scoreMetric;
     document.querySelectorAll(".score-btn").forEach(b => b.classList.remove("active"));
     const activeScore = document.getElementById("score_" + scoreMetric);
     if (activeScore) activeScore.classList.add("active");
-
     updateComboCount();
 }
 
-// ── Load saved defaults ────────────────────────────────────────
 function loadSavedDefaults() {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -383,7 +338,6 @@ function loadSavedDefaults() {
     } catch(e) { console.log("No saved defaults"); }
 }
 
-// ── Set as Default ─────────────────────────────────────────────
 function setAsDefault() {
     const cfg = {
         timeframe          : document.getElementById("timeframe_select").value,
@@ -396,8 +350,8 @@ function setAsDefault() {
         trail_start_options: document.getElementById("trail_start_options").value,
         trail_minus_options: document.getElementById("trail_minus_options").value,
         rsi_exit_options   : document.getElementById("rsi_exit_options").value,
-        init_profit        : document.getElementById("init_profit_options").value,
-        decay_start        : document.getElementById("decay_start").value,
+        init_profit_options: document.getElementById("init_profit_options").value,
+        decay_start_options: document.getElementById("decay_start_options").value,
         decay_rate         : document.getElementById("decay_rate").value,
         bars               : document.getElementById("bars").value,
         min_trades         : document.getElementById("min_trades").value,
@@ -409,7 +363,6 @@ function setAsDefault() {
     setTimeout(() => { setDefaultBtn.textContent = "⭐ Set as Default"; }, 2000);
 }
 
-// ── Reset to baseline ──────────────────────────────────────────
 function resetDefaults() {
     localStorage.removeItem(STORAGE_KEY);
     applyConfig(BASELINE);
@@ -419,7 +372,6 @@ function resetDefaults() {
     setTimeout(() => { btn.textContent = "↺ Reset"; }, 2000);
 }
 
-// ── Direction ──────────────────────────────────────────────────
 function setDirection(dir) {
     direction = dir;
     document.getElementById("btn_long").className  = "dir-btn" + (dir === "LONG"  ? " active-long"  : "");
@@ -427,7 +379,6 @@ function setDirection(dir) {
     validateForm();
 }
 
-// ── Score metric ───────────────────────────────────────────────
 function setScore(metric, el) {
     scoreMetric = metric;
     document.getElementById("score_metric").value = metric;
@@ -435,45 +386,40 @@ function setScore(metric, el) {
     if (el) el.classList.add("active");
 }
 
-// ── Parse comma list ───────────────────────────────────────────
 function parseList(id) {
     return document.getElementById(id).value
         .split(",").map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
 }
 
-// ── Combo count ────────────────────────────────────────────────
 function updateComboCount() {
-const total = parseList("rsi_len_options").length *
+    const total = parseList("rsi_len_options").length *
                   parseList("rsi_entry_options").length *
                   parseList("stop_loss_options").length *
                   parseList("trail_start_options").length *
                   parseList("trail_minus_options").length *
-                  parseList("rsi_exit_options").length;    comboCount.textContent = total.toLocaleString();
+                  parseList("rsi_exit_options").length *
+                  parseList("init_profit_options").length *
+                  parseList("decay_start_options").length;
+    comboCount.textContent = total.toLocaleString();
     comboEst.textContent   = total > 0 ? `(~${Math.ceil(total * 0.03)}s estimated)` : "";
 }
 
-// ── Validate form ──────────────────────────────────────────────
 function validateForm() {
     runBtn.disabled = !(brokerSelect.value && symbolSelect.value && direction);
 }
 
-// ── Status badge ───────────────────────────────────────────────
 function setStatus(text, type) {
     statusBadge.textContent   = text;
     statusBadge.className     = `status-badge status-${type}`;
     statusBadge.style.display = "inline-block";
 }
 
-// ── Format results ─────────────────────────────────────────────
 function formatResult(data) {
     if (data.error) return `<span class="log-err">❌ Error: ${data.error}</span>`;
-    // Handle both {result:{...}} and flat structure
     const r = data.result || data || {};
     const p = data.params || {};
     if (!r || !p) return `<span class="log-err">❌ Invalid result structure</span>`;
     const sep = `<span class="log-sep">${"─".repeat(52)}</span>`;
-
-    // ✅ parseFloat ensures correct green/red comparison
     const pnlColor = Number(String(r.total_pnl).replace('%','')) >= 0 ? "log-ok" : "log-err";
     const avgColor = Number(String(r.avg_pnl).replace('%',''))   >= 0 ? "log-ok" : "log-err";
     const wrColor  = Number(String(r.winrate).replace('%',''))   >= 50 ? "log-ok" : "log-err";
@@ -491,26 +437,26 @@ function formatResult(data) {
         `<span class="log-info">Trail Start:</span> ${p.trail_start}%`,
         `<span class="log-info">Trail Drop :</span> ${p.trail_minus}%`,
         `<span class="log-info">Init Profit:</span> ${p.init_profit}%`,
+        `<span class="log-info">Decay Start:</span> ${p.decay_start}h`,
         sep,
         `<span class="log-info">Win Rate   :</span> <span class="${wrColor}">${r.winrate}%</span>`,
         `<span class="log-info">Avg PnL    :</span> <span class="${avgColor}">${r.avg_pnl}%</span>`,
         `<span class="log-info">Trades     :</span> ${r.trades}`,
         `<span class="log-info">Total PnL  :</span> <span class="${pnlColor}">${r.total_pnl}%</span>`,
         sep,
-        // ✅ NEW: Exit breakdown
         ...(r.exit_breakdown ? [
             `<span class="log-best">📊 EXIT BREAKDOWN</span>`,
             `<span class="log-info">STOP Loss  :</span> ${r.exit_breakdown.STOP} trades (${(r.exit_breakdown.STOP/r.trades*100).toFixed(1)}%)`,
-`           <span class="log-info">TRAIL Exit :</span> ${r.exit_breakdown['TRAIL']} trades (${(r.exit_breakdown['TRAIL']/r.trades*100).toFixed(1)}%)`,
+            `<span class="log-info">TRAIL Exit :</span> ${r.exit_breakdown['TRAIL']} trades (${(r.exit_breakdown['TRAIL']/r.trades*100).toFixed(1)}%)`,
             `<span class="log-info">DECAY Exit :</span> ${r.exit_breakdown['DECAY']} trades (${(r.exit_breakdown['DECAY']/r.trades*100).toFixed(1)}%)`,
-            `<span class="log-info">RSI Exit   :</span> ${r.exit_breakdown['RSI']} trades (${(r.exit_breakdown['RSI']/r.trades*100).toFixed(1)}%)`,            sep,
+            `<span class="log-info">RSI Exit   :</span> ${r.exit_breakdown['RSI']} trades (${(r.exit_breakdown['RSI']/r.trades*100).toFixed(1)}%)`,
+            sep,
         ] : []),
         `<span class="log-ok">✅ Saved to strategy_params</span>`,
         sep,
     ].join("\n");
 }
 
-// ── Load brokers/products ──────────────────────────────────────
 (async () => {
     try {
         const resp = await fetch("/get_brokers_and_symbols");
@@ -526,7 +472,6 @@ function formatResult(data) {
     loadSavedDefaults();
 })();
 
-// ── Broker → symbols ───────────────────────────────────────────
 brokerSelect.addEventListener("change", () => {
     const brokerId = brokerSelect.value;
     symbolSelect.innerHTML = '<option value="">-- Choose --</option>';
@@ -540,14 +485,14 @@ brokerSelect.addEventListener("change", () => {
 });
 symbolSelect.addEventListener("change", validateForm);
 
-// ── Live combo count ───────────────────────────────────────────
 ["rsi_len_options","rsi_entry_options","stop_loss_options",
- "trail_start_options","trail_minus_options"].forEach(id => {
-  document.getElementById(id).addEventListener("input", updateComboCount);
+ "trail_start_options","trail_minus_options","rsi_exit_options",
+ "init_profit_options","decay_start_options"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", updateComboCount);
 });
 updateComboCount();
 
-// ── Run tuner ──────────────────────────────────────────────────
 runBtn.addEventListener("click", async () => {
     const payload = {
         broker_id           : brokerSelect.value,
@@ -564,7 +509,8 @@ runBtn.addEventListener("click", async () => {
         trail_minus_options : parseList("trail_minus_options"),
         rsi_exit_options    : parseList("rsi_exit_options"),
         init_profit_options : parseList("init_profit_options"),
-        decay_rate          : parseFloat(document.getElementById("decay_rate").value)   || 0.5,
+        decay_start_options : parseList("decay_start_options"),
+        decay_rate          : parseFloat(document.getElementById("decay_rate").value)  || 0.5,
         bars                : parseInt(document.getElementById("bars").value)       || 2016,
         min_trades          : parseInt(document.getElementById("min_trades").value) || 5,
         score_metric        : scoreMetric,
@@ -583,22 +529,16 @@ runBtn.addEventListener("click", async () => {
             body   : JSON.stringify(payload),
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-        // ✅ Handle browser extension interference
         let result;
         try { result = await resp.json(); }
         catch(e) { result = JSON.parse(await resp.text()); }
-
         lastResult = result;
         resultBox.innerHTML = formatResult(result);
         setStatus("Done ✓", "green");
-
-        // ✅ Show default button after success
         if (result && !result.error) {
             setDefaultBtn.style.display    = "inline-block";
             setDefaultBtn.style.visibility = "visible";
         }
-
     } catch(e) {
         resultBox.innerHTML = `<span class="log-err">❌ Request failed: ${e.message}</span>`;
         setStatus("Failed", "red");
@@ -607,60 +547,46 @@ runBtn.addEventListener("click", async () => {
     }
 });
 
-//====================================================
-
-// ── Run All Tuning ─────────────────────────────────────────────
 async function runAllTuning() {
     const btn    = document.getElementById('run_all_btn');
     const status = document.getElementById('action_status');
-
     btn.disabled    = true;
     btn.textContent = '⟳ Starting...';
     status.style.display = 'inline';
-    status.textContent   = '⟳ Starting tuning run — this will take 5-10 minutes...';
-
+    status.textContent   = '⟳ Starting tuning run...';
     try {
         const resp = await fetch('/run_all_tuning', { method: 'POST' });
         const data = await resp.json();
-
         if (data.status === 'started') {
             btn.textContent      = '✅ Running!';
             status.textContent   = '✅ ' + data.message;
             status.style.color   = '#10b981';
-            setTimeout(() => {
-                btn.disabled    = false;
-                btn.textContent = '▶ Run All Tuning';
-            }, 5000);
+            setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Run All Tuning'; }, 5000);
         } else {
             status.textContent = '❌ ' + data.message;
             status.style.color = '#ef4444';
-            btn.disabled       = false;
-            btn.textContent    = '▶ Run All Tuning';
+            btn.disabled = false;
+            btn.textContent = '▶ Run All Tuning';
         }
     } catch(e) {
         status.textContent = '❌ Error: ' + e.message;
         status.style.color = '#ef4444';
-        btn.disabled       = false;
-        btn.textContent    = '▶ Run All Tuning';
+        btn.disabled = false;
+        btn.textContent = '▶ Run All Tuning';
     }
 }
 
-// ── Disable Old Strategies ─────────────────────────────────────
 async function disableOldStrategies() {
     const btn    = document.getElementById('disable_old_btn');
     const status = document.getElementById('action_status');
-
-    if (!confirm('Disable all strategies tuned before April 8 or with negative PnL?')) return;
-
-    btn.disabled    = true;
+    if (!confirm('Disable all strategies with negative PnL?')) return;
+    btn.disabled = true;
     btn.textContent = '⟳ Processing...';
     status.style.display = 'inline';
     status.textContent   = '⟳ Disabling old strategies...';
-
     try {
         const resp = await fetch('/disable_old_strategies', { method: 'POST' });
         const data = await resp.json();
-
         if (data.status === 'success') {
             status.textContent = '✅ ' + data.message;
             status.style.color = '#10b981';
@@ -672,12 +598,10 @@ async function disableOldStrategies() {
         status.textContent = '❌ Error: ' + e.message;
         status.style.color = '#ef4444';
     } finally {
-        btn.disabled    = false;
+        btn.disabled = false;
         btn.textContent = '🧹 Disable Old Strategies';
     }
 }
-
-
 </script>
 </body>
 </html>
