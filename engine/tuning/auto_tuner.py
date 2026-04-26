@@ -201,11 +201,13 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
 def score(result, metric='total_pnl'):
     if not result:
         return -999
+    decay_pct = result['exit_breakdown']['DECAY'] / result['trades']
+    decay_penalty = decay_pct * 15
     if metric == 'winrate':
-        return result['winrate'] + (result['total_pnl'] * 0.01)
+        return result['winrate'] + (result['total_pnl'] * 0.01) - decay_penalty
     if metric == 'avg_pnl':
-        return result['avg_pnl'] + (result['winrate'] * 0.001)
-    return result['total_pnl'] + (result['winrate'] * 0.01)
+        return result['avg_pnl'] + (result['winrate'] * 0.001) - decay_penalty
+    return result['total_pnl'] + (result['winrate'] * 0.01) - decay_penalty
 
 
 def save_best_params(strategy_id, params, result):
