@@ -57,7 +57,7 @@ GRID_CFG = {
     'trail_minus_options': [0.3, 0.5, 0.7],
     'rsi_exit_options'   : [65, 70, 75, 80],
     'init_profit_options': [0.5, 1.0, 1.5, 2.0],
-    'decay_start'        : 0.5,
+    'decay_start_options': [0.5, 1.0, 2.0],
     'decay_rate'         : 0.5,
     'min_trades'         : 5,
     'score_metric'       : 'total_pnl',

@@ -178,12 +178,12 @@
             </div>
             <div>
                 <label class="field-label">Trail Start % Options</label>
-                <input type="text" id="trail_start_options" value="0.2,0.5">
+                <input type="text" id="trail_start_options" value="1.0,1.5,2.0">
                 <div class="field-hint">Peak profit to activate trail</div>
             </div>
             <div>
                 <label class="field-label">Trail Drop % Options</label>
-                <input type="text" id="trail_minus_options" value="0.1,0.2">
+                <input type="text" id="trail_minus_options" value="0.3,0.5,0.7">
                 <div class="field-hint">Drop from peak to trigger exit</div>
             </div>
             <div>
@@ -204,7 +204,7 @@
             </div>
             <div>
                 <label class="field-label">Decay Start Options (hours)</label>
-                <input type="text" id="decay_start_options" value="0.5,1.0,2.0">
+                <input type="text" id="decay_start_options" value="2.0,3.0,4.0">
                 <div class="field-hint">Hours before floor decays</div>
             </div>
             <div>
@@ -268,7 +268,6 @@ let lastResult  = null;
 
 const STORAGE_KEY = 'aimn_tuner_defaults_v3';
 
-// ★ UPDATED BASELINE — 128 combinations max, no timeout!
 const BASELINE = {
     timeframe          : '1hr',
     rsi_len_options    : '50,100,168',
@@ -276,18 +275,17 @@ const BASELINE = {
     macd_fast          : '12',
     macd_slow          : '26',
     macd_sig           : '9',
-    stop_loss_options  : '0.3,1.0,2.0',
-    trail_start_options: '0.2,0.5',
-    trail_minus_options: '0.1,0.2',
+    stop_loss_options  : '1.5,2.0,3.0',
+    trail_start_options: '1.0,1.5,2.0',
+    trail_minus_options: '0.3,0.5,0.7',
     rsi_exit_options   : '65,70',
-    init_profit_options: '0.1,0.5',
-    decay_start_options: '0.5,1.0,2.0',
+    init_profit_options: '0.5,1.0,1.5',
+    decay_start_options: '2.0,3.0,4.0',
     decay_rate         : '0.5',
     bars               : '2016',
     min_trades         : '3',
     score_metric       : 'total_pnl',
 };
-
 const brokerSelect    = document.getElementById("broker_select");
 const symbolSelect    = document.getElementById("symbol_select");
 const timeframeSelect = document.getElementById("timeframe_select");

@@ -247,7 +247,7 @@ function selectRun(runId) {
 
     // Update active state in list
     document.querySelectorAll('.run-row').forEach(row => {
-        row.classList.toggle('active', row.onclick.toString().includes(`(${runId})`));
+        row.classList.toggle('active', parseInt(row.dataset.runId) === runId);
     });
 
     loadLog(runId);

@@ -188,15 +188,15 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
 
     if trades < min_trades:
         return None
+
     return {
-        'trades'        : trades,
+       'trades'        : trades,
         'wins'          : wins,
         'winrate'       : round(wins / trades * 100, 2),
         'avg_pnl'       : round(total_pnl / trades, 4),
         'total_pnl'     : round(total_pnl, 4),
         'exit_breakdown': exit_reasons,
     }
-
 
 def score(result, metric='total_pnl'):
     if not result:

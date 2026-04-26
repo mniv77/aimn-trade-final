@@ -819,7 +819,7 @@ def run_auto_tuner():
             'trail_minus_options': data.get('trail_minus_options', [0.3, 0.5, 0.7]),
             'rsi_exit_options'   : data.get('rsi_exit_options',    [65, 70, 75, 80]),
             'init_profit_options': data.get('init_profit_options', [0.5, 1.0, 1.5, 2.0]),
-            'decay_start'        : float(data.get('decay_start', 0.5)),
+            'decay_start_options': data.get('decay_start_options', [0.5, 1.0, 2.0]),
             'decay_rate'         : float(data.get('decay_rate',  0.5)),
             'min_trades'         : int(data.get('min_trades', 5)),
             'score_metric'       : data.get('score_metric', 'total_pnl'),
@@ -857,7 +857,7 @@ def disable_old_strategies():
         cursor.execute("""
             UPDATE strategy_params
             SET active = 0
-            WHERE (last_tuned < '2025-04-08' OR last_tuned IS NULL OR pl_pct < 0)
+            WHERE (last_tuned < DATE_SUB(NOW(), INTERVAL 7 DAY) OR last_tuned IS NULL OR pl_pct < 0)
               AND active = 1
         """)
         affected = cursor.rowcount
