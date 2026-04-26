@@ -1,10 +1,8 @@
-
 # scanner.py
-'''
+"""
 AIMn Trading System - Multi-Symbol Scanner
-Continuously scans for the best opportunity across all symbols
-'''
-
+Scans all symbols and finds the best trading opportunity
+"""
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional, Tuple
@@ -16,142 +14,118 @@ logger = logging.getLogger(__name__)
 
 
 class AIMnScanner:
-    '''
-    Scanner that finds the best trading opportunity across multiple symbols
-    '''
+    """Scanner to find the best trading opportunity across multiple symbols"""
 
     def __init__(self, symbol_params: Dict[str, Dict]):
         self.symbol_params = symbol_params
         self.default_params = {
-            'rsi_window': 100,
-            'rsi_overbought': 70,
+            'rsi_period': 14,
             'rsi_oversold': 30,
+            'rsi_overbought': 70,
             'macd_fast': 12,
             'macd_slow': 26,
             'macd_signal': 9,
-            'volume_threshold': 1.0,
+            'volume_threshold': 1.2,
             'atr_period': 14,
             'atr_ma_period': 28,
             'atr_multiplier': 1.3,
-            'obv_period': 20
+            'obv_period': 20,
         }
 
     def get_symbol_params(self, symbol: str) -> Dict:
         params = self.default_params.copy()
-        # Try exact match first
         if symbol in self.symbol_params:
             params.update(self.symbol_params[symbol])
-        # Try without slash for crypto (BTC/USD -> BTCUSD)
+        # Try without slash (BTC/USD -> BTCUSD)
         symbol_no_slash = symbol.replace('/', '')
         if symbol_no_slash in self.symbol_params:
             params.update(self.symbol_params[symbol_no_slash])
         return params
 
-    def check_buy_conditions(self, df: pd.DataFrame, params: Dict) -> Tuple[bool, float]:
-        if len(df) < 100:
-            return False, 0.0
-
+    def calculate_opportunity_score(self, df: pd.DataFrame, params: Dict, direction: str) -> float:
+        """Score 0-100: higher = better opportunity"""
+        if len(df) < 2:
+            return 0.0
         latest = df.iloc[-1]
-
-        rsi_oversold = latest['rsi_real'] <= params['rsi_oversold']
-        macd_bullish = latest['macd_bullish_cross']
-        volume_ok = latest['bullish_volume']
-        atr_ok = latest['volatility_expanding']
-
-        signal = rsi_oversold and macd_bullish and volume_ok and atr_ok
-
         score = 0.0
-        if signal:
-            rsi_score = (params['rsi_oversold'] - latest['rsi_real']) / params['rsi_oversold'] * 25
-            macd_score = min(abs(latest['macd_histogram']) * 10, 25)
-            volume_ratio = latest['volume'] / df['volume'].rolling(20).mean().iloc[-1]
-            volume_score = min((volume_ratio - 1) * 10, 25)
-            atr_ratio = latest['atr'] / latest['atr_ma']
-            atr_score = min((atr_ratio - params['atr_multiplier']) * 10, 25)
 
-            score = rsi_score + macd_score + volume_score + atr_score
-            score = max(0, min(100, score))
+        # RSI component (0-25 points)
+        rsi = latest.get('rsi_real', 50)
+        if direction == 'BUY':
+            if rsi <= params['rsi_oversold']:
+                score += (params['rsi_oversold'] - rsi) / params['rsi_oversold'] * 25
+        else:
+            if rsi >= params['rsi_overbought']:
+                score += (rsi - params['rsi_overbought']) / (100 - params['rsi_overbought']) * 25
 
-        return signal, score
+        # MACD histogram component (0-25 points)
+        hist = latest.get('macd_histogram', 0)
+        score += min(abs(hist) * 10, 25)
 
-    def check_sell_conditions(self, df: pd.DataFrame, params: Dict) -> Tuple[bool, float]:
-        if len(df) < 100:
-            return False, 0.0
+        # Volume component (0-25 points)
+        vol_mean = df['volume'].rolling(20).mean().iloc[-1]
+        volume_ratio = latest['volume'] / vol_mean if vol_mean else 1
+        score += min((volume_ratio - 1) * 10, 25)
 
-        latest = df.iloc[-1]
+        # ATR component (0-25 points)
+        atr_ma = latest.get('atr_ma', None)
+        atr = latest.get('atr', None)
+        if atr and atr_ma and atr_ma > 0:
+            atr_ratio = atr / atr_ma
+            score += min((atr_ratio - params['atr_multiplier']) * 10, 25)
 
-        rsi_overbought = latest['rsi_real'] >= params['rsi_overbought']
-        macd_bearish = latest['macd_bearish_cross']
-        volume_ok = latest['bearish_volume']
-        atr_ok = latest['volatility_expanding']
+        return max(0.0, min(100.0, score))
 
-        signal = rsi_overbought and macd_bearish and volume_ok and atr_ok
+    def scan_symbol(self, symbol: str, df: pd.DataFrame) -> Optional[Dict]:
+        """Scan a single symbol; returns opportunity dict or None"""
+        if df is None or len(df) < 50:
+            logger.debug(f"Insufficient data for {symbol}")
+            return None
 
-        score = 0.0
-        if signal:
-            rsi_score = (latest['rsi_real'] - params['rsi_overbought']) / (100 - params['rsi_overbought']) * 25
-            macd_score = min(abs(latest['macd_histogram']) * 10, 25)
-            volume_ratio = latest['volume'] / df['volume'].rolling(20).mean().iloc[-1]
-            volume_score = min((volume_ratio - 1) * 10, 25)
-            atr_ratio = latest['atr'] / latest['atr_ma']
-            atr_score = min((atr_ratio - params['atr_multiplier']) * 10, 25)
+        params = self.get_symbol_params(symbol)
+        df_ind = AIMnIndicators.calculate_all_indicators(df, params)
+        conditions = AIMnIndicators.check_entry_conditions(df_ind, params)
+        latest = df_ind.iloc[-1]
 
-            score = rsi_score + macd_score + volume_score + atr_score
-            score = max(0, min(100, score))
-
-        return signal, score
+        for direction, cond_key in [('BUY', 'buy'), ('SELL', 'sell')]:
+            if conditions.get(cond_key):
+                score = self.calculate_opportunity_score(df_ind, params, direction)
+                return {
+                    'symbol': symbol,
+                    'direction': direction,
+                    'entry_price': latest['close'],
+                    'score': score,
+                    'indicators': {
+                        'rsi_real': latest.get('rsi_real'),
+                        'macd': latest.get('macd'),
+                        'signal': latest.get('signal'),
+                        'volume_ratio': latest['volume'] / df_ind['volume'].rolling(20).mean().iloc[-1],
+                        'atr_ratio': (latest.get('atr', 0) / latest.get('atr_ma', 1)) if latest.get('atr_ma') else None,
+                    },
+                    'conditions': conditions
+                }
+        return None
 
     def scan_all_symbols(self, market_data: Dict[str, pd.DataFrame]) -> Optional[Dict]:
+        """Scan all symbols; return highest-scoring opportunity or None"""
         opportunities = []
-
         for symbol, df in market_data.items():
             try:
-                params = self.get_symbol_params(symbol)
-                df_with_indicators = AIMnIndicators.calculate_all_indicators(df, params)
-
-                buy_signal, buy_score = self.check_buy_conditions(df_with_indicators, params)
-                if buy_signal:
-                    opportunities.append({
-                        'symbol': symbol,
-                        'direction': 'BUY',
-                        'score': buy_score,
-                        'entry_price': df_with_indicators['close'].iloc[-1],
-                        'indicators': {
-                            'rsi_real': df_with_indicators['rsi_real'].iloc[-1],
-                            'macd': df_with_indicators['macd'].iloc[-1],
-                            'volume_ratio': df_with_indicators['volume'].iloc[-1] / df_with_indicators['volume'].rolling(20).mean().iloc[-1],
-                            'atr_ratio': df_with_indicators['atr'].iloc[-1] / df_with_indicators['atr_ma'].iloc[-1]
-                        }
-                    })
-
-                sell_signal, sell_score = self.check_sell_conditions(df_with_indicators, params)
-                if sell_signal:
-                    opportunities.append({
-                        'symbol': symbol,
-                        'direction': 'SELL',
-                        'score': sell_score,
-                        'entry_price': df_with_indicators['close'].iloc[-1],
-                        'indicators': {
-                            'rsi_real': df_with_indicators['rsi_real'].iloc[-1],
-                            'macd': df_with_indicators['macd'].iloc[-1],
-                            'volume_ratio': df_with_indicators['volume'].iloc[-1] / df_with_indicators['volume'].rolling(20).mean().iloc[-1],
-                            'atr_ratio': df_with_indicators['atr'].iloc[-1] / df_with_indicators['atr_ma'].iloc[-1]
-                        }
-                    })
-
+                opp = self.scan_symbol(symbol, df)
+                if opp:
+                    opportunities.append(opp)
+                    logger.debug(f"Opportunity: {symbol} {opp['direction']} score={opp['score']:.1f}")
             except Exception as e:
                 logger.error(f"Error scanning {symbol}: {e}")
-                continue
 
         if opportunities:
-            best_opportunity = max(opportunities, key=lambda x: x['score'])
-            logger.info(f"Best opportunity: {best_opportunity['symbol']} {best_opportunity['direction']} (score: {best_opportunity['score']:.1f})")
-            return best_opportunity
-
+            best = max(opportunities, key=lambda x: x['score'])
+            logger.info(f"Best: {best['symbol']} {best['direction']} score={best['score']:.1f}")
+            return best
         return None
 
     def get_signal_summary(self, market_data: Dict[str, pd.DataFrame]) -> Dict[str, Dict]:
-        """Get a summary of signals for all symbols (for dashboard/monitoring)."""
+        """Summary of all symbols for dashboard/monitoring"""
         summary = {}
         for symbol, df in market_data.items():
             if df is None or len(df) < 50:
@@ -161,16 +135,26 @@ class AIMnScanner:
                 params = self.get_symbol_params(symbol)
                 df_ind = AIMnIndicators.calculate_all_indicators(df, params)
                 latest = df_ind.iloc[-1]
-                buy_signal, buy_score = self.check_buy_conditions(df_ind, params)
-                sell_signal, sell_score = self.check_sell_conditions(df_ind, params)
+                conditions = AIMnIndicators.check_entry_conditions(df_ind, params)
+                vol_mean = df_ind['volume'].rolling(20).mean().iloc[-1]
+
+                missing_buy, missing_sell = [], []
+                if not conditions.get('rsi_buy'):   missing_buy.append('RSI')
+                if not conditions.get('macd_buy'):  missing_buy.append('MACD')
+                if not conditions.get('volume_buy'): missing_buy.append('Volume')
+                if not conditions.get('rsi_sell'):  missing_sell.append('RSI')
+                if not conditions.get('macd_sell'): missing_sell.append('MACD')
+                if not conditions.get('volume_sell'): missing_sell.append('Volume')
+
                 summary[symbol] = {
                     'status': 'ready',
                     'price': latest['close'],
-                    'rsi': latest.get('rsi_real', 50),
-                    'buy_ready': buy_signal,
-                    'sell_ready': sell_signal,
-                    'buy_score': round(buy_score, 1),
-                    'sell_score': round(sell_score, 1),
+                    'rsi': latest.get('rsi_real'),
+                    'volume_ratio': latest['volume'] / vol_mean if vol_mean else None,
+                    'buy_ready': conditions.get('buy', False),
+                    'sell_ready': conditions.get('sell', False),
+                    'missing_buy': missing_buy,
+                    'missing_sell': missing_sell,
                 }
             except Exception as e:
                 summary[symbol] = {'status': 'error', 'error': str(e)}

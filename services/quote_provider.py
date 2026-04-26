@@ -68,6 +68,24 @@ class PublicQuoteProvider(QuoteProvider):
             return s.replace("USD", "USDT")
         return s
 
+    @staticmethod
+    def _to_gemini_symbol(symbol: str) -> str:
+        """BTC/USD → btcusd, ETH/USD → ethusd"""
+        return symbol.upper().replace("/", "").replace("USDT", "USD").lower()
+
+    def _gemini_price(self, symbol: str) -> Optional[float]:
+        sym = self._to_gemini_symbol(symbol)
+        url = f"https://api.gemini.com/v1/pubticker/{sym}"
+        try:
+            r = self._session.get(url, timeout=3)
+            if r.ok:
+                j = r.json()
+                px = float(j.get("last", 0) or 0)
+                if px > 0: return px
+        except Exception:
+            return None
+        return None
+
     def _binance_price(self, symbol: str) -> Optional[float]:
         sym = self._to_binance_symbol(symbol)
         url = f"https://api.binance.com/api/v3/ticker/price?symbol={sym}"
@@ -105,6 +123,10 @@ class PublicQuoteProvider(QuoteProvider):
     def get_price(self, symbol: str, exchange: str) -> Optional[Quote]:
         now = int(time.time()*1000)
         if self._is_crypto(symbol, exchange):
+            # Try Gemini first (matches trading exchange), fallback to Binance
+            px = self._gemini_price(symbol)
+            if px and px > 0:
+                return Quote(symbol, exchange, px, now, "GEMINI")
             px = self._binance_price(symbol)
             if px and px > 0:
                 return Quote(symbol, exchange, px, now, "PUBLIC")

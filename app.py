@@ -53,7 +53,7 @@ def system_overview():
 aiml = Blueprint("aiml", __name__, template_folder="templates")
 
 @aiml.route("/")
-def aiml_home():
+def aiml_page():
     return render_or_404("aiml/home.html")
 
 @aiml.route("/manual")
@@ -318,7 +318,9 @@ def api_scanner_strategies():
             SELECT bp.local_ticker as symbol, b.name as broker,
                    sp.direction, sp.candle_time,
                    sp.rsi_entry, sp.rsi_exit, sp.stop_loss,
-                   sp.trailing_start, sp.init_profit
+                   sp.trailing_start, sp.trailing_drop, sp.init_profit,
+                   sp.decay_start, sp.decay_rate,
+                   sp.macd_fast, sp.macd_slow, sp.macd_signal
             FROM strategy_params sp
             JOIN broker_products bp ON sp.broker_product_id = bp.id
             JOIN brokers b ON bp.broker_id = b.id
@@ -385,17 +387,30 @@ def api_open_orders():
 @app.route("/api/trades/active")
 def api_trades_active():
     try:
-        trades = db_session.query(Trade).filter(Trade.pnl == None).order_by(Trade.ts.desc()).limit(20).all()
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT id, symbol, direction, entry_price, entry_time,
+                   last_price, peak_profit, status, broker_name, candle_time
+            FROM active_trades
+            WHERE status = 'OPEN'
+            ORDER BY entry_time DESC
+            LIMIT 20
+        """)
+        rows = cursor.fetchall()
+        conn.close()
         result = []
-        for t in trades:
+        for r in rows:
+            # Convert entry_time to Unix timestamp (ms) to avoid timezone issues
+            import datetime
+            entry_ms = int(r['entry_time'].timestamp() * 1000) if isinstance(r['entry_time'], datetime.datetime) else None
             result.append({
-                "id": t.id,
-                "symbol": t.symbol,
-                "side": t.side,
-                "qty": t.qty,
-                "price": t.price,
-                "broker": (t.meta or {}).get("exchange", ""),
-                "ts": str(t.ts),
+                "id": r['id'], "symbol": r['symbol'],
+                "direction": r['direction'],
+                "side": "BUY" if r['direction'] == "LONG" else "SELL",
+                "entry_price": r['entry_price'], "last_price": r['last_price'],
+                "peak_profit": r['peak_profit'], "broker": r['broker_name'],
+                "entry_time": entry_ms or str(r['entry_time']),
             })
         return jsonify(result)
     except Exception as e:
@@ -473,13 +488,14 @@ def api_scanner_snapshot():
 
     from db import get_db_connection
     from engine.tuning.candle_fetcher import fetch_candles
-    from engine.tuning.auto_tuner import calc_rsi_real
+    from engine.tuning.auto_tuner import calc_rsi_real, calc_macd_series
 
     try:
         conn, cursor = get_db_connection()
         cursor.execute("""
             SELECT bp.local_ticker as symbol, b.name as broker,
-                   sp.rsi_len, sp.candle_time, sp.pl_pct
+                   sp.rsi_len, sp.candle_time, sp.pl_pct,
+                   sp.macd_fast, sp.macd_slow, sp.macd_signal
             FROM strategy_params sp
             JOIN broker_products bp ON sp.broker_product_id = bp.id
             JOIN brokers b ON bp.broker_id = b.id
@@ -507,7 +523,7 @@ def api_scanner_snapshot():
         candle_time = row['candle_time'] or '1hr'
         is_crypto = broker.upper() in ("GEMINI", "COINBASE")
 
-        price = rsi = atr_pct = change = None
+        price = rsi = atr_pct = change = macd = None
         feed = "SIM"
         try:
             quote = _get_pub_provider().get_price(symbol, "CRYPTO") if is_crypto else provider.get_price(symbol, broker.upper())
@@ -529,12 +545,22 @@ def api_scanner_snapshot():
                 n = len(closes)
                 r_val = calc_rsi_real(highs, lows, closes, n - 1, rsi_len)
                 if r_val is not None:
-                    rsi = round(r_val, 1)
+                    rsi = round(max(0.0, min(100.0, r_val)), 1)
                 if closes[-2]:
                     change = round((closes[-1] - closes[-2]) / closes[-2] * 100, 2)
                 atr_vals = [(candles[i]['high'] - candles[i]['low']) / candles[i]['close'] * 100
                             for i in range(-min(14, n), 0)]
                 atr_pct = round(sum(atr_vals) / len(atr_vals), 2)
+                # MACD
+                try:
+                    mf = int(row.get('macd_fast') or 12)
+                    ms = int(row.get('macd_slow') or 26)
+                    mg = int(row.get('macd_signal') or 9)
+                    macd_series = calc_macd_series(closes, mf, ms, mg)
+                    if macd_series:
+                        macd = round(macd_series[-1], 4)
+                except Exception:
+                    pass
                 # Use most recent candle close as price fallback
                 if price is None and closes:
                     price = closes[-1]
@@ -543,7 +569,8 @@ def api_scanner_snapshot():
             print(f"[snapshot] {symbol}: {e}")
 
         result.append({'symbol': symbol, 'broker': broker, 'price': price,
-                       'rsi': rsi, 'atr_pct': atr_pct, 'change': change, 'feed': feed})
+                       'rsi': rsi, 'atr_pct': atr_pct, 'change': change,
+                       'macd': macd, 'feed': feed})
 
     _scanner_snapshot_cache = {'symbols': result, 'ts': int(time.time() * 1000)}
     _scanner_snapshot_ts = time.time()
@@ -563,46 +590,61 @@ def api_trade_completed():
     return jsonify({"ok": True, "ack": True, "received": payload})
 
 
-# ---- Trade open / close — stores in shared MySQL trades table ----
+# ---- Trade open / close — stores in active_trades table ----
 @app.route("/api/trade/open", methods=["POST"])
 def api_trade_open():
     try:
-        data = request.get_json(force=True, silent=True) or {}
+        data     = request.get_json(force=True, silent=True) or {}
         symbol   = (data.get("symbol") or "").upper()
-        exchange = (data.get("exchange") or data.get("broker") or "UNKNOWN").upper()
+        broker   = (data.get("exchange") or data.get("broker") or "UNKNOWN")
         side     = (data.get("side") or "BUY").upper()
         qty      = float(data.get("qty") or 1)
 
         if not symbol or side not in ("BUY", "SELL"):
             return jsonify({"ok": False, "error": "symbol and side required"}), 400
 
-        # Get a live price (fall back to 0 if unavailable)
-        base_prices = {
-            "BTCUSD": 68000, "BTC/USD": 68000,
-            "ETHUSD": 3400,  "ETH/USD": 3400,
-            "LTCUSD": 70,    "AAPL": 190, "TSLA": 240,
-        }
-        entry_price = base_prices.get(symbol, 100.0)
+        direction = "LONG" if side == "BUY" else "SHORT"
 
-        trade = Trade(
-            symbol=symbol,
-            side=side,
-            qty=qty,
-            price=entry_price,
-            meta={"exchange": exchange, "status": "open"},
-        )
-        db_session.add(trade)
-        db_session.commit()
+        try:
+            exchange = "CRYPTO" if broker.upper() in ("GEMINI", "COINBASE", "CRYPTO") else broker.upper()
+            quote = _get_provider().get_price(symbol, exchange)
+            entry_price = quote.price if quote and quote.price else float(data.get("price") or 100)
+        except Exception:
+            entry_price = float(data.get("price") or 100)
 
-        return jsonify({
-            "ok": True,
-            "trade_id": trade.id,
-            "symbol": symbol,
-            "side": side,
-            "qty": qty,
-            "entry_price": entry_price,
-            "exchange": exchange,
-        })
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+
+        # Block duplicate: same symbol already has an open trade
+        cursor.execute("SELECT id FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({"ok": False, "error": f"{symbol} already has an open trade"}), 409
+
+        bp_id = None
+        try:
+            cursor.execute("""
+                SELECT bp.id FROM broker_products bp
+                JOIN brokers b ON bp.broker_id = b.id
+                WHERE bp.local_ticker = %s AND b.name = %s LIMIT 1
+            """, (symbol, broker))
+            row = cursor.fetchone()
+            if row:
+                bp_id = row['id']
+        except Exception:
+            pass
+
+        cursor.execute("""
+            INSERT INTO active_trades
+              (broker_product_id, broker_name, symbol, direction,
+               entry_price, entry_time, last_price, status)
+            VALUES (%s, %s, %s, %s, %s, NOW(), %s, 'OPEN')
+        """, (bp_id, broker, symbol, direction, entry_price, entry_price))
+        trade_id = cursor.lastrowid
+        conn.close()
+
+        return jsonify({"ok": True, "trade_id": trade_id, "symbol": symbol,
+                        "direction": direction, "entry_price": entry_price, "broker": broker})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
@@ -610,31 +652,29 @@ def api_trade_open():
 @app.route("/api/trade/close", methods=["POST"])
 def api_trade_close():
     try:
-        data     = request.get_json(force=True, silent=True) or {}
-        symbol   = (data.get("symbol") or "").upper()
-        pnl      = float(data.get("pnl") or data.get("pnl_pct") or 0)
-        reason   = str(data.get("reason") or "")
-        trade_id = data.get("trade_id")
+        data       = request.get_json(force=True, silent=True) or {}
+        symbol     = (data.get("symbol") or "").upper()
+        pnl        = float(data.get("pnl") or data.get("pnl_pct") or 0)
+        reason     = str(data.get("reason") or "")
+        trade_id   = data.get("trade_id")
+        exit_price = data.get("exit_price") or None
 
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
         if trade_id:
-            trade = db_session.get(Trade, int(trade_id))
+            cursor.execute("""
+                UPDATE active_trades
+                SET status='CLOSED', exit_price=%s, exit_time=NOW(), exit_reason=%s
+                WHERE id=%s
+            """, (exit_price, reason, int(trade_id)))
         else:
-            # Find latest open trade for this symbol
-            trade = (
-                db_session.query(Trade)
-                .filter(Trade.symbol == symbol,
-                        Trade.meta["status"].as_string() == "open")
-                .order_by(Trade.id.desc())
-                .first()
-            )
-
-        if trade:
-            trade.pnl = pnl
-            meta = dict(trade.meta or {})
-            meta["status"] = "closed"
-            meta["reason"] = reason
-            trade.meta = meta
-            db_session.commit()
+            cursor.execute("""
+                UPDATE active_trades
+                SET status='CLOSED', exit_price=%s, exit_time=NOW(), exit_reason=%s
+                WHERE symbol=%s AND status='OPEN'
+                ORDER BY entry_time DESC LIMIT 1
+            """, (exit_price, reason, symbol))
+        conn.close()
 
         return jsonify({"ok": True, "symbol": symbol, "pnl": pnl, "reason": reason})
     except Exception as e:
@@ -779,7 +819,7 @@ def run_auto_tuner():
             'trail_minus_options': data.get('trail_minus_options', [0.3, 0.5, 0.7]),
             'rsi_exit_options'   : data.get('rsi_exit_options',    [65, 70, 75, 80]),
             'init_profit_options': data.get('init_profit_options', [0.5, 1.0, 1.5, 2.0]),
-            'decay_start'        : float(data.get('decay_start', 0.5)),
+            'decay_start_options': data.get('decay_start_options', [0.5, 1.0, 2.0]),
             'decay_rate'         : float(data.get('decay_rate',  0.5)),
             'min_trades'         : int(data.get('min_trades', 5)),
             'score_metric'       : data.get('score_metric', 'total_pnl'),
@@ -817,7 +857,7 @@ def disable_old_strategies():
         cursor.execute("""
             UPDATE strategy_params
             SET active = 0
-            WHERE (last_tuned < '2025-04-08' OR last_tuned IS NULL OR pl_pct < 0)
+            WHERE (last_tuned < DATE_SUB(NOW(), INTERVAL 7 DAY) OR last_tuned IS NULL OR pl_pct < 0)
               AND active = 1
         """)
         affected = cursor.rowcount
@@ -846,6 +886,26 @@ def api_tuning_runs():
         return jsonify(rows)
     except Exception as e:
         return jsonify([])
+
+
+@app.route("/api/tuning_runs/cleanup", methods=["POST"])
+def api_tuning_runs_cleanup():
+    """Mark any run stuck in 'running' status for >2 hours as 'failed'."""
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            UPDATE tuning_runs
+            SET status='failed', finished_at=NOW(),
+                summary=CONCAT(IFNULL(summary,''), ' [auto-cancelled: stuck]')
+            WHERE status='running'
+              AND started_at < DATE_SUB(NOW(), INTERVAL 2 HOUR)
+        """)
+        affected = cursor.rowcount
+        conn.close()
+        return jsonify({"ok": True, "cancelled": affected})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @app.route("/api/tuning_runs/<int:run_id>")

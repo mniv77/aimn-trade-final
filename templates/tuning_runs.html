@@ -140,7 +140,10 @@
 
     <!-- Run List -->
     <div class="panel">
-        <div class="panel-title">📋 Tuning History</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <div class="panel-title" style="margin:0;">📋 Tuning History</div>
+            <button onclick="cleanStuck()" style="background:#374151; color:#f97316; border:1px solid #374151; border-radius:4px; padding:4px 12px; font-size:11px; cursor:pointer; font-family:'Share Tech Mono',monospace;">🧹 Cancel Stuck</button>
+        </div>
         <div id="run_list">
             <div class="empty-state">Loading runs...</div>
         </div>
@@ -159,6 +162,18 @@
 let selectedRunId  = null;
 let autoRefreshTimer = null;
 let hasRunningRun  = false;
+
+// ── Cancel stuck runs ──────────────────────────────────────────
+async function cleanStuck() {
+    const resp = await fetch('/api/tuning_runs/cleanup', {method:'POST'});
+    const d = await resp.json();
+    if (d.ok) {
+        alert(`Cancelled ${d.cancelled} stuck run(s).`);
+        loadRuns();
+    } else {
+        alert('Error: ' + d.error);
+    }
+}
 
 // ── Load run list ──────────────────────────────────────────────
 async function loadRuns() {
@@ -232,7 +247,7 @@ function selectRun(runId) {
 
     // Update active state in list
     document.querySelectorAll('.run-row').forEach(row => {
-        row.classList.toggle('active', row.onclick.toString().includes(`(${runId})`));
+        row.classList.toggle('active', parseInt(row.dataset.runId) === runId);
     });
 
     loadLog(runId);
