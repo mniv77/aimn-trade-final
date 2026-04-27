@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AImn Strategy v2.0 | Control Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #020617; overflow: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+        #symbol-list { transition: all 0.5s ease; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans overflow-hidden">
+
+    <div class="flex h-screen w-full">
+
+        <div class="w-72 border-r border-slate-800 bg-slate-900/50 flex flex-col shrink-0">
+
+            <div class="p-4 border-b border-slate-800 bg-slate-900">
+                <div class="flex justify-between items-center mb-3">
+                    <h1 class="text-[10px] font-black tracking-widest text-blue-400 uppercase">AIMN CONTROL</h1>
+                    <span id="sync-indicator" class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1.5">
+                    <a href="/" class="bg-slate-700 text-white text-[9px] py-1 rounded text-center font-bold">🏠 HOME</a>
+                    <a href="/tuning" class="bg-blue-600 text-white text-[9px] py-1 rounded text-center font-bold">🛠️ TUNING</a>
+                    <a href="/orders" class="bg-slate-800 text-slate-300 text-[9px] py-1 rounded text-center font-bold uppercase">Orders</a>
+                    <a href="/symbols" class="bg-slate-800 text-slate-300 text-[9px] py-1 rounded text-center font-bold uppercase">Symbols</a>
+                    <a href="/add_broker" class="col-span-2 bg-slate-800 text-slate-300 text-[9px] py-1 rounded text-center font-bold uppercase">Add Broker</a>
+                </div>
+            </div>
+
+            <div class="p-2 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                <span class="text-[10px] font-black uppercase text-blue-400 tracking-tighter">Evaluation Scanner</span>
+                <span id="last-sync" class="text-[8px] font-mono text-slate-600">Syncing...</span>
+            </div>
+
+            <div id="symbol-list" class="flex-1 overflow-y-auto custom-scrollbar bg-black/20">
+                </div>
+
+            <div class="p-2 border-t border-slate-800 bg-slate-950 flex items-center justify-between">
+                <span class="text-[8px] font-bold text-slate-500 uppercase">Cycle Speed</span>
+                <div class="flex gap-1">
+                    <button onclick="setScannerSpeed(10000)" class="speed-btn text-[7px] px-1.5 py-0.5 rounded bg-slate-800">10s</button>
+                    <button onclick="setScannerSpeed(5000)" class="speed-btn text-[7px] px-1.5 py-0.5 rounded bg-blue-600">5s</button>
+                    <button onclick="setScannerSpeed(2000)" class="speed-btn text-[7px] px-1.5 py-0.5 rounded bg-slate-800">2s</button>
+                </div>
+            </div>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center p-6 bg-black/20">
+
+            <div id="row-4-inspector" class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl">
+
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 id="active-symbol" class="text-5xl font-black text-white tracking-tighter">---</h2>
+                        <p id="active-broker" class="text-[10px] text-blue-400 font-bold uppercase mt-1">Select a Symbol</p>
+                    </div>
+                    <div id="active-direction" class="px-3 py-1 rounded text-[10px] font-black uppercase bg-slate-800 text-slate-500">
+                        WAITING
+                    </div>
+                </div>
+
+                <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div id="rsi-gauge" class="h-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mt-6">
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                    <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Live RSI</p>
+                    <span id="real-time-rsi" class="text-3xl font-black text-blue-400">0.00</span>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                    <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Tuned Entry</p>
+                    <span id="target-entry" class="text-3xl font-black text-yellow-500">0.00</span>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                   <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">MACD Result</p>
+                    <span id="real-time-macd" class="text-xl font-black text-slate-300">0.0000</span>
+            </div>
+        </div>
+>
+            </div>
+
+            <p class="mt-6 text-slate-600 text-[9px] uppercase font-bold tracking-[0.4em]">Inspection Zone Active</p>
+        </div>
+        <div class="w-80 bg-slate-900/80 p-4 flex flex-col border-l border-slate-800 shrink-0">
+
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Orders</h3>
+                <span class="text-[8px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded border border-green-500/20 font-bold uppercase">Live HUD</span>
+            </div>
+
+            <div id="hud-stack-container" class="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 custom-scrollbar">
+                </div>
+        </div>
+  </div>
+
+        <script>
+// ==========================================
+// 1. GLOBAL STATE & CONFIG
+// ==========================================
+let scannerData = [];
+let currentFocusIndex = 0;
+let rotationInterval = null;
+let currentSpeed = 5000;
+
+// ==========================================
+// 2. DATA FETCH & RENDER (LEFT COLUMN)
+// ==========================================
+async function fetchData() {
+    const API_URL = 'https://meirniv.pythonanywhere.com/get_active_strategies?cb=' + Date.now();
+
+    try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        // DEBUG LOG: Press F12 to see this in your browser!
+        console.log("📡 DATA FROM SERVER:", data);
+
+        if (!data || data.length === 0) {
+            console.warn("⚠️ Server returned an EMPTY list. Check your Python script/Database.");
+            return;
+        }
+
+        scannerData = data;
+        renderScanner();
+
+        // Update the middle box with the currently focused symbol
+        if (scannerData[currentFocusIndex]) {
+            updateInspector(scannerData[currentFocusIndex]);
+        }
+    } catch (err) {
+        console.error("❌ Connection Error:", err);
+    }
+}
+
+function renderScanner() {
+    const listContainer = document.getElementById('symbol-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = '';
+
+    scannerData.forEach((item, index) => {
+        const isFocused = index === currentFocusIndex;
+        const rowId = item.symbol.replace('/', '-').toUpperCase();
+
+        // GET COLOR STATUS
+        const colorStatus = item.color_status || 'GRAY';
+        const statusLabel = item.status_label || 'UNKNOWN';
+
+        // BORDER COLOR BASED ON STATUS
+        let borderColor = 'border-slate-800';
+        let bgOpacity = 'opacity-40';
+
+        if (colorStatus === 'GREEN') {
+            borderColor = 'border-green-500';
+            bgOpacity = isFocused ? 'opacity-100' : 'opacity-70';
+        } else if (colorStatus === 'RED') {
+            borderColor = 'border-red-500';
+            bgOpacity = 'opacity-100';
+        } else if (colorStatus === 'BROWN') {
+            borderColor = 'border-yellow-700';
+            bgOpacity = 'opacity-50';
+        } else if (colorStatus === 'YELLOW') {
+            borderColor = 'border-yellow-500';
+            bgOpacity = 'opacity-40';
+        }
+
+        const line = document.createElement('div');
+        line.className = `p-3 border-b ${borderColor} border-l-4 flex justify-between items-center transition-all duration-500 ${bgOpacity} ${
+            isFocused ? 'bg-blue-900/40' : 'bg-black/20'
+        }`;
+
+        const priceVal = parseFloat(item.last_price || 0);
+
+        line.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="w-1 h-6 ${isFocused ? 'bg-blue-400 animate-pulse' : 'bg-slate-800'} rounded-full"></div>
+                <div>
+                    <div class="text-[10px] font-black ${isFocused ? 'text-white' : 'text-slate-400'}">${item.symbol}</div>
+                    <div class="text-[7px] text-slate-500 font-bold uppercase">
+                        ${item.broker_name} | ${statusLabel}
+                    </div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div id="price-${rowId}" class="text-[11px] font-mono font-bold text-blue-400">
+                    ${priceVal > 0 ? priceVal.toLocaleString() : '0.00'}
+                </div>
+                <div class="text-[7px] ${
+                    colorStatus === 'GREEN' ? 'text-green-400' :
+                    colorStatus === 'RED' ? 'text-red-400' :
+                    colorStatus === 'BROWN' ? 'text-yellow-700' :
+                    colorStatus === 'YELLOW' ? 'text-yellow-400' :
+                    'text-slate-500'
+                } uppercase font-bold tracking-widest">${colorStatus}</div>
+            </div>
+        `;
+
+        listContainer.appendChild(line);
+
+        if (isFocused) {
+            line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            updateInspector(item);
+        }
+    });
+}
+
+// ==========================================
+// 3. INSPECTOR LOGIC (MIDDLE COLUMN)
+// ==========================================
+function updateInspector(item) {
+    if (!item) return;
+
+    // 1. PULL REAL DATA FROM YOUR NEW DB COLUMNS
+    const liveRsi = parseFloat(item.rsi_real || 0);
+    const tunedEntry = parseFloat(item.rsi_entry || 0);
+    const macdVal = parseFloat(item.macd || 0);
+    const mktPrice = parseFloat(item.last_price || 0);
+
+    const brokerName = (item.broker || "GEMINI").toUpperCase();
+    const signal = item.signal || 'LONG';
+
+    // 2. UPDATE HEADER (Symbol & Broker)
+    document.getElementById('active-symbol').innerText = item.symbol;
+    document.getElementById('active-broker').innerText = brokerName;
+
+    // 3. DIRECTION BADGE
+    const dirBadge = document.getElementById('active-direction');
+    dirBadge.innerText = `${signal} SETUP`;
+    dirBadge.className = `px-4 py-2 rounded-lg text-sm font-black ${
+        signal === 'LONG' ? 'bg-green-500 text-black' : 'bg-red-500 text-white'
+    }`;
+
+    // 4. THE LIVE RSI (The "History 14" Real Units)
+    const rsiEl = document.getElementById('real-time-rsi');
+    rsiEl.innerText = liveRsi.toFixed(2);
+
+    // Logic: Pulse Green if your "Tight Tuning" target is hit
+    const rsiReady = (signal === 'LONG' ? liveRsi <= tunedEntry : liveRsi >= tunedEntry);
+    rsiEl.className = `text-6xl font-black ${rsiReady && liveRsi > 0 ? 'text-green-400 animate-pulse' : 'text-blue-400'}`;
+
+    // 5. THE MACD WITH MOMENTUM ARROW
+    const macdEl = document.getElementById('real-time-macd');
+    const arrow = macdVal > 0 ? '↑' : '↓';
+    const macdReady = (signal === 'LONG' ? macdVal > 0 : macdVal < 0);
+
+    macdEl.innerHTML = `${arrow} <span class="text-3xl">${macdVal.toFixed(4)}</span>`;
+    macdEl.className = `font-black ${macdReady ? 'text-green-500' : 'text-red-500'}`;
+
+    // 6. BOTTOM STATUS (Market Price & Tuning Specs)
+    const statusEl = document.getElementById('inspector-status');
+    statusEl.innerHTML = `
+        <div class="text-white font-mono text-lg mb-2">PRICE: $${mktPrice.toLocaleString()}</div>
+        <div class="flex justify-center gap-4 text-[10px] text-slate-500 font-bold uppercase">
+            <span>Entry Target: ${tunedEntry}</span>
+            <span>Tuning: ${item.macd_fast}/${item.macd_slow}/${item.macd_sig}</span>
+        </div>
+    `;
+}
+
+// ==========================================
+// LIVE PRICE ENGINE (WebSocket)
+// ==========================================
+function startLivePrices(data) {
+    if (priceSocket) return; // Don't open multiple connections
+
+    // Use a public price feed or your own PythonAnywhere socket
+    // For this example, we'll use a standard crypto feed
+    priceSocket = new WebSocket('wss://stream.binance.com:9443/ws');
+
+    const streams = data.map(item => `${item.symbol.replace('/', '').toLowerCase()}@ticker`);
+
+    priceSocket.onopen = () => {
+        console.log("🔌 WebSocket Connected to Price Feed");
+        priceSocket.send(JSON.stringify({
+            method: "SUBSCRIBE",
+            params: streams,
+            id: 1
+        }));
+    };
+
+    priceSocket.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (!msg.s) return; // Skip if no symbol data
+
+        const ticker = msg.s; // e.g., BTCUSDT
+        const currentPrice = parseFloat(msg.c);
+
+        // 1. Update the Left Column Price
+        // We match "BTCUSDT" back to "BTC-USD"
+        const cleanTicker = ticker.replace('USDT', '-USD');
+        const priceEl = document.getElementById(`price-${cleanTicker}`);
+
+        if (priceEl) {
+            const oldPrice = parseFloat(priceEl.innerText.replace(/,/g, '')) || 0;
+            priceEl.innerText = currentPrice.toLocaleString();
+
+            // Visual feedback: Green for up, Red for down
+            priceEl.style.color = currentPrice > oldPrice ? '#4ade80' : '#f87171';
+            setTimeout(() => priceEl.style.color = '#60a5fa', 400);
+        }
+
+        // 2. Update the Middle Column if it's the Focused Symbol
+        const focusedItem = scannerData[currentFocusIndex];
+        if (focusedItem && focusedItem.symbol.replace('/', '') === ticker.replace('USDT', 'USD')) {
+            // Update the global object with the new price
+            focusedItem.last_price = currentPrice;
+
+            // Re-run the inspector logic to check RSI/MACD against new price
+            updateInspector(focusedItem);
+        }
+    };
+
+    priceSocket.onerror = (err) => console.error("WebSocket Error:", err);
+    priceSocket.onclose = () => {
+        console.log("🔌 Socket Closed. Reconnecting...");
+        priceSocket = null;
+        setTimeout(() => startLivePrices(scannerData), 5000);
+    };
+}
+
+
+// ==========================================
+// 4. SPEED & CONTROL
+// ==========================================
+function setScannerSpeed(ms) {
+    currentSpeed = ms;
+    // Visually update buttons
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+        const isCurrent = btn.innerText.includes(ms/1000);
+        btn.className = `speed-btn text-[7px] px-1.5 py-0.5 rounded ${isCurrent ? 'bg-blue-600 text-white font-bold' : 'bg-slate-800 text-slate-400'}`;
+    });
+    startRotation();
+}
+
+function startRotation() {
+    clearInterval(rotationTimer);
+    rotationTimer = setInterval(() => {
+        if (rotationEnabled && scannerData.length > 0) {
+            let attempts = 0;
+            const maxAttempts = scannerData.length;
+
+            // Keep advancing until we find a GREEN strategy or we've checked all
+            do {
+                currentFocusIndex = (currentFocusIndex + 1) % scannerData.length;
+                attempts++;
+
+                const item = scannerData[currentFocusIndex];
+                if (!item) break;
+
+                // Check if this strategy is GREEN (ready to trade)
+                const firstActivePerBroker = getFirstActivePerBroker();
+                const status = getBrokerStatus(item, firstActivePerBroker);
+
+                if (status.color === 'green') {
+                    // Found a GREEN one - stop here
+                    break;
+                }
+
+            } while (attempts < maxAttempts);
+
+            renderScanner();
+            updateMonitor();
+        }
+    }, rotationSeconds * 1000);
+}
+
+// Helper function to calculate first active per broker
+function getFirstActivePerBroker() {
+    const firstActivePerBroker = new Map();
+    scannerData.forEach(item => {
+        const broker = item.broker_name;
+        const hasMatch = item.rsi_ready && item.macd_ready;
+        if (hasMatch && !firstActivePerBroker.has(broker)) {
+            firstActivePerBroker.set(broker, item.id);
+        }
+    });
+    return firstActivePerBroker;
+}
+
+// ==========================================
+// 5. BOOTSTRAP
+// ==========================================
+function initScanner() {
+    fetchData(); // Initial load
+
+    // Refresh the DB data every 3 seconds to make numbers "Live"
+    setInterval(fetchData, 3000);
+
+    // Start the automatic rotation of the scanner
+    startRotation();
+}
+
+initScanner();
+</script>
+</body>
+</html>

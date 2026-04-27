@@ -1,0 +1,301 @@
+<!-- templates/mobile-dash.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AiMN V3.1 - Master Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; height: 100vh; text-align: left; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Mobile-First Scanner Styling */
+        .symbol-anchor { 
+            transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; border-radius: 16px; 
+            margin-bottom: 8px; padding: 14px; background: rgba(30, 41, 59, 0.25); height: 60px; 
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .active-eval { background: #4f46e5 !important; border-color: #818cf8 !important; box-shadow: 0 0 25px rgba(79, 70, 229, 0.4); transform: scale(1.02); }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        .pipeline-step { height: 4px; border-radius: 2px; flex: 1; background: #1e293b; transition: all 0.5s ease; }
+        .step-ready { background: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+
+        .order-row { 
+            background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 12px; display: flex; align-items: center; padding: 8px 16px; gap: 12px; font-size: 10px; white-space: nowrap; height: 48px;
+        }
+        
+        /* Mobile Sidebar Drawer */
+        #mobile-scanner { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .scanner-hidden { transform: translateX(-100%); }
+        .scanner-visible { transform: translateX(0); }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <!-- MOBILE DASHBOARD HEADER -->
+    <nav class="bg-slate-950/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-[1100] shrink-0 shadow-2xl">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleScanner()" class="h-10 w-10 flex items-center justify-center bg-slate-900 border border-white/5 rounded-xl text-slate-400 active:text-indigo-400 transition-colors">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="text-sm font-black uppercase italic tracking-tighter">AiMN <span class="text-indigo-400">V3.1</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div id="sync-status" class="flex items-center gap-2">
+                <span class="h-2 w-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
+                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Live</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-row relative overflow-hidden">
+        
+        <!-- SIDEBAR SCANNER (Mobile Drawer) -->
+        <aside id="mobile-scanner" class="fixed inset-y-0 left-0 w-80 bg-slate-950/95 border-r border-slate-800 z-[1050] scanner-hidden md:relative md:transform-none md:flex md:w-72 lg:w-80 flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-white/5 bg-slate-900/60 flex justify-between items-center">
+                <h3 class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Strategy Pool</h3>
+                <span id="asset-count" class="bg-indigo-500/20 text-indigo-400 text-[10px] font-black px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="scanner-viewport" class="flex-1 overflow-y-auto p-3 custom-scrollbar scroll-smooth">
+                <div id="symbol-list-box" class="flex flex-col"></div>
+            </div>
+            <!-- Sidebar Close Button for Mobile -->
+            <button onclick="toggleScanner()" class="p-4 bg-slate-900 text-[10px] font-black uppercase text-slate-500 tracking-widest md:hidden border-t border-white/5">
+                <i class="fas fa-chevron-left mr-2"></i> Close Scanner
+            </button>
+        </aside>
+
+        <!-- MAIN HUD -->
+        <main class="flex-1 flex flex-col p-2 gap-2 overflow-hidden overflow-y-auto custom-scrollbar">
+            
+            <!-- MONITORING HUD -->
+            <div class="space-y-2">
+                <div class="bg-black/40 rounded-2xl p-5 border border-white/5 glass flex justify-between items-center shadow-xl">
+                    <div class="text-left">
+                        <div class="flex items-center gap-2">
+                            <h2 id="eval-symbol" class="text-3xl font-black text-white uppercase tracking-tighter leading-none">---</h2>
+                            <span id="eval-candle" class="text-[9px] font-black bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-lg mono">--</span>
+                        </div>
+                        <div id="eval-direction" class="text-[9px] font-black uppercase mt-2 text-indigo-500 tracking-widest opacity-80">BIAS: ---</div>
+                    </div>
+                    <div id="eval-price" class="text-3xl font-black mono text-slate-100 tracking-tighter">$0.00</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-left">
+                    <div class="bg-black/40 rounded-2xl p-4 border border-white/5 glass flex flex-col justify-between shadow-lg">
+                        <div class="flex justify-between items-center mb-1">
+                            <p class="text-[8px] text-slate-500 font-black uppercase tracking-widest">RSI Scale</p>
+                            <span id="eval-rsi-goal" class="text-[8px] font-black px-1.5 py-0.5 rounded bg-indigo-500 text-white uppercase">GOAL: --</span>
+                        </div>
+                        <div id="eval-current-rsi" class="text-3xl font-black text-indigo-400 leading-none">0.00</div>
+                    </div>
+                    <div class="bg-black/40 rounded-2xl p-4 border border-white/5 glass flex flex-col justify-between shadow-lg">
+                        <p class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Momentum</p>
+                        <div class="flex items-baseline gap-2">
+                            <div id="eval-current-macd" class="text-2xl font-black text-slate-400 mono leading-none truncate">0.00</div>
+                            <div id="macd-slope-icon" class="text-xl font-black text-indigo-400">─</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUDIT & PIPELINE -->
+            <div class="bg-slate-900/60 p-4 rounded-2xl border border-white/5 flex flex-col gap-3 shadow-xl text-left">
+                <div class="flex justify-between items-center">
+                    <div class="flex flex-col gap-1 w-24">
+                        <p class="text-[7px] font-black text-slate-500 uppercase tracking-widest">Agreement</p>
+                        <div class="flex gap-1 w-full">
+                            <div id="step-rsi" class="pipeline-step"></div>
+                            <div id="step-macd" class="pipeline-step"></div>
+                            <div id="step-exec" class="pipeline-step"></div>
+                        </div>
+                    </div>
+                    <div id="alignment-indicator" class="text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl bg-slate-800 text-slate-500 transition-all border border-white/5">WAIT</div>
+                </div>
+                <div id="condition-audit" class="text-[10px] font-black uppercase tracking-widest italic text-slate-400 border-t border-white/5 pt-3">Synthesizing Logic...</div>
+            </div>
+
+            <!-- PIPELINE LIST -->
+            <div class="flex-1 bg-black/60 rounded-3xl border border-white/5 flex flex-col overflow-hidden glass shadow-2xl p-2 min-h-[300px] text-left">
+                <div class="flex items-center justify-between p-3 border-b border-white/10">
+                    <h3 class="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <span class="h-1.5 w-1.5 bg-rose-500 rounded-full"></span> Active Pipeline
+                    </h3>
+                </div>
+                <div id="orders-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-1 p-1">
+                    <div class="flex flex-col items-center justify-center h-full opacity-20 py-10">
+                        <i class="fas fa-radar text-4xl mb-4"></i>
+                        <p class="text-[9px] font-black uppercase tracking-[0.3em]">Monitoring Signals...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MOBILE NAVIGATION DOCK -->
+    <div class="bg-slate-950 border-t border-slate-800 p-2 flex justify-around items-center shrink-0 z-[1100] md:hidden shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+        <a href="/" class="flex flex-col items-center gap-1 text-indigo-400 px-6 py-2">
+            <i class="fas fa-chart-pie text-lg"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Monitor</span>
+        </a>
+        <a href="/notes" class="flex flex-col items-center gap-1 text-slate-500 px-6 py-2">
+            <i class="fas fa-vault text-lg"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Vault</span>
+        </a>
+        <a href="/tuning" class="flex flex-col items-center gap-1 text-slate-500 px-6 py-2">
+            <i class="fas fa-sliders-h text-lg"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Tune</span>
+        </a>
+    </div>
+
+    <script>
+        const getEl = (id) => document.getElementById(id);
+        let scannerData = []; 
+        let currentFocusIndex = 0;
+        let rotationEnabled = true; 
+        let rotationTimer;
+        const matchTimestamps = new Map(); 
+        const matchPriceCache = new Map();
+
+        function toggleScanner() {
+            const sidebar = getEl('mobile-scanner');
+            sidebar.classList.toggle('scanner-hidden');
+            sidebar.classList.toggle('scanner-visible');
+        }
+
+        async function engineSync() {
+            try {
+                const res = await fetch('/get_active_strategies');
+                scannerData = await res.json();
+                getEl('asset-count').innerText = scannerData.length;
+                renderScanner(); renderOrdersLog(); updateMonitor();
+            } catch (err) {}
+        }
+
+        function renderScanner() {
+            const viewport = getEl('scanner-viewport');
+            getEl('symbol-list-box').innerHTML = scannerData.map((item, i) => `
+                <div id="scanner-row-${i}" onclick="manualSelect(${i})" class="symbol-anchor border ${i === currentFocusIndex ? 'active-eval' : 'border-white/5'} text-left">
+                    <div class="flex justify-between items-center mb-1 text-[11px] font-black text-white">
+                        <span class="truncate pr-2">${item.symbol} <span class="text-[7px] opacity-40">${item.candle_time}</span></span>
+                        <span class="${item.direction==='LONG'?'text-emerald-400':'text-rose-400'}">${item.direction}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] mono text-blue-400 font-black">
+                        <span>$${parseFloat(item.last_price || 0).toLocaleString()}</span>
+                        <span>${parseFloat(item.rsi_real || 0).toFixed(1)}%</span>
+                    </div>
+                </div>`).join('');
+            
+            const activeRow = document.getElementById(`scanner-row-${currentFocusIndex}`);
+            if (activeRow && rotationEnabled) {
+                const rowHeight = activeRow.offsetHeight + 8;
+                viewport.scrollTop = Math.max(0, (currentFocusIndex - 2) * rowHeight);
+            }
+        }
+
+        function renderOrdersLog() {
+            const container = getEl('orders-list-container');
+            let html = "";
+            scannerData.forEach(s => {
+                const rsiVal = parseFloat(s.rsi_real || 0); 
+                const rsiGoal = parseFloat(s.rsi_entry || 0); 
+                const macdVal = parseFloat(s.macd || 0);
+                const isReady = s.direction === 'LONG' ? (rsiVal <= rsiGoal && macdVal > 0) : (rsiVal >= rsiGoal && macdVal < 0);
+
+                if (isReady || s.is_running) {
+                    const current = parseFloat(s.last_price || 0);
+                    const sKey = `${s.symbol}_${s.direction}_${s.candle_time}`;
+                    if (!matchTimestamps.has(sKey)) { matchTimestamps.set(sKey, new Date()); matchPriceCache.set(sKey, current); }
+                    
+                    const entry = s.is_running ? parseFloat(s.entry_price || 0) : matchPriceCache.get(sKey);
+                    const durSecs = Math.floor((new Date() - matchTimestamps.get(sKey)) / 1000);
+                    const timerStr = new Date(Math.max(0, durSecs) * 1000).toISOString().substr(11, 8);
+                    const pnl = entry > 0 ? ((current - entry) / entry) * 100 * (s.direction === 'LONG' ? 1 : -1) : 0;
+
+                    html += `
+                    <div class="order-row ${!s.is_running ? 'pending-row' : ''}">
+                        <div class="cell cell-sm font-black text-white truncate">${s.symbol}</div>
+                        <div class="cell cell-xs font-black ${s.direction==='LONG'?'text-emerald-400':'text-rose-400'}">${s.direction}</div>
+                        <div class="cell cell-sm text-emerald-400 mono text-right">${timerStr}</div>
+                        <div class="cell cell-sm ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'} mono font-black text-right">${pnl.toFixed(1)}%</div>
+                        <div class="cell-grow text-right">
+                            <button onclick="settlePosition(${s.id}, '${s.symbol}')" class="bg-rose-600 active:bg-rose-500 text-white font-black px-4 py-2 rounded-xl text-[8px] uppercase shadow-lg">PANIC</button>
+                        </div>
+                    </div>`;
+                }
+            });
+            container.innerHTML = html || container.innerHTML;
+        }
+
+        async function settlePosition(id, sym) {
+            if(!confirm(`Confirm PANIC EXIT for ${sym}?`)) return;
+            try {
+                await fetch('/finalize_order', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ strategy_id: id }) });
+                engineSync();
+            } catch(e) {}
+        }
+
+        function updateMonitor() {
+            const item = scannerData[currentFocusIndex]; if (!item) return;
+            const rsiReady = (item.direction === 'LONG' ? item.rsi_real <= item.rsi_entry : item.rsi_real >= item.rsi_entry);
+            const macdReady = (item.direction === 'LONG' ? item.macd > 0 : item.macd < 0);
+            
+            getEl('eval-symbol').innerText = item.symbol; 
+            getEl('eval-candle').innerText = item.candle_time; 
+            getEl('eval-price').innerText = `$${parseFloat(item.last_price || 0).toLocaleString()}`;
+            getEl('eval-current-rsi').innerText = parseFloat(item.rsi_real || 0).toFixed(2);
+            getEl('eval-current-macd').innerText = parseFloat(item.macd || 0).toFixed(4);
+            getEl('eval-direction').innerText = `BIAS: ${item.direction}`;
+            
+            getEl('eval-rsi-goal').innerText = `GOAL: ${item.direction === 'LONG' ? '<' : '>'} ${parseFloat(item.rsi_entry).toFixed(1)}`;
+            getEl('condition-audit').innerHTML = `RSI: <span class="${rsiReady?'text-emerald-400':'text-amber-400'}">${rsiReady?'MATCH':'WAIT'}</span> | MACD: <span class="${macdReady?'text-emerald-400':'text-amber-400'}">${macdReady?'MATCH':'WAIT'}</span>`;
+            
+            getEl('step-rsi').className = `pipeline-step ${rsiReady ? 'step-ready' : ''}`;
+            getEl('step-macd').className = `pipeline-step ${macdReady ? 'step-ready' : ''}`;
+            getEl('step-exec').className = `pipeline-step ${(rsiReady && macdReady) ? 'step-ready' : ''}`;
+
+            const align = getEl('alignment-indicator');
+            if (rsiReady && macdReady) { 
+                align.innerText = "READY"; 
+                align.className = "text-[10px] font-black uppercase px-4 py-2 rounded-xl bg-emerald-600 text-white border border-emerald-500 animate-pulse"; 
+            } else { 
+                align.innerText = "WAIT"; 
+                align.className = "text-[10px] font-black uppercase px-4 py-2 rounded-xl bg-slate-800 text-slate-500 border border-white/5"; 
+            }
+        }
+
+        function manualSelect(i) {
+            currentFocusIndex = i; 
+            rotationEnabled = false; 
+            clearTimeout(rotationTimer); 
+            renderScanner(); 
+            updateMonitor();
+            if (window.innerWidth < 768) toggleScanner();
+        }
+
+        function startRotation() { 
+            clearTimeout(rotationTimer); 
+            rotationTimer = setTimeout(() => { 
+                if (rotationEnabled && scannerData.length > 0) { 
+                    currentFocusIndex = (currentFocusIndex + 1) % scannerData.length; 
+                    renderScanner(); updateMonitor(); 
+                } 
+                startRotation(); 
+            }, 5000); 
+        }
+
+        setInterval(engineSync, 3000); 
+        setInterval(renderOrdersLog, 1000);
+        engineSync(); startRotation();
+    </script>
+</body>
+</html>

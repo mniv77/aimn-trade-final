@@ -77,7 +77,7 @@ def executor_loop():
             monitor_and_exit_trades()
             if cycle % 30 == 0:
                 log(f"[EXEC Cycle {cycle}] Monitoring...")
-            time.sleep(1)
+            time.sleep(2)
         except Exception as e:
             log(f"❌ Executor error: {e}")
             time.sleep(5)

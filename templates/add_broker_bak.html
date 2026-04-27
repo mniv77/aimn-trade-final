@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Broker Settings | AIMn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/">🚀 AIMn</a>
+        <div class="navbar-nav">
+            <a class="nav-link" href="/">Dashboard</a>
+            <a class="nav-link" href="/symbols">Symbols</a>
+            <a class="nav-link active" href="/add_broker">Brokers</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} shadow-sm">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-5">
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">1. Register New Broker Name</h6>
+                </div>
+                <div class="card-body">
+                    <form action="/add_broker" method="post">
+                        <input type="hidden" name="action_type" value="register_broker">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="name" required placeholder="e.g. Gemini">
+                            <button type="submit" class="btn btn-secondary">Register</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">2. Update API Keys & URLs</h6>
+                </div>
+                <div class="card-body">
+                    <form action="/add_broker" method="post">
+                        <input type="hidden" name="action_type" value="update_keys">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">SELECT BROKER</label>
+                            <select class="form-select" name="broker_id" required>
+                                <option value="" selected disabled>Choose a broker...</option>
+                                {% for broker in brokers %}
+                                    <option value="{{ broker.id }}">{{ broker.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">API KEY</label>
+                            <input type="text" name="api_key" class="form-control" placeholder="Enter Key">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">API SECRET</label>
+                            <input type="password" name="api_secret" id="api_secret" class="form-control" placeholder="Enter Secret">
+                            <div class="form-check mt-1">
+                                <input class="form-check-input" type="checkbox" onclick="togglePassword()">
+                                <label class="form-check-label small text-muted">Show Secret</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">WEBSITE URL</label>
+                            <input type="url" class="form-control" name="website_url" placeholder="https://...">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">Existing Connections</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Keys Set?</th>
+                                <th class="text-end px-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for broker in brokers %}
+                            <tr>
+                                <td class="fw-bold">{{ broker.name }}</td>
+                                <td>
+                                    {% if broker.api_key %}
+                                        <span class="badge bg-success">Yes</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Empty</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end px-4">
+                                    <form action="{{ url_for('delete_broker', id=broker.id) }}" method="POST"
+                                          onsubmit="return confirm('Delete this broker and all associated data?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="3" class="text-center py-4 text-muted">No brokers defined.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    var x = document.getElementById("api_secret");
+    if (x.type === "password") { x.type = "text"; }
+    else { x.type = "password"; }
+}
+</script>
+
+</body>
+</html>

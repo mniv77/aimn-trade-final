@@ -1,0 +1,193 @@
+<!-- templates/add_broker.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broker Settings | AiMN V3.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        input, select { background-color: #0f172a; border: 1px solid #334155; color: white !important; padding: 12px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 0.85rem; }
+        input:focus, select:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; margin-bottom: 8px; display: block; letter-spacing: 0.1em; }
+        option { background-color: #0f172a; color: white; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- NAVIGATION BAR (SYNCHRONIZED LINKS) -->
+    <nav class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-[500] shadow-2xl">
+        <div class="flex items-center gap-6 text-sm font-bold uppercase tracking-tighter">
+            <a href="/" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/tuning" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-sliders-h"></i> Tuning</a>
+            <a href="/orders" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-list"></i> Orders</a>
+            <a href="/symbols" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-coins"></i> Symbols</a>
+            <a href="/add_broker" class="text-white border-b-2 border-white pb-1"><i class="fas fa-university"></i> Brokers</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="/tuning_help" class="text-[10px] font-black text-rose-400 hover:text-rose-300 uppercase tracking-widest flex items-center gap-1">
+                <i class="fas fa-question-circle"></i> Help?
+            </a>
+            <div class="h-4 w-[1px] bg-slate-800"></div>
+            <div class="text-[9px] text-slate-600 font-mono uppercase tracking-widest">v3.1 Secure</div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto w-full p-6 mt-6 flex-grow">
+        
+        <!-- SYSTEM SYNC DIAGNOSTIC BAR -->
+        <div class="mb-8 p-5 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <i class="fas fa-sync"></i> Data Pipeline Audit (Flask-to-HTML)
+                </h4>
+                <div class="text-[9px] font-black {% if brokers %}text-emerald-500{% else %}text-rose-500{% endif %} uppercase">
+                    {% if brokers %}STATUS: {{ brokers|length }} BROKERS DETECTED{% else %}STATUS: ZERO DATA RECEIVED FROM FLASK{% endif %}
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-2">
+                {% if brokers %}
+                    {% for b in brokers %}
+                        <div class="px-3 py-1.5 bg-black/40 rounded border border-emerald-500/20 text-[10px] font-mono text-emerald-400">
+                            {{ b.name }} (ID:{{ b.id }})
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-[10px] text-rose-400 font-bold uppercase italic p-3 bg-rose-500/5 rounded border border-rose-500/20 w-full text-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> The 'brokers' list is EMPTY in this template. 
+                        <br><span class="text-[8px] opacity-60 mt-1 block">Check your app.py: Are you passing 'brokers=all_brokers' in the add_broker_view route?</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="mb-6 p-4 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-bold text-xs uppercase tracking-widest flex items-center gap-3">
+                  <i class="fas fa-check-circle"></i> {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <header class="mb-10">
+            <h1 class="text-4xl font-black italic tracking-tighter uppercase text-white leading-none">Broker <span class="text-indigo-500">Settings</span></h1>
+            <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-2">Initialize exchange credentials for data flow</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-5 space-y-6">
+                <!-- 1. REGISTER NAME -->
+                <div class="glass-card rounded-2xl p-6 border border-white/5 shadow-xl">
+                    <h3 class="text-xs font-black uppercase text-slate-400 mb-6 tracking-widest flex items-center gap-2">
+                        <span class="bg-indigo-500/20 text-indigo-400 h-5 w-5 rounded flex items-center justify-center text-[10px]">1</span>
+                        Register Broker Name
+                    </h3>
+                    <form action="/add_broker" method="POST">
+                        <input type="hidden" name="action_type" value="register_broker">
+                        <div class="flex gap-2">
+                            <input type="text" name="name" placeholder="e.g. Gemini" required class="flex-1">
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 rounded-xl uppercase text-[10px] tracking-widest transition-all">Add</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. UPDATE KEYS -->
+                <div class="glass-card rounded-2xl p-6 border border-white/5 shadow-xl">
+                    <h3 class="text-xs font-black uppercase text-slate-400 mb-6 tracking-widest flex items-center gap-2">
+                        <span class="bg-blue-500/20 text-blue-400 h-5 w-5 rounded flex items-center justify-center text-[10px]">2</span>
+                        Update API Credentials
+                    </h3>
+                    <form action="/add_broker" method="POST" class="space-y-5">
+                        <input type="hidden" name="action_type" value="update_keys">
+                        <div>
+                            <label>Select Broker</label>
+                            <select name="broker_id" required>
+                                {% if brokers %}
+                                    <option value="" selected disabled>Choose from {{ brokers|length }} brokers...</option>
+                                    {% for b in brokers %}
+                                        <option value="{{ b.id }}">{{ b.name }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="" selected disabled>No brokers detected in database</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div><label>API Key</label><input type="text" name="api_key" placeholder="Paste Public Key" class="font-mono text-xs"></div>
+                        <div><label>API Secret</label><input type="password" name="api_secret" id="api_secret" placeholder="Paste Secret Key" class="font-mono text-xs"></div>
+                        <div><label>Website URL</label><input type="url" name="website_url" placeholder="https://api.gemini.com" class="text-xs"></div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl uppercase text-[11px] tracking-widest transition-all shadow-lg">
+                            Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- EXISTING LIST -->
+            <div class="lg:col-span-7">
+                <div class="glass-card rounded-2xl overflow-hidden border border-white/5 shadow-2xl h-full flex flex-col">
+                    <div class="p-6 bg-slate-900/40 border-b border-white/5 flex justify-between items-center">
+                        <h3 class="text-xs font-black uppercase text-slate-300 tracking-widest">Active System Registry</h3>
+                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Total: {{ brokers|length }}</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto custom-scrollbar">
+                        <table class="w-full text-left">
+                            <thead class="bg-black/20 text-[10px] font-black uppercase text-slate-500">
+                                <tr>
+                                    <th class="p-5">Name (ID)</th>
+                                    <th class="p-5">Security Status</th>
+                                    <th class="p-5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                {% for b in brokers %}
+                                <tr class="hover:bg-white/5 transition-colors">
+                                    <td class="p-5 font-black text-white italic tracking-tighter text-lg">{{ b.name }} <span class="text-[10px] opacity-30 not-italic ml-2">#{{ b.id }}</span></td>
+                                    <td class="p-5">
+                                        {% if b.api_key %}
+                                            <span class="text-emerald-400 text-[10px] font-black uppercase flex items-center gap-1.5">
+                                                <span class="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Active
+                                            </span>
+                                        {% else %}
+                                            <span class="text-amber-500 text-[10px] font-black uppercase opacity-40">Setup Required</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-5 text-right">
+                                        <form action="{{ url_for('delete_broker', id=b.id) }}" method="POST" onsubmit="return confirm('Security Alert: Delete this broker?');">
+                                            <button type="submit" class="text-rose-500/50 hover:text-rose-500 text-[10px] font-black uppercase transition-all">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="p-20 text-center text-slate-500 italic uppercase font-black text-[10px] tracking-widest opacity-20">
+                                        Waiting for Database Refresh...
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            var x = document.getElementById("api_secret");
+            x.type = (x.type === "password") ? "text" : "password";
+        }
+    </script>
+</body>
+</html>

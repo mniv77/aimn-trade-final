@@ -1,0 +1,229 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMN V3.1 - Master Control Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; overflow: hidden; height: 100vh; text-align: left; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .symbol-anchor { transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; border-radius: 12px; margin-bottom: 6px; padding: 12px; background: rgba(30, 41, 59, 0.2); }
+        .active-eval { background: #4f46e5 !important; border-color: #818cf8 !important; box-shadow: 0 0 20px rgba(79, 70, 229, 0.4); transform: scale(1.02); z-index: 10; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        .order-row { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .frozen-exit { background: rgba(244, 63, 94, 0.1) !important; border-color: #f43f5e !important; pointer-events: none; opacity: 0.8; }
+        
+        @keyframes slide-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-entry { animation: slide-in 0.3s ease forwards; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <div id="toast-container" class="fixed top-6 right-6 z-[1000] flex flex-col gap-3"></div>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-[500] shrink-0 shadow-2xl">
+        <div class="flex items-center gap-6 text-[11px] font-bold uppercase tracking-wider text-left">
+            <a href="/" class="text-white border-b-2 border-white pb-1">Dashboard</a>
+            <a href="/tuning" class="text-gray-400 hover:text-white transition-colors">Tuning</a>
+            <a href="/orders" class="text-gray-400 hover:text-white transition-colors">Orders</a>
+            <a href="/symbols" class="text-gray-400 hover:text-white transition-colors">Symbols</a>
+        </div>
+        <div class="flex items-center gap-3 bg-slate-900 px-4 py-1.5 rounded-xl border border-white/5">
+            <button onclick="adjustSpeed(-1)" class="text-white px-1"><i class="fas fa-minus-circle"></i></button>
+            <span id="speed-label" class="text-[10px] font-black text-indigo-400 mono w-6 text-center">5s</span>
+            <button onclick="adjustSpeed(1)" class="text-white px-1"><i class="fas fa-plus-circle"></i></button>
+            <div class="h-4 w-[1px] bg-white/10 mx-1"></div>
+            <button onclick="toggleRotation()" id="rot-btn" class="text-[10px] font-black uppercase text-indigo-400">ON</button>
+        </div>
+    </nav>
+
+    <div class="flex-1 flex flex-row p-2 overflow-hidden gap-2">
+        <!-- SCANNER SIDEBAR -->
+        <aside class="w-64 lg:w-80 glass rounded-2xl flex flex-col overflow-hidden border border-white/5 shrink-0 shadow-lg bg-slate-950/40 text-left">
+            <div class="p-3 border-b border-white/5 bg-slate-900/60 shadow-inner">
+                <h3 class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Live Scanner</h3>
+                <div class="flex justify-between items-center">
+                    <span id="sync-status" class="text-[7px] font-bold text-blue-500 uppercase tracking-widest leading-none flex items-center gap-1">
+                        <span id="heartbeat" class="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse"></span> Analyzing
+                    </span>
+                    <span id="asset-count" class="bg-indigo-500/20 text-indigo-400 text-[10px] font-black px-2 py-0.5 rounded-full">0</span>
+                </div>
+            </div>
+            <div id="scanner-viewport" class="flex-1 overflow-y-auto p-2 custom-scrollbar text-left">
+                <div id="symbol-list-box" class="flex flex-col"></div>
+            </div>
+        </aside>
+
+        <!-- MAIN MONITOR -->
+        <main class="flex-1 flex flex-col gap-2 overflow-hidden text-left">
+            <!-- HUD TOP -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 shrink-0">
+                <div class="bg-black/40 rounded-xl p-4 border border-white/5 glass flex justify-between items-center">
+                    <div>
+                        <h2 id="eval-symbol" class="text-4xl font-black text-white uppercase tracking-tighter leading-none">---</h2>
+                        <div id="eval-direction" class="text-[10px] font-black uppercase mt-2 text-indigo-400">BIAS: ---</div>
+                    </div>
+                    <div class="text-right">
+                        <div id="eval-price" class="text-4xl font-black mono text-slate-100 leading-none tracking-tighter">$0.00</div>
+                    </div>
+                </div>
+                <div class="bg-black/40 rounded-xl p-4 border border-white/5 glass flex gap-6 items-center">
+                    <div class="flex-1">
+                        <p class="text-[8px] text-slate-500 font-black uppercase mb-1">RSI Score</p>
+                        <div id="eval-current-rsi" class="text-4xl font-black text-indigo-400">0.00</div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-[8px] text-slate-500 font-black uppercase mb-1">MACD Momentum</p>
+                        <div id="eval-current-macd" class="text-3xl font-black text-slate-400 mono">0.0000</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIVE EXECUTION PIPELINE -->
+            <div class="flex-1 bg-black/60 rounded-xl border border-white/5 flex flex-col overflow-hidden glass shadow-inner p-4 text-left">
+                <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+                    <h3 class="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em]">Live Execution Pipeline</h3>
+                </div>
+                <div id="orders-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-3">
+                    <div id="idle-status" class="h-full flex flex-col items-center justify-center text-center opacity-20">
+                        <p class="text-[10px] font-black uppercase tracking-[0.4em]">Monitoring Entry Signals...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const getEl = (id) => document.getElementById(id);
+        let scannerData = [];
+        let currentFocusIndex = 0;
+        let rotationEnabled = true;
+        let rotationSeconds = 5;
+        let rotationTimer;
+        const frozenExits = new Map();
+
+        async function engineSync() {
+            try {
+                const res = await fetch('/get_active_strategies');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                
+                // Success: Clear failure messages and update data
+                scannerData = data || [];
+                getEl('asset-count').innerText = scannerData.length;
+                getEl('sync-status').className = "text-[7px] font-bold text-blue-500 uppercase tracking-widest leading-none flex items-center gap-1";
+                getEl('sync-status').innerHTML = '<span id="heartbeat" class="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse"></span> Analyzing';
+                
+                renderScanner();
+                updateMonitor();
+                renderOrdersLog();
+            } catch (err) { 
+                console.error("Sync Failure:", err); 
+                getEl('sync-status').className = "text-[7px] font-bold text-rose-500 uppercase tracking-widest flex items-center gap-1";
+                getEl('sync-status').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Sync Error';
+                getEl('symbol-list-box').innerHTML = '<div class="text-[9px] text-rose-500 font-black p-4 uppercase italic">Backend Connection Failure. <br>Please Reload Flask Web App.</div>';
+            }
+        }
+
+        function renderScanner() {
+            const list = getEl('symbol-list-box');
+            if (scannerData.length === 0) {
+                list.innerHTML = '<div class="opacity-20 text-[9px] font-black uppercase tracking-widest text-center py-10 italic">No Assets Tuned.<br>Go to Tuning page.</div>';
+                return;
+            }
+            
+            list.innerHTML = scannerData.map((item, i) => `
+                <div onclick="manualSelect(${i})" class="symbol-anchor border ${i === currentFocusIndex ? 'active-eval' : 'border-white/5'}">
+                    <div class="flex justify-between items-center mb-1 text-[11px] font-black uppercase text-white">
+                        <span>${item.symbol} ${item.is_running ? '<i class="fas fa-bolt text-emerald-400"></i>' : ''}</span>
+                        <span class="${item.direction==='LONG'?'text-emerald-400':'text-rose-400'}">${item.direction}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] mono text-blue-400 font-black">
+                        <span>$${parseFloat(item.last_price || 0).toLocaleString()}</span>
+                        <span class="text-slate-500">${parseFloat(item.rsi_real || 0).toFixed(1)}%</span>
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderOrdersLog() {
+            const activeOrders = scannerData.filter(s => s.is_running);
+            const container = getEl('orders-list-container');
+            let html = "";
+
+            activeOrders.forEach(o => {
+                const entry = parseFloat(o.entry_price || 0);
+                const current = parseFloat(o.last_price || 0);
+                const pnl = entry > 0 ? ((current - entry) / entry) * 100 * (o.direction === 'LONG' ? 1 : -1) : 0;
+                
+                const entryTime = o.entry_time ? new Date(o.entry_time) : new Date();
+                const durSecs = Math.floor((new Date() - entryTime) / 1000);
+                const timerStr = new Date(Math.max(0, durSecs) * 1000).toISOString().substr(11, 8);
+
+                html += `
+                <div class="order-row p-4 flex items-center justify-between border-white/10">
+                    <div>
+                        <div class="text-[13px] font-black text-white uppercase">${o.symbol} <span class="bg-indigo-600 text-[8px] px-1 rounded ml-1">LIVE</span></div>
+                        <div class="text-[9px] font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'} mono mt-1">${pnl.toFixed(2)}% | ${timerStr}</div>
+                    </div>
+                    <button onclick="settlePosition(${o.id}, ${current}, ${pnl}, ${durSecs}, '${o.symbol}')" class="bg-rose-600 hover:bg-rose-500 text-white font-black px-4 py-2 rounded-xl text-[9px] uppercase tracking-widest shadow-lg">Panic Exit</button>
+                </div>`;
+            });
+
+            frozenExits.forEach((data, stratId) => {
+                html += `
+                <div class="order-row p-4 flex items-center justify-between border-rose-500 frozen-exit">
+                    <div>
+                        <div class="text-[13px] font-black text-rose-500 uppercase">${data.symbol} <span class="bg-rose-600 text-white text-[8px] px-1 rounded ml-1 uppercase">EXIT</span></div>
+                        <div class="text-[9px] font-bold text-slate-500 mono mt-1">${data.pnl.toFixed(2)}% | ${data.duration} (Frozen Audit)</div>
+                    </div>
+                    <div class="text-[8px] font-black text-slate-600 uppercase tracking-widest text-right">Archiving...</div>
+                </div>`;
+            });
+
+            if (html === "") { getEl('idle-status').classList.remove('hidden'); container.innerHTML = ""; container.appendChild(getEl('idle-status')); } 
+            else { getEl('idle-status').classList.add('hidden'); container.innerHTML = html; }
+        }
+
+        async function settlePosition(id, exitPrice, pnl, dur, sym) {
+            if(!confirm(`Security Protocol: Confirm Result Archiving for ${sym}?`)) return;
+            const timerStr = new Date(dur * 1000).toISOString().substr(11, 8);
+            frozenExits.set(id, { symbol: sym, price: exitPrice, pnl: pnl, duration: timerStr });
+            try {
+                await fetch('/finalize_order', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ strategy_id: id, exit_price: exitPrice, pnl_percent: pnl, duration_seconds: dur })
+                });
+                setTimeout(() => { frozenExits.delete(id); renderOrdersLog(); }, 120000);
+                engineSync();
+            } catch(e) { alert('Finalize Failure'); }
+        }
+
+        function updateMonitor() {
+            const item = scannerData[currentFocusIndex];
+            if (!item) return;
+            getEl('eval-symbol').innerText = item.symbol;
+            getEl('eval-price').innerText = `$${parseFloat(item.last_price || 0).toLocaleString()}`;
+            getEl('eval-direction').innerText = `BIAS: ${item.direction}`;
+            getEl('eval-current-rsi').innerText = parseFloat(item.rsi_real || 0).toFixed(2);
+            getEl('eval-current-macd').innerText = parseFloat(item.macd || 0).toFixed(4);
+        }
+
+        function adjustSpeed(delta) { rotationSeconds = Math.max(2, rotationSeconds + delta); getEl('speed-label').innerText = rotationSeconds + 's'; if (rotationEnabled) startRotation(); }
+        function toggleRotation() { rotationEnabled = !rotationEnabled; getEl('rot-btn').innerText = rotationEnabled ? "ON" : "OFF"; if (rotationEnabled) startRotation(); else clearInterval(rotationTimer); }
+        function startRotation() { clearInterval(rotationTimer); rotationTimer = setInterval(() => { if (rotationEnabled && scannerData.length > 0) { currentFocusIndex = (currentFocusIndex + 1) % scannerData.length; updateMonitor(); renderScanner(); } }, rotationSeconds * 1000); }
+        window.manualSelect = (i) => { currentFocusIndex = i; rotationEnabled = false; getEl('rot-btn').innerText = "OFF"; clearInterval(rotationTimer); updateMonitor(); renderScanner(); };
+
+        setInterval(engineSync, 3000);
+        engineSync(); startRotation();
+    </script>
+</body>
+</html>

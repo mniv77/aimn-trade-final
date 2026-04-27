@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Trade History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #111; color: #e5e5e5; font-family: 'Segoe UI', sans-serif; font-size: 14px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Reports Grid */
+        .reports-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
+        .report-card { background: #1e1e1e; border: 1px solid #333; border-radius: 6px; padding: 15px; }
+        .report-title { color: #fbbf24; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        .report-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 3px 0; }
+
+        /* Table */
+        .table-wrap { overflow-x: auto; background: #1e1e1e; border: 1px solid #333; border-radius: 6px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th { background: #262626; color: #aaa; text-align: left; padding: 10px; font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 8px 10px; border-bottom: 1px solid #2a2a2a; }
+        tr:hover { background: #2d2d2d; }
+
+        .pos { color: #4ade80; }
+        .neg { color: #f87171; }
+        .badge { padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+        .badge-buy { background: #064e3b; color: #6ee7b7; }
+        .badge-sell { background: #7f1d1d; color: #fca5a5; }
+
+        /* Buttons & Inputs */
+        .btn { padding: 6px 12px; background: #333; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; border: 1px solid #444; }
+        .btn:hover { background: #444; }
+        .btn-refresh { background: #2563eb; border-color: #1e40af; }
+        .btn-refresh:hover { background: #1d4ed8; }
+
+        .input-id { background: #222; border: 1px solid #444; color: white; padding: 5px 10px; border-radius: 4px; width: 80px; font-family: monospace; }
+        .filter-form { display: flex; align-items: center; gap: 8px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-bold text-yellow-500 flex items-center gap-2">
+            <span>📜</span> Trade Orders
+        </h1>
+
+        <div class="flex items-center gap-2">
+            <form action="{{ url_for('orders') }}" method="get" class="filter-form">
+                <input type="number" name="start_id" placeholder="ID #" class="input-id"
+                       value="{{ request.args.get('start_id', '') }}">
+                <button type="submit" class="btn">Filter</button>
+            </form>
+
+            <a href="{{ url_for('orders') }}" class="btn btn-refresh">⟳ Reset</a>
+            <a href="{{ url_for('scanner') }}" class="btn">Scanner</a>
+            <a href="{{ url_for('index') }}" class="btn">Home</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Broker</th>
+                    <th>Time</th>
+                    <th>Symbol</th>
+                    <th>Side</th>
+                    <th>Duration</th>
+                    <th>Entry</th>
+                    <th>Exit</th>
+                    <th>P&L $</th>
+                    <th>P&L %</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in trades %}
+                <tr>
+                    <td class="font-mono text-yellow-600">#{{ t.id }}</td>
+                    <td class="font-bold text-gray-400">{{ t.broker }}</td>
+                    <td class="text-gray-500 text-xs">{{ t.ts }}</td>
+                    <td class="font-bold">{{ t.symbol }}</td>
+                    <td>
+                        <span class="badge {{ 'badge-buy' if t.side == 'BUY' else 'badge-sell' }}">
+                            {{ t.side }}
+                        </span>
+                    </td>
+                    <td class="text-gray-400 font-mono text-xs">{{ t.duration }}</td>
+                    <td class="font-mono">{{ "%.2f"|format(t.entry_price) }}</td>
+                    <td class="font-mono">{{ "%.2f"|format(t.exit_price) }}</td>
+                    <td class="{{ 'pos' if t.pnl_money >= 0 else 'neg' }} font-bold">
+                        ${{ "%.2f"|format(t.pnl_money) }}
+                    </td>
+                    <td class="{{ 'pos' if t.pnl_percent >= 0 else 'neg' }}">
+                        {{ "%+.2f"|format(t.pnl_percent) }}%
+                    </td>
+                    <td>
+                        <span class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">
+                            {{ t.reason }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="11" class="text-center py-10 text-gray-500">No trades match your criteria.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-lg font-bold text-gray-400 mb-2">📊 Summary Reports</h2>
+    <div class="reports-grid">
+
+        <div class="report-card">
+            <div class="report-title">Sum by Broker</div>
+            {% for k, v in rep_broker.items() %}
+            <div class="report-row">
+                <span>{{ k }}</span>
+                <span class="{{ 'pos' if v >= 0 else 'neg' }}">${{ "%.2f"|format(v) }}</span>
+            </div>
+            {% else %}
+            <div class="text-gray-500 italic">No data</div>
+            {% endfor %}
+        </div>
+
+        <div class="report-card">
+            <div class="report-title">Sum by Symbol</div>
+            {% for k, v in rep_symbol.items() %}
+            <div class="report-row">
+                <span>{{ k }}</span>
+                <span class="{{ 'pos' if v >= 0 else 'neg' }}">${{ "%.2f"|format(v) }}</span>
+            </div>
+            {% else %}
+            <div class="text-gray-500 italic">No data</div>
+            {% endfor %}
+        </div>
+
+        <div class="report-card">
+            <div class="report-title">Sum by Side</div>
+            {% for k, v in rep_side.items() %}
+            <div class="report-row">
+                <span>{{ k }}</span>
+                <span class="{{ 'pos' if v >= 0 else 'neg' }}">${{ "%.2f"|format(v) }}</span>
+            </div>
+            {% else %}
+            <div class="text-gray-500 italic">No data</div>
+            {% endfor %}
+        </div>
+
+        <div class="report-card flex flex-col justify-center items-center">
+            <div class="text-gray-400 uppercase text-xs">Total Net P&L</div>
+            <div class="text-3xl font-bold {{ 'pos' if total_pnl_money >= 0 else 'neg' }}">
+                ${{ "%.2f"|format(total_pnl_money) }}
+            </div>
+            <div class="text-gray-500 text-xs mt-1">{{ total_trades }} Trades Shown</div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+<script>
+    let globalData = [];
+    let currentIndex = 0;
+    let secondsCounter = 0;
+    let activeTrades = {};
+
+    // --- 1. THE DATA SYNC ---
+function updateTable(data) {
+    const tableBody = document.getElementById('signals-table-body'); // Make sure this ID exists!
+    tableBody.innerHTML = ''; // Clear the "undefined" rows
+
+    data.forEach(item => {
+        const row = document.createElement('tr');
+
+        // Use lowercase keys to match your JSON exactly
+        row.innerHTML = `
+            <td class="px-4 py-2">${item.symbol}</td>
+            <td class="px-4 py-2 ${item.signal === 'LONG' ? 'text-green-500' : 'text-red-500'} font-bold">
+                ${item.signal}
+            </td>
+            <td class="px-4 py-2">${item.time}</td>
+            <td class="px-4 py-2">$${item.price}</td>
+            <td class="px-4 py-2">
+                <span class="px-2 py-1 rounded ${item.status.includes('LIVE') ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                    ${item.status}
+                </span>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+    // --- 2. THE ONE-LINER POPUP (With Duration & Broker) ---
+    function triggerPopup(item) {
+        const key = `${item.symbol_name}-${item.broker_name}`;
+        if (activeTrades[key]) return;
+
+        // Use real price if available, otherwise use RSI so it's not 0
+        const mktPrice = parseFloat(item.live_price || item.live_rsi || 0);
+
+        activeTrades[key] = {
+            startTime: Date.now(),
+            entryPrice: mktPrice,
+            direction: item.direction.toUpperCase(),
+            isExited: false,
+            broker: item.broker_name
+        };
+
+        const hud = document.getElementById('hud-stack-container');
+        const card = document.createElement('div');
+        card.id = `alert-${key}`;
+        const isLong = item.direction.toUpperCase() === 'LONG';
+
+        card.className = `bg-slate-900 border-l-4 ${isLong ? 'border-green-500' : 'border-red-500'} p-2 rounded flex items-center justify-between gap-1 shadow-xl mb-1 w-full max-w-[325px] transition-all duration-500`;
+        card.innerHTML = `
+            <div class="flex flex-col min-w-[70px]">
+                <span class="text-[7px] text-slate-500 uppercase font-black">${item.broker_name}</span>
+                <span class="text-white text-[10px] font-bold truncate">${item.symbol_name}</span>
+            </div>
+            <div class="flex flex-col items-center min-w-[55px] border-l border-white/5 pl-1">
+                <span class="text-[7px] text-slate-500 uppercase">Mkt Price</span>
+                <span id="curr-price-${key}" class="text-blue-400 text-[10px] font-mono">${mktPrice.toFixed(2)}</span>
+            </div>
+            <div class="flex flex-col items-center min-w-[40px]">
+                <span class="text-[7px] text-slate-500 uppercase">Time</span>
+                <span id="duration-${key}" class="text-slate-300 text-[10px] font-mono">0s</span>
+            </div>
+            <div id="pnl-${key}" class="text-xs font-black w-12 text-right text-green-400">0.00%</div>
+            <div id="action-area-${key}" class="min-w-[55px] flex justify-end">
+                <button onclick="exitTrade('${key}', '${item.symbol_name}', 'PANIC')" class="bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded text-[8px] font-black uppercase">Panic</button>
+            </div>
+        `;
+        hud.prepend(card);
+    }
+
+    // --- 3. THE EXIT & FREEZE LOGIC ---
+    async function exitTrade(key, symbol, reason) {
+        const trade = activeTrades[key];
+        if (!trade || trade.isExited) return;
+
+        trade.isExited = true; // THIS FREEZES THE NUMBERS
+        const finalPrice = document.getElementById(`curr-price-${key}`).innerText;
+        const finalPnl = document.getElementById(`pnl-${key}`).innerText;
+
+        const card = document.getElementById(`alert-${key}`);
+        if (card) {
+            card.classList.add('opacity-50', 'bg-slate-950');
+            document.getElementById(`action-area-${key}`).innerHTML = `<span class="text-[7px] font-black text-slate-400 border border-slate-700 px-1 rounded uppercase">${reason}</span>`;
+        }
+
+        // Send to Database
+        fetch('/close_order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ symbol, exit_price: finalPrice, pnl: finalPnl, exit_reason: reason })
+        });
+
+        // 2-Minute Auto-Remove
+        setTimeout(() => {
+            if (card) card.remove();
+            delete activeTrades[key];
+        }, 120000);
+    }
+
+    // --- 4. THE HEARTBEAT (UPDATER) ---
+    function updateTradeLogic() {
+        for (let key in activeTrades) {
+            const trade = activeTrades[key];
+            if (trade.isExited) continue; // FREEZE CHECK
+
+            const live = globalData.find(d => `${d.symbol_name}-${d.broker_name}` === key);
+            if (live) {
+                if (live.system_exit_triggered) { exitTrade(key, live.symbol_name, "STRATEGY"); continue; }
+
+                const currentP = parseFloat(live.live_price || live.live_rsi || 0);
+                const entryP = trade.entryPrice;
+
+                document.getElementById(`curr-price-${key}`).innerText = currentP.toFixed(2);
+
+                const sec = Math.floor((Date.now() - trade.startTime) / 1000);
+                document.getElementById(`duration-${key}`).innerText = sec + "s";
+
+                let pnl = (trade.direction === 'LONG') ? ((currentP - entryP) / entryP) * 100 : ((entryP - currentP) / entryP) * 100;
+                const pnlEl = document.getElementById(`pnl-${key}`);
+                pnlEl.innerText = pnl.toFixed(2) + "%";
+                pnlEl.className = `text-xs font-black w-12 text-right ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            }
+        }
+    }
+
+    // --- 5. INITIALIZE ---
+    setInterval(() => {
+        if (globalData.length > 0) {
+            secondsCounter++;
+            if (secondsCounter % 3 === 0) {
+                currentIndex = (currentIndex + 1) % globalData.length;
+                updateInspector();
+            }
+            updateTradeLogic();
+        }
+    }, 1000);
+
+    fetchData();
+    setInterval(fetchData, 10000);
+
+    // 1. Get the data from Flask
+    const signals = {{ signals | tojson | safe }};
+    const listContainer = document.getElementById('symbol-list');
+
+    // Set the header using the first item in the list
+    if (data.length > 0) {
+        document.getElementById('header-symbol').innerText = data[0].symbol_name;
+        document.getElementById('header-broker').innerText = data[0].broker_name;
+    }
+
+    if (signals.length > 0) {
+        // Clear the "Waiting for data" message
+        listContainer.innerHTML = '';
+
+        // 2. Build the list
+        signals.forEach(sig => {
+            const card = document.createElement('div');
+            card.className = "p-4 mb-2 bg-slate-800 rounded border-l-4 " +
+                             (sig.signal === 'BUY' ? 'border-green-500' : 'border-red-500');
+
+            card.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-white font-bold">${sig.symbol}</span>
+                        <span class="text-xs ml-2 ${sig.signal === 'BUY' ? 'text-green-400' : 'text-red-400'}">${sig.signal}</span>
+                    </div>
+                    <div class="text-white font-mono">$${sig.price}</div>
+                </div>
+                <div class="text-[10px] text-slate-400">${sig.timestamp || ''}</div>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+
+// This prevents the "Uncaught ReferenceError" and lets the table load
+function updateInspector(data) {
+    // console.log("Data received for inspector:", data);
+}
+
+//=================================================================
+
+// Function to connect to Gemini WebSocket for real-time prices
+let priceSocket;
+
+function connectAllPrices(data) {
+    // 1. Close existing socket if we are reconnecting
+    if (priceSocket) priceSocket.close();
+
+    // 2. Prepare symbols for Gemini (e.g., "BTCUSD", "ETHUSD")
+    // Note: Gemini symbols are lowercase and have no slash
+    const geminiSymbols = data
+        .map(item => item.symbol.replace('/', '').toLowerCase())
+        .join(',');
+
+    // 3. Connect to Gemini Multi-Market stream
+    const url = `wss://api.gemini.com/v1/multimarketdata?symbols=${geminiSymbols}&heartbeat=true`;
+    priceSocket = new WebSocket(url);
+
+    priceSocket.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+
+        if (response.type === 'update' && response.events) {
+            response.events.forEach(e => {
+                if (e.type === 'change' || e.type === 'trade') {
+                    // Normalize symbol back to BTC/USD format to find it in the UI
+                    const formattedSymbol = formatToDisplaySymbol(e.symbol);
+                    updatePriceInUI(formattedSymbol, e.price);
+                }
+            });
+        }
+    };
+
+    priceSocket.onclose = () => {
+        console.log("Socket closed. Reconnecting in 5s...");
+        setTimeout(() => connectAllPrices(data), 5000);
+    };
+}
+
+// Simple helper to match "btcusd" from API to "BTC/USD" in your list
+function formatToDisplaySymbol(apiSymbol) {
+    const s = apiSymbol.toUpperCase();
+    if (s.includes('USD')) return s.replace('USD', '/USD');
+    return s;
+}
+
+//===================================================================
+
+
+
+
+
+
+
+
+
+
+// 1. Global variable to keep the connection alive
+
+async function fetchData() {
+    try {
+        const res = await fetch('/get_active_strategies');
+        const data = await res.json();
+        const symbolList = document.getElementById('symbol-list');
+        if (!symbolList || data.length === 0) return;
+
+        symbolList.innerHTML = '';
+
+        data.forEach(item => {
+            const safeId = item.symbol.replace('/', '-');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = "flex items-center justify-between p-3 border-b border-slate-800 hover:bg-slate-900 transition";
+
+            itemDiv.innerHTML = `
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">${item.symbol}</span>
+                    <span id="price-${safeId}" class="text-xl font-mono text-white leading-none tracking-tighter">---</span>
+                </div>
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-600 mb-1">${item.time}</div>
+                    <span class="px-3 py-0.5 rounded text-xs font-black ${item.signal === 'LONG' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                        ${item.signal}
+                    </span>
+                </div>
+            `;
+            symbolList.appendChild(itemDiv);
+        });
+
+        if (!priceSocket) startLivePrices(data);
+    } catch (err) { console.error("Error:", err); }
+}
+
+function startLivePrices(data) {
+    const symbols = data.map(d => d.symbol.replace('/', '').toLowerCase()).join(',');
+    priceSocket = new WebSocket(`wss://api.gemini.com/v1/multimarketdata?symbols=${symbols}`);
+
+    priceSocket.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'update' && msg.events) {
+            msg.events.forEach(e => {
+                if (e.price) {
+                    const ticker = e.symbol.toUpperCase().replace('USD', '-USD');
+                    const el = document.getElementById(`price-${ticker}`);
+                    if (el) el.innerText = `$${parseFloat(e.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                }
+            });
+        }
+    };
+    priceSocket.onclose = () => { priceSocket = null; };
+}
+
+fetchData();
+setInterval(fetchData, 2000);
+
+
+
+
+</script>

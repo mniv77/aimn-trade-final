@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Symbol & API Management</title>
+    <style>
+        /* DARK/NEON STYLES */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            min-height: 100vh; color: white;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; color: #00ff00; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .section-card {
+            background: rgba(255,255,255,0.05); border-radius: 15px; padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .section-title { margin-bottom: 25px; color: #00ffff; font-size: 1.3em; font-weight: bold; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #e0e0e0; font-weight: 600; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px; border: 1px solid #444;
+            border-radius: 8px; background: #222; color: white;
+        }
+
+        button {
+            padding: 12px; border: none; border-radius: 8px; font-weight: bold;
+            cursor: pointer; width: 100%; margin-top: 10px;
+        }
+        .btn-add { background: #007bff; color: white; }
+        .btn-save { background: #28a745; color: white; }
+        .btn-del { background: #dc3545; color: white; width: auto; padding: 5px 10px; font-size: 0.8em; }
+
+        .symbol-list {
+            background: #111; border-radius: 8px; padding: 10px;
+            max-height: 300px; overflow-y: auto; margin-top: 20px;
+        }
+        .symbol-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; border-bottom: 1px solid #333;
+        }
+        .exchange-badge { background: #ff6b35; padding: 2px 8px; border-radius: 10px; font-size: 0.7em; }
+
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .dot-green { background: #0f0; }
+        .dot-gray { background: #555; }
+
+        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Symbol & Broker Manager</h1>
+            <p>Connect your Brokers and Assign Symbols</p>
+        </div>
+
+        <div class="main-grid">
+
+            <div class="section-card">
+                <div class="section-title">📈 Symbol Database</div>
+                <div class="form-group">
+                    <label>Add Symbol</label>
+                    <input type="text" id="symbolInput" placeholder="BTC/USD" style="text-transform: uppercase;">
+                </div>
+                <div class="form-group">
+                    <label>Exchange</label>
+                    <select id="exchangeSelect">
+                        <option value="CRYPTO">CRYPTO (General)</option>
+                        <option value="ALPACA">ALPACA</option>
+                        <option value="BINANCE">BINANCE</option>
+                        <option value="COINBASE">COINBASE</option>
+                        <option value="IBKR">IBKR</option>
+                    </select>
+                </div>
+                <button class="btn-add" onclick="addSymbol()">➕ Add Symbol</button>
+                <div class="symbol-list" id="symbolList">Loading...</div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">🔐 Broker API Keys</div>
+
+                <div class="form-group">
+                    <label>Select Broker</label>
+                    <select id="brokerSelect">
+                        <option value="ALPACA">Alpaca Markets</option>
+                        <option value="BINANCE">Binance</option>
+                        <option value="IBKR">Interactive Brokers (Requires Login)</option>
+                        <option value="COINBASE">Coinbase</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Login ID / Username (Optional)</label>
+                    <input type="text" id="apiLogin" placeholder="For IBKR or brokers requiring User ID">
+                </div>
+
+                <div class="form-group">
+                    <label>API Key / Client ID</label>
+                    <input type="password" id="apiKey" placeholder="Paste Key Here">
+                </div>
+
+                <div class="form-group">
+                    <label>API Secret</label>
+                    <input type="password" id="apiSecret" placeholder="Paste Secret Here">
+                </div>
+
+                <div class="form-group">
+                    <label>Passphrase (Coinbase/KuCoin)</label>
+                    <input type="password" id="passphrase" placeholder="Optional">
+                </div>
+
+                <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="sandbox" style="width:20px;">
+                    <label for="sandbox" style="margin:0;">Use Sandbox / Paper Trading</label>
+                </div>
+
+                <button class="btn-save" onclick="saveBroker()">💾 Save Credentials</button>
+
+                <div id="brokerStatus" style="margin-top:20px; font-size:0.9em; color:#aaa;">
+                    </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/dashboard" style="color:#00ff00; text-decoration:none;">🏠 Return to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        // --- SYMBOL FUNCTIONS ---
+        async function loadSymbols() {
+            const list = document.getElementById('symbolList');
+            try {
+                const res = await fetch('/api/get_symbols');
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; color:#666;">No symbols found</div>';
+                    return;
+                }
+                list.innerHTML = data.map(s => `
+                    <div class="symbol-item">
+                        <div><span style="font-weight:bold; color:#0ff;">${s.symbol}</span></div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="exchange-badge">${s.exchange}</span>
+                            <button class="btn-del" onclick="deleteSymbol(${s.id})">DEL</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) { console.error(err); }
+        }
+
+        async function addSymbol() {
+            const sym = document.getElementById('symbolInput').value.trim().toUpperCase();
+            const ex = document.getElementById('exchangeSelect').value;
+            if(!sym) return alert("Enter a symbol");
+            await fetch('/api/add_symbol', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ symbol: sym, exchange: ex })
+            });
+            document.getElementById('symbolInput').value = '';
+            loadSymbols();
+        }
+
+        async function deleteSymbol(id) {
+            if(!confirm("Delete?")) return;
+            await fetch('/api/delete_symbol', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: id })
+            });
+            loadSymbols();
+        }
+
+        // --- BROKER API FUNCTIONS ---
+        async function saveBroker() {
+            const broker = document.getElementById('brokerSelect').value;
+            const login = document.getElementById('apiLogin').value;
+            const key = document.getElementById('apiKey').value;
+            const secret = document.getElementById('apiSecret').value;
+            const pass = document.getElementById('passphrase').value;
+            const sand = document.getElementById('sandbox').checked;
+
+            if(!key || !secret) return alert("API Key and Secret are required.");
+
+            const res = await fetch('/api/save_broker_config', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    broker: broker, username: login, api_key: key,
+                    api_secret: secret, passphrase: pass, sandbox: sand
+                })
+            });
+            const data = await res.json();
+            if(data.status === 'success') {
+                alert(`✅ Saved credentials for ${broker}`);
+                // Clear fields for security
+                document.getElementById('apiLogin').value = '';
+                document.getElementById('apiKey').value = '';
+                document.getElementById('apiSecret').value = '';
+                loadBrokerStatus();
+            } else {
+                alert("Error saving: " + data.msg);
+            }
+        }
+
+        async function loadBrokerStatus() {
+            const container = document.getElementById('brokerStatus');
+            const res = await fetch('/api/get_broker_status');
+            const data = await res.json();
+
+            if(data.length === 0) {
+                container.innerHTML = "No brokers configured yet.";
+                return;
+            }
+            container.innerHTML = "<strong>Configured Brokers:</strong><br>" + data.map(b =>
+                `<div style="margin-top:5px; border-left:2px solid #0f0; padding-left:8px;">
+                    <span style="color:#fff; font-weight:bold;">${b.broker_name}</span>
+                    <br><span style="font-size:0.8em; color:#888;">${b.username ? 'User: '+b.username : 'API Key Only'} | ${b.is_sandbox ? 'Sandbox' : 'Live'}</span>
+                 </div>`
+            ).join('');
+        }
+
+        // INIT
+        loadSymbols();
+        loadBrokerStatus();
+        document.getElementById('symbolInput').addEventListener('input', e => e.target.value = e.target.value.toUpperCase());
+    </script>
+</body>
+</html>

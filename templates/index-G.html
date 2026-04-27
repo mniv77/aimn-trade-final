@@ -1,0 +1,514 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMN V3.1 - Master Control Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; overflow: hidden; height: 100vh; text-align: left; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* SCANNER ANCHOR STYLES */
+        .symbol-anchor { 
+            transition: all 0.1s ease; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            cursor: pointer; 
+            border-radius: 8px; 
+            margin-bottom: 4px; 
+            padding: 10px; 
+            background: rgba(30, 41, 59, 0.1); 
+            height: 54px; /* Fixed height for reliable scroll math */
+        }
+        .active-eval { 
+            background: #4f46e5 !important; 
+            border-color: #818cf8 !important; 
+            box-shadow: 0 0 25px rgba(79, 70, 229, 0.6); 
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        .pipeline-step { height: 4px; border-radius: 2px; flex: 1; background: #1e293b; transition: all 0.5s ease; }
+        .step-active { background: #6366f1; }
+        .step-ready { background: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+
+        /* EXECUTION PIPELINE - ONE LINE RIGID LAYOUT */
+        .order-row { 
+            background: rgba(0, 0, 0, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 6px; 
+            display: flex; 
+            align-items: center; 
+            padding: 4px 12px; 
+            gap: 12px; 
+            font-size: 10px; 
+            white-space: nowrap;
+            height: 34px;
+        }
+        .pending-row { background: rgba(16, 185, 129, 0.05) !important; border-color: #10b981 !important; }
+        .frozen-exit { background: rgba(244, 63, 94, 0.1) !important; border-color: #f43f5e !important; opacity: 0.9; }
+        
+        .cell { flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; }
+        .cell-xs { width: 30px; }
+        .cell-sm { width: 50px; }
+        .cell-md { width: 80px; }
+        .cell-lg { width: 100px; }
+        .cell-grow { flex-grow: 1; min-width: 0; }
+
+        /* REINFORCED "REAL" BUTTONS */
+        .heavy-btn {
+            background-color: #4f46e5 !important;
+            color: white !important;
+            border: 2px solid #6366f1 !important;
+            width: 44px !important;
+            height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 12px !important;
+            font-weight: 900 !important;
+            font-size: 32px !important;
+            cursor: pointer !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
+            line-height: 1 !important;
+            transition: all 0.1s ease;
+            user-select: none;
+        }
+        .heavy-btn:hover { background-color: #6366f1 !important; border-color: white !important; }
+        .heavy-btn:active { transform: scale(0.9); background-color: #3730a3 !important; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <div id="toast-container" class="fixed top-6 right-6 z-[2000] flex flex-col gap-3"></div>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-[1500] shrink-0 shadow-2xl">
+        <div class="flex items-center gap-6 text-[11px] font-bold uppercase tracking-wider text-left text-left">
+            <a href="/" class="text-white border-b-2 border-white pb-1">Dashboard</a>
+            <a href="/tuning" class="text-gray-400 hover:text-white transition-colors">Tuning</a>
+        </div>
+        
+        <!-- MASTER CONTROL PANEL (FORCE VISIBILITY) -->
+        <div class="flex items-center gap-5 bg-slate-900 border border-white/10 p-2 rounded-2xl shadow-2xl shrink-0 z-[2000] text-left">
+            <div class="px-3 border-r border-white/10 text-left">
+                <span class="text-[9px] font-black text-indigo-400 mono block uppercase">Sync: 3s</span>
+            </div>
+
+            <!-- THE STARK BUTTONS -->
+            <div class="flex items-center gap-4 text-left">
+                <button type="button" onclick="adjustSpeed(-1)" class="heavy-btn">−</button>
+                <div class="min-w-[65px] text-center bg-black/50 py-1.5 rounded-lg border border-white/5">
+                    <span id="speed-label" class="text-[15px] font-black text-white mono uppercase">5s</span>
+                </div>
+                <button type="button" onclick="adjustSpeed(1)" class="heavy-btn">+</button>
+            </div>
+            
+            <div class="h-10 w-[1px] bg-white/10 mx-1 text-left"></div>
+            
+            <!-- ROTATION STATUS -->
+            <div class="flex items-center gap-3 pl-1 text-left">
+                <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Rotation</span>
+                <button onclick="toggleRotation()" id="rot-btn" class="bg-indigo-600 border border-indigo-400 px-6 py-2 rounded-xl text-[10px] font-black uppercase text-white shadow-lg transition-all active:scale-95">ON</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex-1 flex flex-row p-2 overflow-hidden gap-2 text-left">
+        <!-- SCANNER SIDEBAR -->
+        <aside class="w-64 lg:w-80 glass rounded-2xl flex flex-col overflow-hidden border border-white/5 shrink-0 shadow-lg bg-slate-950/40 text-left text-left">
+            <div class="p-3 border-b border-white/5 bg-slate-900/60 shadow-inner text-left text-left">
+                <h3 class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2 text-left">Live Strategy Pool</h3>
+                <div class="flex justify-between items-center text-left">
+                    <span class="text-[7px] font-bold text-blue-500 uppercase tracking-widest leading-none flex items-center gap-1 text-left">
+                        <span class="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse"></span> Analyzing
+                    </span>
+                    <span id="asset-count" class="bg-indigo-500/20 text-indigo-400 text-[10px] font-black px-2 py-0.5 rounded-full">0</span>
+                </div>
+            </div>
+            <!-- SCROLLABLE VIEWPORT -->
+            <div id="scanner-viewport" class="flex-1 overflow-y-auto p-2 custom-scrollbar text-left relative scroll-smooth text-left">
+                <div id="symbol-list-box" class="flex flex-col relative text-left"></div>
+            </div>
+        </aside>
+
+        <!-- MAIN MONITOR -->
+        <main class="flex-1 flex flex-col gap-2 overflow-hidden text-left text-left">
+            <!-- HUD TOP -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 shrink-0 text-left text-left">
+                <div class="bg-black/40 rounded-xl p-4 border border-white/5 glass flex justify-between items-center text-left text-left">
+                    <div class="text-left text-left">
+                        <div class="flex items-center gap-2 text-left text-left">
+                            <h2 id="eval-symbol" class="text-4xl font-black text-white uppercase tracking-tighter leading-none text-left">---</h2>
+                            <span id="eval-candle" class="text-[9px] font-black bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded mono uppercase">--</span>
+                        </div>
+                        <div id="eval-direction" class="text-[10px] font-black uppercase mt-2 text-indigo-400 tracking-widest text-left">BIAS: ---</div>
+                    </div>
+                    <div class="text-right text-left text-left text-left">
+                        <div id="eval-price" class="text-4xl font-black mono text-slate-100 leading-none tracking-tighter">$0.00</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-left text-left">
+                    <!-- RSI ANALYSIS BOX -->
+                    <div class="bg-black/40 rounded-xl p-4 border border-white/5 glass flex flex-col justify-between text-left text-left">
+                        <div class="flex justify-between items-center mb-1 text-left text-left">
+                            <p class="text-[8px] text-slate-500 font-black uppercase tracking-widest text-left text-left">Live RSI</p>
+                            <!-- RSI GOAL >< DISPLAY -->
+                            <span id="eval-rsi-goal" class="text-[10px] font-black px-1.5 py-0.5 rounded bg-indigo-500 text-white shadow-lg transition-all duration-300">GOAL: --</span>
+                        </div>
+                        <div id="eval-current-rsi" class="text-4xl font-black text-indigo-400 leading-none text-left text-left">0.00</div>
+                        <div class="flex items-center gap-2 mt-2 text-[7px] font-black text-slate-500 uppercase text-left text-left">
+                            <div class="bg-white/5 px-2 py-0.5 rounded text-left">MIN <span id="eval-rsi-min" class="text-slate-300 ml-1">0</span></div>
+                            <div class="bg-white/5 px-2 py-0.5 rounded text-left">MAX <span id="eval-rsi-max" class="text-slate-300 ml-1">0</span></div>
+                        </div>
+                    </div>
+                    <!-- MOMENTUM BOX -->
+                    <div class="bg-black/40 rounded-xl p-4 border border-white/5 glass flex flex-col justify-between text-left text-left text-left">
+                        <p class="text-[8px] text-slate-500 font-black uppercase tracking-widest text-left text-left">Momentum</p>
+                        <div id="eval-current-macd" class="text-3xl font-black text-slate-400 mono leading-none text-left text-left">0.0000</div>
+                        <div id="macd-slope-icon" class="text-xl font-black text-indigo-400 mt-1 text-left text-left text-left">─</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUDIT HUD -->
+            <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5 flex justify-between items-center shrink-0 text-left text-left text-left">
+                <div class="flex items-center gap-4 text-left text-left text-left">
+                    <div class="flex flex-col gap-1 w-32 shrink-0 text-left text-left text-left text-left">
+                        <p class="text-[7px] font-black text-slate-500 uppercase tracking-widest text-left text-left text-left text-left">Agreement Audit</p>
+                        <div class="flex gap-1 w-full text-left text-left text-left">
+                            <div id="step-rsi" class="pipeline-step"></div>
+                            <div id="step-macd" class="pipeline-step"></div>
+                            <div id="step-exec" class="pipeline-step"></div>
+                        </div>
+                    </div>
+                    <div id="condition-audit" class="text-[9px] font-black uppercase tracking-[0.1em] italic text-left text-left text-left text-left">Analyzing Engine Agreement...</div>
+                </div>
+                <div id="alignment-indicator" class="text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-lg bg-slate-800 text-slate-500 border border-white/5 transition-all text-left text-left">Wait</div>
+            </div>
+
+            <!-- LIVE EXECUTION PIPELINE (THE ORDER LOG) -->
+            <div class="flex-1 bg-black/60 rounded-xl border border-white/5 flex flex-col overflow-hidden glass shadow-inner p-2 text-left text-left text-left">
+                <div class="flex items-center justify-between mb-1 border-b border-white/10 pb-1 px-2 text-left text-left text-left text-left">
+                    <h3 class="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em] text-left">Live Execution Pipeline</h3>
+                    <span id="pipeline-count" class="text-[8px] font-black text-slate-600 uppercase tracking-widest text-left">0 Active</span>
+                </div>
+                <!-- TABLE HEADER -->
+                <div class="flex items-center px-3 mb-1 text-[7px] font-black uppercase text-slate-500 tracking-[0.2em] text-left text-left text-left">
+                    <div class="cell cell-md text-left text-left text-left">Broker</div>
+                    <div class="cell cell-md text-left text-left text-left">Symbol</div>
+                    <div class="cell cell-sm text-left text-left text-left">Side</div>
+                    <div class="cell cell-xs text-left text-left text-left">TF</div>
+                    <div class="cell cell-md text-left text-left text-left">Duration</div>
+                    <div class="cell cell-md text-left text-left text-left">Entry Price</div>
+                    <div class="cell cell-md text-left text-left text-left">Current</div>
+                    <div class="cell cell-sm text-left text-left text-left">P&L%</div>
+                    <div class="cell-grow text-right text-left text-left text-left text-left text-left">Action</div>
+                </div>
+                <div id="orders-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-0.5 text-left text-left text-left text-left text-left">
+                    <div id="idle-status" class="h-full flex flex-col items-center justify-center text-center opacity-20 text-left text-left text-left text-left text-left">
+                        <p class="text-[10px] font-black uppercase tracking-[0.4em]">Monitoring Entry Signals...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const getEl = (id) => document.getElementById(id);
+        let scannerData = [];
+        let currentFocusIndex = 0;
+        let rotationEnabled = true;
+        let rotationSeconds = 5;
+        let rotationTimer;
+        
+        const frozenExits = new Map();
+        const matchTimestamps = new Map(); 
+        const matchPriceCache = new Map();
+        const macdHistory = new Map();
+
+        async function engineSync() {
+            try {
+                const res = await fetch('/get_active_strategies');
+                if (!res.ok) throw new Error(`Critical Error: ${res.status}`);
+                const data = await res.json();
+                scannerData = data || [];
+                
+                scannerData.forEach(item => {
+                    const rsiVal = parseFloat(item.rsi_real || 0);
+                    const rsiGoal = parseFloat(item.rsi_entry || 0);
+                    const macdVal = parseFloat(item.macd || 0);
+                    const direction = item.direction;
+                    const key = `${item.symbol}_${direction}_${item.candle_time}`;
+
+                    let hist = macdHistory.get(key) || { val: macdVal, dir: '─' };
+                    let currentDir = macdVal > hist.val ? '↑' : (macdVal < hist.val ? '↓' : hist.dir);
+                    
+                    if (currentDir === '─') {
+                        if (macdVal > 0) currentDir = '↑';
+                        else if (macdVal < 0) currentDir = '↓';
+                    }
+
+                    macdHistory.set(key, { val: macdVal, dir: currentDir });
+
+                    const isBullish = currentDir === '↑' || (currentDir === '─' && macdVal > 0);
+                    const isBearish = currentDir === '↓' || (currentDir === '─' && macdVal < 0);
+                    
+                    // Match Logic (Center-Label Strategy Sync)
+                    item.rsi_ready = direction === 'LONG' ? rsiVal <= rsiGoal : rsiVal >= rsiGoal;
+                    item.macd_ready = (direction === 'LONG' && isBullish) || (direction === 'SHORT' && isBearish);
+                    item.trend_label = isBullish ? 'BULLISH' : (isBearish ? 'BEARISH' : 'STAGNANT');
+                    item.current_dir_arrow = currentDir;
+                    item.unique_key = key; 
+                });
+
+                getEl('asset-count').innerText = scannerData.length;
+                renderScanner();
+                updateMonitor();
+                renderOrdersLog();
+            } catch (err) { console.error("Sync Error", err); }
+        }
+
+        function renderScanner() {
+            const list = getEl('symbol-list-box');
+            const viewport = getEl('scanner-viewport');
+            if (!list || !viewport) return;
+
+            list.innerHTML = scannerData.map((item, i) => `
+                <div id="scanner-row-${i}" onclick="manualSelect(${i})" class="symbol-anchor border ${i === currentFocusIndex ? 'active-eval' : 'border-white/5'} text-left text-left text-left">
+                    <div class="flex justify-between items-center mb-1 text-[11px] font-black uppercase text-white text-left text-left text-left text-left">
+                        <div class="flex items-center gap-1 text-left text-left text-left text-left text-left">
+                            <span>${item.symbol}</span>
+                            <span class="text-[7px] bg-white/10 px-1 rounded mono text-slate-400">${item.candle_time}</span>
+                            <span class="text-[7px] text-indigo-400 opacity-60 ml-1 tracking-tighter font-black uppercase">${item.broker_name || 'SYNC'}</span>
+                        </div>
+                        <span class="${item.direction==='LONG'?'text-emerald-400':'text-rose-400'}">${item.direction}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] mono text-blue-400 font-black text-left text-left text-left text-left text-left">
+                        <span>$${parseFloat(item.last_price || 0).toLocaleString()}</span>
+                        <span class="${i === currentFocusIndex ?'text-white':'text-slate-600'}">${parseFloat(item.rsi_real || 0).toFixed(1)}%</span>
+                    </div>
+                </div>`).join('');
+
+            // STEP-LOCK SCROLLING (CURSOR ALIGNS TO TOP AFTER 2 LINES)
+            const activeRow = document.getElementById(`scanner-row-${currentFocusIndex}`);
+            if (activeRow && rotationEnabled) {
+                const rowHeight = activeRow.offsetHeight + 4; // row + margin
+                // Start scrolling up line-by-line after the 2nd line
+                // This keeps the active asset strictly at the top once the 3-line buffer is hit
+                const scrollTarget = Math.max(0, (currentFocusIndex - 2) * rowHeight);
+                viewport.scrollTop = scrollTarget;
+            } else if (activeRow && !rotationEnabled) {
+                // In manual mode, just make sure it is in view
+                activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function renderOrdersLog() {
+            const container = getEl('orders-list-container');
+            let html = "";
+            let eventCount = 0;
+
+            scannerData.forEach(s => {
+                const sKey = s.unique_key;
+                if (s.is_running) return;
+
+                if (s.rsi_ready && s.macd_ready) {
+                    const current = parseFloat(s.last_price || 0);
+                    if (current <= 0) return;
+                    eventCount++;
+
+                    if (!matchTimestamps.has(sKey)) {
+                        matchTimestamps.set(sKey, new Date());
+                        matchPriceCache.set(sKey, current);
+                    }
+                    
+                    const entry = matchPriceCache.get(sKey);
+                    const durSecs = Math.floor((new Date() - matchTimestamps.get(sKey)) / 1000);
+                    const timerStr = new Date(Math.max(0, durSecs) * 1000).toISOString().substr(11, 8);
+                    const pnl = entry > 0 ? ((current - entry) / entry) * 100 * (s.direction === 'LONG' ? 1 : -1) : 0;
+
+                    html += `
+                    <div class="order-row pending-row text-left text-left">
+                        <div class="cell cell-md text-emerald-500 font-black uppercase text-left text-left text-left">${s.broker_name || 'GATEWAY'}</div>
+                        <div class="cell cell-md font-black text-white text-left text-left text-left">${s.symbol}</div>
+                        <div class="cell cell-sm font-black ${s.direction==='LONG'?'text-emerald-400':'text-rose-400'} text-left text-left text-left text-left">${s.direction}</div>
+                        <div class="cell cell-xs text-slate-500 mono">${s.candle_time}</div>
+                        <div class="cell cell-md text-emerald-400 mono animate-pulse text-left text-left text-left">${timerStr}</div>
+                        <div class="cell cell-md text-slate-400 mono text-left text-left text-left text-left text-left">$${entry.toLocaleString()}</div>
+                        <div class="cell cell-md text-white mono font-bold text-left text-left text-left text-left text-left">$${current.toLocaleString()}</div>
+                        <div class="cell cell-sm ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'} mono font-black text-left text-left text-left text-left text-left">${pnl.toFixed(2)}%</div>
+                        <div class="cell-grow text-right text-left text-left text-left text-left text-left text-left">
+                            <button type="button" onclick="settlePosition('${sKey}', ${current}, ${pnl}, ${durSecs}, '${s.symbol}', '${s.direction}', '${s.candle_time}', ${entry}, '${s.broker_name}', ${s.id})" class="bg-rose-600 hover:bg-rose-500 text-white font-black px-4 py-1 rounded text-[8px] uppercase tracking-widest transition-all">PANIC</button>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            const activeOrders = scannerData.filter(s => s.is_running);
+            activeOrders.forEach(o => {
+                const sKey = o.unique_key;
+                eventCount++;
+                const entry = parseFloat(o.entry_price || 0);
+                const current = parseFloat(o.last_price || 0);
+                const pnl = entry > 0 ? ((current - entry) / entry) * 100 * (o.direction === 'LONG' ? 1 : -1) : 0;
+                const entryTime = o.entry_time ? new Date(o.entry_time) : new Date();
+                const durSecs = Math.floor((new Date() - entryTime) / 1000);
+                const timerStr = new Date(Math.max(0, durSecs) * 1000).toISOString().substr(11, 8);
+
+                html += `
+                <div class="order-row text-left text-left text-left">
+                    <div class="cell cell-md text-indigo-400 font-black uppercase text-left text-left text-left text-left">${o.broker_name || 'GATEWAY'}</div>
+                    <div class="cell cell-md font-black text-white text-left text-left text-left text-left">${o.symbol}</div>
+                    <div class="cell cell-sm font-black ${o.direction==='LONG'?'text-emerald-400':'text-rose-400'} text-left text-left text-left text-left text-left">${o.direction}</div>
+                    <div class="cell cell-xs text-slate-500 mono text-left text-left text-left text-left text-left">${o.candle_time}</div>
+                    <div class="cell cell-md text-indigo-400 mono text-left text-left text-left text-left text-left">${timerStr}</div>
+                    <div class="cell cell-md text-slate-400 mono text-left text-left text-left text-left text-left">$${entry.toLocaleString()}</div>
+                    <div class="cell cell-md text-white mono font-bold text-left text-left text-left text-left text-left">$${current.toLocaleString()}</div>
+                    <div class="cell cell-sm ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'} mono font-black text-left text-left text-left text-left text-left">${pnl.toFixed(2)}%</div>
+                    <div class="cell-grow text-right text-left text-left text-left text-left text-left text-left text-left">
+                        <button type="button" onclick="settlePosition('${sKey}', ${current}, ${pnl}, ${durSecs}, '${o.symbol}', '${o.direction}', '${o.candle_time}', ${entry}, '${o.broker_name}', ${o.id})" class="bg-rose-600 hover:bg-rose-500 text-white font-black px-4 py-1 rounded text-[8px] uppercase tracking-widest transition-all">PANIC</button>
+                    </div>
+                </div>`;
+            });
+
+            frozenExits.forEach((data, sKey) => {
+                eventCount++;
+                html += `
+                <div class="order-row frozen-exit text-left text-left text-left text-left">
+                    <div class="cell cell-md text-rose-500 font-black uppercase text-left text-left text-left text-left text-left">${data.broker || 'GATEWAY'}</div>
+                    <div class="cell cell-md font-black text-rose-500 text-left text-left text-left text-left text-left text-left">${data.symbol}</div>
+                    <div class="cell cell-sm font-black opacity-50 text-left text-left text-left text-left text-left text-left">${data.direction}</div>
+                    <div class="cell cell-xs text-slate-600 mono text-left text-left text-left text-left text-left text-left text-left">${data.tf}</div>
+                    <div class="cell cell-md text-rose-400 mono text-left text-left text-left text-left text-left text-left text-left text-left">${data.duration}</div>
+                    <div class="cell cell-md text-slate-600 mono text-left text-left text-left text-left text-left text-left text-left text-left text-left">$${data.entry.toLocaleString()}</div>
+                    <div class="cell cell-md text-white mono font-bold text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">$${data.price.toLocaleString()}</div>
+                    <div class="cell cell-sm ${data.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'} mono font-black text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">${data.pnl.toFixed(2)}%</div>
+                    <div class="cell-grow text-right font-black text-[7px] text-rose-500 uppercase tracking-tighter text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">EXIT [${data.timeLeft}s]</div>
+                </div>`;
+            });
+
+            getEl('pipeline-count').innerText = `${eventCount} Active`;
+            if (html === "") { getEl('idle-status').classList.remove('hidden'); container.innerHTML = ""; container.appendChild(getEl('idle-status')); } 
+            else { getEl('idle-status').classList.add('hidden'); container.innerHTML = html; }
+        }
+
+        async function settlePosition(sKey, exitPrice, pnl, dur, sym, dir, tf, entry, broker, stratId) {
+            if(!confirm(`Security Protocol: Confirm PANIC EXIT for ${sym}?`)) return;
+            const timerStr = new Date(dur * 1000).toISOString().substr(11, 8);
+            let timeLeft = 120;
+            frozenExits.set(sKey, { symbol: sym, price: exitPrice, pnl: pnl, duration: timerStr, broker: broker, direction: dir, tf: tf, entry: entry, timeLeft: timeLeft });
+            const countdown = setInterval(() => {
+                const item = frozenExits.get(sKey);
+                if (item && item.timeLeft > 0) { 
+                    item.timeLeft -= 1; 
+                    renderOrdersLog(); 
+                } else { 
+                    clearInterval(countdown); 
+                }
+            }, 1000);
+            renderOrdersLog();
+            try {
+                await fetch('/finalize_order', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ strategy_id: stratId }) });
+                setTimeout(() => { frozenExits.delete(sKey); renderOrdersLog(); }, 120000);
+                engineSync();
+            } catch(e) {}
+        }
+
+        function updateMonitor() {
+            const item = scannerData[currentFocusIndex];
+            if (!item) return;
+
+            const rsiVal = parseFloat(item.rsi_real || 0);
+            const rsiGoal = parseFloat(item.rsi_entry || 0);
+            const macdVal = parseFloat(item.macd || 0);
+            const direction = item.direction;
+
+            getEl('eval-symbol').innerText = item.symbol;
+            getEl('eval-candle').innerText = item.candle_time;
+            getEl('eval-price').innerText = `$${parseFloat(item.last_price || 0).toLocaleString()}`;
+            getEl('eval-direction').innerText = `BIAS: ${direction}`;
+            getEl('eval-current-rsi').innerText = rsiVal.toFixed(2);
+            getEl('eval-current-macd').innerText = macdVal.toFixed(4);
+            getEl('eval-rsi-min').innerText = parseFloat(item.rsi_real_min || 0).toLocaleString();
+            getEl('eval-rsi-max').innerText = parseFloat(item.rsi_real_max || 0).toLocaleString();
+            getEl('macd-slope-icon').innerText = item.current_dir_arrow;
+
+            const operator = direction === 'LONG' ? '<' : '>';
+            getEl('eval-rsi-goal').innerText = `GOAL: ${operator} ${rsiGoal.toFixed(1)}`;
+            getEl('eval-rsi-goal').className = `text-[10px] font-black px-1.5 py-0.5 rounded text-white shadow-lg transition-all ${item.rsi_ready ? 'bg-emerald-600' : 'bg-indigo-500'}`;
+
+            const rsiColor = item.rsi_ready ? 'text-emerald-400 font-black' : 'text-amber-400';
+            const macdColor = item.macd_ready ? 'text-emerald-400 font-black' : 'text-amber-400';
+            const trendColor = item.trend_label === 'BULLISH' ? 'text-emerald-400' : (item.trend_label === 'BEARISH' ? 'text-rose-400' : 'text-slate-500');
+
+            getEl('condition-audit').innerHTML = `RSI: <span class="${rsiColor}">${item.rsi_ready?'MATCHED':'WAIT'}</span> | MACD: <span class="${macdColor}">${item.macd_ready?'MATCHED':'WAIT'}</span> | TREND: <span class="${trendColor}">${item.trend_label}</span>`;
+            
+            getEl('step-rsi').className = `pipeline-step ${item.rsi_ready ? 'step-ready' : 'step-active'}`;
+            getEl('step-macd').className = `pipeline-step ${item.macd_ready ? 'step-ready' : ''}`;
+            getEl('step-exec').className = `pipeline-step ${(item.rsi_ready && item.macd_ready) ? 'step-ready' : ''}`;
+            
+            const isReady = item.rsi_ready && item.macd_ready;
+            const indicator = getEl('alignment-indicator');
+            indicator.innerText = isReady ? "READY" : "WAIT";
+            indicator.className = `text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-lg border transition-all ${isReady ? 'bg-emerald-600 text-white border-emerald-500 animate-pulse' : 'bg-slate-800 text-slate-500 border-white/5'}`;
+        }
+
+        // SPEED ADJUSTMENT LOGIC (RESUMES ROTATION AUTOMATICALLY)
+        function adjustSpeed(delta) { 
+            rotationSeconds = Math.max(2, rotationSeconds + delta); 
+            getEl('speed-label').innerText = `${rotationSeconds}s`; 
+            rotationEnabled = true; // Force resume if they adjust speed
+            getEl('rot-btn').innerText = "ON";
+            getEl('rot-btn').className = "bg-indigo-600 border border-indigo-400 px-6 py-2 rounded-xl text-[10px] font-black uppercase text-white shadow-lg transition-all active:scale-95";
+            startRotation(); 
+        }
+
+        function toggleRotation() { 
+            rotationEnabled = !rotationEnabled; 
+            getEl('rot-btn').innerText = rotationEnabled ? "ON" : "OFF"; 
+            getEl('rot-btn').className = rotationEnabled ? "bg-indigo-600 border border-indigo-400 px-6 py-2 rounded-xl text-[10px] font-black uppercase text-white shadow-lg transition-all active:scale-95" : "bg-slate-800 border border-white/10 px-6 py-2 rounded-xl text-[10px] font-black uppercase text-slate-500";
+            if (rotationEnabled) startRotation(); 
+            else clearInterval(rotationTimer); 
+        }
+
+        function startRotation() { 
+            clearInterval(rotationTimer); 
+            rotationTimer = setInterval(() => { 
+                if (rotationEnabled && scannerData.length > 0) { 
+                    currentFocusIndex = (currentFocusIndex + 1) % scannerData.length; 
+                    updateMonitor(); 
+                    renderScanner(); 
+                } 
+            }, rotationSeconds * 1000); 
+        }
+        
+        window.manualSelect = (i) => { 
+            currentFocusIndex = i; 
+            rotationEnabled = false; 
+            getEl('rot-btn').innerText = "OFF"; 
+            getEl('rot-btn').className = "bg-slate-800 border border-white/10 px-6 py-2 rounded-xl text-[10px] font-black uppercase text-slate-500";
+            clearInterval(rotationTimer); 
+            updateMonitor(); 
+            renderScanner(); 
+        };
+
+        // UI TICK TIMER: Smooth movement every second
+        setInterval(() => {
+            if (scannerData.length > 0) { renderOrdersLog(); updateMonitor(); }
+        }, 1000);
+
+        engineSync();
+        setInterval(engineSync, 3000);
+        startRotation();
+    </script>
+</body>
+</html>

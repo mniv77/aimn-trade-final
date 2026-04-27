@@ -390,32 +390,30 @@ def api_trades_active():
         from db import get_db_connection
         conn, cursor = get_db_connection()
         cursor.execute("""
-            SELECT id, symbol, direction, entry_price, entry_time,
-                   last_price, peak_profit, status, broker_name, candle_time,
-                   exit_price, exit_time, exit_reason
+            SELECT id, symbol, broker_name as broker, direction,
+                   entry_price, last_price, peak_profit,
+                   status, entry_time
             FROM active_trades
             WHERE status = 'OPEN'
-               OR (status = 'CLOSED' AND exit_time > DATE_SUB(NOW(), INTERVAL 2 MINUTE))
             ORDER BY entry_time DESC
-            LIMIT 20
         """)
         rows = cursor.fetchall()
         conn.close()
+        import datetime
         result = []
         for r in rows:
-            # Convert entry_time to Unix timestamp (ms) to avoid timezone issues
-            import datetime
-            import time as time_module
-            entry_ms = int(r['entry_time'].timestamp() * 1000) if isinstance(r['entry_time'], datetime.datetime) else int(time_module.time() * 1000)
-        result.append({
-            "id": r['id'], "symbol": r['symbol'],
-            "direction": r['direction'],
-            "side": "BUY" if r['direction'] == "LONG" else "SELL",
-            "entry_price": r['entry_price'], "last_price": r['last_price'],
-            "peak_profit": r['peak_profit'], "broker": r['broker_name'],
-            "entry_time": entry_ms or str(r['entry_time']),
-            "status": r['status'],
-        })
+            result.append({
+                "id": r['id'],
+                "symbol": r['symbol'],
+                "broker": r['broker'],
+                "direction": r['direction'],
+                "side": "BUY" if r['direction'] == "LONG" else "SELL",
+                "entry_price": float(r['entry_price'] or 0),
+                "last_price": float(r['last_price'] or 0),
+                "peak_profit": float(r['peak_profit'] or 0),
+                "status": r['status'],
+                "entry_time": str(r['entry_time'])
+            })
         return jsonify(result)
     except Exception as e:
         return jsonify([])
@@ -657,12 +655,14 @@ def api_trade_open():
 def api_trade_close():
     try:
         data       = request.get_json(force=True, silent=True) or {}
-        symbol     = (data.get("symbol") or "").upper()
-        pnl        = float(data.get("pnl") or data.get("pnl_pct") or 0)
         reason     = str(data.get("reason") or "")
+        # Block scanner panic exits — only executor can close trades
+        if "PANIC" in reason.upper() or reason == "" or reason is None:
+            return jsonify({"ok": False, "error": "Use executor to close trades"}), 403
         trade_id   = data.get("trade_id")
+        symbol     = (data.get("symbol") or "").upper()
+        pnl        = float(data.get("pnl") or 0)
         exit_price = data.get("exit_price") or None
-
         from db import get_db_connection
         conn, cursor = get_db_connection()
         if trade_id:
@@ -671,19 +671,10 @@ def api_trade_close():
                 SET status='CLOSED', exit_price=%s, exit_time=NOW(), exit_reason=%s
                 WHERE id=%s
             """, (exit_price, reason, int(trade_id)))
-        else:
-            cursor.execute("""
-                UPDATE active_trades
-                SET status='CLOSED', exit_price=%s, exit_time=NOW(), exit_reason=%s
-                WHERE symbol=%s AND status='OPEN'
-                ORDER BY entry_time DESC LIMIT 1
-            """, (exit_price, reason, symbol))
         conn.close()
-
         return jsonify({"ok": True, "symbol": symbol, "pnl": pnl, "reason": reason})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
-
 
 
 
@@ -823,7 +814,7 @@ def run_auto_tuner():
             'trail_minus_options': data.get('trail_minus_options', [0.3, 0.5, 0.7]),
             'rsi_exit_options'   : data.get('rsi_exit_options',    [65, 70, 75, 80]),
             'init_profit_options': data.get('init_profit_options', [0.5, 1.0, 1.5, 2.0]),
-            'decay_start_options': data.get('decay_start_options', [0.5, 1.0, 2.0]),
+            'decay_start'        : float(data.get('decay_start', 0.5)),
             'decay_rate'         : float(data.get('decay_rate',  0.5)),
             'min_trades'         : int(data.get('min_trades', 5)),
             'score_metric'       : data.get('score_metric', 'total_pnl'),
@@ -861,7 +852,7 @@ def disable_old_strategies():
         cursor.execute("""
             UPDATE strategy_params
             SET active = 0
-            WHERE (last_tuned < DATE_SUB(NOW(), INTERVAL 7 DAY) OR last_tuned IS NULL OR pl_pct < 0)
+            WHERE (last_tuned < '2025-04-08' OR last_tuned IS NULL OR pl_pct < 0)
               AND active = 1
         """)
         affected = cursor.rowcount

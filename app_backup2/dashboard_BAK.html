@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Dashboard • AIMn{% endblock %}
+{% block content %}
+<style>
+  .dash-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:120px;gap:14px}
+  .tile{
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;
+    border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,rgba(15,23,42,.85),rgba(9,13,26,.85));
+    box-shadow:0 10px 30px rgba(0,0,0,.25);text-decoration:none;color:var(--text);font-weight:700
+  }
+  .tile small{display:block;color:var(--muted);font-weight:500;margin-top:6px}
+  .r1c4{grid-row:1;grid-column:4}
+  .r2c1{grid-row:2;grid-column:1}
+  .r2c2{grid-row:2;grid-column:2}
+  .r2c3{grid-row:2;grid-column:3}
+  .r3c1{grid-row:3;grid-column:1}
+  .r3c2{grid-row:3;grid-column:2}
+</style>
+
+<div class="dash-grid">
+  <!-- From your table: (1,4) Trade tester -->
+  <a class="tile r1c4" href="/trade-tester">
+    Trade Tester
+    <small>trade-tester.html</small>
+  </a>
+
+  <!-- (2,1) Symbol & API Management -->
+  <a class="tile r2c1" href="/symbol-api-manager">
+    Symbol &amp; API Management
+    <small>symbol_api_manager.html</small>
+  </a>
+
+  <!-- (2,2) Simple Explanation -->
+  <a class="tile r2c2" href="{{ url_for('simple_explanation') }}">
+       Simple Explanation
+    <small>simple_explanation.html</small>
+ </a>
+
+
+
+  <!-- (2,3) Architectural Analysis -->
+  <a class="tile r2c3" href="/architectural-analysis-and-trading-philosophy">
+    Architectural Analysis
+   <small>Architectural Analysis and Trading Philosophy.html</small>
+  </a>
+
+  <!-- (3,1) Trade Scanner Simulator -->
+  <a class="tile r3c1" href="/scanner-simulator">
+    Trade Scanner Simulator
+    <small>scanner-simulator.html</small>
+  </a>
+
+  <!-- (3,2) System Overview -->
+  <a class="tile  r3c2" href="/system-overview" style="grid-row: 2; grid-column: 2;">
+     System Overview
+  <small>aiml/home.html</small>
+  </a>
+
+
+
+  <a class="tile r3c2" href="/aiml">
+    System Overview
+    <small>aimll/home.html</small>
+  </a>
+</div>
+
+<div style="margin-top:16px" class="grid grid-2">
+  <a class="tile" href="/scanner">Primary Scanner <small>aimn_flowing_scanner_auto.html</small></a>
+  <a class="tile" href="/trade-full">Trade Full <small>trade-full.html</small></a>
+  <a class="tile" href="/scanner/analysis">Scanner Analysis <small>scanner-analysis.html</small></a>
+  <a class="tile" href="/symbols">Symbols <small>symbols.html</small></a>
+  <a class="tile" href="/orders">Orders <small>orders.html</small></a>
+  <a class="tile" href="/settings">Settings <small>setting.html</small></a>
+</div>
+{% endblock %}

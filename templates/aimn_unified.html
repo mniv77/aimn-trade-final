@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMN Unified Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .view-section { display: none; }
+        .view-active { display: block; }
+        
+        input, select, textarea { background-color: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 8px; width: 100%; font-weight: bold; }
+        input:focus, select:focus, textarea:focus { border-color: #818cf8; outline: none; box-shadow: 0 0 15px rgba(129, 140, 248, 0.2); }
+        label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
+        .section-title { color: #94a3b8; font-weight: 900; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 20px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        @keyframes pulse-green { 0%, 100% { color: #4ade80; text-shadow: 0 0 15px rgba(74, 222, 128, 0.6); } 50% { color: #fff; text-shadow: 0 0 25px rgba(74, 222, 128, 0.9); } }
+        .animate-ready { animation: pulse-green 1.2s infinite; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        .history-table { width: 100%; font-size: 0.75rem; text-align: left; }
+        .history-table th { color: #64748b; padding: 12px 8px; border-bottom: 1px solid #1e293b; white-space: nowrap; position: sticky; top: 0; background: #0f172a; z-index: 10; }
+        .history-table td { padding: 12px 8px; border-bottom: 1px solid #0f172a; }
+        .history-row:hover { background: rgba(255,255,255,0.02); }
+        
+        @keyframes border-pulse-green { 0% { border-color: rgba(74, 222, 128, 0.2); } 50% { border-color: rgba(74, 222, 128, 0.8); } 100% { border-color: rgba(74, 222, 128, 0.2); } }
+        .trade-active-border { animation: border-pulse-green 2s infinite; border-width: 2px; }
+
+        .status-pill { padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+        .status-active { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .btn-glow:hover { transform: translateY(-1px); box-shadow: 0 10px 20px -10px rgba(129, 140, 248, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-[500] shrink-0">
+        <div class="flex items-center gap-6 text-sm font-bold">
+            <a href="/dashboard" id="nav-dashboard" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-home"></i> DASHBOARD
+            </a>
+            <a href="/tuning" id="nav-tuner" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-sliders-h"></i> TUNING
+            </a>
+            <a href="/orders" id="nav-orders" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-list"></i> ORDERS
+            </a>
+            <a href="/symbols" id="nav-symbols" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-coins"></i> SYMBOLS
+            </a>
+            <a href="/brokers" id="nav-brokers" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-university"></i> BROKERS
+            </a>
+        </div>
+        <div class="text-[10px] text-slate-600 font-black tracking-widest uppercase">V3.1 Unified Interface</div>
+    </nav>
+
+    <!-- FLASH MESSAGES -->
+    <div class="max-w-6xl mx-auto w-full px-6 mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="p-4 mb-4 rounded-xl border {% if category == 'success' %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400{% else %}bg-red-500/10 border-red-500/20 text-red-400{% endif %} font-bold text-xs uppercase tracking-widest">
+                  {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="flex-1 relative">
+        
+        <!-- SECTION: DASHBOARD -->
+        <div id="view-dashboard" class="view-section p-6 h-[calc(100vh-60px)]">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full overflow-hidden">
+                <aside class="lg:col-span-1 glass-card rounded-2xl flex flex-col overflow-hidden">
+                    <div class="p-4 border-b border-white/5 font-black text-[10px] uppercase text-slate-500 tracking-widest flex justify-between">
+                        <span>Active Assets</span>
+                        <span id="asset-count" class="text-blue-400">0</span>
+                    </div>
+                    <div id="scanner-list" class="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar"></div>
+                </aside>
+
+                <section class="lg:col-span-3 glass-card rounded-2xl p-8 flex flex-col relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-10">
+                        <div>
+                            <h2 id="active-symbol" class="text-6xl font-black tracking-tighter leading-none text-white uppercase">---</h2>
+                            <div id="active-broker-dash" class="text-[10px] font-bold text-blue-400 mt-2 tracking-widest uppercase">SELECT AN ASSET</div>
+                        </div>
+                        <div id="active-price" class="text-4xl font-black mono text-slate-200 leading-none">$0.00</div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                        <div class="bg-black/40 rounded-2xl p-6 border border-white/5">
+                            <p class="text-[10px] text-slate-500 font-black uppercase mb-4 tracking-widest">RSI Real-Time</p>
+                            <div id="real-time-rsi" class="text-6xl font-black text-blue-400">0.00</div>
+                        </div>
+                        <div class="bg-black/40 rounded-2xl p-6 border border-white/5">
+                            <p class="text-[10px] text-slate-500 font-black uppercase mb-4 tracking-widest">MACD Momentum</p>
+                            <div id="real-time-macd" class="text-4xl font-black text-slate-400 mono">0.0000</div>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-black/20 rounded-2xl border border-white/5 p-4 overflow-y-auto custom-scrollbar">
+                        <div id="trade-log-container" class="space-y-3">
+                             <p class="text-center opacity-20 italic">Trade log active...</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- SECTION: TUNER (THE REAL TUNER PAGE) -->
+        <div id="view-tuner" class="view-section p-6 max-w-6xl mx-auto pb-12 w-full flex-grow">
+            
+            <div class="glass-card rounded-2xl p-6 mb-8 shadow-2xl border-indigo-500/20">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-sync-alt text-indigo-400"></i>
+                    <h2 class="text-xs font-black uppercase text-slate-400 tracking-widest">TradingView Bridge (CSV String)</h2>
+                </div>
+                <textarea id="csv_input" class="h-24 bg-black/40 border-slate-800 font-mono text-emerald-400 text-xs mb-4 custom-scrollbar" placeholder="Paste strategy input string from TradingView here..."></textarea>
+                <div class="flex gap-4">
+                    <button onclick="parseCSV()" class="flex-grow bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl transition btn-glow uppercase text-[10px] tracking-widest">Auto-Fill Fields From String</button>
+                    <button onclick="exportToTV()" class="bg-amber-600 hover:bg-amber-500 text-white font-black px-10 py-3 rounded-xl transition btn-glow uppercase text-[10px] tracking-widest">Recreate TV String</button>
+                </div>
+            </div>
+
+            <form id="tuningForm" class="glass-card rounded-2xl p-8 shadow-2xl" onsubmit="return false;">
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 pb-10 border-b border-white/5">
+                    <div>
+                        <label>1. Select Broker</label>
+                        <select id="broker_select_tuner" onchange="filterSymbols()">
+                            <option value="">-- All Brokers --</option>
+                            {% for broker in brokers %}
+                                <option value="{{ broker.id }}">{{ broker.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>2. Select Symbol</label>
+                        <select id="broker_product_id" name="broker_product_id" onchange="loadHistory()">
+                            <option value="" id="symbol_placeholder">-- Choose Symbol --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>3. Direction</label>
+                        <select id="direction_select" name="direction" onchange="loadHistory()">
+                            <option value="LONG">🟢 LONG</option>
+                            <option value="SHORT">🔴 SHORT</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button type="button" onclick="loadTuning()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl border border-white/10 transition font-black uppercase text-[10px] tracking-widest">LOAD</button>
+                        <button type="button" onclick="saveTuning()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-black shadow-lg transition btn-glow uppercase text-[10px] tracking-widest">SAVE</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div>
+                        <div class="section-title text-indigo-400">Technical Indicators</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2"><label>RSI Lookback</label><input type="number" id="rsi_len" value="14"></div>
+                            <div><label>MACD Fast</label><input type="number" id="macd_fast" value="12"></div>
+                            <div><label>MACD Slow</label><input type="number" id="macd_slow" value="26"></div>
+                            <div class="col-span-2"><label>MACD Signal</label><input type="number" id="macd_sig" value="9"></div>
+                            <div><label>RSI Entry Goal</label><input type="number" step="0.01" id="rsi_entry" value="30"></div>
+                            <div><label>RSI Exit Goal</label><input type="number" step="0.01" id="rsi_exit" value="70"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="section-title text-emerald-400">Risk Management</div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label>Stop Loss %</label><input type="number" step="0.01" id="stop_loss" value="2"></div>
+                            <div><label>Take Profit %</label><input type="number" step="0.01" id="take_profit" value="5"></div>
+                            <div><label>Trail Start %</label><input type="number" step="0.01" id="trail_start" value="1"></div>
+                            <div><label>Trail Drop %</label><input type="number" step="0.01" id="trail_drop" value="0.5"></div>
+                            <div><label>Decay Start (H)</label><input type="number" step="0.1" id="decay_start" value="24"></div>
+                            <div><label>Decay Rate %</label><input type="number" step="0.01" id="decay_rate" value="0.1"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center section-title">
+                            <span class="text-amber-400">Global Range Math</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div><label>Historical Max (High)</label><input type="text" id="rsi_real_max" value="0.00"></div>
+                            <div><label>Historical Min (Low)</label><input type="text" id="rsi_real_min" value="0.00"></div>
+                            <p class="text-[10px] text-slate-500 italic mt-8 border-t border-white/5 pt-4 leading-relaxed uppercase">
+                                Parameters automatically scaled by <strong>Dynamic Pump</strong> logic.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-12 pt-8 border-t border-white/10">
+                    <div class="section-title text-blue-400">TradingView Performance Metrics</div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div><label>Total P&L $</label><input type="number" step="0.01" id="pl_amount" value="0.00"></div>
+                        <div><label>Net P&L %</label><input type="number" step="0.01" id="pl_pct" value="0.00"></div>
+                        <div><label>Timeframe</label><input type="text" id="candle_time" value="1m"></div>
+                        <div><label>Bar Count</label><input type="number" id="bar_count" value="0"></div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="glass-card rounded-2xl p-8 mt-8 shadow-2xl border-white/5">
+                <div class="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-history text-slate-400"></i>
+                        <h3 class="text-[11px] font-black uppercase text-slate-300 tracking-[0.2em]">Tuning History Archive</h3>
+                    </div>
+                    <div id="history-count" class="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-black/40 px-2 py-1 rounded">0 Records</div>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="history-table">
+                        <thead>
+                            <tr><th>Archived Date</th><th>Dir</th><th>Goals</th><th class="text-emerald-400">P&L %</th><th class="text-blue-400">P&L $</th><th>Action</th></tr>
+                        </thead>
+                        <tbody id="history_body">
+                            <tr><td colspan="6" class="text-center py-12 text-slate-600 italic">Select symbol to view history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: ORDERS -->
+        <div id="view-orders" class="view-section p-6 max-w-6xl mx-auto flex-grow">
+            <div class="glass-card rounded-2xl p-8 shadow-2xl border-white/5">
+                <div class="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+                    <div>
+                        <h3 class="text-2xl font-black uppercase text-slate-100 tracking-tighter">Live Order Pipeline</h3>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Real-time signal tracking and manual override</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="bg-blue-600/10 px-4 py-2 rounded-xl border border-blue-500/20"><p class="text-[9px] text-blue-400 font-black uppercase">Active Trades</p><p id="active-order-count" class="text-lg font-black mono leading-none text-white">0</p></div>
+                        <div class="bg-slate-800/40 px-4 py-2 rounded-xl border border-white/10"><p class="text-[9px] text-slate-500 font-black uppercase">Session Exit</p><p id="closed-order-count" class="text-lg font-black mono leading-none text-slate-400">0</p></div>
+                    </div>
+                </div>
+                <div id="pipeline-list" class="space-y-4 min-h-[300px]">
+                    <div class="text-center py-20 opacity-20 italic">Scanning strategy confluence for entries...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: SYMBOLS (THE RESTORED SYMBOL MANAGER) -->
+        <div id="view-symbols" class="view-section p-6 max-w-7xl mx-auto flex-grow">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- FORM COLUMN -->
+                <div class="lg:col-span-4">
+                    <div class="glass-card rounded-2xl p-8 sticky top-24 border border-blue-500/10 shadow-2xl">
+                        <div class="section-title text-blue-400 flex items-center gap-3">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Add New Symbol</span>
+                        </div>
+                        <form action="/symbols" method="POST" class="space-y-5">
+                            <div>
+                                <label>Target Broker</label>
+                                <select name="broker_id" required class="bg-slate-900 border-slate-700">
+                                    <option value="" disabled selected>Choose a Broker...</option>
+                                    {% for broker in brokers %}
+                                        <option value="{{ broker.id }}">{{ broker.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label>Asset Name</label>
+                                <input type="text" name="name" placeholder="e.g. Bitcoin" required>
+                            </div>
+                            <div>
+                                <label>Asset Class</label>
+                                <select name="asset_class">
+                                    <option value="Crypto">Crypto</option>
+                                    <option value="Forex">Forex</option>
+                                    <option value="Stock">Stock</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Broker Ticker</label>
+                                <input type="text" name="ticker" placeholder="e.g. btcusd" required class="font-mono">
+                            </div>
+                            <div class="pt-4">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl shadow-lg transition-all uppercase text-[11px] tracking-widest btn-glow">
+                                    Add Symbol Signature
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- TABLE COLUMN -->
+                <div class="lg:col-span-8">
+                    <div class="glass-card rounded-2xl p-0 overflow-hidden border border-white/5 shadow-2xl flex flex-col h-[700px]">
+                        <div class="p-6 border-b border-white/5 flex justify-between items-center bg-slate-900/40">
+                            <div class="section-title mb-0 flex items-center gap-3 border-none">
+                                <i class="fas fa-database text-blue-400"></i>
+                                <span>Managed Symbols</span>
+                            </div>
+                            
+                            <form action="/symbols" method="GET">
+                                <select name="filter_broker_id" onchange="this.form.submit()" class="bg-black/40 text-[9px] font-black uppercase tracking-widest border border-white/5 px-4 py-2 rounded-full cursor-pointer hover:bg-slate-800">
+                                    <option value="all">Show All Brokers</option>
+                                    {% for broker in brokers %}
+                                        <option value="{{ broker.id }}" {% if selected_filter|int == broker.id %}selected{% endif %}>
+                                            Show {{ broker.name }} Only
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto custom-scrollbar">
+                            <table class="history-table w-full">
+                                <thead>
+                                    <tr>
+                                        <th class="pl-8">Broker</th>
+                                        <th>Asset Name</th>
+                                        <th>Ticker</th>
+                                        <th class="text-right pr-8">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in rows %}
+                                    <tr class="history-row">
+                                        <td class="pl-8">
+                                            <span class="text-[11px] font-black tracking-widest text-blue-400 uppercase">
+                                                {{ row.broker_name }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="font-black text-slate-100">{{ row.local_ticker }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="font-mono text-xs text-slate-400 bg-black/30 px-2 py-1 rounded border border-white/5">{{ row.local_ticker }}</span>
+                                        </td>
+                                        <td class="text-right pr-8">
+                                            <form action="{{ url_for('delete_symbol', id=row.id) }}" method="POST" onsubmit="return confirm('Secure Warning: Delete this symbol?');" class="inline">
+                                                <button type="submit" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase transition-all border border-red-500/20">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-20 opacity-20 italic">
+                                            No symbols configured in database.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: BROKERS -->
+        <div id="view-brokers" class="view-section p-6 max-w-6xl mx-auto flex-grow">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- GEMINI CARD -->
+                <div class="glass-card rounded-3xl p-10 border border-blue-500/20 relative group overflow-hidden">
+                    <div class="absolute -right-10 -top-10 text-blue-500/5 text-[150px] font-black italic pointer-events-none">G</div>
+                    <div class="flex justify-between items-start mb-10 relative z-10">
+                        <div>
+                            <h3 class="text-3xl font-black uppercase text-white tracking-tighter italic">Gemini Exchange</h3>
+                            <div class="flex items-center gap-3 mt-3">
+                                <div class="flex items-center gap-2 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                                    <span class="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    <span class="text-[8px] font-black uppercase text-emerald-500 tracking-widest">Active Connection</span>
+                                </div>
+                                <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Latency: 42ms</span>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-shield-alt text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-6 relative z-10">
+                        <div><label class="text-blue-400">Public API Key</label><div class="relative"><input type="text" value="gm-live-8429-x921-k922-m102" disabled class="bg-black/20 border-white/5 pr-10 font-mono text-xs"></div></div>
+                        <div><label class="text-blue-400">Secret Gateway</label><div class="relative"><input type="password" value="secretkeyhidden" disabled class="bg-black/20 border-white/5 pr-10 font-mono text-xs"></div></div>
+                    </div>
+                    <div class="mt-10 pt-8 border-t border-white/5 flex justify-between items-center relative z-10">
+                         <div class="flex flex-col"><span class="text-[8px] font-black text-slate-500 uppercase">Trading Mode</span><span class="text-[10px] font-black text-slate-100 uppercase tracking-widest">Production / Live</span></div>
+                         <button class="bg-slate-800 hover:bg-blue-600 text-white font-black px-6 py-2.5 rounded-xl transition-all text-[9px] uppercase tracking-widest border border-white/5">Update Keys</button>
+                    </div>
+                </div>
+
+                <!-- ALPACA CARD -->
+                <div class="glass-card rounded-3xl p-10 border border-amber-500/20 relative group overflow-hidden">
+                    <div class="absolute -right-10 -top-10 text-amber-500/5 text-[150px] font-black italic pointer-events-none">A</div>
+                    <div class="flex justify-between items-start mb-10 relative z-10">
+                        <div>
+                            <h3 class="text-3xl font-black uppercase text-white tracking-tighter italic">Alpaca Markets</h3>
+                            <div class="flex items-center gap-3 mt-3">
+                                <div class="flex items-center gap-2 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                                    <span class="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    <span class="text-[8px] font-black uppercase text-emerald-500 tracking-widest">System Healthy</span>
+                                </div>
+                                <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Latency: 18ms</span>
+                            </div>
+                        </div>
+                        <div class="h-12 w-12 bg-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-university text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-6 relative z-10">
+                        <div><label class="text-amber-400">Client ID</label><div class="relative"><input type="text" value="AP-PRD-92104-X-01" disabled class="bg-black/20 border-white/5 pr-10 font-mono text-xs"></div></div>
+                        <div><label class="text-amber-400">Security Signature</label><div class="relative"><input type="password" value="secretkeyhidden" disabled class="bg-black/20 border-white/5 pr-10 font-mono text-xs"></div></div>
+                    </div>
+                    <div class="mt-10 pt-8 border-t border-white/5 flex justify-between items-center relative z-10">
+                         <div class="flex flex-col"><span class="text-[8px] font-black text-slate-500 uppercase">Trading Mode</span><span class="text-[10px] font-black text-slate-100 uppercase tracking-widest">Paper / Sandbox</span></div>
+                         <button class="bg-slate-800 hover:bg-amber-600 text-white font-black px-6 py-2.5 rounded-xl transition-all text-[9px] uppercase tracking-widest border border-white/5">Configure</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const getEl = (id) => document.getElementById(id);
+        let scannerData = [];
+        let historyData = [];
+        let currentFocusIndex = 0;
+        let tradeOrders = [];
+
+        // ==========================================
+        // 1. NAVIGATION & SWITCHER
+        // ==========================================
+        function showView(viewId) {
+            console.log("Switching view to:", viewId);
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('view-active'));
+            const target = document.getElementById(`view-${viewId}`);
+            if (target) target.classList.add('view-active');
+
+            document.querySelectorAll('nav a').forEach(a => {
+                a.classList.remove('text-white', 'border-b-2', 'border-white', 'pb-1');
+                a.classList.add('text-gray-400');
+            });
+            const navLink = document.getElementById(`nav-${viewId}`);
+            if (navLink) {
+                navLink.classList.replace('text-gray-400', 'text-white');
+                navLink.classList.add('border-b-2', 'border-white', 'pb-1');
+            }
+        }
+
+        // ==========================================
+        // 2. DATA ENGINE
+        // ==========================================
+        async function fetchData() {
+            try {
+                const res = await fetch('/get_active_strategies');
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    scannerData = data.map(item => {
+                        const price = parseFloat(item.last_price || 0);
+                        const max = parseFloat(item.rsi_real_max || 0);
+                        const min = parseFloat(item.rsi_real_min || 0);
+                        let calcRsi = (max > min) ? ((price - min) / (max - min)) * 100 : 0;
+                        return { ...item, calculated_rsi: calcRsi };
+                    });
+                    updateUI();
+                }
+            } catch (e) { console.error("Data Fetch Error", e); }
+        }
+
+        function updateUI() {
+            const assetCountEl = getEl('asset-count');
+            if(assetCountEl) assetCountEl.innerText = scannerData.length;
+
+            const item = scannerData[currentFocusIndex];
+            if (!item) return;
+
+            getEl('active-symbol').innerText = item.symbol;
+            getEl('active-price').innerText = `$${parseFloat(item.last_price).toLocaleString()}`;
+            getEl('real-time-rsi').innerText = item.calculated_rsi.toFixed(2);
+            getEl('real-time-macd').innerText = parseFloat(item.macd).toFixed(4);
+            getEl('active-broker-dash').innerText = `BROKER ID: ${item.broker}`;
+            
+            const list = getEl('scanner-list');
+            if(list) {
+                list.innerHTML = scannerData.map((s, i) => `
+                    <div onclick="currentFocusIndex=${i};updateUI();" class="p-4 rounded-xl border ${i===currentFocusIndex?'bg-blue-600 border-blue-400':'bg-slate-800/30 border-white/5'} cursor-pointer transition-all">
+                        <div class="font-black text-xs uppercase">${s.symbol}</div>
+                        <div class="text-[10px] mono text-blue-300">$${parseFloat(s.last_price).toLocaleString()}</div>
+                    </div>`).join('');
+            }
+        }
+
+        // ==========================================
+        // 3. TUNER ENGINE
+        // ==========================================
+        function parseCSV() {
+            let input = getEl('csv_input').value.trim();
+            if (!input) return;
+            if (input.includes('(')) input = input.split('(')[1].split(')')[0];
+            let fixed = input.replace(/(\d),(\d)/g, '$1$2');
+            const p = fixed.split(',').map(s => s.trim());
+            const stitch = (i, j) => (parseFloat(p[i]) + parseFloat(p[j])).toFixed(2);
+            try {
+                getEl('direction_select').value = p[0].includes("SELL") ? "SHORT" : "LONG";
+                getEl('macd_fast').value = p[1]; getEl('macd_slow').value = p[2]; getEl('macd_sig').value = p[3];
+                getEl('rsi_len').value = p[4]; getEl('rsi_entry').value = stitch(5, 6); getEl('rsi_exit').value = stitch(7, 8);
+                getEl('stop_loss').value = stitch(9, 10); getEl('trail_start').value = stitch(11, 12); 
+                getEl('trail_drop').value = stitch(13, 14); getEl('take_profit').value = stitch(15, 16);
+                getEl('rsi_real_max').value = p[p.length - 2]; getEl('rsi_real_min').value = p[p.length - 1];
+                alert("✅ Fields Populated Successfully!");
+                loadHistory();
+            } catch (e) { alert("Format Error."); }
+        }
+
+        function exportToTV() {
+            const split = (id) => {
+                let v = parseFloat(getEl(id).value) || 0;
+                let w = Math.floor(v);
+                return `${w}, ${(v - w).toFixed(2)}`;
+            };
+            let d = getEl('direction_select').value === "SHORT" ? "SELL" : "BUY";
+            let str = `AImn-Sync (${d}, ${getEl('macd_fast').value}, ${getEl('macd_slow').value}, ${getEl('macd_sig').value}, ${getEl('rsi_len').value}, `;
+            str += `${split('rsi_entry')}, ${split('rsi_exit')}, ${split('stop_loss')}, ${split('trail_start')}, ${split('trail_drop')}, ${split('take_profit')}, `;
+            str += `24.0, 0.1, true, ${getEl('rsi_real_max').value}, ${getEl('rsi_real_min').value})`;
+            getEl('csv_input').value = str; getEl('csv_input').select();
+            alert("TradingView String Created!");
+        }
+
+        async function saveTuning() {
+            const payload = {
+                broker_product_id: getEl('broker_product_id').value,
+                direction: getEl('direction_select').value,
+                macd_fast: getEl('macd_fast').value, macd_slow: getEl('macd_slow').value, macd_sig: getEl('macd_sig').value,
+                rsi_len: getEl('rsi_len').value, rsi_entry: getEl('rsi_entry').value, rsi_exit: getEl('rsi_exit').value,
+                stop_loss: getEl('stop_loss').value, take_profit: getEl('take_profit').value,
+                trailing_start: getEl('trail_start').value, trailing_drop: getEl('trail_drop').value,
+                decay_start: getEl('decay_start').value, decay_rate: getEl('decay_rate').value,
+                rsi_real_max: getEl('rsi_real_max').value, rsi_real_min: getEl('rsi_real_min').value,
+                pl_pct: getEl('pl_pct').value, pl_amount: getEl('pl_amount').value,
+                candle_time: getEl('candle_time').value, bar_count: getEl('bar_count').value
+            };
+            try {
+                const res = await fetch('/save_tuning', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert('Strategy Engine Parameters Synced!');
+                    loadHistory();
+                }
+            } catch (e) { alert('Sync Failed'); }
+        }
+
+        async function loadHistory() {
+            const pId = getEl('broker_product_id').value;
+            const dir = getEl('direction_select').value;
+            if (!pId) return;
+            try {
+                const res = await fetch(`/get_tuning_history?product_id=${pId}&direction=${dir}`);
+                const data = await res.json();
+                if (data.status === "success" && data.history.length > 0) {
+                    historyData = data.history;
+                    getEl('history-count').innerText = `${data.history.length} Records`;
+                    getEl('history_body').innerHTML = data.history.map((h, i) => `
+                        <tr class="history-row">
+                            <td class="text-slate-500 font-mono text-[10px]">${new Date(h.archived_at).toLocaleString()}</td>
+                            <td class="font-bold text-[10px]">${h.direction}</td>
+                            <td class="text-slate-400 font-bold">${h.rsi_entry}/${h.rsi_exit}</td>
+                            <td class="font-black text-emerald-400">${parseFloat(h.pl_pct).toFixed(2)}%</td>
+                            <td class="font-black text-slate-200">$${parseFloat(h.pl_amount).toFixed(2)}</td>
+                            <td><button onclick='restoreHistoryRecord(${i})' class="text-[9px] bg-slate-800 hover:bg-indigo-600 text-white px-2 py-1 rounded font-black">RESTORE</button></td>
+                        </tr>`).join('');
+                } else {
+                    getEl('history_body').innerHTML = '<tr><td colspan="6" class="text-center py-8 opacity-20">No history found.</td></tr>';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function restoreHistoryRecord(index) {
+            const h = historyData[index];
+            getEl('macd_fast').value = h.macd_fast; getEl('macd_slow').value = h.macd_slow; getEl('macd_sig').value = h.macd_sig;
+            getEl('rsi_len').value = h.rsi_len; getEl('rsi_entry').value = h.rsi_entry; getEl('rsi_exit').value = h.rsi_exit;
+            getEl('stop_loss').value = h.stop_loss; getEl('take_profit').value = h.take_profit;
+            getEl('rsi_real_max').value = h.rsi_real_max; getEl('rsi_real_min').value = h.rsi_real_min;
+            getEl('pl_amount').value = h.pl_amount; getEl('pl_pct').value = h.pl_pct;
+            alert("✅ Restored to Form. Click SAVE.");
+        }
+
+        async function loadTuning() { loadHistory(); }
+
+        function filterSymbols() {
+            const bId = String(getEl('broker_select_tuner').value);
+            const select = getEl('broker_product_id');
+            if (!select) return;
+            const options = select.options;
+            for (let i = 0; i < options.length; i++) {
+                const optB = String(options[i].getAttribute('data-broker'));
+                if (options[i].id === "symbol_placeholder") continue;
+                options[i].style.display = !bId || optB === bId ? "block" : "none";
+            }
+        }
+
+        window.onload = () => {
+            const activeTabFromServer = "{{ active_tab }}";
+            if (activeTabFromServer && activeTabFromServer !== "None" && activeTabFromServer !== "") {
+                showView(activeTabFromServer);
+            } else {
+                const path = window.location.pathname;
+                if (path.includes('tuning')) showView('tuner');
+                else if (path.includes('orders')) showView('orders');
+                else if (path.includes('symbols')) showView('symbols');
+                else if (path.includes('brokers')) showView('brokers');
+                else showView('dashboard');
+            }
+
+            const populateTunerSymbols = async () => {
+                const res = await fetch('/get_active_strategies');
+                const data = await res.json();
+                const select = getEl('broker_product_id');
+                if (select) {
+                    const seen = new Set();
+                    const optionsHtml = data.map(s => {
+                        if(!seen.has(s.symbol)) {
+                            seen.add(s.symbol);
+                            return `<option value="${s.strategy_id}" data-broker="${s.broker}">${s.symbol}</option>`;
+                        }
+                        return "";
+                    }).join('');
+                    select.innerHTML = `<option value="" id="symbol_placeholder">-- Choose Symbol --</option>` + optionsHtml;
+                }
+            };
+
+            populateTunerSymbols();
+            setInterval(fetchData, 3000);
+            fetchData();
+        };
+    </script>
+</body>
+</html>

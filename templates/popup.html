@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AIMn - Hot Picks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #111; color: #e5e5e5; font-family: 'Segoe UI', sans-serif; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #333; transition: 0.2s; }
+        .card:hover { border-color: #fbbf24; transform: translateY(-2px); }
+        .score { font-size: 2.5em; color: #34d399; font-weight: bold; }
+        
+        .btn { padding: 6px 12px; background: #333; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; border: 1px solid #444; transition: 0.2s; font-size: 14px; }
+        .btn:hover { background: #444; border-color: #666; }
+        .btn-active { background: #2563eb; border-color: #1e40af; }
+        .btn-tune { display: block; background: #2563eb; color: white; text-align: center; padding: 8px; margin-top: 15px; border-radius: 4px; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+        <h1 class="text-2xl font-bold text-yellow-500 flex items-center gap-2">
+            <span>🔥</span> Hot Picks
+        </h1>
+        <div class="flex items-center gap-2">
+            <a href="{{ url_for('manager_console') }}" class="btn">Dashboard</a>
+            <a href="{{ url_for('popup') }}" class="btn btn-active">Hot Picks</a>
+            <a href="{{ url_for('scanner') }}" class="btn">Scanner</a>
+            <a href="{{ url_for('tuning') }}" class="btn">Tuning</a>
+            <a href="{{ url_for('symbol_manager') }}" class="btn">Symbols</a>
+            <a href="{{ url_for('orders') }}" class="btn">Orders</a>
+        </div>
+    </div>
+
+    <div class="grid">
+        {% for row in rows %}
+        <div class="card">
+            <h2 class="text-xl font-bold text-white">{{ row.symbol }}</h2>
+            <div class="score">{{ row.pick_score }}%</div>
+            <p class="text-gray-400 mt-2">{{ row.reason }}</p>
+            <a href="{{ url_for('tuning') }}" class="btn-tune">Adjust Strategy</a>
+        </div>
+        {% else %}
+        <p class="text-gray-500 col-span-full text-center py-10">No picks generated yet. Wait for the scanner...</p>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>

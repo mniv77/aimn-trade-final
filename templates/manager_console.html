@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AIMn - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #111; color: #e5e5e5; font-family: 'Segoe UI', sans-serif; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Table Styles */
+        .table-wrap { overflow-x: auto; background: #1e1e1e; border: 1px solid #333; border-radius: 6px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th { background: #262626; color: #aaa; text-align: left; padding: 12px; font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #2a2a2a; }
+        tr:hover { background: #2d2d2d; }
+
+        .active-status { color: #4ade80; font-weight: bold; }
+        .paused-status { color: #f87171; font-weight: bold; }
+        
+        /* Buttons */
+        .btn { padding: 6px 12px; background: #333; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; border: 1px solid #444; transition: 0.2s; font-size: 14px; }
+        .btn:hover { background: #444; border-color: #666; }
+        .btn-active { background: #2563eb; border-color: #1e40af; } /* Blue for current page */
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+        <h1 class="text-2xl font-bold text-green-500 flex items-center gap-2">
+            <span>🚀</span> Manager Console
+        </h1>
+        
+        <div class="flex items-center gap-2">
+            <a href="{{ url_for('manager_console') }}" class="btn btn-active">Dashboard</a>
+            <a href="{{ url_for('popup') }}" class="btn">Hot Picks</a>
+            <a href="{{ url_for('scanner') }}" class="btn">Scanner</a>
+            <a href="{{ url_for('tuning') }}" class="btn">Tuning</a>
+            <a href="{{ url_for('symbol_manager') }}" class="btn">Symbols</a>
+            <a href="{{ url_for('orders') }}" class="btn">Orders</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Broker</th>
+                    <th>Status</th>
+                    <th>Current Signal</th>
+                    <th>Last Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td class="font-bold text-white">{{ row.symbol }}</td>
+                    <td class="text-gray-400">{{ row.broker }}</td>
+                    <td class="{{ 'active-status' if row.status == 'Active' else 'paused-status' }}">
+                        {{ row.status }}
+                    </td>
+                    <td class="text-yellow-500">{{ row.current_signal or 'Waiting for signal...' }}</td>
+                    <td class="text-xs text-gray-500 font-mono">{{ row.timestamp }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center py-8 text-gray-500">System is offline or no symbols added.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

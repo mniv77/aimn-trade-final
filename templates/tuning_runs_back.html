@@ -1,0 +1,249 @@
+<!-- /home/MeirNiv/aimn-trade-final/templates/tuning_runs.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AiMN Tuning Runs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #080d18;
+            --panel:   #0d1526;
+            --border:  #1a3050;
+            --accent:  #2563eb;
+            --accent2: #0ea5e9;
+            --gold:    #f59e0b;
+            --green:   #10b981;
+            --red:     #ef4444;
+            --text:    #c8d8f0;
+            --muted:   #4a6a90;
+            --label:   #7aa0c8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 14px; min-height: 100vh; padding: 24px; }
+        .mono { font-family: 'Share Tech Mono', monospace; }
+
+        /* Header */
+        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+        .header-logo  { font-family: 'Share Tech Mono', monospace; color: var(--accent2); font-size: 22px; letter-spacing: 3px; }
+        .header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: white; letter-spacing: 1px; }
+        .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+        .header-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 3px; }
+
+        /* Panel */
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
+        .panel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* Run list */
+        .run-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border: 1px solid var(--border);
+            border-radius: 5px; margin-bottom: 8px; cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            background: #060c18;
+        }
+        .run-row:hover { border-color: var(--accent2); background: #0a1525; }
+        .run-row.active { border-color: var(--accent); background: #0f1e3a; }
+
+        .run-id    { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--accent2); min-width: 40px; }
+        .run-date  { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted); min-width: 150px; }
+        .run-status { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; min-width: 80px; }
+        .status-success { color: var(--green); }
+        .status-partial { color: var(--gold); }
+        .status-failed  { color: var(--red); }
+        .status-running { color: var(--accent2); }
+        .run-summary { font-size: 12px; color: var(--text); flex: 1; }
+        .run-duration { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); }
+
+        /* Log viewer */
+        #log_viewer {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px; line-height: 1.7;
+            white-space: pre-wrap; min-height: 300px;
+            max-height: 600px; overflow-y: auto;
+            color: var(--text);
+        }
+        #log_viewer .ok    { color: var(--green); }
+        #log_viewer .err   { color: var(--red); }
+        #log_viewer .info  { color: var(--accent2); }
+        #log_viewer .best  { color: var(--gold); font-weight: bold; }
+        #log_viewer .sep   { color: var(--border); }
+        #log_viewer .warn  { color: var(--gold); }
+
+        /* Refresh button */
+        .btn-refresh {
+            padding: 8px 18px; background: #1a2a4a; border: 1px solid var(--accent2);
+            border-radius: 4px; color: var(--accent2); font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-refresh:hover { background: #1e3a5f; }
+
+        /* Auto refresh indicator */
+        #auto_refresh_indicator { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 40px; color: var(--muted); font-family: 'Share Tech Mono', monospace; }
+
+        /* Spinner */
+        .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-logo">AiMN</div>
+        <div class="header-title">Tuning Runs</div>
+        <div class="header-right">
+            <span id="auto_refresh_indicator"></span>
+            <button class="btn-refresh" onclick="loadRuns()">↺ Refresh</button>
+            <a href="/auto_tuner" style="padding: 8px 18px; background: #1a3a1a; border: 1px solid var(--green); border-radius: 4px; color: var(--green); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; text-decoration: none;">▶ Run Tuner</a>
+            <div class="header-badge">V3.1</div>
+            <a href="/" style="padding: 8px 18px; background: #0d1526; border: 1px solid #1a3050; border-radius: 4px; color: #7aa0c8; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; text-decoration: none;">← Dashboard</a>
+        </div>
+    </div>
+
+
+    <!-- Run List -->
+    <div class="panel">
+        <div class="panel-title">📋 Tuning History</div>
+        <div id="run_list">
+            <div class="empty-state">Loading runs...</div>
+        </div>
+    </div>
+
+    <!-- Log Viewer -->
+    <div class="panel" id="log_panel" style="display:none;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div class="panel-title" style="margin-bottom:0; flex:1;">📄 Run Log</div>
+            <span id="log_run_label" style="font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--accent2);"></span>
+        </div>
+        <div id="log_viewer">Select a run above to view its log...</div>
+    </div>
+
+<script>
+let selectedRunId  = null;
+let autoRefreshTimer = null;
+let hasRunningRun  = false;
+
+// ── Load run list ──────────────────────────────────────────────
+async function loadRuns() {
+    try {
+        const resp = await fetch('/api/tuning_runs');
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const runs = await resp.json();
+        renderRuns(runs);
+
+        // Auto-refresh if any run is still running
+        hasRunningRun = runs.some(r => r.status === 'running');
+        if (hasRunningRun) {
+            document.getElementById('auto_refresh_indicator').textContent = '⟳ Auto-refreshing...';
+            if (!autoRefreshTimer) {
+                autoRefreshTimer = setInterval(() => {
+                    loadRuns();
+                    if (selectedRunId) loadLog(selectedRunId);
+                }, 5000);
+            }
+        } else {
+            document.getElementById('auto_refresh_indicator').textContent = '';
+            if (autoRefreshTimer) {
+                clearInterval(autoRefreshTimer);
+                autoRefreshTimer = null;
+            }
+        }
+
+        // Auto-select most recent run
+        if (runs.length > 0 && !selectedRunId) {
+            selectRun(runs[0].id);
+        }
+
+    } catch(e) {
+        document.getElementById('run_list').innerHTML =
+            `<div class="empty-state">❌ Error loading runs: ${e.message}</div>`;
+    }
+}
+
+function renderRuns(runs) {
+    if (runs.length === 0) {
+        document.getElementById('run_list').innerHTML =
+            '<div class="empty-state">No tuning runs yet!</div>';
+        return;
+    }
+
+    const html = runs.map(r => {
+        const statusClass = `status-${r.status}`;
+        const statusIcon  = r.status === 'success' ? '✅' :
+                            r.status === 'partial'  ? '⚠️' :
+                            r.status === 'failed'   ? '❌' : '⟳';
+        const duration = r.finished_at ?
+            `${Math.round((new Date(r.finished_at) - new Date(r.started_at)) / 60000)}m` : '...';
+        const activeClass = r.id === selectedRunId ? 'active' : '';
+
+        return `
+        <div class="run-row ${activeClass}" data-run-id="${r.id}" onclick="selectRun(${r.id})">
+            <div class="run-id">#${r.id}</div>
+            <div class="run-date">${r.started_at}</div>
+            <div class="run-status ${statusClass}">${statusIcon} ${r.status.toUpperCase()}</div>
+            <div class="run-summary">${r.summary || '...'}</div>
+            <div class="run-duration">${duration}</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('run_list').innerHTML = html;
+}
+
+// ── Select and load a run ──────────────────────────────────────
+function selectRun(runId) {
+    selectedRunId = runId;
+
+    // Update active state in list
+    document.querySelectorAll('.run-row').forEach(row => {
+        row.classList.toggle('active', row.onclick.toString().includes(`(${runId})`));
+    });
+
+    loadLog(runId);
+}
+
+// ── Load log for a run ─────────────────────────────────────────
+async function loadLog(runId) {
+    document.getElementById('log_panel').style.display = 'block';
+    document.getElementById('log_run_label').textContent = `Run #${runId}`;
+
+    try {
+        const resp = await fetch(`/api/tuning_runs/${runId}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const run = await resp.json();
+
+        // Colorize log
+        let log = run.log_text || '(no log)';
+        log = log
+            .replace(/✅[^\n]*/g, m => `<span class="ok">${m}</span>`)
+            .replace(/❌[^\n]*/g, m => `<span class="err">${m}</span>`)
+            .replace(/⚠[^\n]*/g, m => `<span class="warn">${m}</span>`)
+            .replace(/🏆[^\n]*/g, m => `<span class="best">${m}</span>`)
+            .replace(/={3,}/g, m => `<span class="sep">${m}</span>`)
+            .replace(/─{3,}/g, m => `<span class="sep">${m}</span>`);
+
+        const viewer = document.getElementById('log_viewer');
+        viewer.innerHTML = log;
+
+        // If running, scroll to bottom
+        if (run.status === 'running') {
+            viewer.scrollTop = viewer.scrollHeight;
+        }
+
+    } catch(e) {
+        document.getElementById('log_viewer').innerHTML =
+            `<span class="err">❌ Error loading log: ${e.message}</span>`;
+    }
+}
+
+// ── Start ──────────────────────────────────────────────────────
+loadRuns();
+</script>
+</body>
+</html>

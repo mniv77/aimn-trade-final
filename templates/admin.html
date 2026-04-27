@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scanner Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white p-8">
+    <h1 class="text-3xl font-black mb-6">SCANNER CONTROL PANEL</h1>
+    <div class="max-w-4xl bg-slate-800 rounded-xl overflow-hidden shadow-2xl">
+        <table class="w-full text-left">
+            <thead class="bg-slate-700">
+                <tr>
+                    <th class="p-4">Symbol</th>
+                    <th class="p-4">Broker</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="border-b border-slate-700">
+                    <td class="p-4 font-bold">{{ item.local_ticker }}</td>
+                    <td class="p-4 opacity-70">{{ item.broker }}</td>
+                    <td class="p-4">
+                        {% if item.active %}
+                        <span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs font-bold">LIVE</span>
+                        {% else %}
+                        <span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold">OFF</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4">
+                        <a href="/toggle_active/{{ item.id }}" 
+                           class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold transition">
+                            TOGGLE
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-6">
+        <a href="/" class="text-blue-400 underline">← Back to Scanner</a>
+    </div>
+</body>
+</html>

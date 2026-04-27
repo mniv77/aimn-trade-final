@@ -52,37 +52,14 @@
           <input type="checkbox" id="auto-enter-toggle" onchange="toggleAutoEnter()" class="cursor-pointer">
           <span>⚡ Auto-Enter</span>
         </label>
-      </div>
-      <!-- Signal detected -->
-      <div id="strip-signal" class="hidden flex items-center gap-3 px-4 py-2 bg-blue-950 border-b border-blue-800">
-        <span class="text-blue-300 text-xs font-bold">⚡ SIGNAL</span>
-        <span id="strip-symbol" class="text-white font-bold"></span>
-        <span id="strip-direction" class="text-xs px-2 py-0.5 rounded font-bold"></span>
-        <span id="strip-sig-price" class="text-gray-300 text-sm font-mono"></span>
-        <button id="strip-enter-btn" onclick="stripEnterOrder()"
-          class="ml-auto bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded font-bold text-sm">
-          🚀 Enter Order
-        </button>
-        <button onclick="stripDismiss()"
-          class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded text-sm">
-          ✕ Skip
-        </button>
-      </div>
+     </div>
       <!-- Live positions — one row per open trade -->
       <div id="active-orders-list"></div>
-      <!-- Legend -->
-      <div class="px-4 py-1 border-t border-gray-700 text-xs text-gray-600">
-        🟢 Ready &nbsp;🟡 Weak/Closed &nbsp;🔴 Trading &nbsp;🟤 Blocked
-      </div>
-    </div>
 
     <div class="text-center mt-3">
       <div class="inline-flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg">
         <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
         <span class="text-sm font-semibold">Currently Testing: <span id="current-testing-symbol" class="font-mono">--</span></span>
-        <button onclick="testCurrentSymbol()" class="ml-2 bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded text-xs font-bold">
-          🧪 Test Order
-        </button>
       </div>
       <div class="text-xs text-gray-400 mt-1">
         Row <span id="testing-row-number">-</span> •
@@ -172,7 +149,7 @@
     let stripCurrentPrice = 0;
     let stripDirection = '';
     let stripPriceInterval = null;
-    let autoEnterSignals = true;  // auto-enter when signal fires (no manual click)
+    let autoEnterSignals = false;  // auto-enter when signal fires (no manual click)
     // Per-trade live price map: tradeId → currentPrice
     let livePriceMap = {};
     let peakProfitMap = {};  // tradeId → peak P&L % reached
@@ -302,7 +279,8 @@
           const bt = longS  ? parseFloat(longS.rsi_entry)  : 30;
           const st = shortS ? (100 - parseFloat(shortS.rsi_entry)) : 70;
           item.signal = snap.rsi <= bt ? 'BUY' : snap.rsi >= st ? 'SELL' : 'NEUTRAL';
-          item.last_trade_seconds = 30;  // always pass recentPass (no real data available)
+          item.last_trade_seconds = 30;
+          item.filters = checkFilters(item);
         });
         updateScanResultsDisplay();
       } catch(e) {
@@ -517,7 +495,13 @@
 
       let readyCount = 0;
 
-      scanData.forEach((row, index) => {
+      scanData.filter(row => {
+        if (row.symbol === activeTradeSymbol) return true;
+        if (!row.rsi || row.rsi === 0) return false;
+        const hasStrategy = strategyMap[`${row.symbol}:LONG`] || strategyMap[`${row.symbol}:SHORT`];
+        if (!hasStrategy) return false;
+        return row.filters.allPassed;
+      }).forEach((row, index) => {
         const isTestingRow = (index === testingRowIndex);
         const rowExNorm = normEx(row.exchange);
         const marketOpen = isMarketOpen(row.exchange);
@@ -588,6 +572,8 @@
       if (scanData.length === 0) return;
       const first = scanData.shift();
       scanData.push(first);
+      // Recalculate filters with latest data
+      scanData.forEach(item => { item.filters = checkFilters(item); });
       updateScanResultsDisplay();
       checkAndOpenPopups();
     }
@@ -875,7 +861,10 @@
           <span class="${rsiColor}" id="rsi-${o.id}">${rsiVal}</span>
           <span class="text-gray-500">Init</span>
           <span class="text-yellow-300">${initProfit}</span>
-          <span class="text-gray-600">${o.broker}</span>
+          <span class="text-gray-500">Stop</span>
+          <span class="text-red-400">${strat ? parseFloat(strat.stop_loss||2).toFixed(1)+'%' : '--'}</span>
+          <span class="text-gray-500">Decay</span>
+          <span class="text-orange-300">${strat ? parseFloat(strat.decay_start||1).toFixed(1)+'h' : '--'}</span>          <span class="text-gray-600">${o.broker}</span>
           <button ${isClosed?'disabled':''} onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
             class="${isClosed?'bg-gray-600 cursor-not-allowed':'bg-blue-700 hover:bg-blue-600'} text-white px-2 py-0.5 rounded font-bold">
             📊
@@ -965,13 +954,10 @@
       renderOrderRows(_ordersCache);
     }
 
-    async function panicExitTrade(tradeId, symbol, broker, autoReason) {
-      console.log("[Scanner] exit disabled - executor handles:", symbol, autoReason); return;
-      console.log("[Scanner] exit disabled - executor handles:", symbol, autoReason); return;
-      // DISABLED — executor handles all exits
-      console.log("[Scanner] panicExitTrade disabled", symbol, autoReason); return;
+
+async function panicExitTrade(tradeId, symbol, broker, autoReason) {
       const cur = livePriceMap[tradeId];
-      const order = _ordersCache.find(o => o.id === tradeId);
+      if (!cur) { alert('No live price available for ' + symbol); return; }      const order = _ordersCache.find(o => o.id === tradeId);
       if (!order) return;
       const entry = parseFloat(order.entry_price || 0);
       const dir = order.direction === 'LONG' ? 'BUY' : 'SELL';
@@ -1014,7 +1000,14 @@
       try {
         const resp = await fetch('/api/trades/active');
         const orders = await resp.json();
-        _ordersCache = orders.length ? orders : _ordersCache.filter(o => o.status !== "CLOSED");
+        // Keep recently closed trades visible for 2 minutes
+        const now = Date.now();
+        const recentlyClosed = _ordersCache.filter(o =>
+            o.status === 'CLOSED' &&
+            o.exit_time &&
+            (now - (typeof o.exit_time === 'number' ? o.exit_time : new Date(o.exit_time).getTime())) < 120000
+        );
+        _ordersCache = [...orders, ...recentlyClosed];
         el('active-order-count').textContent = `${orders.length} open`;
 
         // Sync activeTradeSymbol for scanner display

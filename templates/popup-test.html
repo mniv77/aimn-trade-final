@@ -1,0 +1,169 @@
+<!-- file: templates/popup-test.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AIMn Popup Test Harness</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: #e5e7eb;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .log {
+      margin-top: 15px;
+      padding: 10px;
+      background: #020617;
+      border-radius: 6px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      margin-right: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    #btnOpen {
+      background: #2563eb;
+      color: white;
+    }
+    #btnStart {
+      background: #16a34a;
+      color: white;
+    }
+    #btnStop {
+      background: #b91c1c;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>AIMn Popup Test Harness</h1>
+  <p>
+    1) Click <b>Open Popup</b> to open <code>trade-popup-fixed.html</code>.<br/>
+    2) Click <b>Start Feed</b> to send INIT + random price ticks every 2 seconds.<br/>
+    3) In the popup you should see <b>Current</b> and <b>P/L%</b> moving.
+  </p>
+
+  <div style="margin-top: 16px;">
+    <button id="btnOpen">Open Popup</button>
+    <button id="btnStart">Start Feed</button>
+    <button id="btnStop">Stop Feed</button>
+  </div>
+
+  <div class="log" id="log"></div>
+
+<script>
+(function(){
+  const logBox = document.getElementById('log');
+  const btnOpen = document.getElementById('btnOpen');
+  const btnStart = document.getElementById('btnStart');
+  const btnStop = document.getElementById('btnStop');
+
+  let popupWin = null;
+  let feedTimer = null;
+  let baseEntry = 448.51;  // test entry price
+  let currentPrice = baseEntry;
+
+  function log(msg){
+    const ts = new Date().toLocaleTimeString();
+    logBox.textContent += `[${ts}] ${msg}\n`;
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  btnOpen.addEventListener('click', () => {
+    // open your popup template (same domain)
+    popupWin = window.open(
+      "/trade-popup-fixed?symbol=CL-OIL&side=SELL&qty=10&exchange=FUTURES&price=" + baseEntry,
+      "AIMN_POPUP_TEST",
+      "width=900,height=80"
+    );
+    log("Popup opened");
+  });
+
+  btnStart.addEventListener('click', () => {
+    if (!popupWin || popupWin.closed) {
+      log("Popup not open – click 'Open Popup' first.");
+      return;
+    }
+
+    // 1) Send INIT once
+    const initMsg = {
+      type: "AIMN_POPUP_INIT",
+      broker: "FUTURES",
+      symbol: "CL-OIL",
+      side: "SELL",
+      entry: baseEntry,
+      current: baseEntry,
+      qty: 10,
+      start_ts: Date.now()
+    };
+    popupWin.postMessage(initMsg, "*");
+    log("INIT sent: " + JSON.stringify(initMsg));
+
+    // 2) Start random price feed
+    if (feedTimer) clearInterval(feedTimer);
+    feedTimer = setInterval(() => {
+      if (!popupWin || popupWin.closed) {
+        clearInterval(feedTimer);
+        feedTimer = null;
+        log("Feed stopped (popup closed)");
+        return;
+      }
+      // random walk around base price
+      currentPrice = currentPrice + (Math.random() - 0.5) * 2; // +/- 1.0
+      const tickMsg = {
+        type: "AIMN_POPUP_TICK",
+        symbol: "CL-OIL",
+        side: "SELL",
+        current: currentPrice
+      };
+      popupWin.postMessage(tickMsg, "*");
+      log("TICK sent: current=" + currentPrice.toFixed(2));
+    }, 2000);
+
+    log("Feed started");
+  });
+
+  btnStop.addEventListener('click', () => {
+    if (feedTimer) {
+      clearInterval(feedTimer);
+      feedTimer = null;
+      log("Feed stopped by user");
+    }
+    if (popupWin && !popupWin.closed) {
+      const exitMsg = {
+        type: "AIMN_POPUP_EXIT",
+        symbol: "CL-OIL",
+        side: "SELL",
+        current: currentPrice
+      };
+      popupWin.postMessage(exitMsg, "*");
+      log("EXIT sent: " + JSON.stringify(exitMsg));
+    }
+  });
+
+  // Listen for PANIC from popup
+  window.addEventListener("message", (event) => {
+    const data = event.data || {};
+    if (data.type === "AIMN_POPUP_PANIC") {
+      log("PANIC received from popup: " + JSON.stringify(data));
+      // here you would call your real bot to close the order
+    }
+  });
+})();
+</script>
+</body>
+</html>

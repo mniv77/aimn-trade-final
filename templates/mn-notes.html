@@ -1,0 +1,404 @@
+<!-- templates/mn-notes.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AiMN Vault | Sovereign Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; text-align: left; -webkit-tap-highlight-color: transparent; }
+        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Interactive Elements */
+        input, select, textarea { background-color: #0f172a; border: 1px solid #334155; color: white !important; padding: 14px; border-radius: 14px; width: 100%; font-weight: bold; font-size: 16px; }
+        input:focus, textarea:focus, select:focus { border-color: #818cf8; outline: none; box-shadow: 0 0 15px rgba(129, 140, 248, 0.2); }
+        label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; margin-bottom: 6px; display: block; letter-spacing: 0.1em; }
+        
+        /* List Density Styling */
+        .vault-row { transition: all 0.2s; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; }
+        .vault-row:hover { background: rgba(99, 102, 241, 0.05); border-left: 4px solid #6366f1; }
+        .hidden-record { display: none !important; }
+
+        .nav-link { color: #94a3b8; transition: all 0.2s; font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; }
+        .nav-link:hover { color: white; }
+        .nav-link-active { color: white; border-bottom: 2px solid #6366f1; padding-bottom: 4px; }
+        
+        .modal-enter { animation: modalFade 0.2s ease-out; }
+        @keyframes modalFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Search Highlight */
+        .search-container { position: sticky; top: 72px; z-index: 100; background: #020617; padding-top: 1rem; padding-bottom: 1rem; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24 md:pb-0">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-slate-950/90 backdrop-blur-md border-b border-slate-800 px-4 py-4 sticky top-0 z-[500] shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg"><i class="fas fa-vault text-white text-xs"></i></div>
+                <h1 class="text-lg font-black tracking-tighter uppercase italic text-left">AiMN <span class="text-indigo-500">Vault</span></h1>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('tuning') }}" class="nav-link">Tuning</a>
+                <a href="{{ url_for('orders') }}" class="nav-link">Orders</a>
+                <a href="{{ url_for('symbols') }}" class="nav-link">Symbols</a>
+                <a href="{{ url_for('add_broker') }}" class="nav-link">Brokers</a>
+                <a href="{{ url_for('notes_page') }}" class="nav-link nav-link-active">Vault</a>
+            </div>
+
+            <div class="flex items-center justify-end">
+                <button onclick="document.getElementById('catModal').classList.remove('hidden')" class="bg-indigo-600/20 border border-indigo-400/30 px-4 py-2 rounded-xl text-[9px] font-black uppercase text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all shadow-lg">
+                    + New Category
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto w-full p-4 md:p-6 flex-grow flex flex-col">
+        
+        <!-- SEARCH & FILTER -->
+        <div class="search-container border-b border-white/5">
+            <div class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="flex-grow w-full text-left">
+                    <label>Search Registry (Title, Keyword, Content)</label>
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input type="text" id="vaultSearch" onkeyup="filterRegistry()" placeholder="Start typing to find titles..." class="pl-12">
+                    </div>
+                </div>
+                <div class="w-full md:w-64 text-left">
+                    <label>Category Filter</label>
+                    <select id="mainCategoryFilter" onchange="filterRegistry()">
+                        <option value="all">📁 Show All Active</option>
+                        <option value="create_new_protocol" class="text-indigo-400 font-bold italic">➕ Create New Category</option>
+                        {% for cat in categories if cat.id > 1 %}
+                        <option value="{{ cat.id }}">📂 {{ cat.name }}</option>
+                        {% endfor %}
+                        <option value="1">📦 System Archive</option>
+                    </select>
+                </div>
+                <button onclick="openEditModal(null)" class="h-[52px] bg-indigo-600 px-6 rounded-2xl text-white font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-95 transition-all whitespace-nowrap">
+                    New Record
+                </button>
+            </div>
+        </div>
+
+        <!-- EXPLORER LIST -->
+        <div class="mt-4 flex-grow glass-card rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+            <div class="bg-slate-900/50 p-4 border-b border-white/5 grid grid-cols-12 gap-4 text-[10px] font-black uppercase text-slate-500 tracking-widest text-left">
+                <div class="col-span-6 md:col-span-8">Title / Subject</div>
+                <div class="col-span-3 md:col-span-2">Category</div>
+                <div class="col-span-3 md:col-span-2 text-right">Actions</div>
+            </div>
+
+            <div id="registryList" class="divide-y divide-white/5 max-h-[65vh] overflow-y-auto custom-scrollbar">
+                {% for note in notes %}
+                <div class="vault-row p-4 grid grid-cols-12 gap-4 items-center" 
+                     data-id="{{ note.id }}"
+                     data-category="{{ note.category_id }}" 
+                     data-title="{{ note.title }}" 
+                     data-content="{{ note.content }}"
+                     data-file="{{ note.file_path if note.file_path else '' }}"
+                     onclick="openEditModal(this)">
+                    
+                    <div class="col-span-6 md:col-span-8 flex flex-col gap-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-bold text-sm tracking-tight italic">{{ note.title }}</span>
+                            {% if note.file_path %}<i class="fas fa-paperclip text-indigo-400 text-[10px]" title="Attachment Stored"></i>{% endif %}
+                        </div>
+                        <span class="text-[10px] text-slate-500 truncate max-w-md mono opacity-60">{{ note.content[:80] }}...</span>
+                    </div>
+
+                    <div class="col-span-3 md:col-span-2">
+                        <span class="text-[8px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded font-black uppercase tracking-tighter">{{ note.category_name }}</span>
+                    </div>
+
+                    <div class="col-span-3 md:col-span-2 flex justify-end gap-2" onclick="event.stopPropagation()">
+                        {% if note.file_path %}
+                        <a href="{{ url_for('download_file', filename=note.file_path) }}" class="h-8 w-8 bg-slate-800 rounded-lg flex items-center justify-center text-indigo-400 text-xs border border-indigo-500/20 hover:bg-indigo-600 hover:text-white transition-all"><i class="fas fa-download"></i></a>
+                        {% endif %}
+                        <form action="{{ url_for('delete_note', id=note.id) }}" method="POST" onsubmit="return confirm('Purge record?');">
+                            <button type="submit" class="h-8 w-8 bg-slate-800 rounded-lg flex items-center justify-center text-rose-500 text-xs border border-rose-500/20 hover:bg-rose-600 hover:text-white transition-all"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Archive Section -->
+                {% for a in archived %}
+                <div class="vault-row p-4 grid grid-cols-12 gap-4 items-center opacity-40 hidden-record" 
+                     data-id="{{ a.id }}"
+                     data-category="1" 
+                     data-title="{{ a.title }}" 
+                     data-content="{{ a.content }}"
+                     data-file="{{ a.file_path if a.file_path else '' }}"
+                     onclick="openEditModal(this)">
+                    <div class="col-span-6 md:col-span-8">
+                        <span class="text-slate-400 font-bold text-sm tracking-tight strike-through">{{ a.title }} (ARCHIVED)</span>
+                    </div>
+                    <div class="col-span-3 md:col-span-2"><span class="text-[8px] bg-slate-800 text-slate-500 px-2 py-1 rounded font-black uppercase">Archive</span></div>
+                    <div class="col-span-3 md:col-span-2 text-right"><i class="fas fa-lock text-slate-600"></i></div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Empty State -->
+            <div id="noResults" class="hidden flex flex-col items-center justify-center py-20 opacity-20">
+                <i class="fas fa-search-minus text-5xl mb-4"></i>
+                <p class="font-black uppercase text-xs tracking-widest">No matching records found</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECORD MANAGER MODAL -->
+    <div id="editModal" class="fixed inset-0 bg-slate-950/98 backdrop-blur-xl z-[2000] hidden flex items-center justify-center overflow-y-auto">
+        <div class="w-full h-full md:h-auto md:max-w-4xl p-6">
+            <div class="glass-card rounded-3xl overflow-hidden border border-white/10 shadow-2xl modal-enter text-left">
+                <div class="bg-indigo-600 p-6 flex justify-between items-center text-white">
+                    <h3 id="modalTitle" class="font-black uppercase text-xs tracking-widest">Record Management</h3>
+                    <button onclick="closeEditModal()" class="h-10 w-10 rounded-full bg-black/20 text-white flex items-center justify-center hover:bg-black/40 transition-colors"><i class="fas fa-times"></i></button>
+                </div>
+                
+                <form id="noteForm" action="{{ url_for('notes_page') }}" method="POST" enctype="multipart/form-data" class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-5">
+                            <input type="hidden" name="id" id="edit_id">
+                            <div class="text-left">
+                                <label>Asset Class / Category</label>
+                                <select name="category_id" id="edit_category_id">
+                                    {% for cat in categories %}<option value="{{ cat.id }}">{{ cat.name }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <div class="text-left"><label>Title / Identifier</label><input type="text" name="title" id="edit_title" required></div>
+                            
+                            <!-- ATTACHMENT SECTION -->
+                            <div id="attachment_block" class="space-y-4 text-left">
+                                <div id="current_attachment" class="hidden">
+                                    <label>Secured Attachment (Stored File)</label>
+                                    <div class="bg-indigo-500/10 p-4 rounded-2xl flex justify-between items-center border border-indigo-500/20">
+                                        <div class="flex items-center gap-2 overflow-hidden">
+                                            <i class="fas fa-file-shield text-indigo-400"></i>
+                                            <span id="file_name_display" class="text-[10px] font-mono text-indigo-400 truncate"></span>
+                                        </div>
+                                        <a id="file_download_link" href="#" target="_blank" class="text-white bg-indigo-600 px-3 py-1 rounded text-[10px] font-black uppercase whitespace-nowrap shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-all">Download</a>
+                                    </div>
+                                </div>
+
+                                <div class="text-left">
+                                    <label>Upload / Swap Security File</label>
+                                    <div class="relative group">
+                                        <input type="file" name="attachment" id="edit_file" class="text-xs" onchange="handleFileSelection(this)">
+                                        <div id="file_status" class="hidden mt-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-400 uppercase italic">
+                                            <i class="fas fa-check-circle mr-1"></i> <span id="selected_file_name"></span> - Pending Seal
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 flex flex-col text-left">
+                            <label>Logic / Information Content</label>
+                            
+                            <!-- FIND AND REPLACE TOOLBAR -->
+                            <div class="flex flex-wrap gap-2 items-end mb-2 bg-slate-900/50 p-3 rounded-xl border border-white/5">
+                                <div class="flex-1 min-w-[120px]">
+                                    <label class="!mb-1 opacity-50 !text-[8px]">Find</label>
+                                    <input type="text" id="findInput" class="!p-2 !text-xs !h-8 !rounded-lg" placeholder="Search...">
+                                </div>
+                                <div class="flex-1 min-w-[120px]">
+                                    <label class="!mb-1 opacity-50 !text-[8px]">Replace</label>
+                                    <input type="text" id="replaceInput" class="!p-2 !text-xs !h-8 !rounded-lg" placeholder="Replace...">
+                                </div>
+                                <div class="flex gap-1">
+                                    <button type="button" onclick="findInText()" class="h-8 px-3 bg-slate-800 rounded-lg text-[9px] font-black uppercase hover:bg-slate-700 transition-colors">Find</button>
+                                    <button type="button" onclick="replaceInText()" class="h-8 px-3 bg-indigo-600 rounded-lg text-[9px] font-black uppercase hover:bg-indigo-500 transition-colors">Replace</button>
+                                    <button type="button" onclick="replaceAllInText()" class="h-8 px-3 bg-indigo-900 rounded-lg text-[9px] font-black uppercase hover:bg-indigo-800 transition-colors">All</button>
+                                </div>
+                            </div>
+
+                            <textarea name="content" id="edit_content" rows="16" class="mono text-xs leading-relaxed flex-grow custom-scrollbar" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-6 border-t border-white/5 mt-6">
+                        <button type="button" onclick="closeEditModal()" class="flex-1 bg-slate-800 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-slate-700 transition-colors">Discard Changes</button>
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest shadow-xl hover:bg-indigo-500 transition-colors">Seal Record</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW CATEGORY MODAL -->
+    <div id="catModal" class="fixed inset-0 bg-black/95 z-[3000] hidden flex items-center justify-center p-6 text-left">
+        <div class="glass-card w-full max-w-sm rounded-3xl p-8 border border-white/10 modal-enter">
+            <h3 class="font-black uppercase text-xs tracking-widest text-indigo-400 mb-6 flex items-center gap-2">
+                <i class="fas fa-folder-plus"></i> Initialize Category
+            </h3>
+            <form action="{{ url_for('add_category') }}" method="POST" class="space-y-4">
+                <label>Category Name</label>
+                <input type="text" name="category_name" placeholder="e.g. Backups" required>
+                <div class="flex gap-2">
+                    <button type="button" onclick="document.getElementById('catModal').classList.add('hidden')" class="flex-1 bg-slate-800 py-4 rounded-xl text-[10px] font-black uppercase hover:bg-slate-700 transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 bg-indigo-600 py-4 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-500 transition-colors">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let lastSearchPos = 0;
+
+        function handleFileSelection(input) {
+            const status = document.getElementById('file_status');
+            const nameDisplay = document.getElementById('selected_file_name');
+            if (input.files && input.files.length > 0) {
+                status.classList.remove('hidden');
+                nameDisplay.innerText = input.files[0].name;
+            } else {
+                status.classList.add('hidden');
+            }
+        }
+
+        function findInText() {
+            const textarea = document.getElementById('edit_content');
+            const findTerm = document.getElementById('findInput').value;
+            if (!findTerm) return;
+            const text = textarea.value;
+            let pos = text.toLowerCase().indexOf(findTerm.toLowerCase(), lastSearchPos);
+            if (pos === -1) pos = text.toLowerCase().indexOf(findTerm.toLowerCase(), 0);
+            if (pos !== -1) {
+                textarea.focus();
+                textarea.setSelectionRange(pos, pos + findTerm.length);
+                lastSearchPos = pos + findTerm.length;
+                const lineHeight = 18; 
+                const lines = text.substr(0, pos).split("\n").length;
+                textarea.scrollTop = (lines - 5) * lineHeight;
+            } else {
+                lastSearchPos = 0;
+            }
+        }
+
+        function replaceInText() {
+            const textarea = document.getElementById('edit_content');
+            const findTerm = document.getElementById('findInput').value;
+            const replaceTerm = document.getElementById('replaceInput').value;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            if (selectedText.toLowerCase() === findTerm.toLowerCase() && findTerm !== "") {
+                const text = textarea.value;
+                textarea.value = text.substring(0, start) + replaceTerm + text.substring(end);
+                textarea.setSelectionRange(start, start + replaceTerm.length);
+                lastSearchPos = start + replaceTerm.length;
+                findInText();
+            } else {
+                findInText();
+            }
+        }
+
+        function replaceAllInText() {
+            const textarea = document.getElementById('edit_content');
+            const findTerm = document.getElementById('findInput').value;
+            const replaceTerm = document.getElementById('replaceInput').value;
+            if (!findTerm) return;
+            const text = textarea.value;
+            const escapedTerm = findTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const re = new RegExp(escapedTerm, 'gi');
+            textarea.value = text.replace(re, replaceTerm);
+        }
+
+        function filterRegistry() {
+            const query = document.getElementById('vaultSearch').value.toLowerCase();
+            const catId = document.getElementById('mainCategoryFilter').value;
+            const rows = document.querySelectorAll('.vault-row');
+            let matchCount = 0;
+            if (catId === 'create_new_protocol') {
+                document.getElementById('catModal').classList.remove('hidden');
+                document.getElementById('mainCategoryFilter').value = 'all';
+                return;
+            }
+            rows.forEach(row => {
+                const rowCat = row.getAttribute('data-category');
+                const title = row.getAttribute('data-title').toLowerCase();
+                const content = row.getAttribute('data-content').toLowerCase();
+                const matchesSearch = title.includes(query) || content.includes(query);
+                const matchesCat = (catId === 'all') ? rowCat !== '1' : rowCat === catId;
+                if (matchesSearch && matchesCat) { row.classList.remove('hidden-record'); matchCount++; } 
+                else { row.classList.add('hidden-record'); }
+            });
+            document.getElementById('noResults').classList.toggle('hidden', matchCount > 0);
+        }
+
+        function openEditModal(rowEl) {
+            const form = document.getElementById('noteForm');
+            const displayTitle = document.getElementById('modalTitle');
+            
+            // Reset modal UI state
+            document.getElementById('edit_file').value = "";
+            document.getElementById('file_status').classList.add('hidden');
+            document.getElementById('findInput').value = "";
+            document.getElementById('replaceInput').value = "";
+            document.getElementById('current_attachment').classList.add('hidden');
+            lastSearchPos = 0;
+            
+            if (rowEl) {
+                // Populate from data-attributes
+                const id = rowEl.getAttribute('data-id');
+                const title = rowEl.getAttribute('data-title');
+                const catId = rowEl.getAttribute('data-category');
+                const content = rowEl.getAttribute('data-content');
+                const filePath = rowEl.getAttribute('data-file');
+
+                form.action = "{{ url_for('update_note') }}";
+                document.getElementById('edit_id').value = id;
+                document.getElementById('edit_title').value = title;
+                document.getElementById('edit_category_id').value = catId;
+                document.getElementById('edit_content').value = content;
+                displayTitle.innerText = "Modify Vault Record";
+
+                // Check for valid file path (handle string versions of None)
+                if (filePath && filePath !== 'None' && filePath !== '' && filePath !== 'null' && filePath !== 'undefined') {
+                    document.getElementById('current_attachment').classList.remove('hidden');
+                    // Display cleaner filename (remove timestamp prefix)
+                    const cleanName = filePath.includes('_') ? filePath.split('_').slice(1).join('_') : filePath;
+                    document.getElementById('file_name_display').innerText = cleanName;
+                    document.getElementById('file_download_link').href = "/download/" + encodeURIComponent(filePath);
+                }
+            } else {
+                // New Record Setup
+                form.action = "{{ url_for('notes_page') }}";
+                document.getElementById('edit_id').value = "";
+                document.getElementById('edit_title').value = "";
+                const currentFilter = document.getElementById('mainCategoryFilter').value;
+                document.getElementById('edit_category_id').value = (currentFilter === 'all' || currentFilter === '1') ? 2 : currentFilter;
+                document.getElementById('edit_content').value = "";
+                displayTitle.innerText = "New Vault Record";
+            }
+            document.getElementById('editModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'Escape') {
+                closeEditModal(); 
+                document.getElementById('catModal').classList.add('hidden'); 
+            } 
+        });
+        
+        window.onload = () => filterRegistry();
+    </script>
+</body>
+</html>

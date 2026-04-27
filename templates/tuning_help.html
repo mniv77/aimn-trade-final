@@ -1,0 +1,209 @@
+<!-- templates/tuning_help.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMN Tuning Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; line-height: 1.7; }
+        .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .highlight { color: #4ade80; font-weight: 900; }
+        .step { background: #0f172a; border-left: 4px solid #3b82f6; padding: 24px; border-radius: 12px; margin-bottom: 20px; }
+        .warning { background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; }
+        code { background: rgba(99, 102, 241, 0.1); padding: 2px 6px; border-radius: 4px; color: #818cf8; font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="p-6 md:p-12 max-w-5xl mx-auto">
+
+    <header class="mb-12 border-b border-white/5 pb-8 flex justify-between items-end">
+        <div class="text-left">
+            <h1 class="text-5xl font-black italic tracking-tighter uppercase text-white leading-none">Strategy <span class="text-indigo-500">Tuning</span> Guide</h1>
+            <p class="text-slate-500 uppercase tracking-[0.3em] font-black text-[10px] mt-2">AiMN V3.1 • Parameter Optimization Protocol</p>
+        </div>
+        <a href="/tuning" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase transition-all flex items-center gap-2 shadow-xl">
+            <i class="fas fa-arrow-left"></i> Back to Tuning
+        </a>
+    </header>
+
+    <div class="space-y-8">
+        
+        <!-- OVERVIEW -->
+        <div class="glass-card p-8 rounded-2xl border-indigo-500/20">
+            <h3 class="text-2xl font-black uppercase text-indigo-400 mb-4 flex items-center gap-3">
+                <i class="fas fa-bullseye"></i> What is Tuning?
+            </h3>
+            <p class="text-base text-slate-300 mb-4">
+                Tuning is finding the <span class="highlight">"magic numbers"</span> that make a strategy profitable for a specific asset. 
+                Each asset (BTC, ETH, AAPL, etc.) has unique behavior and requires its own optimized parameters.
+            </p>
+            <p class="text-sm text-slate-400">
+                You use <strong>TradingView</strong> to backtest hundreds of parameter combinations, 
+                then copy the winning settings into AiMN to trade live.
+            </p>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="step">
+            <h2 class="text-2xl font-black uppercase text-blue-400 mb-4 flex items-center gap-3">
+                <span class="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+                Open TradingView Strategy
+            </h2>
+            <div class="space-y-3 text-sm text-slate-300">
+                <p>1. Open your chart in TradingView (BTC/USD, ETH/USD, etc.)</p>
+                <p>2. Add the <code>AiMN-G Tuning V31</code> strategy indicator</p>
+                <p>3. Select direction: <code>BUY</code> (for LONG) or <code>SELL</code> (for SHORT)</p>
+                <p>4. Open the <strong>Strategy Tester</strong> tab at the bottom</p>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step border-l-emerald-500">
+            <h2 class="text-2xl font-black uppercase text-emerald-400 mb-4 flex items-center gap-3">
+                <span class="bg-emerald-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
+                Find Magic Numbers (The Hard Part)
+            </h2>
+            <div class="space-y-4 text-sm text-slate-300">
+                <p class="text-base font-bold text-white">Your Goal: <span class="highlight">Maximize Total Profit</span></p>
+                
+                <div class="bg-slate-900 p-4 rounded-lg space-y-2">
+                    <p class="font-bold text-amber-400">Parameters to Adjust:</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-400">
+                        <li><strong>RSI Length</strong> - Usually 4320 (3 days of 1-min bars) or 36 (3 days of 2-hour bars)</li>
+                        <li><strong>RSI Entry</strong> - For LONG: try 20-50. For SHORT: try 50-80</li>
+                        <li><strong>RSI Exit</strong> - For LONG: try 70-90. For SHORT: try 10-30</li>
+                        <li><strong>MACD Fast/Slow/Signal</strong> - Try unusual numbers! (5,24,9) or (22,14,8) might work</li>
+                        <li><strong>Stop Loss %</strong> - Usually 1-5%</li>
+                        <li><strong>Trailing Start/Drop</strong> - Advanced profit protection</li>
+                    </ul>
+                </div>
+
+                <div class="warning">
+                    <p class="font-black text-red-400 mb-2"><i class="fas fa-exclamation-triangle"></i> IMPORTANT!</p>
+                    <p class="text-sm">The MACD numbers don't need to "make sense" - they just need to produce profit! 
+                    Fast=29, Slow=14, Signal=8 might seem backwards, but if it makes money, it works!</p>
+                </div>
+
+                <p class="text-base font-bold text-white mt-6">What You're Looking For:</p>
+                <ul class="list-disc list-inside space-y-1 text-slate-400">
+                    <li>Total Profit % as high as possible</li>
+                    <li>Smooth equity curve (not choppy)</li>
+                    <li>At least 20+ trades (proves it's not just luck)</li>
+                    <li>Win rate above 40%</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step border-l-purple-500">
+            <h2 class="text-2xl font-black uppercase text-purple-400 mb-4 flex items-center gap-3">
+                <span class="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>
+                Copy the Orange Label (CSV String)
+            </h2>
+            <div class="space-y-3 text-sm text-slate-300">
+                <p>Once you find good numbers in TradingView:</p>
+                <p>1. Look for the <strong class="text-amber-400">orange label</strong> on your chart</p>
+                <p>2. It says <code>📋 V31 CSV (CLICK & COPY)</code></p>
+                <p>3. Click it and copy the entire string that appears</p>
+                <p class="text-slate-500 text-xs italic">Example: BUY, 12, 26, 9, 4,320, 30, 0, 70, 0, 2, 0, 1, 0, 0.5, 0, 5, 0, ...</p>
+            </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step border-l-rose-500">
+            <h2 class="text-2xl font-black uppercase text-rose-400 mb-4 flex items-center gap-3">
+                <span class="bg-rose-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">4</span>
+                Sync to AiMN Dashboard
+            </h2>
+            <div class="space-y-3 text-sm text-slate-300">
+                <p>1. Go to the <strong>Tuning</strong> page</p>
+                <p>2. Select your <code>Broker</code> and <code>Symbol</code></p>
+                <p>3. Select <code>Direction</code> (LONG or SHORT)</p>
+                <p>4. Paste the CSV string into the <strong class="text-amber-400">TradingView Bridge</strong> box</p>
+                <p>5. Click <strong class="text-indigo-400">Map Indicators to Form</strong></p>
+                <p>6. All fields auto-fill! ✅</p>
+                <p>7. Click <strong class="text-blue-400">SAVE SYSTEM</strong></p>
+            </div>
+        </div>
+
+        <!-- STEP 5 -->
+        <div class="step border-l-amber-500">
+            <h2 class="text-2xl font-black uppercase text-amber-400 mb-4 flex items-center gap-3">
+                <span class="bg-amber-500 text-black w-8 h-8 rounded-full flex items-center justify-center text-sm">5</span>
+                Understanding RSI Real (Range Scaling)
+            </h2>
+            <div class="space-y-3 text-sm text-slate-300">
+                <p>AiMN doesn't use standard 0-100 RSI. It uses <span class="highlight">Real-World Range Scaling</span>.</p>
+                
+                <div class="bg-slate-900 p-4 rounded-lg">
+                    <p class="font-bold text-white mb-2">Formula:</p>
+                    <code class="text-xs">RSI Real = ((Current Price - MIN) / (MAX - MIN)) × 100</code>
+                </div>
+
+                <p class="mt-4"><strong>What this means:</strong></p>
+                <ul class="list-disc list-inside space-y-1 text-slate-400">
+                    <li><strong>MAX</strong> = Highest price in the last X bars (from RSI Length)</li>
+                    <li><strong>MIN</strong> = Lowest price in the last X bars</li>
+                    <li>When price is near MAX → RSI Real is close to 100</li>
+                    <li>When price is near MIN → RSI Real is close to 0</li>
+                </ul>
+
+                <p class="mt-4 text-amber-400 font-bold">📊 Important: Copy MAX and MIN values!</p>
+                <p>Look at the <strong>HI/LO Copy Table</strong> in TradingView (bottom right)</p>
+                <p>Those numbers go in fields <code>22. RSI Real MAX</code> and <code>23. RSI Real MIN</code></p>
+            </div>
+        </div>
+
+        <!-- PRO TIPS -->
+        <div class="glass-card p-8 rounded-2xl border-emerald-500/20">
+            <h4 class="text-xl font-black uppercase text-emerald-400 mb-6 tracking-widest flex items-center gap-3">
+                <i class="fas fa-lightbulb"></i> Pro Tips
+            </h4>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-slate-900 p-4 rounded-lg">
+                    <p class="font-bold text-white mb-2">✨ Don't Overtune</p>
+                    <p class="text-slate-400">Numbers that work for 100+ trades are better than numbers that work perfectly for 10 trades.</p>
+                </div>
+                <div class="bg-slate-900 p-4 rounded-lg">
+                    <p class="font-bold text-white mb-2">🎯 Test Both Directions</p>
+                    <p class="text-slate-400">BTC might be great for LONG but terrible for SHORT. Tune each direction separately.</p>
+                </div>
+                <div class="bg-slate-900 p-4 rounded-lg">
+                    <p class="font-bold text-white mb-2">📊 Different Timeframes</p>
+                    <p class="text-slate-400">1h candles might work better than 2h for some assets. Try both!</p>
+                </div>
+                <div class="bg-slate-900 p-4 rounded-lg">
+                    <p class="font-bold text-white mb-2">🔄 Retune Regularly</p>
+                    <p class="text-slate-400">Markets change. If profit drops, retune with fresh data.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TROUBLESHOOTING -->
+        <div class="warning">
+            <h4 class="text-lg font-black text-red-400 mb-3 flex items-center gap-2">
+                <i class="fas fa-tools"></i> Common Issues
+            </h4>
+            <div class="space-y-2 text-sm text-slate-300">
+                <p><strong>⚠️ "RETUNE" warning on dashboard?</strong><br>
+                The price broke above MAX or below MIN. The range is outdated. Retune to get new MAX/MIN values.</p>
+                
+                <p><strong>❌ No matches (RSI or MACD stuck on WAIT)?</strong><br>
+                Your entry parameters might be too strict. Try widening the RSI Entry range or different MACD numbers.</p>
+                
+                <p><strong>🟡 Symbol shows "CLOSED" (yellow)?</strong><br>
+                Market is closed (Alpaca stocks only trade Mon-Fri 6:30am-1pm PST). Wait for market hours.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="mt-20 text-center border-t border-white/5 pt-10 opacity-30">
+        <p class="text-[9px] text-slate-600 font-black uppercase tracking-[0.8em]">AiMN V3.1 • Strategy Tuning Protocol</p>
+    </footer>
+
+</body>
+</html>

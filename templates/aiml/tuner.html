@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMn Strategy Tuner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+        .input-dark { 
+            background: #1e293b; 
+            border: 1px solid #334155; 
+            color: white; 
+            padding: 6px 10px; 
+            border-radius: 4px; 
+            width: 80px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        .input-dark:focus { border-color: #3b82f6; outline: none; }
+        .btn-save { 
+            background: #10b981; color: white; 
+            padding: 6px 16px; border-radius: 4px; 
+            font-weight: bold; font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-save:hover { background: #059669; transform: translateY(-1px); }
+        .original-value { font-size: 0.75rem; color: #64748b; margin-right: 6px; }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-blue-400">🧠 AIMn Strategy Tuner</h1>
+                <p class="text-gray-400 text-sm mt-1">Adjust your trading parameters. Updates apply to the Scanner immediately.</p>
+            </div>
+            
+            <div>
+                <button onclick="loadConfigs()" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded shadow font-bold text-sm mr-3">
+                    📂 Reload Saved Data
+                </button>
+                <button onclick="window.close()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded shadow font-bold text-sm">
+                    ✖ Close
+                </button>
+            </div>
+        </div>
+
+        <div id="status-msg" class="hidden p-3 mb-4 rounded text-center font-bold"></div>
+
+        <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-900 text-gray-400 uppercase text-xs border-b border-gray-700">
+                        <th class="p-4 font-semibold">Broker</th>
+                        <th class="p-4 font-semibold">Symbol</th>
+                        <th class="p-4 font-semibold text-yellow-500">Stop Loss (x ATR)</th>
+                        <th class="p-4 font-semibold text-green-500">Take Profit (x ATR)</th>
+                        <th class="p-4 font-semibold">Timeframe</th>
+                        <th class="p-4 font-semibold text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tuner-rows" class="divide-y divide-gray-700">
+                    <tr><td colspan="6" class="p-8 text-center text-gray-500">Connecting to Brain...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 1. FETCH CONFIGS AND RENDER
+        async function loadConfigs() {
+            const tbody = document.getElementById('tuner-rows');
+            // Visual cue that it's refreshing
+            tbody.style.opacity = '0.5';
+
+            try {
+                const res = await fetch('/api/get_scanner_data');
+                const json = await res.json();
+
+                if (json.status === 'success') {
+                    tbody.innerHTML = '';
+                    json.data.forEach((row, index) => {
+                        const html = `
+                            <tr class="hover:bg-gray-750 transition group">
+                                <td class="p-4 text-gray-400 font-medium">${row.exchange}</td>
+                                <td class="p-4 font-mono text-lg font-bold text-white">${row.symbol}</td>
+                                
+                                <td class="p-4">
+                                    <div class="flex flex-col">
+                                        <span class="original-value">Saved: ${row.sl_mult}</span>
+                                        <input type="number" step="0.1" value="${row.sl_mult}" id="sl-${index}" class="input-dark focus:border-yellow-500">
+                                    </div>
+                                </td>
+
+                                <td class="p-4">
+                                    <div class="flex flex-col">
+                                        <span class="original-value">Saved: ${row.tp_mult}</span>
+                                        <input type="number" step="0.1" value="${row.tp_mult}" id="tp-${index}" class="input-dark focus:border-green-500">
+                                    </div>
+                                </td>
+
+                                <td class="p-4">
+                                    <select id="tf-${index}" class="input-dark w-24 cursor-pointer">
+                                        <option value="5m" ${row.timeframe=='5m'?'selected':''}>5m</option>
+                                        <option value="15m" ${row.timeframe=='15m'?'selected':''}>15m</option>
+                                        <option value="1h" ${row.timeframe=='1h'?'selected':''}>1h</option>
+                                        <option value="4h" ${row.timeframe=='4h'?'selected':''}>4h</option>
+                                    </select>
+                                </td>
+
+                                <td class="p-4 text-center">
+                                    <button onclick="saveRow('${row.symbol}', '${row.exchange}', ${index})" class="btn-save shadow-lg">
+                                        SAVE
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += html;
+                    });
+                    
+                    // Restore opacity & Show success toast
+                    tbody.style.opacity = '1';
+                    showStatus("✅ Data Loaded Successfully", "bg-green-900 text-green-200 border-green-700");
+
+                } else {
+                    showStatus("⚠️ API Error: " + json.message, "bg-red-900 text-red-200");
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-red-500 text-center">Failed to load data: ${err}</td></tr>`;
+            }
+        }
+
+        // 2. SAVE FUNCTION
+        async function saveRow(symbol, broker, idx) {
+            const sl = document.getElementById(`sl-${idx}`).value;
+            const tp = document.getElementById(`tp-${idx}`).value;
+            const tf = document.getElementById(`tf-${idx}`).value;
+            const btn = document.querySelectorAll('.btn-save')[idx];
+
+            // Visual Feedback
+            const originalText = btn.innerText;
+            btn.innerText = '⏳';
+            btn.style.opacity = '0.7';
+
+            try {
+                const response = await fetch('/api/update_config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        symbol: symbol, broker: broker, 
+                        sl: sl, tp: tp, timeframe: tf 
+                    })
+                });
+                
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Success Animation
+                    btn.innerText = '✔ SAVED';
+                    btn.style.backgroundColor = '#3b82f6'; // Blue
+                    
+                    // Update the "Saved:" label instantly so it matches the new value
+                    // This is a nice UI trick so you don't have to reload to see the update
+                    const row = btn.closest('tr');
+                    row.querySelectorAll('.original-value')[0].innerText = `Saved: ${sl}`;
+                    row.querySelectorAll('.original-value')[1].innerText = `Saved: ${tp}`;
+
+                    setTimeout(() => { 
+                        btn.innerText = 'SAVE'; 
+                        btn.style.backgroundColor = '#10b981'; // Back to Green
+                        btn.style.opacity = '1';
+                    }, 2000);
+                } else {
+                    alert("Error: " + result.message);
+                    btn.innerText = originalText;
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Connection failed.");
+                btn.innerText = 'RETRY';
+            }
+        }
+
+        function showStatus(msg, classes) {
+            const el = document.getElementById('status-msg');
+            el.className = `p-3 mb-4 rounded text-center font-bold border ${classes}`;
+            el.innerText = msg;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3000);
+        }
+
+        // Initialize
+        loadConfigs();
+    </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!-- templates/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMN V3.1 - Master Control Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;700;900&display=swap');
+        body { font-family: 'Exo 2', sans-serif; background-color: #020617; color: white; overflow: hidden; height: 100vh; text-align: left; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .mono { font-family: 'Share Tech Mono', monospace; }
+        .symbol-anchor { transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; border-radius: 12px; margin-bottom: 6px; padding: 12px; background: rgba(30, 41, 59, 0.2); height: 58px; }
+        .active-eval { background: #4f46e5 !important; border-color: #818cf8 !important; box-shadow: 0 0 20px rgba(79, 70, 229, 0.4); transform: scale(1.02); z-index: 10; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .pipeline-step { height: 4px; border-radius: 2px; flex: 1; background: #1e293b; transition: all 0.5s ease; }
+        .step-active { background: #6366f1; }
+        .step-ready { background: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+        .order-row { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; display: flex; align-items: center; padding: 4px 12px; gap: 10px; font-size: 10px; white-space: nowrap; overflow: hidden; height: 34px; }
+        .pending-row { background: rgba(16,185,129,0.05) !important; border-color: #10b981 !important; }
+        .frozen-exit { background: rgba(244,63,94,0.1) !important; border-color: #f43f5e !important; opacity: 0.9; }
+        .cell { flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; }
+        .cell-xs { width: 32px; } .cell-sm { width: 52px; } .cell-md { width: 78px; } .cell-tf { width: 38px; } .cell-grow { flex-grow: 1; min-width: 0; }
+        @keyframes flash-green { 0%,100%{color:#60a5fa;} 50%{color:#4ade80;} }
+        @keyframes flash-red   { 0%,100%{color:#60a5fa;} 50%{color:#f87171;} }
+        .price-up { animation: flash-green 0.4s ease; } .price-down { animation: flash-red 0.4s ease; }
+        .ws-dot { width:6px; height:6px; border-radius:50%; display:inline-block; margin-right:4px; }
+        .ws-connected { background:#4ade80; box-shadow:0 0 6px rgba(74,222,128,0.6); }
+        .ws-disconnected { background:#f87171; }
+        .ws-connecting { background:#fbbf24; animation: blink 1s infinite; }
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+    </style>
+</head>
+<body class="flex flex-col">
+    <nav class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-[500] shrink-0 shadow-2xl">
+        <div class="flex items-center gap-6 text-[11px] font-bold uppercase tracking-wider">
+            <a href="/" class="text-white border-b-2 border-white pb-1">Dashboard</a>
+            <a href="/tuning" class="text-gray-400 hover:text-white transition-colors">Tuning</a>
+            <a href="/orders" class="text-gray-400 hover:text-white transition-colors">Orders</a>
+            <a href="/symbols" class="text-gray-400 hover:text-white transition-colors">Symbols</a>
+            <a href="/brokers" class="text-gray-400 hover:text-white transition-colors">Brokers</a>
+            <a href="/test_scanner" class="text-yellow-400 hover:text-white transition-colors">🧪 Test</a>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center bg-slate-900 px-3 py-2 rounded-xl border border-white/5">
+                <span id="ws-dot" class="ws-dot ws-connecting"></span>
+                <span id="ws-label" class="text-[9px] font-black mono text-slate-400 uppercase">CONNECTING</span>
+            </div>
+            <div class="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-xl border border-white/5">
+                <span id="speed-label" class="text-[10px] font-black text-indigo-400 mono">SPEED: 5s</span>
+                <button onclick="adjustSpeed(-1)" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black w-8 h-8 rounded-lg text-xl">−</button>
+                <button onclick="adjustSpeed(1)" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black w-8 h-8 rounded-lg text-xl">+</button>
+                <div class="h-6 w-[1px] bg-white/10 mx-1"></div>
+                <button onclick="toggleRotation()" id="rot-btn" class="text-[10px] font-black uppercase text-indigo-400 hover:text-white transition-colors">ROTATION ON</button>
+            </div>
+        </div>
+    </nav>
+    <div class="flex-1 flex flex-row p-2 overflow-hidden gap-2">
+        <aside class="w-64 lg:w-80 glass rounded-2xl flex flex-col overflow-hidden border border-white/5 shrink-0 shadow-lg bg-slate-950/40">
+            <div class="p-3 border-b border-white/5 bg-slate-900/60 shadow-inner">
+                <h3 class="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Live Strategy Pool</h3>
+                <div class="flex justify-between items-center">
+                    <span class="text-[7px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1"><span class="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse"></span> Analyzing</span>
+                    <span id="asset-count" class="bg-indigo-500/20 text-indigo-400 text-[10px] font-black px-2 py-0.5 rounded-full">0</span>
+                </div>
+            </div>
+            <div id="scanner-viewport" class="flex-1 overflow-y-auto p-2 custom-scrollbar">
+                <div id="symbol-list-box" class="flex flex-col"></div>
+            </div>
+        </aside>
+        <main class="flex-1 flex flex-col gap-2 overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 shrink-0">
+                <div class="bg-black/40 rounded-xl p-4 border border-white/5 glass flex justify-between items-center">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 id="eval-symbol" class="text-4xl font-black text-white uppercase tracking-tighter leading-none">---</h2>
+                            <span id="eval-candle" class="text-[9px] font-black bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded mono uppercase">--</span>
+                        </div>
+                        <div id="eval-direction" class="text-[10px] font-black uppercase mt-2 text-indigo-400 tracking-widest">BIAS: ---</div>
+                    </div>
+                    <div class="text-right">
+                        <div id="eval-price" class="text-4xl font-black mono text-slate-100 leading-none tracking-tighter">$0.00</div>
+                        <div id="eval-price-source" class="text-[7px] text-slate-600 mono mt-1 uppercase">DB PRICE</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-black/40 rounded-xl p-4 border border-white/5 glass flex flex-col justify-between">
+                        <p class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Live RSI</p>
+                        <div id="eval-current-rsi" class="text-4xl font-black text-indigo-400 leading-none">0.00</div>
+                        <div class="flex items-center gap-2 mt-2 text-[7px] font-black text-slate-500 uppercase">
+                            <div class="bg-white/5 px-2 py-0.5 rounded">MIN <span id="eval-rsi-min" class="text-slate-300 ml-1">0</span></div>
+                            <div class="bg-white/5 px-2 py-0.5 rounded">MAX <span id="eval-rsi-max" class="text-slate-300 ml-1">0</span></div>
+                            <div class="bg-indigo-500/20 px-2 py-0.5 rounded">GOAL <span id="eval-rsi-arrow" class="text-indigo-400 ml-1"></span><span id="eval-rsi-goal" class="text-white ml-1">0</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-4 border border-white/5 glass flex flex-col justify-between">
+                        <p class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Momentum</p>
+                        <div id="eval-current-macd" class="text-3xl font-black text-slate-400 mono leading-none">0.0000</div>
+                        <div id="macd-slope-icon" class="text-xl font-black text-indigo-400 mt-1">─</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="flex flex-col gap-1 w-32 shrink-0">
+                        <p class="text-[7px] font-black text-slate-500 uppercase tracking-widest">Agreement Audit</p>
+                        <div class="flex gap-1 w-full">
+                            <div id="step-rsi" class="pipeline-step"></div>
+                            <div id="step-macd" class="pipeline-step"></div>
+                            <div id="step-exec" class="pipeline-step"></div>
+                        </div>
+                    </div>
+                    <div id="condition-audit" class="text-[9px] font-black uppercase tracking-[0.1em] italic">Synthesizing...</div>
+                </div>
+                <div id="alignment-indicator" class="text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-lg bg-slate-800 text-slate-500 border border-white/5">Wait</div>
+            </div>
+            <div class="flex-1 bg-black/60 rounded-xl border border-white/5 flex flex-col overflow-hidden glass shadow-inner p-2">
+                <div class="flex items-center justify-between mb-1 border-b border-white/10 pb-1 px-2">
+                    <h3 class="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em]">Live Execution Pipeline</h3>
+                    <span id="pipeline-count" class="text-[8px] font-black text-slate-600 uppercase tracking-widest">0 Active</span>
+                </div>
+                <div class="flex items-center px-3 mb-1 text-[7px] font-black uppercase text-slate-500 tracking-[0.2em]">
+                    <div class="cell cell-md">Broker</div><div class="cell cell-md">Symbol</div>
+                    <div class="cell cell-sm">Side</div><div class="cell cell-tf">TF</div>
+                    <div class="cell cell-md">Duration</div><div class="cell cell-md">Entry</div>
+                    <div class="cell cell-md">Current ⚡</div><div class="cell cell-sm">P&amp;L%</div>
+                    <div class="cell-grow text-right">Control</div>
+                </div>
+                <div id="orders-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-0.5"></div>
+            </div>
+        </main>
+    </div>
+    <div class="bg-slate-950 border-t border-slate-800 px-6 shrink-0 shadow-2xl">
+        <div class="flex items-center justify-between py-3 cursor-pointer hover:bg-slate-900/50 transition-colors" onclick="toggleRetunePanel()">
+            <div class="flex items-center gap-3">
+                <h3 class="text-[9px] font-black text-amber-500 uppercase tracking-[0.3em]">⚠️ Retune Alerts</h3>
+                <span id="retune-count-badge" class="bg-amber-600 text-white px-2 py-0.5 rounded-full text-[9px] font-black">0</span>
+                <span id="retune-arrow" class="text-amber-500 text-xl font-black transition-transform">▼</span>
+            </div>
+            <button onclick="event.stopPropagation(); clearAllRetuneMessages();" class="text-[8px] font-black text-slate-600 hover:text-red-500 uppercase tracking-widest transition-colors">Clear All</button>
+        </div>
+        <div id="retune-panel-content" class="max-h-32 overflow-y-auto custom-scrollbar pb-3 hidden">
+            <div id="retune-messages-container" class="space-y-1"></div>
+        </div>
+    </div>
+<script>
+const getEl = id => document.getElementById(id);
+let scannerData=[],currentFocusIndex=0,rotationEnabled=true,rotationSeconds=5,rotationTimer=null;
+const frozenExits=new Map(),matchTimestamps=new Map(),matchPriceCache=new Map(),macdHistory=new Map();
+let lockedBrokers=new Set(),retuneMessages=new Map();
+const livePrices=new Map();
+
+// ★ FIX: Duration — never show 00:00:00, minimum 1 second, correct UTC handling
+function calcDuration(entryTimeStr) {
+    if (!entryTimeStr) return '00:00:01';
+    const entryUTC = new Date(entryTimeStr.includes('Z') ? entryTimeStr : entryTimeStr + 'Z');
+    const secs = Math.max(1, Math.floor((new Date() - entryUTC) / 1000));
+    return new Date(secs * 1000).toISOString().substr(11, 8);
+}
+
+function calcDurSecs(entryTimeStr) {
+    if (!entryTimeStr) return 1;
+    const entryUTC = new Date(entryTimeStr.includes('Z') ? entryTimeStr : entryTimeStr + 'Z');
+    return Math.max(1, Math.floor((new Date() - entryUTC) / 1000));
+}
+
+function getBestPrice(item) {
+    if (livePrices.has(item.symbol)) return livePrices.get(item.symbol);
+    return parseFloat(item.last_price||0);
+}
+
+const GEMINI_PAIRS={'BTCUSD':'BTC/USD','ETHUSD':'ETH/USD','SOLUSD':'SOL/USD','AVAXUSD':'AVAX/USD','LINKUSD':'LINK/USD'};
+const wsSockets={};
+
+function startLivePrices() {
+    Object.entries(GEMINI_PAIRS).forEach(([pair,symbol])=>connectGeminiSocket(pair,symbol));
+}
+
+function connectGeminiSocket(pair,symbol) {
+    if (wsSockets[pair]&&wsSockets[pair].readyState<=1) return;
+    const ws=new WebSocket(`wss://api.gemini.com/v1/marketdata/${pair}`);
+    wsSockets[pair]=ws;
+    ws.onopen=()=>setWsStatus('connected');
+    ws.onmessage=(e)=>{
+        try {
+            const msg=JSON.parse(e.data);
+            if (msg.type==='update'&&Array.isArray(msg.events)) msg.events.forEach(ev=>{if(ev.type==='trade')onPriceTick(symbol,parseFloat(ev.price));});
+            if (msg.type==='trade') onPriceTick(symbol,parseFloat(msg.price));
+        } catch(err){}
+    };
+    ws.onerror=()=>setWsStatus('disconnected');
+    ws.onclose=()=>{setWsStatus('disconnected');delete wsSockets[pair];setTimeout(()=>connectGeminiSocket(pair,symbol),5000);};
+}
+
+function onPriceTick(symbol,price) {
+    if (!price||isNaN(price)) return;
+    const old=livePrices.get(symbol)||0;
+    livePrices.set(symbol,price);
+    const el=document.getElementById(`live-price-${symbol.replace('/','-')}`);
+    if (el){el.innerText='$'+price.toLocaleString();el.classList.remove('price-up','price-down');void el.offsetWidth;el.classList.add(price>=old?'price-up':'price-down');}
+    const focused=scannerData[currentFocusIndex];
+    if (focused&&focused.symbol===symbol) updateMonitor();
+    renderOrdersLog();
+}
+
+function setWsStatus(state) {
+    const dot=getEl('ws-dot'),lbl=getEl('ws-label');
+    if(!dot||!lbl)return;
+    dot.className=`ws-dot ws-${state}`;lbl.innerText=state.toUpperCase();
+}
+
+function isMarketOpen(b) {
+    const pst=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Los_Angeles'}));
+    const dow=pst.getDay(),min=pst.getHours()*60+pst.getMinutes();
+    if (b.toUpperCase()==='GEMINI') return true;
+    if (b.toUpperCase()==='ALPACA'){if(dow===0||dow===6)return false;return min>=390&&min<780;}
+    return true;
+}
+
+function getBrokerStatus(item,fab) {
+    const b=item.broker_name;
+    if (item.is_running) return {color:'red',label:'TRADING',cls:'bg-red-600 text-white'};
+    if (item.rsi_ready&&item.macd_ready&&fab.get(b)===item.id) return {color:'red',label:'ACTIVE',cls:'bg-red-600 text-white'};
+    if (lockedBrokers.has(b)) return {color:'brown',label:'LOCKED',cls:'bg-amber-900 text-amber-200'};
+    if (!isMarketOpen(b)) return {color:'yellow',label:'CLOSED',cls:'bg-yellow-500 text-black'};
+    return {color:'green',label:'READY',cls:'bg-emerald-600 text-white'};
+}
+
+function getFirstActivePerBroker() {
+    const map=new Map();
+    scannerData.forEach(item=>{if(item.rsi_ready&&item.macd_ready&&!map.has(item.broker_name))map.set(item.broker_name,item.id);});
+    return map;
+}
+
+async function engineSync() {
+    try {
+        const lr=await fetch('/get_locked_brokers');
+        if (lr.ok){const ld=await lr.json();lockedBrokers=new Set(ld.locked_brokers||[]);}
+        const res=await fetch('/get_active_strategies');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        scannerData=await res.json()||[];
+        scannerData.forEach(item=>{
+            const rsiVal=parseFloat(item.rsi_real||0),rsiGoal=parseFloat(item.rsi_entry||0),macdVal=parseFloat(item.macd||0),dir=item.direction;
+            const key=`${item.symbol}_${dir}_${item.candle_time}`;
+            const hist=macdHistory.get(key)||{val:macdVal,dir:'─'};
+            const arrow=macdVal>hist.val?'↑':(macdVal<hist.val?'↓':hist.dir);
+            macdHistory.set(key,{val:macdVal,dir:arrow});
+            item.rsi_ready=dir==='LONG'?rsiVal<=rsiGoal:rsiVal>=rsiGoal;
+            item.macd_ready=(dir==='LONG'&&macdVal>0)||(dir==='SHORT'&&macdVal<0);
+            item.trend_label=macdVal>0?'BULLISH':(macdVal<0?'BEARISH':'NEUTRAL');
+            item.current_dir_arrow=arrow;item.unique_key=key;
+            const needsRetune=(!parseFloat(item.rsi_real_max||0))||(!parseFloat(item.rsi_real_min||0))||parseFloat(item.rsi_real_max||0)<=parseFloat(item.rsi_real_min||0);
+            if (needsRetune) addRetuneMessage(item); else retuneMessages.delete(key);
+        });
+        getEl('asset-count').innerText=scannerData.length;
+        renderScanner();updateMonitor();renderOrdersLog();renderRetuneMessages();
+    } catch(err){console.error('Sync:',err);}
+}
+
+function renderScanner() {
+    const list=getEl('symbol-list-box'),fab=getFirstActivePerBroker();
+    list.innerHTML=scannerData.map((item,i)=>{
+        const status=getBrokerStatus(item,fab);
+        const bc=status.color==='red'?'border-red-500':status.color==='green'?'border-emerald-500':status.color==='brown'?'border-amber-900':status.color==='yellow'?'border-yellow-400':'border-white/5';
+        const liveP=livePrices.get(item.symbol)||parseFloat(item.last_price||0);
+        return `<div id="scanner-row-${i}" onclick="manualSelect(${i})" class="symbol-anchor ${bc} ${i===currentFocusIndex?'active-eval':''}">
+            <div class="flex justify-between items-center mb-1 text-[11px] font-black uppercase text-white">
+                <div class="flex items-center gap-1">
+                    <span>${item.symbol}</span>
+                    <span class="text-[7px] bg-white/10 px-1 rounded mono text-slate-400">${item.candle_time}</span>
+                    <span class="text-[7px] ${status.cls} px-2 py-0.5 rounded font-black">${status.label}</span>
+                </div>
+                <span class="${item.direction==='LONG'?'text-emerald-400':'text-rose-400'}">${item.direction}</span>
+            </div>
+            <div class="flex justify-between items-center text-[10px] mono font-black">
+                <span id="live-price-${item.symbol.replace('/','-')}" class="text-blue-400">${liveP>0?'$'+liveP.toLocaleString():'$0.00'}</span>
+                <span class="${i===currentFocusIndex?'text-white':'text-slate-600'}">${parseFloat(item.rsi_real||0).toFixed(1)}%</span>
+            </div>
+        </div>`;
+    }).join('');
+    scrollToActiveRow();
+}
+
+function scrollToActiveRow() {
+    requestAnimationFrame(()=>{
+        const vp=getEl('scanner-viewport'),row=document.getElementById(`scanner-row-${currentFocusIndex}`);
+        if(!vp||!row)return;
+        const top=row.offsetTop,rh=64,vh=vp.clientHeight,sc=vp.scrollTop;
+        if(top+rh>sc+vh)vp.scrollTo({top:top-vh+rh+10,behavior:'smooth'});
+        else if(top<sc)vp.scrollTo({top:top-10,behavior:'smooth'});
+    });
+}
+
+function updateMonitor() {
+    const item=scannerData[currentFocusIndex];
+    if(!item)return;
+    const liveP=getBestPrice(item),isLive=livePrices.has(item.symbol);
+    const rsiVal=parseFloat(item.rsi_real||0),rsiGoal=parseFloat(item.rsi_entry||0),macdVal=parseFloat(item.macd||0),dir=item.direction;
+    getEl('eval-symbol').innerText=item.symbol;
+    getEl('eval-candle').innerText=item.candle_time;
+    getEl('eval-price').innerText='$'+liveP.toLocaleString();
+    getEl('eval-price-source').innerText=isLive?'⚡ LIVE PRICE':'DB PRICE';
+    getEl('eval-price-source').className=isLive?'text-[7px] text-emerald-500 mono mt-1 uppercase':'text-[7px] text-slate-600 mono mt-1 uppercase';
+    getEl('eval-direction').innerText=`BIAS: ${dir}`;
+    getEl('eval-current-rsi').innerText=rsiVal.toFixed(2);
+    getEl('eval-current-macd').innerText=macdVal.toFixed(4);
+    getEl('eval-rsi-min').innerText=parseFloat(item.rsi_real_min||0).toLocaleString();
+    getEl('eval-rsi-max').innerText=parseFloat(item.rsi_real_max||0).toLocaleString();
+    getEl('macd-slope-icon').innerText=item.current_dir_arrow||'─';
+    getEl('eval-rsi-arrow').innerText=dir==='LONG'?(rsiVal>rsiGoal?'↓':'✓'):(rsiVal<rsiGoal?'↑':'✓');
+    getEl('eval-rsi-goal').innerText=rsiGoal.toFixed(0);
+    const rc=item.rsi_ready?'text-emerald-400 font-black':'text-amber-400';
+    const mc=item.macd_ready?'text-emerald-400 font-black':'text-amber-400';
+    const tc=item.trend_label==='BULLISH'?'text-emerald-400':item.trend_label==='BEARISH'?'text-rose-400':'text-slate-500';
+    getEl('condition-audit').innerHTML=`RSI: <span class="${rc}">${item.rsi_ready?'MATCHED':'WAIT'}</span> | MACD: <span class="${mc}">${item.macd_ready?'MATCHED':'WAIT'}</span> | TREND: <span class="${tc}">${item.trend_label}</span>`;
+    getEl('step-rsi').className=`pipeline-step ${item.rsi_ready?'step-ready':'step-active'}`;
+    getEl('step-macd').className=`pipeline-step ${item.macd_ready?'step-ready':''}`;
+    getEl('step-exec').className=`pipeline-step ${(item.rsi_ready&&item.macd_ready)?'step-ready':''}`;
+    getEl('alignment-indicator').innerText=(item.rsi_ready&&item.macd_ready)?'READY':'WAIT';
+}
+
+function renderOrdersLog() {
+    const container=getEl('orders-list-container');
+    let html='',eventCount=0;
+    const brokersWithActiveOrders=new Set();
+    scannerData.filter(s=>s.is_running).forEach(s=>brokersWithActiveOrders.add(s.broker_name));
+
+    const brokersWithSignals=new Set();
+    scannerData.forEach(s=>{
+        const sKey=s.unique_key;
+        if (s.is_running) return;
+        if (frozenExits.has(sKey)) return;
+        if (brokersWithActiveOrders.has(s.broker_name)) return;
+        if (s.rsi_ready&&s.macd_ready){
+            if (brokersWithSignals.has(s.broker_name)) return;
+            brokersWithSignals.add(s.broker_name);
+            const current=getBestPrice(s);
+            if (current<=0) return;
+            eventCount++;
+            if (!matchTimestamps.has(sKey)){matchTimestamps.set(sKey,new Date());matchPriceCache.set(sKey,current);}
+            const entry=matchPriceCache.get(sKey);
+            // ★ FIX: minimum 1 second
+            const durSecs=Math.max(1,Math.floor((new Date()-matchTimestamps.get(sKey))/1000));
+            const timerStr=new Date(durSecs*1000).toISOString().substr(11,8);
+            const pnl=entry>0?((current-entry)/entry)*100*(s.direction==='LONG'?1:-1):0;
+            const pnlColor=pnl>=0?'text-emerald-400':'text-rose-400';
+            const liveMark=livePrices.has(s.symbol)?'⚡':'';
+            html+=`<div class="order-row pending-row">
+                <div class="cell cell-md text-emerald-500 font-black uppercase">${s.broker_name||'GW'}</div>
+                <div class="cell cell-md font-black text-white">${s.symbol}</div>
+                <div class="cell cell-sm font-black ${s.direction==='LONG'?'text-emerald-400':'text-rose-400'}">${s.direction}</div>
+                <div class="cell cell-tf text-slate-400 mono font-black">${s.candle_time}</div>
+                <div class="cell cell-md text-emerald-400 mono animate-pulse">${timerStr}</div>
+                <div class="cell cell-md text-slate-400 mono">$${entry.toLocaleString()}</div>
+                <div class="cell cell-md text-white mono font-bold">${liveMark}$${current.toLocaleString()}</div>
+                <div class="cell cell-sm ${pnlColor} mono font-black">${pnl.toFixed(2)}%</div>
+                <div class="cell-grow text-right">
+                    <button onclick="settlePosition('${sKey}',${current},${pnl},${durSecs},'${s.symbol}','${s.direction}','${s.candle_time}',${entry},'${s.broker_name}',${s.id},'PANIC_EXIT')"
+                        class="bg-rose-600 hover:bg-rose-500 text-white font-black px-3 py-1 rounded text-[8px] uppercase tracking-widest">PANIC</button>
+                </div>
+            </div>`;
+        }
+    });
+
+    const brokersRendered=new Set();
+    scannerData.filter(s=>s.is_running).forEach(o=>{
+        if (frozenExits.has(o.unique_key)) return;
+        if (brokersRendered.has(o.broker_name)) return;
+        brokersRendered.add(o.broker_name);
+        eventCount++;
+        const entry=parseFloat(o.entry_price||0),current=getBestPrice(o);
+        const pnl=entry>0?((current-entry)/entry)*100*(o.direction==='LONG'?1:-1):0;
+        const pnlColor=pnl>=0?'text-emerald-400':'text-rose-400';
+        // ★ FIX: correct duration — UTC + minimum 1 second
+        const timerStr=calcDuration(o.entry_time);
+        const durSecs=calcDurSecs(o.entry_time);
+        const liveMark=livePrices.has(o.symbol)?'⚡':'';
+        const sKey=o.unique_key;
+        html+=`<div class="order-row">
+            <div class="cell cell-md text-indigo-400 font-black uppercase">${o.broker_name||'GW'}</div>
+            <div class="cell cell-md font-black text-white">${o.symbol}</div>
+            <div class="cell cell-sm font-black ${o.direction==='LONG'?'text-emerald-400':'text-rose-400'}">${o.direction}</div>
+            <div class="cell cell-tf text-slate-400 mono font-black">${o.candle_time}</div>
+            <div class="cell cell-md text-indigo-400 mono">${timerStr}</div>
+            <div class="cell cell-md text-slate-400 mono">$${entry.toLocaleString()}</div>
+            <div class="cell cell-md text-white mono font-bold">${liveMark}$${current.toLocaleString()}</div>
+            <div class="cell cell-sm ${pnlColor} mono font-black">${pnl.toFixed(2)}%</div>
+            <div class="cell-grow text-right">
+                <button onclick="settlePosition('${sKey}',${current},${pnl},${durSecs},'${o.symbol}','${o.direction}','${o.candle_time}',${entry},'${o.broker_name}',${o.id},'PANIC_EXIT')"
+                    class="bg-rose-600 hover:bg-rose-500 text-white font-black px-3 py-1 rounded text-[8px] uppercase tracking-widest">PANIC</button>
+            </div>
+        </div>`;
+    });
+
+    frozenExits.forEach((data)=>{
+        eventCount++;
+        html+=`<div class="order-row frozen-exit">
+            <div class="cell cell-md text-rose-500 font-black uppercase">${data.broker||'GW'}</div>
+            <div class="cell cell-md font-black text-rose-500">${data.symbol}</div>
+            <div class="cell cell-sm font-black opacity-50">${data.direction}</div>
+            <div class="cell cell-tf text-slate-600 mono">${data.tf}</div>
+            <div class="cell cell-md text-rose-400 mono">${data.duration}</div>
+            <div class="cell cell-md text-slate-600 mono">$${data.entry.toLocaleString()}</div>
+            <div class="cell cell-md text-white mono font-bold">$${data.price.toLocaleString()}</div>
+            <div class="cell cell-sm ${data.pnl>=0?'text-emerald-400':'text-rose-400'} mono font-black">${data.pnl.toFixed(2)}%</div>
+            <div class="cell-grow text-right font-black text-[7px] text-rose-500 uppercase">EXIT [${data.timeLeft}s]</div>
+        </div>`;
+    });
+
+    getEl('pipeline-count').innerText=`${eventCount} Active`;
+    container.innerHTML=html||`<div class="h-full flex flex-col items-center justify-center text-center opacity-20"><p class="text-[10px] font-black uppercase tracking-[0.4em]">Monitoring Entry Signals...</p></div>`;
+}
+
+async function settlePosition(sKey,exitPrice,pnl,dur,sym,dir,tf,entry,broker,stratId,reason) {
+    if (!confirm(`Confirm Panic Exit for ${sym} ${dir} ${tf}?`)) return;
+    const timerStr=new Date(Math.max(1,dur)*1000).toISOString().substr(11,8);
+    frozenExits.set(sKey,{symbol:sym,price:exitPrice,pnl,duration:timerStr,broker,direction:dir,tf,entry,timeLeft:120});
+    const cd=setInterval(()=>{const it=frozenExits.get(sKey);if(it&&it.timeLeft>0){it.timeLeft--;renderOrdersLog();}else clearInterval(cd);},1000);
+    renderOrdersLog();
+    try {
+        await fetch('/finalize_order',{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({strategy_id:stratId,exit_price:exitPrice,pnl,duration:dur,exit_reason:reason||'PANIC_EXIT'})});
+        setTimeout(()=>{frozenExits.delete(sKey);renderOrdersLog();engineSync();},120000);
+    } catch(e){console.error('Failed:',e);}
+}
+
+function startRotation(){clearInterval(rotationTimer);rotationTimer=setInterval(()=>{if(rotationEnabled&&scannerData.length>0){currentFocusIndex=(currentFocusIndex+1)%scannerData.length;renderScanner();updateMonitor();}},rotationSeconds*1000);}
+function toggleRotation(){rotationEnabled=!rotationEnabled;getEl('rot-btn').innerText=rotationEnabled?'ROTATION ON':'ROTATION OFF';if(rotationEnabled)startRotation();else clearInterval(rotationTimer);}
+function adjustSpeed(delta){rotationSeconds=Math.max(1,Math.min(30,rotationSeconds+delta));getEl('speed-label').innerText=`SPEED: ${rotationSeconds}s`;if(rotationEnabled)startRotation();}
+function manualSelect(i){currentFocusIndex=i;renderScanner();updateMonitor();}
+
+function addRetuneMessage(item){const key=item.unique_key;if(retuneMessages.has(key))retuneMessages.get(key).count++;else retuneMessages.set(key,{broker:item.broker_name||'UNKNOWN',symbol:item.symbol,direction:item.direction,candle_time:item.candle_time,firstSeen:new Date(),count:1});}
+function renderRetuneMessages(){
+    const c=getEl('retune-messages-container');
+    getEl('retune-count-badge').innerText=retuneMessages.size;
+    if(retuneMessages.size===0){c.innerHTML='<div class="text-[9px] text-slate-600 italic text-center py-2">No retune alerts</div>';return;}
+    c.innerHTML=Array.from(retuneMessages.entries()).map(([key,msg])=>{
+        const cb=msg.count>1?`<span class="bg-red-600 text-white px-2 py-0.5 rounded-full font-black text-[9px]">${msg.count}x</span>`:'';
+        return `<div class="flex items-center justify-between bg-amber-900/20 border border-amber-600/30 rounded-lg px-3 py-2 text-[10px]">
+            <div class="flex items-center gap-3 flex-1"><span class="text-amber-400 font-black">⚠️</span>${cb}<span class="text-white font-black">${msg.symbol}</span><span class="text-slate-400">${msg.broker}</span><span class="${msg.direction==='LONG'?'text-emerald-400':'text-rose-400'} font-black">${msg.direction}</span><span class="text-indigo-400 mono">${msg.candle_time}</span></div>
+            <div class="flex items-center gap-2"><a href="/tuning" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[9px] font-black uppercase">Tune</a><button onclick="dismissRetuneMessage('${key}')" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded text-[9px] font-black uppercase">Done</button></div>
+        </div>`;
+    }).join('');
+}
+function toggleRetunePanel(){const p=getEl('retune-panel-content'),a=getEl('retune-arrow');p.classList.toggle('hidden');a.style.transform=p.classList.contains('hidden')?'rotate(0deg)':'rotate(180deg)';}
+function dismissRetuneMessage(key){retuneMessages.delete(key);renderRetuneMessages();}
+function clearAllRetuneMessages(){if(confirm('Clear all retune alerts?')){retuneMessages.clear();renderRetuneMessages();}}
+
+engineSync();
+setInterval(engineSync,3000);
+setInterval(()=>{if(scannerData.length>0){renderOrdersLog();updateMonitor();}},1000);
+startRotation();
+startLivePrices();
+</script>
+</body>
+</html>

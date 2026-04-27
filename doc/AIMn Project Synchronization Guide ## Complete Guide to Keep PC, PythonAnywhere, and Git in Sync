@@ -1,0 +1,300 @@
+# AIMn Project Synchronization Guide
+## Complete Guide to Keep PC, PythonAnywhere, and Git in Sync
+
+---
+
+## OVERVIEW
+This guide helps you synchronize three locations:
+1. **Your PC** (local development)
+2. **PythonAnywhere** (live server)
+3. **Git Repository** (version control)
+
+---
+
+## PART 1: CURRENT SITUATION CHECK
+
+### Before Starting, Identify What You Have:
+- Your PC: Has older version
+- Git: Needs to be updated
+
+---
+
+## PART 2: THREE-WAY SYNC PROCESS
+
+### STEP 1: Update Your PC (Local Computer)
+
+**Option A: If you have the file downloaded from Claude**
+```
+1. Locate the downloaded file: aimn_flowing_scanner_auto.html
+2. Navigate to your local project folder on PC
+  Example: C:\Users\YourName\Projects\AIMn\templates\
+3. Replace the old file with the new one
+4. Rename if needed to match your project structure
+```
+
+**Option B: If you want to create fresh on PC**
+```
+1. Open your text editor (VS Code, Notepad++, etc.)
+2. Copy the content from the downloaded file
+3. Save to your project location:
+  YourProject\templates\aimn_flowing_scanner_auto.html
+```
+
+---
+
+### STEP 2: Upload to PythonAnywhere
+
+**Method 1: Using PythonAnywhere Web Interface (EASIEST)**
+```
+1. Go to: https://www.pythonanywhere.com
+2. Login to your account
+3. Click "Files" tab at the top
+4. Navigate to your templates folder:
+  /home/MeirNiv/mysite/templates/
+  (or wherever your templates are stored)
+5. Click "Upload a file"
+6. Select: aimn_flowing_scanner_auto.html
+7. If file exists, it will ask to overwrite - click YES
+8. Click the green "Reload" button on your Web tab
+```
+
+**Method 2: Using PythonAnywhere Bash Console (ADVANCED)**
+```bash
+# Open a Bash console on PythonAnywhere
+cd ~/mysite/templates/
+
+# If you have the file locally, you can use SFTP to upload
+# Or edit directly in PythonAnywhere
+nano aimn_flowing_scanner_auto.html
+# Paste content, Ctrl+X, Y, Enter to save
+```
+
+---
+
+### STEP 3: Commit to Git
+
+**3A: If Git is Already Setup**
+```bash
+# Open terminal/command prompt on your PC
+cd C:\Users\YourName\Projects\AIMn
+
+# Check status
+git status
+
+# Add the changed file
+git add templates/aimn_flowing_scanner_auto.html
+
+# Commit with descriptive message
+git commit -m "Update scanner: Add trading hours detection (yellow for closed markets), FUTURES symbols (GC-GOLD, ES-SPX, CL-OIL), fix color indicators"
+
+# Push to remote repository
+git push origin main
+# (or "git push origin master" depending on your branch name)
+```
+
+**3B: If Git is NOT Setup Yet**
+```bash
+# First time setup - Do this once
+cd C:\Users\YourName\Projects\AIMn
+
+# Initialize git repository
+git init
+
+# Add remote repository (replace with your actual Git URL)
+git remote add origin https://github.com/YourUsername/AIMn.git
+
+# Add all files
+git add .
+
+# First commit
+git commit -m "Initial commit: AIMn Auto-Trading Scanner"
+
+# Push to remote
+git push -u origin main
+```
+
+---
+
+## PART 3: PULL FROM GIT TO PYTHONANYWHERE
+
+**After pushing to Git, update PythonAnywhere from Git:**
+
+```bash
+# On PythonAnywhere Bash Console
+cd ~/mysite
+
+# If git is already cloned
+git pull origin main
+
+# If first time - clone the repository
+git clone https://github.com/YourUsername/AIMn.git
+
+# Reload your web app
+# Go to Web tab and click green "Reload" button
+```
+
+---
+
+## PART 4: DAILY WORKFLOW (RECOMMENDED)
+
+### When You Make Changes:
+
+**Scenario A: Changes on PC Update PC & Git**
+```bash
+# 1. Make change on PythonAnywhere (Files tab or Bash)
+# 2. Test on live site
+
+# 3. Commit from PythonAnywhere
+cd ~/mysite
+git add .
+git commit -m "Quick fix: description"
+git push origin main
+
+# 4. Update PC
+# On PC:
+cd C:\Users\YourName\Projects\AIMn
+git pull origin main
+```
+
+---
+
+## PART 5: COMMON ISSUES & SOLUTIONS
+
+### Issue 1: "Git not found" on PythonAnywhere
+```bash
+# Git is pre-installed on PythonAnywhere
+# If issues, verify:
+which git
+# Should show: /usr/bin/git
+```
+
+### Issue 2: "Permission denied" when pushing to Git
+```bash
+# Setup SSH key or use HTTPS with credentials
+# For HTTPS, Git will prompt for username/password
+# Or setup Personal Access Token (recommended)
+```
+
+### Issue 3: "Merge conflict" when pulling
+```bash
+# If you edited same file in two places:
+git pull origin main
+# Git will show conflict
+# Edit the file, remove conflict markers
+# Then:
+git add .
+git commit -m "Resolved merge conflict"
+git push origin main
+```
+
+### Issue 4: PythonAnywhere shows old version after upload
+```bash
+# Always reload your web app!
+# Go to Web tab )
+
+# 2. Copy to your PC project folder
+# Example: C:\Users\Meir\Projects\AIMn\templates\
+
+# 3. Commit to Git (on PC)
+cd C:\Users\Meir\Projects\AIMn
+git add templates/aimn_flowing_scanner_auto.html
+git commit -m "Update scanner: trading hours, futures symbols, color fixes"
+git push origin main
+
+# 4. Update PythonAnywhere
+# Option A: Upload via Files tab (easiest)
+# Option B: Pull from Git (best practice)
+#   - Go to Bash console on PythonAnywhere
+cd ~/mysite
+git pull origin main
+#   - Click Reload button on Web tab
+```
+
+---
+
+## PART 7: BEST PRACTICES
+
+### DON'T:
+- Edit same file on PC and PythonAnywhere simultaneously
+- Forget to reload after uploading to PythonAnywhere
+- Push untested code to production
+- Work directly on PythonAnywhere without Git backup
+
+---
+
+## PART 8: FOLDER STRUCTURE REFERENCE
+
+### Your PC:
+```
+C:\Users\Meir\Projects\AIMn\
+   UPDATE THIS
+trade-popup-fixed.html
+...
+      app.py
+templates\
+aimn_flowing_scanner_auto.html    static\
+...
+```
+
+---
+
+## PART 9: VERIFICATION CHECKLIST
+
+After sync, verify:
+- [ ] File updated on PC
+- [ ] Changes committed to Git
+- [ ] Changes pushed to remote repository
+- [ ] PythonAnywhere updated (via Git pull or upload)
+- [ ] Web app reloaded on PythonAnywhere
+- [ ] Live site shows changes: https://meirniv.pythonanywhere.com/scanner
+- [ ] All three locations have identical file
+
+---
+
+## QUICK REFERENCE COMMANDS
+
+### Git Basics:
+```bash
+git status              # Check what's changed
+git add filename        # Stage a file
+git add .               # Stage all files
+git commit -m "msg"     # Commit changes
+git push origin main    # Push to remote
+git pull origin main    # Pull from remote
+git log                 # See commit history
+```
+
+### PythonAnywhere:
+```bash
+cd ~/mysite                    # Go to project folder
+ls -la                         # List files
+git pull origin main           # Update from Git
+nano filename                  # Edit file
+# Reload button on Web tab     # Apply changes
+```
+
+---
+
+## SUPPORT LINKS
+
+- **Git Documentation:** https://git-scm.com/doc
+- **PythonAnywhere Help:** https://help.pythonanywhere.com/
+- **GitHub Guides:** https://guides.github.com/
+
+---
+
+## NOTES FOR FUTURE UPDATES
+
+When Claude provides a new file:
+1. Download it
+2. Follow PART 2: Three-Way Sync Process
+3. Verify with PART 9: Verification Checklist
+4. Test live site
+
+---
+
+**Last Updated:** November 9, 2025
+**For:** AIMn Multi-Professor Auto-Trading System
+**Maintained by:** Meir Niv
+
+---

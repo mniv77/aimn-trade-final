@@ -1,0 +1,265 @@
+<!-- templates/tuning.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMN V3.1 - Strategy Optimizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; transition: background-color 0.5s ease; overflow-x: hidden; text-align: left; }
+        .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        input, select, textarea { background-color: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 10px; width: 100%; font-weight: bold; font-size: 0.85rem; }
+        input:focus, select:focus, textarea:focus { border-color: #818cf8; outline: none; box-shadow: 0 0 15px rgba(129, 140, 248, 0.2); }
+        label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
+        .section-title { color: #94a3b8; font-weight: 900; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 20px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- NAVIGATION BAR -->
+<nav class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-[500] shrink-0 shadow-2xl">
+    <div class="flex items-center gap-6 text-sm font-bold uppercase tracking-tighter">
+        <a href="/" class="text-gray-400 hover:text-white transition-colors">Dashboard</a>
+        <a href="/tuning" class="text-white border-b-2 border-indigo-500 pb-1">Tuning</a>
+        <a href="/orders" class="text-gray-400 hover:text-white transition-colors">Orders</a>
+        <a href="/symbols" class="text-gray-400 hover:text-white transition-colors">Symbols</a>
+        <a href="/brokers" class="text-gray-400 hover:text-white transition-colors">Brokers</a>
+        <a href="/tuning_help" class="text-gray-400 hover:text-white transition-colors">Help</a>
+    </div>
+    <div class="text-[10px] text-slate-600 font-mono uppercase italic">V3.1 Field-Sync Mode</div>
+</nav>
+
+<div class="max-w-7xl mx-auto px-6 pb-12 w-full mt-8 flex-grow">
+
+    <!-- TRADINGVIEW BRIDGE -->
+    <div class="glass-card rounded-2xl p-6 mb-8 shadow-2xl border-indigo-500/20 text-left">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xs font-black uppercase text-slate-400 tracking-widest">TradingView Bridge</h2>
+            <a href="/tuning_help" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all">
+                <i class="fas fa-question-circle"></i> Tuning Help
+            </a>
+        </div>
+        <textarea id="csv_input" class="h-24 bg-black/40 border-slate-800 font-mono text-emerald-400 text-xs mb-4 custom-scrollbar" placeholder="Paste TV String..."></textarea>
+        <button onclick="parseCSV()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest transition-all shadow-lg">Map Indicators to Form</button>
+    </div>
+
+    <!-- MASTER TUNING FORM -->
+    <form id="tuningForm" class="glass-card rounded-2xl p-8 shadow-2xl" onsubmit="return false;" autocomplete="off">
+        <!-- HIDDEN STATE FIELDS -->
+        <input type="hidden" id="active_order_id">
+        <input type="hidden" id="entry_price_hidden">
+        <input type="hidden" id="entry_time_hidden">
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 pb-10 border-b border-white/5 text-left">
+            <div>
+                <label>1. Target Broker</label>
+                <select id="broker_select" onchange="filterSymbols()">
+                    <option value="">-- All --</option>
+                    {% for b in brokers %}<option value="{{ b.id }}">{{ b.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>2. Asset Symbol</label>
+                <select id="broker_product_id" name="broker_product_id" onchange="loadHistory()">
+                    <option value="" id="symbol_placeholder">-- Choose Asset --</option>
+                </select>
+            </div>
+            <div>
+                <label>3. Bias</label>
+                <select id="direction_select" name="direction" onchange="loadHistory()">
+                    <option value="LONG">🟢 LONG</option>
+                    <option value="SHORT">🔴 SHORT</option>
+                </select>
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="button" onclick="loadHistory(true)" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all">LOAD</button>
+                <button type="button" onclick="saveTuning()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black transition-all uppercase text-[10px] shadow-xl tracking-widest">SAVE SYSTEM</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
+            <!-- INDICATORS -->
+            <div>
+                <div class="section-title text-indigo-400">Indicator Set</div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2"><label>RSI Length</label><input type="number" id="rsi_len" value="14"></div>
+                    <div><label>MACD Fast</label><input type="number" id="macd_fast" value="12"></div>
+                    <div><label>MACD Slow</label><input type="number" id="macd_slow" value="26"></div>
+                    <div class="col-span-2"><label>MACD Signal</label><input type="number" id="macd_sig" value="9"></div>
+                    <div><label>RSI Entry</label><input type="number" step="0.01" id="rsi_entry" value="30"></div>
+                    <div><label>RSI Exit</label><input type="number" step="0.01" id="rsi_exit" value="70"></div>
+                </div>
+            </div>
+            <!-- RISK -->
+            <div>
+                <div class="section-title text-emerald-400">Risk Management</div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label>Stop Loss %</label><input type="number" step="0.01" id="stop_loss" value="2.00"></div>
+                    <div><label>Take Profit %</label><input type="number" step="0.01" id="take_profit" value="5.00"></div>
+                    <div><label>Trail Start</label><input type="number" step="0.01" id="trail_start" value="1.00"></div>
+                    <div><label>Trail Drop</label><input type="number" step="0.01" id="trail_drop" value="0.50"></div>
+                    <div><label>Decay (H)</label><input type="number" step="0.1" id="decay_start" value="5.0"></div>
+                    <div><label>Decay %</label><input type="number" step="0.01" id="decay_rate" value="0.20"></div>
+                </div>
+            </div>
+            <!-- MATH / RANGE -->
+            <div>
+                <div class="section-title text-amber-400">Strategy Optimization</div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2"><label>Historical Max (Scale)</label><input type="text" id="rsi_real_max" value="0.00"></div>
+                    <div class="col-span-2"><label>Historical Min (Scale)</label><input type="text" id="rsi_real_min" value="0.00"></div>
+                    <div class="col-span-2"><label>Expected P&L %</label><input type="number" step="0.01" id="pl_pct" value="0.00"></div>
+                    <div class="col-span-2"><label>Expected P&L $</label><input type="number" step="0.01" id="pl_amount" value="0.00"></div>
+                    <div><label>Candle Time</label><input type="text" id="candle_time" value="1h"></div>
+                    <div><label>History Bars</label><input type="number" id="bar_count" value="36"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- RECENT HISTORY LOG -->
+    <div class="glass-card rounded-2xl p-8 mt-8 shadow-2xl border-white/5 text-left">
+        <h3 class="text-[11px] font-black uppercase text-slate-300 tracking-widest mb-6 italic">History Archive</h3>
+        <div id="history_body" class="space-y-2"></div>
+    </div>
+</div>
+
+<script>
+    const getEl = (id) => document.getElementById(id);
+    let historyData = [];
+
+    // MAPPING LOGIC (Synchronized with V3.1 indices)
+    function parseCSV() {
+        let input = getEl('csv_input').value.trim();
+        if (input.includes('(')) input = input.split('(')[1].split(')')[0];
+        const p = input.split(',').map(s => s.trim());
+
+        const stitch = (i, j) => (parseFloat(p[i] || 0) + parseFloat(p[j] || 0)).toFixed(2);
+        const thousandStitch = (i, j) => ((parseFloat(p[i] || 0) * 1000) + parseFloat(p[j] || 0)).toFixed(2);
+
+        try {
+            getEl('direction_select').value = p[0].includes("SELL") ? "SHORT" : "LONG";
+            getEl('macd_fast').value = p[1]; getEl('macd_slow').value = p[2]; getEl('macd_sig').value = p[3];
+            getEl('rsi_len').value = thousandStitch(4, 5);
+            getEl('rsi_entry').value = stitch(6, 7); getEl('rsi_exit').value = stitch(8, 9);
+            getEl('stop_loss').value = stitch(10, 11); getEl('trail_start').value = stitch(12, 13);
+            getEl('trail_drop').value = stitch(14, 15); getEl('take_profit').value = stitch(16, 17);
+            getEl('decay_start').value = stitch(18, 19); getEl('decay_rate').value = stitch(20, 21);
+
+            // DYNAMIC RANGE MAPPING FIX
+            if (p.length >= 26) {
+                // Extended format: Max (22,23) and Min (24,25)
+                getEl('rsi_real_max').value = thousandStitch(22, 23);
+                getEl('rsi_real_min').value = thousandStitch(24, 25);
+            } else if (p.length >= 24) {
+                // Direct format: Max (22) and Min (23)
+                getEl('rsi_real_max').value = p[22];
+                getEl('rsi_real_min').value = p[23];
+            }
+
+            alert("✅ Fields Mapped Successfully.");
+        } catch (e) { alert("❌ Map Error."); }
+    }
+
+    // SAVE LOGIC (Ensuring labels match Backend data['...'])
+    async function saveTuning() {
+        const pId = getEl('broker_product_id').value;
+        if (!pId) return alert("Select Asset!");
+
+        const payload = {
+            broker_product_id: pId,
+            direction: getEl('direction_select').value,
+            candle_time: getEl('candle_time').value,
+            rsi_len: getEl('rsi_len').value,
+            rsi_entry: getEl('rsi_entry').value,
+            rsi_exit: getEl('rsi_exit').value,
+            macd_fast: getEl('macd_fast').value,
+            macd_slow: getEl('macd_slow').value,
+            macd_sig: getEl('macd_sig').value,
+            stop_loss: getEl('stop_loss').value,
+            take_profit: getEl('take_profit').value,
+            trailing_start: getEl('trail_start').value,
+            trailing_drop: getEl('trail_drop').value,
+            decay_start: getEl('decay_start').value,
+            decay_rate: getEl('decay_rate').value,
+            pl_pct: getEl('pl_pct').value,
+            pl_amount: getEl('pl_amount').value,
+            bar_count: getEl('bar_count').value,
+            rsi_real_max: getEl('rsi_real_max').value,
+            rsi_real_min: getEl('rsi_real_min').value,
+            csv_string: getEl('csv_input').value,
+            active_order_id: getEl('active_order_id').value || null,
+            entry_price: getEl('entry_price_hidden').value || null,
+            entry_time: getEl('entry_time_hidden').value || null
+        };
+
+        try {
+            const res = await fetch('/save_tuning', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.status === "success") { alert("✅ Registry Locked."); loadHistory(false); }
+            else { alert("❌ Server Error: " + d.message); }
+        } catch (e) { alert("❌ Network Connection Failed."); }
+    }
+
+    async function loadHistory(shouldRestore = false) {
+        const pId = getEl('broker_product_id').value;
+        const dir = getEl('direction_select').value;
+        if (!pId) return;
+        try {
+            const res = await fetch(`/load_tuning_data?product_id=${pId}&direction=${dir}`);
+            const data = await res.json();
+            if (data.status === "success" && data.history.length > 0) {
+                historyData = data.history;
+                if (shouldRestore) restoreHistoryRecord(0);
+                getEl('history_body').innerHTML = data.history.map((h, i) => `
+                    <div class="flex justify-between items-center bg-black/20 p-3 rounded-lg border border-white/5">
+                        <span class="text-[10px] font-mono text-slate-500">${new Date(h.last_tuned).toLocaleString()}</span>
+                        <span class="text-emerald-400 font-black">${parseFloat(h.pl_pct || 0).toFixed(2)}% P&L</span>
+                        <button onclick='restoreHistoryRecord(${i})' class="bg-slate-800 text-white px-3 py-1 rounded text-[9px] font-black uppercase">Restore</button>
+                    </div>`).join('');
+            }
+        } catch (e) {}
+    }
+
+    function restoreHistoryRecord(index) {
+        const h = historyData[index]; if(!h) return;
+        const map = (id, v) => { const el = getEl(id); if(el) el.value = (v !== null && v !== undefined) ? v : ""; };
+        map('macd_fast', h.macd_fast); map('macd_slow', h.macd_slow); map('macd_sig', h.macd_sig);
+        map('rsi_len', h.rsi_len); map('rsi_entry', h.rsi_entry); map('rsi_exit', h.rsi_exit);
+        map('stop_loss', h.stop_loss); map('take_profit', h.take_profit);
+        map('trail_start', h.trailing_start); map('trail_drop', h.trailing_drop);
+        map('decay_start', h.decay_start); map('decay_rate', h.decay_rate);
+        map('pl_pct', h.pl_pct); map('pl_amount', h.pl_amount); map('bar_count', h.bar_count);
+        map('rsi_real_max', h.rsi_real_max); map('rsi_real_min', h.rsi_real_min);
+        map('candle_time', h.candle_time);
+        if (h.csv_string) getEl('csv_input').value = h.csv_string;
+        alert("✅ Strategy Profile Restored.");
+    }
+
+    function filterSymbols() {
+        const bId = String(getEl('broker_select').value);
+        const options = getEl('broker_product_id').options;
+        for (let i = 1; i < options.length; i++) {
+            const optB = options[i].getAttribute('data-broker');
+            options[i].style.display = !bId || optB === bId ? "block" : "none";
+        }
+    }
+
+    window.onload = async () => {
+        const sRes = await fetch('/get_all_symbols_api');
+        const data = await sRes.json();
+        const select = getEl('broker_product_id');
+        data.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id; opt.text = s.symbol; opt.setAttribute('data-broker', s.broker_id);
+            select.appendChild(opt);
+        });
+    };
+</script>
+</body>
+</html>
