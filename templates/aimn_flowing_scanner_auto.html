@@ -315,14 +315,14 @@
 
     // --- Generate sample data (KEEP ORIGINAL) ---
     function generateSampleExchangeData() {
-      exchanges = {
-        'ALPACA': { scanning: true, activeSymbol: null, symbolCount: 250 },
-        'CRYPTO': { scanning: true, activeSymbol: null, symbolCount: 100 },
-        'FOREX':  { scanning: true, activeSymbol: null, symbolCount: 50 },
-        'NYSE':   { scanning: true, activeSymbol: null, symbolCount: 200 },
-        'FUTURES':{ scanning: true, activeSymbol: null, symbolCount: 30 }
-      };
-    }
+          exchanges = {
+            'Alpaca'    : { scanning: true, activeSymbol: null, symbolCount: 250 },
+            'Alpaca-ETF': { scanning: true, activeSymbol: null, symbolCount: 50 },
+            'Gemini'    : { scanning: true, activeSymbol: null, symbolCount: 4 },
+            'Forex'     : { scanning: true, activeSymbol: null, symbolCount: 50 },
+            'Futures'   : { scanning: true, activeSymbol: null, symbolCount: 30 }
+          };
+        }
 
     function generateSampleScanData() {
       // Use DB symbols if loaded; fallback to defaults if none
@@ -374,7 +374,7 @@
     }
 
     function generateSampleTickerData() {
-      const symbols = [
+      const symList = symbols.length ? symbols : [
         {symbol: 'BTC/USD', exchange: 'CRYPTO'},
         {symbol: 'ETH/USD', exchange: 'CRYPTO'},
         {symbol: 'AAPL', exchange: 'ALPACA'},
@@ -389,9 +389,7 @@
         {symbol: 'ES-SPX', exchange: 'FUTURES'},  // S&P 500 E-mini futures
         {symbol: 'CL-OIL', exchange: 'FUTURES'}   // Crude Oil futures
       ];
-
-      tickerItems = symbols.map(({symbol, exchange}) => {
-        const rsi = Math.random() * 100;
+      tickerItems = symList.map(({symbol, exchange}) => {        const rsi = Math.random() * 100;
         const atr_pct = Math.random() * 4;
         const volume_ratio = Math.random() * 3;
         const last_trade_seconds = Math.floor(Math.random() * 120);
@@ -497,10 +495,10 @@
 
       scanData.filter(row => {
         if (row.symbol === activeTradeSymbol) return true;
-        if (!row.rsi || row.rsi === 0) return false;
+        if ((!row.rsi || row.rsi === 0) && row.exchange === 'GEMINI') return false;
         const hasStrategy = strategyMap[`${row.symbol}:LONG`] || strategyMap[`${row.symbol}:SHORT`];
         if (!hasStrategy) return false;
-        return row.filters.allPassed;
+        return row.filters.allPassed || isMarketOpen(row.exchange);
       }).forEach((row, index) => {
         const isTestingRow = (index === testingRowIndex);
         const rowExNorm = normEx(row.exchange);
@@ -525,11 +523,14 @@
           statusClass = 'symbol-filter-passed';  // GREEN
           statusText = '🟢 READY';
           readyCount++;
+        } else if (marketOpen) {
+          statusClass = 'symbol-filter-passed';  // GREEN - market open, strategy active
+          statusText = '🟢 ACTIVE';
+          readyCount++;
         } else {
           statusClass = 'symbol-filter-failed';  // YELLOW
-          statusText = '🟡 NEEDS WORK';
+          statusText = '🟡 MARKET CLOSED';
         }
-
         const filterScore = `${row.filters.score}/4`;
         const filterColor = row.filters.score === 4 ? 'text-green-400' : row.filters.score >= 2 ? 'text-yellow-400' : 'text-red-400';
 
@@ -643,6 +644,7 @@
 
     // --- Inline trade strip ---
     function openTradePopupForSignal(signalData) {
+      if (!el('strip-signal')) { isOpening = false; return; }
       activeTradeSymbol = signalData.symbol;
       activeTradeExchange = signalData.exchange;
       activeTradeExchangeNorm = normEx(signalData.exchange);

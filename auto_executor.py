@@ -238,6 +238,11 @@ def monitor_and_exit_trades():
                     pnl = ((current_price - entry_price) / entry_price) * 100
                 else:
                     pnl = ((entry_price - current_price) / entry_price) * 100
+                    
+               # ── SANITY CHECK — reject bad price data ───
+                if abs(pnl) > 20:
+                    log(f"  ⚠️  SANITY CHECK FAILED: {symbol} P&L={pnl:.2f}% — likely bad price data, skipping")
+                    continue 
 
                 # ── Duration ───────────────────────────────
                 duration_seconds = (datetime.now() - entry_time).total_seconds() if entry_time else 0
