@@ -92,11 +92,12 @@ def check_and_execute_signals():
         # Find symbols with open trades (no duplicate symbol)
         # Find symbols with open trades OR recently closed (30 min cooldown)
         cursor.execute("""
-            SELECT DISTINCT symbol FROM active_trades
+            SELECT DISTINCT CONCAT(symbol, '_', direction) as symbol_dir FROM active_trades
             WHERE status = 'OPEN'
-               OR (status = 'CLOSED' AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE))
+               OR (status = 'CLOSED' AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+                   AND exit_reason NOT LIKE '%PANIC%')
         """)
-        locked_symbols = {r['symbol'] for r in cursor.fetchall()}
+        locked_symbols = {r['symbol_dir'] for r in cursor.fetchall()}
         
         # Load all active strategies with tuned params
         strategies = load_strategies(cursor)
@@ -133,7 +134,7 @@ def check_and_execute_signals():
             # Skip if broker or symbol already has open trade
             if broker in locked_brokers:
                 continue
-            if symbol in locked_symbols:
+            if f"{symbol}_{direction}" in locked_symbols:
                 continue
             # ── ENTRY CONDITIONS ─────────────────────────
             # Match exactly what the tuner backtests:
