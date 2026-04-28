@@ -864,7 +864,7 @@
             if (!strat || rsiVal === '--') return rsiVal;
             const cur = parseFloat(rsiVal);
             const exitLvl = o.direction==='LONG' ? parseFloat(strat.rsi_exit||70) : (100-parseFloat(strat.rsi_exit||70));
-            const arrow = o.direction==='LONG' ? '→' : '→';
+            const arrow = o.direction==='LONG' ? '>' : '<';
             const pct = o.direction==='LONG' ? (cur/exitLvl*100) : ((100-cur)/(100-exitLvl)*100);
             const col = pct >= 85 ? 'color:#f85149' : pct >= 60 ? 'color:#d29922' : 'color:#3fb950';
             return '<span style="'+col+'">'+cur.toFixed(1)+'</span><span style="color:#8b949e">'+arrow+'</span><span style="color:#bc8cff">'+exitLvl.toFixed(0)+'</span>';
