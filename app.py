@@ -1076,6 +1076,77 @@ def api_orders_summary():
 def backtest_vs_live():
     return render_or_404("backtest_vs_live.html")
 
+
+@app.route("/api/manual_tune/save", methods=["POST"])
+def api_manual_tune_save():
+    from db import get_db_connection
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        symbol_raw = data.get('symbol','')
+        trade_mode = data.get('trade_mode','BUY').upper()
+        direction  = 'LONG' if trade_mode == 'BUY' else 'SHORT'
+        symbol     = symbol_raw.split('_')[0].upper()
+
+        def combine(a, b):
+            try: return float(data.get(a,0)) + float(data.get(b,0))
+            except: return 0.0
+
+        rsi_len     = int(float(data.get('rsi_window', 100)))
+        rsi_entry   = combine('oversold_level_int','oversold_level_dec') if direction=='LONG' else combine('overbought_level_int','overbought_level_dec')
+        rsi_exit    = combine('rsi_exit_buy_int','rsi_exit_buy_dec') if direction=='LONG' else combine('rsi_exit_sell_int','rsi_exit_sell_dec')
+        stop_loss   = combine('stop_loss_int','stop_loss_dec')
+        trail_start = combine('early_start_int','early_start_dec')
+        trail_drop  = combine('early_minus_int','early_minus_dec')
+        init_profit = combine('rsi_profit_int','rsi_profit_dec')
+        macd_fast   = int(float(data.get('macd_fast', 12)))
+        macd_slow   = int(float(data.get('macd_slow', 26)))
+        macd_sig    = int(float(data.get('macd_signal', 9)))
+
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT bp.id FROM broker_products bp
+            JOIN brokers b ON bp.broker_id = b.id
+            WHERE bp.local_ticker = %s LIMIT 1
+        """, (symbol,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return jsonify({"ok": False, "error": f"Symbol {symbol} not found"}), 404
+
+        bp_id = row['id']
+        cursor.execute("""
+            SELECT id FROM strategy_params
+            WHERE broker_product_id=%s AND direction=%s LIMIT 1
+        """, (bp_id, direction))
+        existing = cursor.fetchone()
+
+        if existing:
+            cursor.execute("""
+                UPDATE strategy_params SET
+                    rsi_len=%s, rsi_entry=%s, rsi_exit=%s,
+                    stop_loss=%s, trailing_start=%s, trailing_drop=%s,
+                    init_profit=%s, macd_fast=%s, macd_slow=%s, macd_sig=%s,
+                    active=1, last_tuned=NOW()
+                WHERE id=%s
+            """, (rsi_len, rsi_entry, rsi_exit, stop_loss, trail_start,
+                  trail_drop, init_profit, macd_fast, macd_slow, macd_sig, existing['id']))
+            msg = f"Updated {symbol} {direction}"
+        else:
+            cursor.execute("""
+                INSERT INTO strategy_params
+                    (broker_product_id, direction, rsi_len, rsi_entry, rsi_exit,
+                     stop_loss, trailing_start, trailing_drop, init_profit,
+                     macd_fast, macd_slow, macd_sig, active, last_tuned)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,1,NOW())
+            """, (bp_id, direction, rsi_len, rsi_entry, rsi_exit, stop_loss,
+                  trail_start, trail_drop, init_profit, macd_fast, macd_slow, macd_sig))
+            msg = f"Created {symbol} {direction}"
+
+        conn.close()
+        return jsonify({"ok": True, "message": msg})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)

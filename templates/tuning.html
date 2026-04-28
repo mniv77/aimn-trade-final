@@ -950,13 +950,21 @@ SELL<br>
                 updated: new Date().toLocaleString()
             };
 
-            // Save to "database" (simulation)
-            parameterDatabase[symbol + '_' + tradeMode] = params;
-
-            // In real implementation, this would be an AJAX call to your Python backend
-            console.log('Saving parameters:', params);
-
-            showStatus(`✅ Parameters saved for ${symbol} (${tradeMode} mode)!`, 'success');
+            // Save to real database via API
+            fetch('/api/manual_tune/save', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(params)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    showStatus('✅ Parameters saved to database for ' + symbol + ' (' + tradeMode + ' mode)!', 'success');
+                } else {
+                    showStatus('❌ Error: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(e => showStatus('❌ Network error: ' + e.message, 'error'));
         }
 
         function clearPasteArea() {
