@@ -26,7 +26,7 @@ DEFAULT = {
     'decay_rate'         : 0.5,
     'timeframe'          : '5m',
     'bars'               : 2000,
-    'min_trades'         : 3,
+    'min_trades'         : 20,
     'score_metric'       : 'total_pnl',
 }
 
