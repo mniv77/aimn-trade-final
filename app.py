@@ -1047,6 +1047,35 @@ def delete_broker(id):
     return redirect(url_for("broker_settings"))
 
 
+
+@app.route("/api/orders/summary")
+def api_orders_summary():
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT symbol, side, pnl_percent, exit_reason,
+                   duration_seconds, created_at, broker
+            FROM orders
+            WHERE status = 'CLOSED'
+            ORDER BY created_at DESC
+            LIMIT 200
+        """)
+        trades = cursor.fetchall()
+        conn.close()
+        for t in trades:
+            if t.get('created_at'):
+                t['created_at'] = str(t['created_at'])
+            if t.get('pnl_percent'):
+                t['pnl_percent'] = float(t['pnl_percent'])
+        return jsonify({"trades": trades, "count": len(trades)})
+    except Exception as e:
+        return jsonify({"trades": [], "error": str(e)}), 500
+
+@app.route("/backtest-vs-live")
+def backtest_vs_live():
+    return render_or_404("backtest_vs_live.html")
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)

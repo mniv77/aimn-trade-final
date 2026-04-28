@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>AiMN - Backtest vs Live</title>
+<style>
+body{background:#0d1117;color:#e6edf3;font-family:monospace;margin:0;padding:20px}
+h1{color:#58a6ff;text-align:center}
+.sub{text-align:center;color:#8b949e;margin-bottom:20px;font-size:13px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.sc{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;text-align:center}
+.sc .val{font-size:22px;font-weight:bold;margin:4px 0}
+.sc .lbl{font-size:11px;color:#8b949e}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{margin:0 0 12px;font-size:14px;color:#58a6ff;border-bottom:1px solid #30363d;padding-bottom:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#21262d;color:#8b949e;padding:6px 8px;text-align:left;border-bottom:1px solid #30363d}
+td{padding:6px 8px;border-bottom:1px solid #21262d}
+tr:hover td{background:#1c2128}
+.pos{color:#3fb950}.neg{color:#f85149}.neu{color:#8b949e}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:bold}
+.stop{background:#3d1a1a;color:#f85149}
+.trail{background:#1a2d3d;color:#58a6ff}
+.rsi{background:#1a3d2d;color:#3fb950}
+.decay{background:#3d3a1a;color:#d29922}
+.panic{background:#3d1a3d;color:#bc8cff}
+.mr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:13px}
+#rb{display:block;margin:0 auto 20px;background:#238636;color:#fff;border:none;padding:8px 24px;border-radius:6px;cursor:pointer;font-size:13px}
+.loading{text-align:center;color:#8b949e;padding:20px}
+</style></head><body>
+<h1>Backtest vs Live Report</h1>
+<div class="sub" id="lu">Loading...</div>
+<button id="rb" onclick="loadAll()">Refresh</button>
+<div class="sg">
+<div class="sc"><div class="val" id="st">-</div><div class="lbl">Live Trades</div></div>
+<div class="sc"><div class="val" id="sw">-</div><div class="lbl">Win Rate</div></div>
+<div class="sc"><div class="val" id="sp">-</div><div class="lbl">Total PnL</div></div>
+<div class="sc"><div class="val" id="sa">-</div><div class="lbl">Avg PnL/Trade</div></div>
+</div>
+<div class="card"><div id="vt"><div class="loading">Loading...</div></div></div>
+<div class="g2">
+<div class="card"><h2>Exit Breakdown</h2><div id="eb"><div class="loading">Loading...</div></div></div>
+<div class="card"><h2>Recent Trades</h2><div id="rt"><div class="loading">Loading...</div></div></div>
+</div>
+<script>
+async function loadAll(){
+  document.getElementById('lu').textContent='Refreshing...';
+  try{
+    const[o,p]=await Promise.all([fetch('/api/orders/summary'),fetch('/api/performance')]);
+    const od=await o.json(); const pd=await p.json();
+    var t=od.trades||[];
+    var wins=t.filter(x=>parseFloat(x.pnl_percent||0)>0);
+    var pnl=t.reduce((s,x)=>s+parseFloat(x.pnl_percent||0),0);
+    var wr=t.length?(wins.length/t.length*100).toFixed(1):0;
+    var avg=t.length?(pnl/t.length).toFixed(2):0;
+    document.getElementById('st').textContent=t.length;
+    document.getElementById('sw').textContent=wr+'%';
+    document.getElementById('sw').className='val '+(wr>=50?'pos':'neg');
+    document.getElementById('sp').textContent=(pnl>=0?'+':'')+pnl.toFixed(2)+'%';
+    document.getElementById('sp').className='val '+(pnl>=0?'pos':'neg');
+    document.getElementById('sa').textContent=(avg>=0?'+':'')+avg+'%';
+    document.getElementById('sa').className='val '+(avg>=0?'pos':'neg');
+    var lm={};
+    t.forEach(function(x){
+      var k=x.symbol+'|'+x.side;
+      if(!lm[k])lm[k]={n:0,w:0,pnl:0,dur:[]};
+      lm[k].n++; var p2=parseFloat(x.pnl_percent||0); lm[k].pnl+=p2;
+      if(p2>0)lm[k].w++;
+      if(x.duration_seconds)lm[k].dur.push(x.duration_seconds);
+    });
+    var rows='';
+    pd.forEach(function(p){
+      var k=p.symbol+'|'+p.direction;
+      var lv=lm[k]; var bp=parseFloat(p.pl_pct||0);
+      var lt=lv?lv.n:0;
+      var lw=lv?(lv.w/lv.n*100).toFixed(0)+'%':'--';
+      var lp=lv?lv.pnl.toFixed(2):null;
+      var ad=lv&&lv.dur.length?Math.round(lv.dur.reduce(function(a,b){return a+b},0)/lv.dur.length/60)+'m':'--';
+      var match=!lv?'--':Math.abs(lv.pnl-bp)<2?'OK':lv.pnl>bp?'Better':'Below';
+      rows+='<tr><td style="color:#58a6ff;font-weight:bold">'+p.symbol+'</td><td>'+p.direction+'</td><td>'+(p.candle_time||'--')+'</td>';
+      rows+='<td class="'+(bp>=0?'pos':'neg')+'">'+(bp>=0?'+':'')+bp+'%</td>';
+      rows+='<td>'+lt+'</td><td>'+lw+'</td>';
+      rows+='<td class="'+(lp!==null?(lv.pnl>=0?'pos':'neg'):'')+'">'+(lp!==null?(lv.pnl>=0?'+':'')+lp+'%':'--')+'</td>';
+      rows+='<td>'+ad+'</td><td>'+match+'</td></tr>';
+    });
+    document.getElementById('vt').innerHTML='<table><thead><tr><th>Symbol</th><th>Dir</th><th>TF</th><th>Backtest</th><th>Trades</th><th>WinRate</th><th>Live PnL</th><th>Avg Dur</th><th>Match</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    var r={};
+    t.forEach(function(x){var k=(x.exit_reason||'UNKNOWN').replace(/[^A-Z\-]/gi,'').toUpperCase()||'UNKNOWN';r[k]=(r[k]||0)+1;});
+    var tot=t.length||1; var eh='';
+    Object.entries(r).sort(function(a,b){return b[1]-a[1]}).forEach(function(e){
+      var c=e[0].includes('STOP')?'stop':e[0].includes('TRAIL')?'trail':e[0].includes('RSI')?'rsi':e[0].includes('DECAY')?'decay':'panic';
+      eh+='<div class="mr"><span class="badge '+c+'">'+e[0]+'</span><span>'+e[1]+' ('+(e[1]/tot*100).toFixed(0)+'%)</span></div>';
+    });
+    document.getElementById('eb').innerHTML=eh||'<div class="loading">No exits</div>';
+    var rrows=(od.trades||[]).slice(0,10).map(function(x){
+      var pv=parseFloat(x.pnl_percent||0);
+      var pc=pv>0?'pos':pv<0?'neg':'neu';
+      var xr=(x.exit_reason||'').replace(/[^A-Z\-]/gi,'').toUpperCase();
+      var bc=xr.includes('STOP')?'stop':xr.includes('TRAIL')?'trail':xr.includes('RSI')?'rsi':xr.includes('DECAY')?'decay':'panic';
+      var dur=x.duration_seconds?Math.round(x.duration_seconds/60)+'m':'--';
+      return '<tr><td style="color:#58a6ff">'+x.symbol+'</td><td>'+x.side+'</td><td class="'+pc+'">'+(pv>=0?'+':'')+pv.toFixed(2)+'%</td><td>'+dur+'</td><td><span class="badge '+bc+'">'+(xr||'?')+'</span></td></tr>';
+    }).join('');
+    document.getElementById('rt').innerHTML='<table><thead><tr><th>Symbol</th><th>Dir</th><th>PnL</th><th>Dur</th><th>Exit</th></tr></thead><tbody>'+rrows+'</tbody></table>';
+    document.getElementById('lu').textContent='Updated: '+new Date().toLocaleTimeString();
+  }catch(e){document.getElementById('lu').textContent='Error: '+e.message;}
+}
+loadAll();
+</script></body></html>
