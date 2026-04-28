@@ -27,7 +27,7 @@ DEFAULT = {
     'timeframe'          : '5m',
     'bars'               : 2000,
     'min_trades'         : 20,
-    'score_metric'       : 'total_pnl',
+    'score_metric'       : 'profit_per_day',
 }
 
 BAR_MINUTES_MAP = {
@@ -189,13 +189,18 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
     if trades < min_trades:
         return None
 
+    profit_per_hour = round(total_pnl / max(total_duration_hours, 0.01), 4)
+    profit_per_day  = round(profit_per_hour * 24, 4)
     return {
-       'trades'        : trades,
-        'wins'          : wins,
-        'winrate'       : round(wins / trades * 100, 2),
-        'avg_pnl'       : round(total_pnl / trades, 4),
-        'total_pnl'     : round(total_pnl, 4),
-        'exit_breakdown': exit_reasons,
+        'trades'          : trades,
+        'wins'            : wins,
+        'winrate'         : round(wins / trades * 100, 2),
+        'avg_pnl'         : round(total_pnl / trades, 4),
+        'total_pnl'       : round(total_pnl, 4),
+        'profit_per_hour' : profit_per_hour,
+        'profit_per_day'  : profit_per_day,
+        'avg_duration_hrs': round(total_duration_hours / max(trades,1), 2),
+        'exit_breakdown'  : exit_reasons,
     }
 
 def score(result, metric='total_pnl'):
@@ -207,6 +212,10 @@ def score(result, metric='total_pnl'):
         return result['winrate'] + (result['total_pnl'] * 0.01) - decay_penalty
     if metric == 'avg_pnl':
         return result['avg_pnl'] + (result['winrate'] * 0.001) - decay_penalty
+    if metric == 'profit_per_day':
+        return result.get('profit_per_day', 0) + (result['winrate'] * 0.001) - decay_penalty
+    if metric == 'profit_per_hour':
+        return result.get('profit_per_hour', 0) + (result['winrate'] * 0.001) - decay_penalty
     return result['total_pnl'] + (result['winrate'] * 0.01) - decay_penalty
 
 
