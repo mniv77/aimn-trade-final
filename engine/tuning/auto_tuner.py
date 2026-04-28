@@ -108,7 +108,6 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
     entry_bar   = 0
 
     exit_reasons = {'STOP': 0, 'TRAIL': 0, 'DECAY': 0, 'RSI': 0}
-    total_duration_hours = 0.0
     start_bar = max(rsi_len, macd_slow + macd_sig) + 1
 
     for i in range(start_bar, n - 1):
@@ -184,7 +183,6 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
                 trades    += 1
                 if current_pnl > 0:
                     wins += 1
-                total_duration_hours += dur_hours
                 in_trade    = False
                 peak_profit = -999.0
 
@@ -197,9 +195,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
         'winrate'       : round(wins / trades * 100, 2),
         'avg_pnl'       : round(total_pnl / trades, 4),
         'total_pnl'     : round(total_pnl, 4),
-        'exit_breakdown'  : exit_reasons,
-        'profit_per_hour' : round(total_pnl / max(total_duration_hours, 0.01), 4),
-        'avg_duration_hrs': round(total_duration_hours / max(trades,1), 2),
+        'exit_breakdown': exit_reasons,
     }
 
 def score(result, metric='total_pnl'):
@@ -211,8 +207,6 @@ def score(result, metric='total_pnl'):
         return result['winrate'] + (result['total_pnl'] * 0.01) - decay_penalty
     if metric == 'avg_pnl':
         return result['avg_pnl'] + (result['winrate'] * 0.001) - decay_penalty
-    if metric == 'profit_per_hour':
-        return result['profit_per_hour'] + (result['winrate'] * 0.001) - decay_penalty
     return result['total_pnl'] + (result['winrate'] * 0.01) - decay_penalty
 
 
@@ -260,6 +254,101 @@ def save_best_params(strategy_id, params, result):
         log(f"  ❌ Save error: {e}")
     finally:
         conn.close()
+
+
+
+def walk_forward(highs, lows, closes, direction, params, bar_minutes, train_pct=0.7):
+    n = len(closes)
+    split = int(n * train_pct)
+    train = backtest(highs[:split], lows[:split], closes[:split], direction, params, bar_minutes)
+    test  = backtest(highs[split:], lows[split:], closes[split:], direction, params, bar_minutes)
+    return train, test
+
+
+def tune_strategy_wf(strategy_id, symbol, direction, candle_time=None, cfg=None, broker_name="Gemini", train_pct=0.7):
+    if cfg is None:
+        cfg = DEFAULT.copy()
+    timeframe    = cfg.get('timeframe', DEFAULT['timeframe'])
+    bars         = cfg.get('bars', DEFAULT['bars'])
+    bar_minutes  = BAR_MINUTES_MAP.get(timeframe, 60)
+    score_metric = cfg.get('score_metric', DEFAULT['score_metric'])
+    rsi_len_options     = cfg.get('rsi_len_options',     DEFAULT['rsi_len_options'])
+    rsi_entry_options   = cfg.get('rsi_entry_options',   DEFAULT['rsi_entry_options'])
+    stop_loss_options   = cfg.get('stop_loss_options',   DEFAULT['stop_loss_options'])
+    trail_start_options = cfg.get('trail_start_options', DEFAULT['trail_start_options'])
+    trail_minus_options = cfg.get('trail_minus_options', DEFAULT['trail_minus_options'])
+    init_profit_options = cfg.get('init_profit_options') or [cfg.get('init_profit', 1.0)]
+    rsi_exit_options    = cfg.get('rsi_exit_options')    or [cfg.get('rsi_exit', 70.0)]
+    decay_start_options = cfg.get('decay_start_options') or [cfg.get('decay_start', 0.5)]
+    fixed = {
+        'decay_rate': cfg.get('decay_rate', DEFAULT['decay_rate']),
+        'min_trades': cfg.get('min_trades', DEFAULT['min_trades']),
+        'macd_fast' : cfg.get('macd_fast',  DEFAULT['macd_fast']),
+        'macd_slow' : cfg.get('macd_slow',  DEFAULT['macd_slow']),
+        'macd_sig'  : cfg.get('macd_sig',   DEFAULT['macd_sig']),
+    }
+    log("=" * 55)
+    log("Walk-Forward: " + symbol + " " + direction + " [" + timeframe + "] train=" + str(int(train_pct*100)) + "%")
+    candles = fetch_candles(symbol, timeframe, bars, broker=broker_name)
+    if not candles or len(candles) < 50:
+        log("Insufficient candles")
+        return None
+    candles.sort(key=lambda x: x['timestamp'])
+    highs  = [float(c['high'])  for c in candles]
+    lows   = [float(c['low'])   for c in candles]
+    closes = [float(c['close']) for c in candles]
+    split  = int(len(closes) * train_pct)
+    log("Total: " + str(len(closes)) + " | Train: " + str(split) + " | Test: " + str(len(closes)-split))
+    best_train  = None
+    best_params = None
+    best_score  = -999
+    for init_profit, rsi_exit, decay_start, rsi_len, rsi_entry, stop_loss, trail_start, trail_minus in product(
+        init_profit_options, rsi_exit_options, decay_start_options, rsi_len_options,
+        rsi_entry_options, stop_loss_options, trail_start_options, trail_minus_options
+    ):
+        if trail_minus >= trail_start:
+            continue
+        params = {
+            'init_profit': init_profit, 'rsi_exit': rsi_exit,
+            'decay_start': decay_start, 'rsi_len': rsi_len,
+            'rsi_entry': rsi_entry, 'stop_loss': stop_loss,
+            'trail_start': trail_start, 'trail_minus': trail_minus,
+            **fixed
+        }
+        train_result = backtest(highs[:split], lows[:split], closes[:split], direction, params, bar_minutes)
+        if not train_result:
+            continue
+        s = score(train_result, score_metric)
+        if s > best_score:
+            best_score  = s
+            best_train  = train_result
+            best_params = params.copy()
+    if not best_params:
+        log("No valid combinations in train window")
+        return None
+    best_test = backtest(highs[split:], lows[split:], closes[split:], direction, best_params, bar_minutes)
+    log("TRAIN: PnL=" + str(best_train['total_pnl']) + "% WR=" + str(best_train['winrate']) + "% trades=" + str(best_train['trades']))
+    if best_test:
+        log("TEST:  PnL=" + str(best_test['total_pnl']) + "% WR=" + str(best_test['winrate']) + "% trades=" + str(best_test['trades']))
+        ratio = round(best_test['total_pnl'] / best_train['total_pnl'], 2) if best_train['total_pnl'] != 0 else 0
+        log("Overfit ratio: " + str(ratio) + " (1.0=perfect, <0.5=overfit)")
+    else:
+        log("TEST: Not enough trades")
+        ratio = None
+    if best_test and best_test['total_pnl'] > 0:
+        save_best_params(strategy_id, best_params, best_test)
+        log("SAVED — test window positive!")
+    else:
+        log("NOT SAVED — test window negative or insufficient")
+    return {
+        'symbol'       : symbol,
+        'direction'    : direction,
+        'timeframe'    : timeframe,
+        'params'       : best_params,
+        'train_result' : best_train,
+        'test_result'  : best_test,
+        'overfit_ratio': ratio,
+    }
 
 
 def tune_strategy(strategy_id, symbol, direction, candle_time=None, cfg=None, broker_name="Gemini"):
