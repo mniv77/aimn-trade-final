@@ -194,7 +194,7 @@ def process_strategies(cursor, alpaca_key, alpaca_secret):
         LEFT JOIN market_sessions ms ON bp.session_id = ms.id
         WHERE sp.active = 1
           AND bp.is_active = 1
-          AND b.name IN ('Gemini', 'Alpaca')
+          AND b.name IN ('Gemini', 'Alpaca', 'Alpaca-ETF')
         ORDER BY bp.local_ticker, sp.direction, sp.candle_time
     """)
     strategies = cursor.fetchall()
@@ -224,7 +224,7 @@ def process_strategies(cursor, alpaca_key, alpaca_secret):
                 data = None
                 if broker_name == 'Gemini':
                     data = fetch_prices_gemini(symbol, candle_time, rsi_len + 50)
-                elif broker_name == 'Alpaca':
+                elif broker_name in ('Alpaca', 'Alpaca-ETF'):
                     if not alpaca_key:
                         log(f"  ⚠️ No Alpaca credentials — skipping {symbol}")
                         continue
