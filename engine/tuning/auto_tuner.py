@@ -108,6 +108,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
     entry_bar   = 0
 
     exit_reasons = {'STOP': 0, 'TRAIL': 0, 'DECAY': 0, 'RSI': 0}
+    total_duration_hours = 0.0
     start_bar = max(rsi_len, macd_slow + macd_sig) + 1
 
     for i in range(start_bar, n - 1):
@@ -183,6 +184,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
                 trades    += 1
                 if current_pnl > 0:
                     wins += 1
+                total_duration_hours += dur_hours
                 in_trade    = False
                 peak_profit = -999.0
 
@@ -195,7 +197,9 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
         'winrate'       : round(wins / trades * 100, 2),
         'avg_pnl'       : round(total_pnl / trades, 4),
         'total_pnl'     : round(total_pnl, 4),
-        'exit_breakdown': exit_reasons,
+        'exit_breakdown'  : exit_reasons,
+        'profit_per_hour' : round(total_pnl / max(total_duration_hours, 0.01), 4),
+        'avg_duration_hrs': round(total_duration_hours / max(trades,1), 2),
     }
 
 def score(result, metric='total_pnl'):
@@ -207,6 +211,8 @@ def score(result, metric='total_pnl'):
         return result['winrate'] + (result['total_pnl'] * 0.01) - decay_penalty
     if metric == 'avg_pnl':
         return result['avg_pnl'] + (result['winrate'] * 0.001) - decay_penalty
+    if metric == 'profit_per_hour':
+        return result['profit_per_hour'] + (result['winrate'] * 0.001) - decay_penalty
     return result['total_pnl'] + (result['winrate'] * 0.01) - decay_penalty
 
 
