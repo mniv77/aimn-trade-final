@@ -860,7 +860,7 @@
           <span class="text-gray-500">Trail</span>
           <span class="text-blue-300" id="trail-${o.id}">${trailStr}</span>
           <span class="text-gray-500">RSI</span>
-          <span class="${rsiColor}" id="rsi-${o.id}">${rsiVal}</span>
+          <span class="${rsiColor}" id="rsi-${o.id}">${rsiVal}/<span class="text-purple-400">${strat ? (o.direction==='LONG' ? parseFloat(strat.rsi_exit||70).toFixed(0) : (100-parseFloat(strat.rsi_exit||70)).toFixed(0)) : '--'}</span></span>
           <span class="text-gray-500">Init</span>
           <span class="text-yellow-300">${initProfit}</span>
           <span class="text-gray-500">Stop</span>
