@@ -46,3 +46,12 @@ git add .gitignore
 git commit -m "chore: add .gitignore"
 >>>>>>> 0c0df91 (Initial push)
 .env.local
+*.bak
+*.backup
+*_backup.py
+__pycache__/
+*.pyc
+*.pyo
+.env
+engine.log
+engine.pid
