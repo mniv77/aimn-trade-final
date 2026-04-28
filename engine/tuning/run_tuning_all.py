@@ -5,7 +5,7 @@
 import sys
 sys.path.insert(0, '/home/MeirNiv/aimn-trade-final')
 
-from engine.tuning.auto_tuner import tune_strategy
+from engine.tuning.auto_tuner import tune_strategy, tune_strategy_wf
 from db import get_db_connection
 from datetime import datetime
 
@@ -59,8 +59,8 @@ GRID_CFG = {
     'init_profit_options': [0.5, 1.0, 1.5, 2.0],
     'decay_start_options': [0.5, 1.0, 2.0],
     'decay_rate'         : 0.5,
-    'min_trades'         : 5,
-    'score_metric'       : 'total_pnl',
+    'min_trades'         : 20,
+    'score_metric'       : 'profit_per_day',
 }
 
 run_id    = None
@@ -196,13 +196,15 @@ def run_all():
                 cfg = {**GRID_CFG, 'timeframe': tf['tf'],
                        'bar_minutes': tf['bar_minutes'], 'bars': tf['bars']}
                 try:
-                    result = tune_strategy(
+                    result = tune_strategy_wf(
                         strategy_id, sym['symbol'], direction,
                         cfg=cfg, broker_name=sym['broker_name'])
                     if result:
                         success += 1
                         results.append(result)
-                        log(f"✅ {label} → TotalPnL={result['result']['total_pnl']}%")
+                        train = result.get('train_result') or {}
+                        test  = result.get('test_result') or {}
+                        log(f"✅ {label} → Train={train.get('total_pnl',0)}% Test={test.get('total_pnl',0)}% Ratio={result.get('overfit_ratio','?')}")
                     else:
                         failed += 1
                         log(f"❌ {label} → No valid combinations")
@@ -212,8 +214,8 @@ def run_all():
 
     summary = f"✅ {success} succeeded | ❌ {failed} failed"
     if results:
-        best = sorted(results, key=lambda r: r['result']['total_pnl'], reverse=True)[0]
-        summary += f" | Best: {best['symbol']} {best['direction']} {best['result']['total_pnl']}%"
+        best = sorted(results, key=lambda r: (r.get('test_result') or {}).get('total_pnl', 0), reverse=True)[0]
+        summary += f" | Best: {best['symbol']} {best['direction']} test={( best.get('test_result') or {}).get('total_pnl',0)}%"
 
     status = "success" if failed == 0 else "partial" if success > 0 else "failed"
     save_run_log(status, summary)
