@@ -30,6 +30,29 @@ def get_db():
         autocommit=True
     )
 
+def get_alpaca_broker(cursor, broker_name):
+    try:
+        cursor.execute(
+            "SELECT api_key, api_secret FROM brokers WHERE name=%s LIMIT 1",
+            (broker_name,)
+        )
+        row = cursor.fetchone()
+        if not row or not row['api_key']:
+            return None
+        import alpaca_trade_api as tradeapi
+        base_url = "https://paper-api.alpaca.markets"
+        api = tradeapi.REST(
+            key_id=row['api_key'],
+            secret_key=row['api_secret'],
+            base_url=base_url,
+            api_version='v2'
+        )
+        from brokers.alpaca_client import AlpacaBroker
+        return AlpacaBroker(api)
+    except Exception as e:
+        log(f"  ⚠️  Alpaca broker init failed: {e}")
+        return None
+
 def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
 
@@ -165,6 +188,21 @@ def check_and_execute_signals():
 
                 log(f"✅ Trade opened: {symbol} {direction} @ ${price:,.2f} "
                     f"[strategy_id={s['strategy_id']}]")
+
+                # Place real order for Alpaca brokers
+                if broker.upper() in ('ALPACA', 'ALPACA-ETF'):
+                    alpaca = get_alpaca_broker(cursor, broker)
+                    if alpaca:
+                        side = 'buy' if direction == 'LONG' else 'sell'
+                        result = alpaca.open_market(symbol, side, qty=1)
+                        if result.ok:
+                            log(f"  📈 Alpaca order placed: {symbol} {side} | order_id={result.order_id}")
+                            cursor.execute(
+                                "UPDATE active_trades SET broker_order_id=%s WHERE broker_name=%s AND symbol=%s AND status='OPEN' ORDER BY id DESC LIMIT 1",
+                                (result.order_id, broker, symbol)
+                            )
+                        else:
+                            log(f"  ❌ Alpaca order FAILED: {symbol} | {result.error}")
 
                 # Lock broker and symbol
                 locked_brokers.add(broker)
@@ -349,6 +387,18 @@ def monitor_and_exit_trades():
                             exit_reason = %s
                         WHERE id = %s
                     """, (current_price, exit_reason, trade_id))
+
+                    # Close real Alpaca position
+                    broker_name = trade.get('broker_name', '')
+                    if broker_name.upper() in ('ALPACA', 'ALPACA-ETF'):
+                        alpaca = get_alpaca_broker(cursor, broker_name)
+                        if alpaca:
+                            side = 'buy' if direction == 'LONG' else 'sell'
+                            result = alpaca.close_market(symbol, side, qty=1)
+                            if result.ok:
+                                log(f"  📉 Alpaca position closed: {symbol} | order_id={result.order_id}")
+                            else:
+                                log(f"  ❌ Alpaca close FAILED: {symbol} | {result.error}")
 
                     log(f"  ✅ CLOSED: {symbol} {direction} | "
                         f"{exit_reason} | P&L:{pnl:+.2f}% | "
