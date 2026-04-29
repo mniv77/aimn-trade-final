@@ -279,7 +279,7 @@ def monitor_and_exit_trades():
                     pnl = ((entry_price - current_price) / entry_price) * 100
                     
                # ── SANITY CHECK — reject bad price data ───
-                if abs(pnl) > 20:
+                if abs(pnl) > 5:
                     log(f"  ⚠️  SANITY CHECK FAILED: {symbol} P&L={pnl:.2f}% — likely bad price data, skipping")
                     continue 
 
