@@ -89,7 +89,7 @@ def update_prices():
 
         # Separate crypto and stocks
         crypto_products = [p for p in products if p.get('is_24_7') == 1 or p['broker_name'].upper() == 'GEMINI']
-        stock_products  = [p for p in products if p.get('is_24_7') != 1 and p['broker_name'].upper() == 'ALPACA']
+        stock_products  = [p for p in products if p.get('is_24_7') != 1 and p['broker_name'].upper() in ('ALPACA', 'ALPACA-ETF')]
 
         # ── CRYPTO: Gemini ───────────────────────────────
         for p in crypto_products:
