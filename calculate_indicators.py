@@ -260,12 +260,7 @@ def process_strategies(cursor, alpaca_key, alpaca_secret):
                 WHERE id = %s
             """, (rsi_real, macd_val, strategy_id))
 
-            # ✅ Also update broker_products price
-            cursor.execute("""
-                UPDATE broker_products
-                SET last_price = %s, price_updated_at = NOW()
-                WHERE id = %s
-            """, (current_price, product_id))
+            # price update handled by price_updater.py only
 
             # ✅ Update active_trades price
             cursor.execute("""
