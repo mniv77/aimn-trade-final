@@ -172,6 +172,11 @@ def check_and_execute_signals():
                 macd_signal = macd_val < 0
 
             if rsi_signal and macd_signal:
+                # Sanity check: price must be > 0 and reasonable
+                if price <= 0:
+                    log(f"  ⚠️  ENTRY BLOCKED: {symbol} price={price} invalid")
+                    continue
+
                 log(f"🚀 SIGNAL: {symbol} {direction} @ ${price:,.2f} | "
                     f"RSI={rsi_real:.1f} (threshold={rsi_entry:.1f}) | "
                     f"MACD={macd_val:.4f}")
