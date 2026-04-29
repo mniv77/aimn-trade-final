@@ -108,6 +108,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
     entry_bar   = 0
 
     exit_reasons = {'STOP': 0, 'TRAIL': 0, 'DECAY': 0, 'RSI': 0}
+    total_duration_hours = 0.0
     start_bar = max(rsi_len, macd_slow + macd_sig) + 1
 
     for i in range(start_bar, n - 1):
@@ -183,6 +184,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
                 trades    += 1
                 if current_pnl > 0:
                     wins += 1
+                total_duration_hours += dur_hours
                 in_trade    = False
                 peak_profit = -999.0
 
