@@ -80,6 +80,8 @@ def get_symbols():
             SELECT bp.id as broker_product_id, bp.local_ticker as symbol, b.name as broker_name
             FROM broker_products bp
             JOIN brokers b ON bp.broker_id = b.id
+            WHERE bp.is_active = 1
+            AND b.name IN ('Gemini', 'Alpaca')
             ORDER BY b.name, bp.local_ticker
         """)
         rows = cursor.fetchall()
