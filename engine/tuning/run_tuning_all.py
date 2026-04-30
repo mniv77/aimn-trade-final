@@ -11,7 +11,7 @@ from datetime import datetime
 
 # Timeframes by broker type
 CRYPTO_TFS = [
-    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 5000},  # ~7 months
+    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 8000},  # ~11 months
     {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 5000},  # ~3.5 months
     {'tf': '5m',  'candle_time': '5m',  'bar_minutes': 5,   'bars': 8000},  # ~28 trading days
 ]
@@ -59,7 +59,7 @@ GRID_CFG = {
     'init_profit_options': [0.5, 1.0, 1.5, 2.0],
     'decay_start_options': [0.5, 1.0, 2.0],
     'decay_rate'         : 0.5,
-    'min_trades'         : 20,
+    'min_trades'         : 5,
     'score_metric'       : 'profit_per_day',
 }
 
