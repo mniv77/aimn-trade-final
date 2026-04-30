@@ -219,7 +219,7 @@ def check_and_execute_signals():
 
                 # Lock broker and symbol
                 locked_brokers.add(broker)
-                locked_symbols.add(symbol)
+                locked_symbols.add(f"{symbol}_{direction}")
 
     except Exception as e:
         log(f"❌ Entry error: {e}")
