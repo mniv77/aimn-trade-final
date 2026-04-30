@@ -186,10 +186,10 @@ def check_and_execute_signals():
                     INSERT INTO active_trades
                     (broker_product_id, broker_name, symbol, direction,
                      entry_price, entry_time, last_price, peak_profit,
-                     status, strategy_id)
-                    VALUES (%s, %s, %s, %s, %s, NOW(), %s, -999.0, 'OPEN', %s)
+                     status, strategy_id, candle_time)
+                    VALUES (%s, %s, %s, %s, %s, NOW(), %s, -999.0, 'OPEN', %s, %s)
                 """, (product_id, broker, symbol, direction,
-                      price, price, s['strategy_id']))
+                      price, price, s['strategy_id'], s['candle_time']))
 
                 log(f"✅ Trade opened: {symbol} {direction} @ ${price:,.2f} "
                     f"[strategy_id={s['strategy_id']}]")
