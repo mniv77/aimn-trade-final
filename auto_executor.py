@@ -91,7 +91,15 @@ def load_strategies(cursor):
         JOIN brokers b          ON bp.broker_id = b.id
         WHERE sp.active = 1
           AND bp.is_active = 1
-        ORDER BY bp.local_ticker, sp.direction, sp.candle_time
+        ORDER BY bp.local_ticker, sp.direction,
+        CASE sp.candle_time
+            WHEN '1hr' THEN 1
+            WHEN '1h'  THEN 2
+            WHEN '30m' THEN 3
+            WHEN '5m'  THEN 4
+            WHEN '1m'  THEN 5
+            ELSE 6
+        END
     """)
     return cursor.fetchall()
 
