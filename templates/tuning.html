@@ -671,6 +671,7 @@ EXACT ORDER EXPECTED:
                 <!-- Action Buttons -->
                 <div class="button-group">
                     <button class="btn-save" onclick="saveParameters()">💾 Save to Database</button>
+                    <button class="btn-auto-fill" onclick="loadFromDatabase()">📥 Load from Database</button>
                     <button class="btn-clear" onclick="clearForm()">🗑️ Clear All</button>
                 </div>
 
@@ -970,6 +971,59 @@ SELL<br>
         function clearPasteArea() {
             document.getElementById('tvNumbers').value = '';
             showStatus('Paste area cleared!', 'success');
+        }
+
+        function loadFromDatabase() {
+            const symbol    = document.getElementById('symbol')?.value?.trim().toUpperCase();
+            const tradeMode = document.getElementById('trade_mode')?.value?.toUpperCase();
+            const direction = (tradeMode === 'BUY') ? 'LONG' : 'SHORT';
+
+            if (!symbol) {
+                showStatus('❌ Please enter a symbol first!', 'error');
+                return;
+            }
+
+            showStatus('⏳ Loading from database...', 'info');
+
+            fetch(`/api/manual_tune/load?symbol=${symbol}&direction=${direction}`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.ok) {
+                    showStatus('❌ ' + (data.error || 'Not found'), 'error');
+                    return;
+                }
+                const d = data.data;
+                // Fill all fields from DB
+                setVal('rsi_window',           d.rsi_window);
+                setVal('oversold_level_int',   Math.floor(d.oversold_level));
+                setVal('oversold_level_dec',   Math.round((d.oversold_level % 1) * 100));
+                setVal('overbought_level_int', Math.floor(d.overbought_level));
+                setVal('overbought_level_dec', Math.round((d.overbought_level % 1) * 100));
+                setVal('rsi_exit_buy_int',     Math.floor(d.rsi_exit));
+                setVal('rsi_exit_buy_dec',     Math.round((d.rsi_exit % 1) * 100));
+                setVal('rsi_exit_sell_int',    Math.floor(d.rsi_exit));
+                setVal('rsi_exit_sell_dec',    Math.round((d.rsi_exit % 1) * 100));
+                setVal('stop_loss_int',        Math.floor(d.stop_loss));
+                setVal('stop_loss_dec',        Math.round((d.stop_loss % 1) * 100));
+                setVal('early_start_int',      Math.floor(d.early_start));
+                setVal('early_start_dec',      Math.round((d.early_start % 1) * 100));
+                setVal('early_minus_int',      Math.floor(d.early_minus));
+                setVal('early_minus_dec',      Math.round((d.early_minus % 1) * 100));
+                setVal('rsi_profit_int',       Math.floor(d.rsi_profit));
+                setVal('rsi_profit_dec',       Math.round((d.rsi_profit % 1) * 100));
+                setVal('macd_fast',            d.macd_fast);
+                setVal('macd_slow',            d.macd_slow);
+                setVal('macd_signal',          d.macd_signal);
+
+                const tuned = d.last_tuned ? ' (tuned: ' + d.last_tuned.substring(0,10) + ')' : '';
+                showStatus('✅ Loaded ' + symbol + ' ' + direction + ' from DB — PnL=' + d.pl_pct + '%' + tuned, 'success');
+            })
+            .catch(e => showStatus('❌ Network error: ' + e.message, 'error'));
+        }
+
+        function setVal(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
         }
 
         function clearForm() {

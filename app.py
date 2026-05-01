@@ -1077,6 +1077,50 @@ def backtest_vs_live():
     return render_or_404("backtest_vs_live.html")
 
 
+
+@app.route("/api/manual_tune/load", methods=["GET"])
+def api_manual_tune_load():
+    from db import get_db_connection
+    try:
+        symbol    = request.args.get('symbol', '').upper()
+        direction = request.args.get('direction', 'LONG').upper()
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT sp.rsi_len, sp.rsi_entry, sp.rsi_exit,
+                   sp.stop_loss, sp.trailing_start, sp.trailing_drop,
+                   sp.init_profit, sp.macd_fast, sp.macd_slow, sp.macd_sig,
+                   sp.decay_start, sp.decay_rate, sp.candle_time,
+                   sp.pl_pct, sp.last_tuned
+            FROM strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            WHERE bp.local_ticker = %s AND sp.direction = %s
+            ORDER BY sp.last_tuned DESC LIMIT 1
+        """, (symbol, direction))
+        row = cursor.fetchone()
+        conn.close()
+        if not row:
+            return jsonify({"ok": False, "error": f"No params found for {symbol} {direction}"}), 404
+        return jsonify({"ok": True, "data": {
+            "rsi_window"           : row["rsi_len"],
+            "oversold_level"       : float(row["rsi_entry"]),
+            "overbought_level"     : float(row["rsi_entry"]),
+            "rsi_exit"             : float(row["rsi_exit"]),
+            "stop_loss"            : float(row["stop_loss"]),
+            "early_start"          : float(row["trailing_start"]),
+            "early_minus"          : float(row["trailing_drop"]),
+            "rsi_profit"           : float(row["init_profit"]),
+            "macd_fast"            : row["macd_fast"],
+            "macd_slow"            : row["macd_slow"],
+            "macd_signal"          : row["macd_sig"],
+            "decay_start"          : float(row["decay_start"]),
+            "decay_rate"           : float(row["decay_rate"]),
+            "candle_time"          : row["candle_time"],
+            "pl_pct"               : float(row["pl_pct"] or 0),
+            "last_tuned"           : str(row["last_tuned"]) if row["last_tuned"] else None
+        }})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 @app.route("/api/manual_tune/save", methods=["POST"])
 def api_manual_tune_save():
     from db import get_db_connection
