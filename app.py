@@ -414,6 +414,7 @@ def api_trades_active():
             "peak_profit": r['peak_profit'], "broker": r['broker_name'],
             "entry_time": entry_ms or str(r['entry_time']),
             "status": r['status'],
+            "candle_time": r['candle_time'] or "--",
         })
         return jsonify(result)
     except Exception as e:
