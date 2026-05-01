@@ -1029,9 +1029,13 @@ SELL<br>
         }
 
         function clearForm() {
-            document.querySelectorAll('input[type="number"]').forEach(el => el.value = '');
-            document.getElementById('tvNumbers').value = '';
-            showStatus('Form cleared!', 'success');
+            document.querySelectorAll('input[type="number"]').forEach(el => {
+                el.value = '';
+                el.defaultValue = '';
+            });
+            const tv = document.getElementById('tvNumbers');
+            if (tv) tv.value = '';
+            showStatus('✅ Form cleared!', 'success');
         }
 
         function showStatus(message, type) {
