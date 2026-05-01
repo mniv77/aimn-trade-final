@@ -1031,7 +1031,7 @@ SELL<br>
         function clearForm() {
             document.querySelectorAll('input[type="number"]').forEach(el => {
                 el.value = '';
-                el.defaultValue = '';
+                el.placeholder = el.placeholder;
             });
             const tv = document.getElementById('tvNumbers');
             if (tv) tv.value = '';
