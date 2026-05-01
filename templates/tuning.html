@@ -809,41 +809,21 @@ SELL<br>
 
         // EXACT ORDER MAPPING - SYNCHRONIZED WITH TV STRATEGY
         const fieldOrder = [
-            'tradeMode',                // 1
-            'rsiWindow',               // 2
-            'oversoldLevel_Int',       // 3
-            'oversoldLevel_Dec',       // 4
-            'overboughtLevel_Int',     // 5
-            'overboughtLevel_Dec',     // 6
-            'rsiExitLevelBuy_Int',     // 7
-            'rsiExitLevelBuy_Dec',     // 8
-            'rsiExitLevelSell_Int',    // 9
-            'rsiExitLevelSell_Dec',    // 10
-            'fastLength',              // 11
-            'slowLength',              // 12
-            'signalLength',            // 13
-            'volMALength',             // 14
-            'volThreshold',            // 15
-            'useVolumeFilter',         // 16
-            'atrLength',               // 17
-            'atrMALength',             // 18
-            'atrThreshold',            // 19
-            'useATRFilter',            // 20
-            'stopLossInt',             // 21
-            'stopLossDec',             // 22
-            'earlyStartInt',           // 23
-            'earlyStartDec',           // 24
-            'earlyMinusInt',           // 25
-            'earlyMinusDec',           // 26
-            'peakStartInt',            // 27
-            'peakStartDec',            // 28
-            'peakMinusInt',            // 29
-            'peakMinusDec',            // 30
-            'rsiProfitInt',            // 31
-            'rsiProfitDec',            // 32
-            'enableAlerts',            // 33
-            'showLines',               // 34
-            'showSignals'              // 35
+            'tradeMode',           // 1  BUY/SELL
+            'fastLength',          // 2  MACD Fast
+            'slowLength',          // 3  MACD Slow
+            'signalLength',        // 4  MACD Signal
+            'rsiEntry',            // 5  RSI Entry
+            'rsiExit',             // 6  RSI Exit
+            'stopLoss',            // 7  Stop Loss
+            'trailStart',          // 8  Trail Start
+            'trailMinus',          // 9  Trail Minus
+            'initProfit',          // 10 Init Profit
+            'decayStart',          // 11 Decay Start
+            'decayRate',           // 12 Decay Rate
+            'useHardTP',           // 13 true/false
+            'savedHi',             // 14 RSI Max
+            'savedLo'              // 15 RSI Min
         ];
 
         function autoFillFromNumbers() {
@@ -856,8 +836,8 @@ SELL<br>
             }
 
             // Split by lines and filter empty lines
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line !== '');
-
+            // Split by comma (TV CSV format)
+            const lines = text.split(',').map(v => v.trim()).filter(v => v !== '');
             if (lines.length < fieldOrder.length) {
                 showStatus(`⚠️ Expected ${fieldOrder.length} values, got ${lines.length}. Please check your TV copy!`, 'error');
                 return;
@@ -865,35 +845,72 @@ SELL<br>
 
             let filled = 0;
 
-            // Fill each field in exact order
-            for (let i = 0; i < fieldOrder.length && i < lines.length; i++) {
-                const fieldId = fieldOrder[i];
-                const field = document.getElementById(fieldId);
-                const value = lines[i];
+            // Smart fill - map CSV values to form fields
+            const vals = {};
+            fieldOrder.forEach((id, i) => { vals[id] = lines[i]; });
 
-                if (field) {
-                    field.value = value;
-                    field.style.background = 'rgba(40,167,69,0.3)';
-                    filled++;
-
-                    // Reset color after 2 seconds
-                    setTimeout(() => {
-                        field.style.background = 'rgba(255,255,255,0.1)';
-                    }, 2000);
-                }
+            // Helper to split float into int+dec
+            function splitFloat(v) {
+                const f = parseFloat(v) || 0;
+                return { int: Math.floor(f), dec: parseFloat((f % 1).toFixed(2)) };
             }
 
+            // Trade Mode
+            const tm = document.getElementById('tradeMode');
+            if (tm) { tm.value = vals.tradeMode; filled++; }
+
+            // MACD
+            setVal('fastLength',   vals.fastLength);
+            setVal('slowLength',   vals.slowLength);
+            setVal('signalLength', vals.signalLength);
+            filled += 3;
+
+            // RSI Entry
+            const re = splitFloat(vals.rsiEntry);
+            setVal('oversoldLevel_Int', re.int);
+            setVal('oversoldLevel_Dec', re.dec);
+            setVal('overboughtLevel_Int', re.int);
+            setVal('overboughtLevel_Dec', re.dec);
+            filled += 2;
+
+            // RSI Exit
+            const rx = splitFloat(vals.rsiExit);
+            setVal('rsiExitLevelBuy_Int',  rx.int);
+            setVal('rsiExitLevelBuy_Dec',  rx.dec);
+            setVal('rsiExitLevelSell_Int', rx.int);
+            setVal('rsiExitLevelSell_Dec', rx.dec);
+            filled += 2;
+
+            // Stop Loss
+            const sl = splitFloat(vals.stopLoss);
+            setVal('stopLossInt', sl.int);
+            setVal('stopLossDec', sl.dec);
+            filled++;
+
+            // Trail Start
+            const ts = splitFloat(vals.trailStart);
+            setVal('earlyStartInt', ts.int);
+            setVal('earlyStartDec', ts.dec);
+            filled++;
+
+            // Trail Minus
+            const tm2 = splitFloat(vals.trailMinus);
+            setVal('earlyMinusInt', tm2.int);
+            setVal('earlyMinusDec', tm2.dec);
+            filled++;
+
+            // Init Profit
+            const ip = splitFloat(vals.initProfit);
+            setVal('rsiProfitInt', ip.int);
+            setVal('rsiProfitDec', ip.dec);
+            filled++;
+
+            // RSI Window (use rsiLen from TV - not in CSV, keep default)
+            // Decay/HardTP stored but no form fields yet
+
+
             if (filled > 0) {
-                showStatus(`✅ Auto-filled ${filled} parameters in perfect order!`, 'success');
-                
-                // Show indicator that fields are synchronized
-                const syncIndicator = document.querySelector('.sync-indicator');
-                if (syncIndicator) {
-                    syncIndicator.style.display = 'block';
-                    setTimeout(() => {
-                        syncIndicator.style.display = 'none';
-                    }, 5000);
-                }
+                showStatus(`✅ Auto-filled ${filled} parameters from TV!`, 'success');
             } else {
                 showStatus('❌ Failed to fill parameters. Check the format!', 'error');
             }
