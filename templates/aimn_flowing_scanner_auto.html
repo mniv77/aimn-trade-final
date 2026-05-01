@@ -875,6 +875,7 @@
           <span class="text-red-400">${strat ? parseFloat(strat.stop_loss||2).toFixed(1)+'%' : '--'}</span>
           <span class="text-gray-500">Decay</span>
           <span class="text-orange-300">${strat ? parseFloat(strat.decay_start||1).toFixed(1)+'h' : '--'}</span>          <span class="text-gray-600">${o.broker}</span>
+          <span class="text-purple-400 font-bold">${o.candle_time || "--"}</span>
           <button ${isClosed?'disabled':''} onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
             class="${isClosed?'bg-gray-600 cursor-not-allowed':'bg-blue-700 hover:bg-blue-600'} text-white px-2 py-0.5 rounded font-bold">
             📊
