@@ -360,7 +360,9 @@ def monitor_and_exit_trades():
                 # ── RULE 4: DECAY EXIT ──────────────────────
                 # After decay_start hours, gate decays toward 0
                 # Exit when current profit >= decayed gate
-                if not exit_reason and duration_hours >= decay_start:
+                # BUT skip if trailing is active — let trailing catch bigger moves!
+                trailing_active = peak_profit >= trail_start
+                if not exit_reason and duration_hours >= decay_start and not trailing_active:
                     if pnl >= current_gate:
                         exit_reason = "DECAY-EXIT"
                         log(f"  ⏰ DECAY EXIT: {symbol} | "
