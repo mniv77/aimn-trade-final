@@ -1014,6 +1014,9 @@ SELL<br>
                 setVal('macd_slow',            d.macd_slow);
                 setVal('macd_signal',          d.macd_signal);
 
+                // Update trade mode to match loaded direction
+                const modeEl = document.getElementById('tradeMode');
+                if (modeEl) modeEl.value = (direction === 'LONG') ? 'BUY' : 'SELL';
                 const tuned = d.last_tuned ? ' (tuned: ' + d.last_tuned.substring(0,10) + ')' : '';
                 showStatus('✅ Loaded ' + symbol + ' ' + direction + ' from DB — PnL=' + d.pl_pct + '%' + tuned, 'success');
             })
@@ -1026,8 +1029,8 @@ SELL<br>
         }
 
         function clearForm() {
-            const inputs = document.querySelectorAll('input, select:not(#symbolSelect), textarea');
-            inputs.forEach(input => input.value = '');
+            document.querySelectorAll('input[type="number"]').forEach(el => el.value = '');
+            document.getElementById('tvNumbers').value = '';
             showStatus('Form cleared!', 'success');
         }
 
