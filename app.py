@@ -1078,14 +1078,39 @@ def backtest_vs_live():
 
 
 
+
+@app.route("/api/active_symbols", methods=["GET"])
+def api_active_symbols():
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            SELECT bp.local_ticker as symbol, b.name as broker,
+                   GROUP_CONCAT(DISTINCT sp.candle_time ORDER BY sp.candle_time) as candle_times,
+                   GROUP_CONCAT(DISTINCT sp.direction ORDER BY sp.direction) as directions
+            FROM broker_products bp
+            JOIN brokers b ON bp.broker_id = b.id
+            JOIN strategy_params sp ON sp.broker_product_id = bp.id
+            WHERE bp.is_active = 1 AND sp.active = 1
+            GROUP BY bp.local_ticker, b.name
+            ORDER BY b.name, bp.local_ticker
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify({"ok": True, "symbols": [dict(r) for r in rows]})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 @app.route("/api/manual_tune/load", methods=["GET"])
 def api_manual_tune_load():
     from db import get_db_connection
     try:
-        symbol    = request.args.get('symbol', '').upper()
-        direction = request.args.get('direction', 'LONG').upper()
+        symbol      = request.args.get('symbol', '').upper()
+        direction   = request.args.get('direction', 'LONG').upper()
+        candle_time = request.args.get('candle_time', '')
         conn, cursor = get_db_connection()
-        cursor.execute("""
+        params = [symbol, direction]
+        sql = """
             SELECT sp.rsi_len, sp.rsi_entry, sp.rsi_exit,
                    sp.stop_loss, sp.trailing_start, sp.trailing_drop,
                    sp.init_profit, sp.macd_fast, sp.macd_slow, sp.macd_sig,
@@ -1093,9 +1118,12 @@ def api_manual_tune_load():
                    sp.pl_pct, sp.last_tuned
             FROM strategy_params sp
             JOIN broker_products bp ON sp.broker_product_id = bp.id
-            WHERE bp.local_ticker = %s AND sp.direction = %s
-            ORDER BY sp.last_tuned DESC LIMIT 1
-        """, (symbol, direction))
+            WHERE bp.local_ticker = %s AND sp.direction = %s"""
+        if candle_time:
+            sql += " AND sp.candle_time = %s"
+            params.append(candle_time)
+        sql += " ORDER BY sp.last_tuned DESC LIMIT 1"
+        cursor.execute(sql, params)
         row = cursor.fetchone()
         conn.close()
         if not row:

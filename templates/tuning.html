@@ -399,17 +399,16 @@
             <div class="symbol-section">
                 <div class="symbol-header">
                     <select id="symbolSelect" style="font-size: 1.2em; padding: 10px;">
-                        <option value="">Select Symbol/Exchange</option>
-                        <option value="BTC_BINANCE">BTC - Binance</option>
-                        <option value="ETH_BINANCE">ETH - Binance</option>
-                        <option value="LTC_BINANCE">LTC - Binance</option>
-                        <option value="BCH_BINANCE">BCH - Binance</option>
-                        <option value="LINK_BINANCE">LINK - Binance</option>
-                        <option value="UNI_BINANCE">UNI - Binance</option>
-                        <option value="AAVE_BINANCE">AAVE - Binance</option>
-                        <option value="AAPL_NASDAQ">AAPL - NASDAQ</option>
-                        <option value="TSLA_NASDAQ">TSLA - NASDAQ</option>
-                        <option value="MSFT_NASDAQ">MSFT - NASDAQ</option>
+                        <option value="">Loading symbols...</option>
+                    </select>
+                    <select id="loadDirection" style="font-size: 1.2em; padding: 10px; margin-left: 10px;">
+                        <option value="LONG">LONG</option>
+                        <option value="SHORT">SHORT</option>
+                    </select>
+                    <select id="loadCandle" style="font-size: 1.2em; padding: 10px; margin-left: 10px;">
+                        <option value="1hr">1hr</option>
+                        <option value="30m">30m</option>
+                        <option value="5m">5m</option>
                     </select>
                 </div>
 
@@ -974,9 +973,9 @@ SELL<br>
         }
 
         function loadFromDatabase() {
-            const symbol    = document.getElementById('symbol')?.value?.trim().toUpperCase();
-            const tradeMode = document.getElementById('trade_mode')?.value?.toUpperCase();
-            const direction = (tradeMode === 'BUY') ? 'LONG' : 'SHORT';
+            const symbol    = document.getElementById('symbolSelect')?.value?.trim();
+            const direction = document.getElementById('loadDirection')?.value;
+            const candle    = document.getElementById('loadCandle')?.value;
 
             if (!symbol) {
                 showStatus('❌ Please enter a symbol first!', 'error');
@@ -985,7 +984,7 @@ SELL<br>
 
             showStatus('⏳ Loading from database...', 'info');
 
-            fetch(`/api/manual_tune/load?symbol=${symbol}&direction=${direction}`)
+            fetch(`/api/manual_tune/load?symbol=${symbol}&direction=${direction}&candle_time=${candle}`)
             .then(r => r.json())
             .then(data => {
                 if (!data.ok) {
@@ -1084,7 +1083,47 @@ SELL<br>
         // Run validation on page load
         document.addEventListener('DOMContentLoaded', function() {
             validateFields();
+            loadSymbolsFromDB();
         });
+
+        function loadSymbolsFromDB() {
+            fetch('/api/active_symbols')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.ok) return;
+                const select = document.getElementById('symbolSelect');
+                select.innerHTML = '<option value="">Select Symbol</option>';
+                let lastBroker = '';
+                data.symbols.forEach(s => {
+                    if (s.broker !== lastBroker) {
+                        const group = document.createElement('optgroup');
+                        group.label = s.broker;
+                        select.appendChild(group);
+                        lastBroker = s.broker;
+                    }
+                    const opt = document.createElement('option');
+                    opt.value = s.symbol;
+                    opt.textContent = s.symbol + ' - ' + s.broker;
+                    select.lastElementChild.appendChild(opt);
+                });
+
+                // Also update candle times when symbol changes
+                select.addEventListener('change', function() {
+                    const sym = data.symbols.find(s => s.symbol === this.value);
+                    if (sym) {
+                        const candles = sym.candle_times.split(',');
+                        const dirs = sym.directions.split(',');
+                        const candleSelect = document.getElementById('loadCandle');
+                        const dirSelect = document.getElementById('loadDirection');
+                        candleSelect.innerHTML = candles.map(c => 
+                            `<option value="${c}">${c}</option>`).join('');
+                        dirSelect.innerHTML = dirs.map(d => 
+                            `<option value="${d}">${d}</option>`).join('');
+                    }
+                });
+            })
+            .catch(e => console.error('Failed to load symbols:', e));
+        }
     </script>
 </body>
 </html>
