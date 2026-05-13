@@ -183,6 +183,9 @@ def process_strategies(cursor, alpaca_key, alpaca_secret):
             sp.rsi_len,
             sp.candle_time,
             sp.direction,
+            sp.macd_fast,
+            sp.macd_slow,
+            sp.macd_sig,
             bp.id as product_id,
             bp.local_ticker as symbol,
             b.name as broker_name,
@@ -249,17 +252,47 @@ def process_strategies(cursor, alpaca_key, alpaca_secret):
             rsi_real = calculate_rsi_real(closes, highs, lows, rsi_len) or 0.0
 
             # MACD
-            macd_val, _ = calculate_macd(closes)
+            macd_fast = int(s['macd_fast'] or 12)
+            macd_slow = int(s['macd_slow'] or 26)
+            macd_sig  = int(s['macd_sig']  or 9)
+            macd_val, signal_val = calculate_macd(closes, macd_fast, macd_slow, macd_sig)
+            macd_prev_val, signal_prev_val = calculate_macd(closes[:-1], macd_fast, macd_slow, macd_sig)
+            if macd_val is None:
+                macd_val = 0.0
+            if signal_val is None:
+                signal_val = 0.0
+            if macd_prev_val is None:
+                macd_prev_val = 0.0
+            if signal_prev_val is None:
+                signal_prev_val = 0.0
+
+            # Detect crossover
+            if macd_prev_val <= signal_prev_val and macd_val > signal_val:
+                crossover = 'BULLISH'
+            elif macd_prev_val >= signal_prev_val and macd_val < signal_val:
+                crossover = 'BEARISH'
+            else:
+                crossover = 'NONE'
+
+            # MACD direction (rising or falling)
+            macd_rising  = macd_val > macd_prev_val
+            macd_falling = macd_val < macd_prev_val
             if macd_val is None:
                 macd_val = 0.0
 
             # ✅ Write RSI/MACD to strategy_params row
             cursor.execute("""
                 UPDATE strategy_params
-                SET rsi_real = %s, macd = %s
+                SET rsi_real      = %s,
+                    macd          = %s,
+                    macd_prev     = %s,
+                    macd_signal   = %s,
+                    signal_prev   = %s,
+                    macd_crossover = %s
                 WHERE id = %s
-            """, (rsi_real, macd_val, strategy_id))
-
+            """, (rsi_real, macd_val, macd_prev_val,
+                  signal_val, signal_prev_val,
+                  crossover, strategy_id))
             # price update handled by price_updater.py only
 
             # ✅ Update active_trades price
