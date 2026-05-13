@@ -281,19 +281,37 @@ def process_strategies(cursor, alpaca_key, alpaca_secret):
                 macd_val = 0.0
 
             # ✅ Write RSI/MACD to strategy_params row
+            # ✅ Compute volume ratio (current bar vs 20-bar average)
+            try:
+                cursor.execute("""
+                    SELECT volume FROM candles
+                    WHERE symbol = %s AND timeframe = %s
+                    ORDER BY timestamp DESC LIMIT 21
+                """, (symbol, candle_time))
+                vol_rows = cursor.fetchall()
+                if vol_rows and len(vol_rows) >= 2:
+                    current_vol = float(vol_rows[0]['volume'])
+                    avg_vol = sum(float(r['volume']) for r in vol_rows[1:]) / len(vol_rows[1:])
+                    volume_ratio = round(current_vol / avg_vol, 4) if avg_vol > 0 else 1.0
+                else:
+                    volume_ratio = 1.0
+            except:
+                volume_ratio = 1.0
+
+            # ✅ Write RSI/MACD/Volume to strategy_params row
             cursor.execute("""
                 UPDATE strategy_params
-                SET rsi_real      = %s,
-                    macd          = %s,
-                    macd_prev     = %s,
-                    macd_signal   = %s,
-                    signal_prev   = %s,
-                    macd_crossover = %s
+                SET rsi_real       = %s,
+                    macd           = %s,
+                    macd_prev      = %s,
+                    macd_signal    = %s,
+                    signal_prev    = %s,
+                    macd_crossover = %s,
+                    volume_ratio   = %s
                 WHERE id = %s
             """, (rsi_real, macd_val, macd_prev_val,
                   signal_val, signal_prev_val,
-                  crossover, strategy_id))
-            # price update handled by price_updater.py only
+                  crossover, volume_ratio, strategy_id))            # price update handled by price_updater.py only
 
             # ✅ Update active_trades price
             cursor.execute("""
