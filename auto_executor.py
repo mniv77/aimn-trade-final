@@ -89,6 +89,7 @@ def load_strategies(cursor):
             sp.macd_signal,
             sp.signal_prev,
             sp.macd_crossover,
+            sp.volume_ratio,
             b.name           as broker_name
         FROM strategy_params sp
         JOIN broker_products bp ON sp.broker_product_id = bp.id
@@ -225,12 +226,15 @@ def check_and_execute_signals():
                 rsi_extreme    = rsi_real >= 92  # Extreme overbought — bypass MACD filter
                 macd_signal    = macd_negative and macd_falling or rsi_extreme
 
+            # ── VOLUME SOFT BOOST ────────────────────────────────
+            volume_ratio = float(s['volume_ratio'] or 1.0)
+            big_volume   = volume_ratio >= 2.0
+
             if rsi_signal and macd_signal:
+                vol_tag = f"🔥 VOL SPIKE x{volume_ratio:.1f}!" if big_volume else f"vol={volume_ratio:.1f}"
                 log(f"🚀 SIGNAL: {symbol} {direction} @ ${price:,.2f} | "
                     f"RSI={rsi_real:.1f} (thr={rsi_entry:.1f}) | "
-                    f"MACD={macd_val:.4f} prev={macd_prev_val:.4f} | "
-                    f"Crossover={crossover}")
-
+                    f"MACD={macd_val:.4f} | {vol_tag}")
 
                 # ── DUPLICATE GUARD — check DB again right before inserting ──
                 cursor.execute("""
@@ -254,6 +258,9 @@ def check_and_execute_signals():
 
                 log(f"✅ Trade opened: {symbol} {direction} @ ${price:,.2f} "
                     f"[strategy_id={s['strategy_id']}]")
+
+                if big_volume:
+                    log(f"  🔥 BIG VOLUME ENTRY: x{volume_ratio:.1f} avg — wider trail & longer hold applied")
 
                 # Place real order for Alpaca brokers
                 if broker.upper() in ('ALPACA', 'ALPACA-ETF'):
