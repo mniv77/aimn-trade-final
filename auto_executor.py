@@ -12,10 +12,10 @@ from datetime import datetime
 import db_config as config
 
 # ── Fallback defaults (only if strategy_params missing) ─────
-DEFAULT_STOP_LOSS    = 2.0
-DEFAULT_TRAIL_START  = 2.0
+DEFAULT_STOP_LOSS    = 0.5
+DEFAULT_TRAIL_START  = 0.5
 DEFAULT_TRAIL_DROP   = 0.5
-DEFAULT_INIT_PROFIT  = 1.5
+DEFAULT_INIT_PROFIT  = 0.5
 DEFAULT_DECAY_START  = 1.0
 DEFAULT_DECAY_RATE   = 0.5
 DEFAULT_RSI_ENTRY    = 35.0
@@ -79,12 +79,16 @@ def load_strategies(cursor):
             sp.init_profit,
             sp.decay_start,
             sp.decay_rate,
-            sp.rsi_real,
-            sp.macd,
+            bp.rsi_real,
+            bp.macd,
             sp.active,
             bp.id            as product_id,
             bp.local_ticker  as symbol,
             bp.last_price,
+            sp.macd_prev,
+            sp.macd_signal,
+            sp.signal_prev,
+            sp.macd_crossover,
             b.name           as broker_name
         FROM strategy_params sp
         JOIN broker_products bp ON sp.broker_product_id = bp.id
@@ -120,16 +124,48 @@ def check_and_execute_signals():
         """)
         locked_brokers = {r['broker_name'] for r in cursor.fetchall()}
 
-        # Find symbols with open trades (no duplicate symbol)
-        # Find symbols with open trades OR recently closed (30 min cooldown)
+        # ── SMART COOLDOWN ────────────────────────────────────
+        # STOP loss exit      → lock BOTH directions 30 min
+        # TRAIL/RSI exit      → lock same direction only (opposite is FREE!)
+        # DECAY exit          → lock same direction only
+        # Open trade          → lock same direction always
         cursor.execute("""
-            SELECT DISTINCT CONCAT(symbol, '_', direction) as symbol_dir FROM active_trades
+            SELECT symbol, direction, exit_reason,
+                   CONCAT(symbol, '_', direction) as symbol_dir
+            FROM active_trades
             WHERE status = 'OPEN'
-               OR (status = 'CLOSED' AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
-                   AND exit_reason NOT LIKE '%PANIC%')
+            UNION
+            SELECT symbol, direction, exit_reason,
+                   CONCAT(symbol, '_', direction) as symbol_dir
+            FROM active_trades
+            WHERE status = 'CLOSED'
+              AND (
+                  (exit_reason = 'STOP' AND exit_time > DATE_SUB(NOW(), INTERVAL 120 MINUTE))
+                  OR
+                 (exit_reason != 'STOP' AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE))
+              )
+              AND exit_reason NOT LIKE '%PANIC%'
         """)
-        locked_symbols = {r['symbol_dir'] for r in cursor.fetchall()}
-        
+        rows = cursor.fetchall()
+
+        locked_symbols = set()
+        for r in rows:
+            symbol    = r['symbol']
+            direction = r['direction']
+            reason    = r['exit_reason'] or ''
+
+            # Always lock same direction
+            locked_symbols.add(f"{symbol}_{direction}")
+
+            # Only STOP locks opposite direction too
+            if 'STOP' in reason:
+                opposite = 'SHORT' if direction == 'LONG' else 'LONG'
+                locked_symbols.add(f"{symbol}_{opposite}")
+                log(f"  🔒 STOP cooldown: {symbol} both directions locked 30min")
+            elif 'TRAIL' in reason or 'RSI' in reason:
+                opposite = 'SHORT' if direction == 'LONG' else 'LONG'
+                log(f"  ✅ {reason} exit: {symbol}_{opposite} FREE for immediate entry!")
+
         # Load all active strategies with tuned params
         strategies = load_strategies(cursor)
 
@@ -162,32 +198,49 @@ def check_and_execute_signals():
                 if not market_open:
                     continue
 
-            # Skip if broker or symbol already has open trade
+            # Skip if broker or symbol already locked
             if broker in locked_brokers:
                 continue
             if f"{symbol}_{direction}" in locked_symbols:
                 continue
-            # ── ENTRY CONDITIONS ─────────────────────────
-            # Match exactly what the tuner backtests:
-            # LONG:  RSI Real <= rsi_entry  AND  MACD > 0
-            # SHORT: RSI Real >= (100 - rsi_entry)  AND  MACD < 0
+
+            # ── ENTRY CONDITIONS ─────────────────────────────────
+            # LONG:  RSI oversold AND MACD positive AND MACD rising
+            # SHORT: RSI overbought AND MACD negative AND MACD falling
+            macd_prev_val    = float(s['macd_prev']     or 0.0)
+            macd_signal_val  = float(s['macd_signal']   or 0.0)
+            crossover        = s['macd_crossover']       or 'NONE'
 
             if direction == 'LONG':
-                rsi_signal  = rsi_real <= rsi_entry
-                macd_signal = macd_val > 0
+                rsi_signal     = rsi_real <= rsi_entry
+                macd_positive  = macd_val > 0
+                macd_rising    = macd_val > macd_prev_val
+                rsi_extreme    = rsi_real <= 8   # Extreme oversold — bypass MACD filter
+                macd_signal    = macd_positive and macd_rising or rsi_extreme
+
             else:  # SHORT
-                rsi_signal  = rsi_real >= (100 - rsi_entry)
-                macd_signal = macd_val < 0
+                rsi_signal     = rsi_real >= (100 - rsi_entry)
+                macd_negative  = macd_val < 0
+                macd_falling   = macd_val < macd_prev_val
+                rsi_extreme    = rsi_real >= 92  # Extreme overbought — bypass MACD filter
+                macd_signal    = macd_negative and macd_falling or rsi_extreme
 
             if rsi_signal and macd_signal:
-                # Sanity check: price must be > 0 and reasonable
-                if price <= 0:
-                    log(f"  ⚠️  ENTRY BLOCKED: {symbol} price={price} invalid")
-                    continue
-
                 log(f"🚀 SIGNAL: {symbol} {direction} @ ${price:,.2f} | "
-                    f"RSI={rsi_real:.1f} (threshold={rsi_entry:.1f}) | "
-                    f"MACD={macd_val:.4f}")
+                    f"RSI={rsi_real:.1f} (thr={rsi_entry:.1f}) | "
+                    f"MACD={macd_val:.4f} prev={macd_prev_val:.4f} | "
+                    f"Crossover={crossover}")
+
+
+                # ── DUPLICATE GUARD — check DB again right before inserting ──
+                cursor.execute("""
+                    SELECT COUNT(*) as cnt FROM active_trades
+                    WHERE symbol = %s AND direction = %s AND status = 'OPEN'
+                """, (symbol, direction))
+                if cursor.fetchone()['cnt'] > 0:
+                    log(f"  ⚠️  Duplicate guard: {symbol} {direction} already open, skipping")
+                    locked_symbols.add(f"{symbol}_{direction}")
+                    continue
 
                 # Open trade in active_trades
                 cursor.execute("""
@@ -253,9 +306,11 @@ def monitor_and_exit_trades():
                 sp.decay_rate,
                 sp.rsi_exit,
                 sp.rsi_real,
-                sp.candle_time
+                sp.candle_time,
+                bp.last_price as live_price
             FROM active_trades at
             LEFT JOIN strategy_params sp ON at.strategy_id = sp.id
+            LEFT JOIN broker_products bp ON at.broker_product_id = bp.id
             WHERE at.status = 'OPEN'
         """)
         trades = cursor.fetchall()
@@ -269,7 +324,7 @@ def monitor_and_exit_trades():
                 symbol        = trade['symbol']
                 direction     = trade['direction']
                 entry_price   = float(trade['entry_price']  or 0)
-                current_price = float(trade['last_price']   or 0)
+                current_price = float(trade['live_price'] or trade['last_price'] or 0)
                 entry_time    = trade['entry_time']
 
                 if entry_price <= 0 or current_price <= 0:
@@ -290,25 +345,29 @@ def monitor_and_exit_trades():
                     pnl = ((current_price - entry_price) / entry_price) * 100
                 else:
                     pnl = ((entry_price - current_price) / entry_price) * 100
-                    
+
                # ── SANITY CHECK — reject bad price data ───
-                if abs(pnl) > 5:
+                if abs(pnl) > 20:
                     log(f"  ⚠️  SANITY CHECK FAILED: {symbol} P&L={pnl:.2f}% — likely bad price data, skipping")
-                    continue 
+                    continue
 
                 # ── Duration ───────────────────────────────
                 duration_seconds = (datetime.now() - entry_time).total_seconds() if entry_time else 0
                 duration_hours   = duration_seconds / 3600.0
 
+                # ── Peak profit tracking ───────────────────
+                peak_profit = float(trade['peak_profit'] or -999.0)
+
                 # ── Current Gate with decay ────────────────
-                if duration_hours >= decay_start:
+                # If peak already exceeded init_profit — disable decay
+                # Let TRAIL/RSI/STOP handle the exit
+                if peak_profit >= init_profit:
+                    current_gate = 0
+                elif duration_hours >= decay_start:
                     decay_amount = (duration_hours - decay_start) * decay_rate
                     current_gate = max(0.0, init_profit - decay_amount)
                 else:
                     current_gate = init_profit
-
-                # ── Peak profit tracking ───────────────────
-                peak_profit = float(trade['peak_profit'] or -999.0)
                 if pnl > peak_profit:
                     peak_profit = pnl
                     cursor.execute(
@@ -327,25 +386,37 @@ def monitor_and_exit_trades():
                 exit_reason = None
 
                 # ── RULE 1: STOP LOSS — always active ──────
-                if pnl <= -stop_loss:
+                if pnl <= -stop_loss and duration_seconds >= 300:
                     exit_reason = "STOP"
                     log(f"  🛑 STOP LOSS: {symbol} | P&L:{pnl:.2f}%")
 
-                # ── RULE 2: TRAIL EXIT — NO gate check ─────
-                # Trail catches sudden moves — fires whenever
-                # peak drops by trail_drop regardless of gate
+                # ── RULE 2: TRAIL EXIT — Dynamic trailing stop ─────
+                # The bigger the peak, the more room we give it
                 elif peak_profit >= trail_start:
-                    trail_level = peak_profit - trail_drop
-                    if pnl <= trail_level:
+                    # Dynamic trail_minus based on peak size
+                    if peak_profit >= 5.0:
+                        dynamic_drop = 2.0
+                    elif peak_profit >= 3.0:
+                        dynamic_drop = 1.0
+                    elif peak_profit >= 2.0:
+                        dynamic_drop = 0.5
+                    elif peak_profit >= 1.0:
+                        dynamic_drop = 0.3
+                    else:
+                        dynamic_drop = trail_drop
+                    trail_level = peak_profit - dynamic_drop
+                    if pnl <= trail_level and duration_seconds >= 300:
                         exit_reason = "TRAIL-EXIT"
                         log(f"  📉 TRAIL EXIT: {symbol} | "
                             f"Peak:{peak_profit:.2f}% → Now:{pnl:.2f}% "
-                            f"(trail={trail_level:.2f}%)")
+                            f"(dynamic_drop={dynamic_drop:.2f}% trail={trail_level:.2f}%)")
 
                 # ── RULE 3: RSI EXIT ────────────────────────
                 # Exit when RSI crosses exit threshold
                 # AND current profit >= current gate
-                if not exit_reason:
+                # BUT skip if big move detected (peak > 1.5%) — let it run!
+                big_move = peak_profit >= 1.5
+                if not exit_reason and not big_move:
                     if direction == 'LONG' and rsi_real >= rsi_exit and pnl >= current_gate:
                         exit_reason = "RSI-EXIT"
                         log(f"  📊 RSI EXIT: {symbol} LONG | "
@@ -362,12 +433,26 @@ def monitor_and_exit_trades():
                 # Exit when current profit >= decayed gate
                 # BUT skip if trailing is active — let trailing catch bigger moves!
                 trailing_active = peak_profit >= trail_start
-                if not exit_reason and duration_hours >= decay_start and not trailing_active:
+                if not exit_reason and duration_hours >= decay_start and not trailing_active and not big_move:
                     if pnl >= current_gate:
                         exit_reason = "DECAY-EXIT"
                         log(f"  ⏰ DECAY EXIT: {symbol} | "
                             f"P&L:{pnl:.2f}% >= Gate:{current_gate:.2f}% "
                             f"after {duration_hours:.1f}h")
+
+                # ── RULE 5: TIME STOP ───────────────────────
+                # Case 1: Never went positive after 2 hours
+                # Case 2: After 3 hours, peak < 30% of init_profit target
+                lazy_trade = (duration_hours >= 3.0 and
+                              peak_profit < (init_profit * 0.3) and
+                              init_profit > 0)
+                if not exit_reason and (
+                    (duration_hours >= 2.0 and peak_profit < 0) or lazy_trade
+                ):
+                    exit_reason = "TIME-STOP"
+                    log(f"  ⏱️ TIME STOP: {symbol} | "
+                        f"Peak:{peak_profit:.2f}% < target after {duration_hours:.1f}h | "
+                        f"P&L:{pnl:.2f}%")
 
                 # ── EXECUTE EXIT ───────────────────────────
                 if exit_reason:
