@@ -165,6 +165,12 @@
                 </div>
                 <div class="field-hint">Fixed — not grid searched</div>
             </div>
+            <div>
+                <label class="field-label">Volume Spike Threshold</label>
+                <input type="text" id="volume_spike" value="2.0" style="text-align:center;">
+                <div class="field-hint">Ratio vs 20-bar avg (2.0 = 2x spike)</div>
+            </div>
+
         </div>
     </div>
 
@@ -275,6 +281,7 @@ const BASELINE = {
     macd_fast          : '12',
     macd_slow          : '26',
     macd_sig           : '9',
+    volume_spike       : '2.0',
     stop_loss_options  : '1.5,2.0,3.0',
     trail_start_options: '1.0,1.5,2.0',
     trail_minus_options: '0.3,0.5,0.7',
@@ -308,6 +315,7 @@ function applyConfig(cfg) {
     v("macd_fast",           "macd_fast");
     v("macd_slow",           "macd_slow");
     v("macd_sig",            "macd_sig");
+    v("volume_spike",        "volume_spike");
     v("stop_loss_options",   "stop_loss_options");
     v("trail_start_options", "trail_start_options");
     v("trail_minus_options", "trail_minus_options");
@@ -502,6 +510,7 @@ runBtn.addEventListener("click", async () => {
         macd_fast           : parseInt(document.getElementById("macd_fast").value) || 12,
         macd_slow           : parseInt(document.getElementById("macd_slow").value) || 26,
         macd_sig            : parseInt(document.getElementById("macd_sig").value)  || 9,
+        volume_spike        : parseFloat(document.getElementById("volume_spike").value) || 2.0,
         stop_loss_options   : parseList("stop_loss_options"),
         trail_start_options : parseList("trail_start_options"),
         trail_minus_options : parseList("trail_minus_options"),
