@@ -225,6 +225,10 @@ def check_and_execute_signals():
                 rsi_extreme    = rsi_real >= 92  # Extreme overbought — bypass MACD filter
                 macd_signal    = macd_negative and macd_falling or rsi_extreme
 
+            # ── VOLUME SOFT BOOST ────────────────────────────────
+            volume_ratio = float(s['volume_ratio'] or 1.0)
+            big_volume   = volume_ratio >= 2.0
+
             if rsi_signal and macd_signal:
                 log(f"🚀 SIGNAL: {symbol} {direction} @ ${price:,.2f} | "
                     f"RSI={rsi_real:.1f} (thr={rsi_entry:.1f}) | "
