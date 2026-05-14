@@ -847,6 +847,10 @@
         const mins = Math.floor((endMs - entryMs) / 60000);
         const durStr = mins >= 60 ? `${Math.floor(mins/60)}h${mins%60}m` : `${mins}m`;
 
+        const totalMins = Math.max(1, mins);
+        const profitPerHour = entry > 0 ? (pnl / totalMins * 60).toFixed(2) : '0.00';
+        const pphColor = parseFloat(profitPerHour) >= 0 ? 'text-green-300' : 'text-red-300';
+
         // Strategy params
         const strat = strategyMap[`${o.symbol}:${o.direction}:${o.candle_time}`] || strategyMap[`${o.symbol}:${o.direction}:1hr`] || strategyMap[`${o.symbol}:${o.direction}:1h`];
         const trailStart = strat ? parseFloat(strat.trailing_start || 1.0) : 1.0;
@@ -884,6 +888,8 @@
           <span class="text-white font-bold w-16">${o.symbol}</span>
           <span class="px-1.5 py-0.5 rounded font-bold ${dirClass}">${dir}</span>
           <span class="text-gray-500">${durStr}</span>
+          <span class="text-gray-500">P/Hr</span>
+          <span class="${pphColor}">${profitPerHour}%</span>
           <span class="text-gray-500">Entry</span>
           <span class="font-mono text-white">$${entry.toFixed(2)}</span>
           <span class="text-gray-500">Now</span>
