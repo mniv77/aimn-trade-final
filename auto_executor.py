@@ -89,6 +89,7 @@ def load_strategies(cursor):
             sp.macd_signal,
             sp.signal_prev,
             sp.macd_crossover,
+            sp.volume_ratio,
             b.name           as broker_name
         FROM strategy_params sp
         JOIN broker_products bp ON sp.broker_product_id = bp.id
