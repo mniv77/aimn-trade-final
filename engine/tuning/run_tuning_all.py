@@ -16,7 +16,8 @@ CRYPTO_TFS = [
     {'tf': '5m',  'candle_time': '5m',  'bar_minutes': 5,   'bars': 8000},  # ~28 trading days
 ]
 STOCK_TFS = [
-    {'tf': '5m',  'candle_time': '5m',  'bar_minutes': 5,   'bars': 8000},  # ~28 trading days
+    {'tf': '5m',  'candle_time': '5m',  'bar_minutes': 5,  'bars': 8000},
+    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30, 'bars': 3000},
 ]
 FOREX_TFS = [
     {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 3000},  # ~6 months
@@ -48,18 +49,18 @@ DEFAULT_STRATEGY = {
 
 GRID_CFG = {
     'rsi_len_options'    : [50, 100, 168],
-    'rsi_entry_options'  : [25, 35],
+    'rsi_entry_options'  : [20, 25, 35, 40],
     'macd_fast'          : 12,
     'macd_slow'          : 26,
     'macd_sig'           : 9,
-    'stop_loss_options'  : [0.3, 0.5, 1.0],
+    'stop_loss_options'  : [0.5, 1.0, 1.5],
     'trail_start_options': [0.2, 0.5, 1.0],
     'trail_minus_options': [0.3, 0.5],
     'rsi_exit_options'   : [65, 70, 75],
-    'init_profit_options': [0.1, 0.3, 0.5, 1.0],
-    'decay_start_options': [0.5, 1.0],
+    'init_profit_options': [0.5, 1.0,1.5, 2.0],
+    'decay_start_options': [1.0, 2.0],
     'decay_rate'         : 0.5,
-    'min_trades'         : 5,
+    'min_trades'         : 10,
     'score_metric'       : 'profit_per_day',
 }
 
@@ -124,6 +125,8 @@ def save_run_log(status, summary):
     finally:
         conn.close()
 
+
+
 def get_or_create_strategy(broker_product_id, direction, candle_time):
     conn, cursor = get_db_connection()
     if not conn:
@@ -163,6 +166,25 @@ def get_or_create_strategy(broker_product_id, direction, candle_time):
     finally:
         conn.close()
 
+def get_strategy_macd(strategy_id):
+    """Load existing tuned MACD params for this strategy."""
+    conn, cursor = get_db_connection()
+    if not conn:
+        return 12, 26, 9
+    try:
+        cursor.execute("""
+            SELECT macd_fast, macd_slow, macd_sig
+            FROM strategy_params WHERE id = %s
+        """, (strategy_id,))
+        row = cursor.fetchone()
+        if row and row['macd_fast']:
+            return int(row['macd_fast']), int(row['macd_slow']), int(row['macd_sig'])
+        return 12, 26, 9
+    except:
+        return 12, 26, 9
+    finally:
+        conn.close()
+
 def run_all():
     global log_lines
     log_lines = []
@@ -195,14 +217,16 @@ def run_all():
                     failed += 1
                     continue
 
+                macd_fast, macd_slow, macd_sig = get_strategy_macd(strategy_id)
                 cfg = {**GRID_CFG, 'timeframe': tf['tf'],
-                       'bar_minutes': tf['bar_minutes'], 'bars': tf['bars']}
+                       'bar_minutes': tf['bar_minutes'], 'bars': tf['bars'],
+                       'macd_fast': macd_fast, 'macd_slow': macd_slow, 'macd_sig': macd_sig}
                 try:
                     result = tune_strategy_wf(
                         strategy_id, sym['symbol'], direction,
-                        cfg=cfg, broker_name=sym['broker_name'])
+                        cfg=cfg, broker_name=sym['broker_name'],
+                        train_pct=0.5)
                     if result:
-                        success += 1
                         results.append(result)
                         train = result.get('train_result') or {}
                         test  = result.get('test_result') or {}
@@ -225,4 +249,7 @@ def run_all():
 
 if __name__ == "__main__":
     run_all()
+    # After main tuning — run MACD tuner
+    from engine.tuning.tune_macd import run_macd_tuning_all
+    run_macd_tuning_all()
 
