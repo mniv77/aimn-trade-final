@@ -12,21 +12,21 @@ from datetime import datetime
 from itertools import product
 
 DEFAULT = {
-    'rsi_len_options'    : [50, 100, 168],
-    'rsi_entry_options'  : [25, 35, 40],
+    'rsi_len_options'    : [20, 50, 100, 168],
+    'rsi_entry_options'  : [20, 25, 35, 40],
     'macd_fast'          : 12,
     'macd_slow'          : 26,
     'macd_sig'           : 9,
-    'stop_loss_options'  : [0.3, 1.0, 2.0],
-    'trail_start_options': [0.2, 0.5, 1.0],
-    'trail_minus_options': [0.1, 0.2, 0.3],
+    'stop_loss_options'  : [0.5, 1.0, 1.5],
+    'trail_start_options': [0.5, 1.0, 1.5],
+    'trail_minus_options': [0.1, 0.15, 0.2],
     'rsi_exit_options'   : [65.0, 70.0, 75.0],
     'init_profit_options': [0.1, 0.5, 1.5],
     'decay_start_options': [0.5, 1.0, 2.0],
     'decay_rate'         : 0.5,
-    'timeframe'          : '5m',
-    'bars'               : 2000,
-    'min_trades'         : 20,
+    'timeframe'          : '1hr',
+    'bars'               : 8000,
+    'min_trades'         : 10,
     'score_metric'       : 'profit_per_day',
 }
 
@@ -82,7 +82,71 @@ def calc_macd_series(closes, fast, slow, sig):
     return macd_line, sig_arr
 
 
-def backtest(highs, lows, closes, direction, params, bar_minutes):
+
+
+def calc_supertrend(highs, lows, closes, period=7, multiplier=2.0):
+    n = len(closes)
+    atr = [0.0] * n
+
+    # Calculate ATR
+    for i in range(1, n):
+        tr = max(
+            highs[i] - lows[i],
+            abs(highs[i] - closes[i-1]),
+            abs(lows[i] - closes[i-1])
+        )
+        if i < period:
+            atr[i] = tr
+        else:
+            atr[i] = (atr[i-1] * (period - 1) + tr) / period
+
+    # Calculate SuperTrend
+    upper = [0.0] * n
+    lower = [0.0] * n
+    supertrend = [0.0] * n
+    direction_st = [1] * n  # 1 = bullish, -1 = bearish
+
+    for i in range(period, n):
+        hl2 = (highs[i] + lows[i]) / 2
+        upper[i] = hl2 + multiplier * atr[i]
+        lower[i] = hl2 - multiplier * atr[i]
+
+        if i == period:
+            supertrend[i] = upper[i]
+            direction_st[i] = -1
+            continue
+
+        # Adjust bands
+        if lower[i] < lower[i-1] or closes[i-1] < lower[i-1]:
+            lower[i] = lower[i]
+        else:
+            lower[i] = lower[i-1]
+
+        if upper[i] > upper[i-1] or closes[i-1] > upper[i-1]:
+            upper[i] = upper[i]
+        else:
+            upper[i] = upper[i-1]
+
+        # Determine direction
+        if supertrend[i-1] == upper[i-1]:
+            if closes[i] <= upper[i]:
+                supertrend[i] = upper[i]
+                direction_st[i] = -1
+            else:
+                supertrend[i] = lower[i]
+                direction_st[i] = 1
+        else:
+            if closes[i] >= lower[i]:
+                supertrend[i] = lower[i]
+                direction_st[i] = 1
+            else:
+                supertrend[i] = upper[i]
+                direction_st[i] = -1
+
+    return direction_st
+
+
+def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
     rsi_len     = params['rsi_len']
     rsi_entry   = params['rsi_entry']
     stop_loss   = params['stop_loss']
@@ -99,7 +163,6 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
 
     n = len(closes)
     macd_line, _ = calc_macd_series(closes, macd_fast, macd_slow, macd_sig)
-
     trades      = 0
     wins        = 0
     total_pnl   = 0.0
@@ -108,7 +171,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
     peak_profit = -999.0
     entry_bar   = 0
 
-    exit_reasons = {'STOP': 0, 'TRAIL': 0, 'DECAY': 0, 'RSI': 0}
+    exit_reasons = {'STOP': 0, 'TRAIL': 0, 'DECAY': 0, 'RSI': 0, 'TIME-STOP': 0}
     total_duration_hours = 0.0
     start_bar = max(rsi_len, macd_slow + macd_sig) + 1
 
@@ -120,14 +183,27 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
                 continue
             macd_curr = macd_line[i]
             if direction == 'LONG':
-                entry_cond = (rsi <= rsi_entry) and (macd_curr > 0)
+                macd_rising = (i > 0) and (macd_line[i] > macd_line[i-1])
+                entry_cond = (rsi <= rsi_entry) and (macd_curr > 0 or macd_rising)
             else:
-                entry_cond = (rsi >= (100 - rsi_entry)) and (macd_curr < 0)
+                macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
+                entry_cond = (rsi >= (100 - rsi_entry)) and (macd_curr < 0 or macd_falling)
             if entry_cond:
                 in_trade    = True
                 entry_price = closes[i]
                 peak_profit = -999.0
                 entry_bar   = i
+                active_stop = stop_loss
+                # Volume soft boost
+                big_volume = False
+                if volumes and i >= 20:
+                    avg_vol = sum(volumes[i-20:i]) / 20
+                    vol_ratio = volumes[i] / avg_vol if avg_vol > 0 else 1.0
+                    big_volume = vol_ratio >= 2.0
+                # Apply wider trail and longer decay for big volume entries
+                active_trail_start = trail_start * 0.7 if big_volume else trail_start
+                active_trail_minus = trail_minus * 2.0 if big_volume else trail_minus
+                active_decay_start = decay_start * 2.0 if big_volume else decay_start
         else:
             # ── EXIT ─────────────────────────────────────
             if direction == 'LONG':
@@ -138,46 +214,62 @@ def backtest(highs, lows, closes, direction, params, bar_minutes):
             peak_profit = max(peak_profit, current_pnl)
             dur_hours   = (i - entry_bar) * bar_minutes / 60.0
 
-            # Current gate — decays after decay_start hours
-            if dur_hours >= decay_start:
-                current_gate = max(0.0, init_profit - (dur_hours - decay_start) * decay_rate)
+            # Current gate — decays after active_decay_start hours (boosted if big volume)
+            if dur_hours >= active_decay_start:
+               current_gate = max(0.2, init_profit - (dur_hours - active_decay_start) * decay_rate)
             else:
                 current_gate = init_profit
-
             exit_reason = None
             exit_hit    = False
 
-            # ── RULE 1: STOP LOSS — always active ────────
-            if current_pnl <= -stop_loss:
-                exit_reason = 'STOP'
-                exit_hit    = True
-
-            # ── RULE 2: TRAIL EXIT ────────────────────────
-            # Trail exits whenever peak drops by trail_minus — NO gate check!
-            # The trail IS the exit signal — gate should not block it
-            elif peak_profit >= trail_start:
-                trail_level = peak_profit - trail_minus
-                if current_pnl <= trail_level:
-                    exit_reason = 'TRAIL'
+            # PHASE 1: Before decay_start — STOP + TRAIL + RSI
+            if dur_hours < decay_start:
+                # RULE 1: STOP LOSS
+                if current_pnl <= -active_stop:
+                    exit_reason = 'STOP'
                     exit_hit    = True
 
-            # ── RULE 3: RSI EXIT ──────────────────────────
-            if not exit_hit:
-                rsi = calc_rsi_real(highs, lows, closes, i, rsi_len)
-                if rsi is not None:
-                    if direction == 'LONG' and rsi >= rsi_exit and current_pnl >= current_gate:
-                        exit_reason = 'RSI'
-                        exit_hit    = True
-                    elif direction == 'SHORT' and rsi <= (100 - rsi_exit) and current_pnl >= current_gate:
-                        exit_reason = 'RSI'
+                # RULE 2: TRAIL EXIT
+                elif peak_profit >= active_trail_start:
+                    trail_level = peak_profit - active_trail_minus:
+                    if current_pnl <= trail_level:
+                        exit_reason = 'TRAIL'
                         exit_hit    = True
 
-            # ── RULE 4: DECAY EXIT ────────────────────────
-            # Only after decay_start hours, when gate reaches 0
-            if not exit_hit and dur_hours >= decay_start:
-                if current_pnl >= current_gate:
+                # RULE 3: RSI EXIT
+                if not exit_hit:
+                    rsi = calc_rsi_real(highs, lows, closes, i, rsi_len)
+                    if rsi is not None:
+                        if direction == 'LONG' and rsi >= rsi_exit and current_pnl >= current_gate:
+                            exit_reason = 'RSI'
+                            exit_hit    = True
+                        elif direction == 'SHORT' and rsi <= (100 - rsi_exit) and current_pnl >= current_gate:
+                            exit_reason = 'RSI'
+                            exit_hit    = True
+
+            # PHASE 2: After decay_start — STOP + DECAY gate only
+            else:
+                # RULE 1: STOP LOSS
+                if current_pnl <= -active_stop:
+                    exit_reason = 'STOP'
+                    exit_hit    = True
+
+                # RULE 2: DECAY — exit immediately if profit >= gate
+                elif current_pnl >= current_gate:
                     exit_reason = 'DECAY'
                     exit_hit    = True
+
+            # RULE 5: TIME STOP
+            # Case 1: Never positive after 2 hours
+            # Case 2: After 3 hours peak < 30% of init_profit target
+            lazy_trade = (dur_hours >= 3.0 and
+                         peak_profit < (init_profit * 0.3) and
+                         init_profit > 0)
+            if not exit_hit and (
+                (dur_hours >= 2.0 and peak_profit < 0) or lazy_trade
+            ):
+                exit_reason = 'TIME-STOP'
+                exit_hit    = True
 
             if exit_hit:
                 exit_reasons[exit_reason] += 1
@@ -210,7 +302,7 @@ def score(result, metric='total_pnl'):
     if not result:
         return -999
     decay_pct = result['exit_breakdown']['DECAY'] / result['trades']
-    decay_penalty = decay_pct * 15
+    decay_penalty = decay_pct * 5
     if metric == 'winrate':
         return result['winrate'] + (result['total_pnl'] * 0.01) - decay_penalty
     if metric == 'avg_pnl':
@@ -277,7 +369,7 @@ def walk_forward(highs, lows, closes, direction, params, bar_minutes, train_pct=
     return train, test
 
 
-def tune_strategy_wf(strategy_id, symbol, direction, candle_time=None, cfg=None, broker_name="Gemini", train_pct=0.7):
+def tune_strategy_wf(strategy_id, symbol, direction, candle_time=None, cfg=None, broker_name="Gemini", train_pct=0.5):
     if cfg is None:
         cfg = DEFAULT.copy()
     timeframe    = cfg.get('timeframe', DEFAULT['timeframe'])
