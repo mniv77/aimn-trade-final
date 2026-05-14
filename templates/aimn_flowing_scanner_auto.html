@@ -935,47 +935,6 @@
           <span class="text-gray-500 font-mono">Exit:$${parseFloat(o.exit_price||0).toFixed(2)}</span>
           `}
         </div>`;
-          <span class="${indicatorColor} font-bold">${indicatorIcon}</span>
-          <span class="text-white font-bold w-16">${o.symbol}</span>
-          <span class="px-1.5 py-0.5 rounded font-bold ${dirClass}">${dir}</span>
-          <span class="text-gray-500">${durStr}</span>
-          <span class="text-gray-500">P/Hr</span>
-          <span class="${pphColor}">${profitPerHour}%</span>
-          <span class="text-gray-500">Entry</span>
-          <span class="font-mono text-white">$${entry.toFixed(2)}</span>
-          <span class="text-gray-500">Now</span>
-          <span class="font-mono text-white" id="now-${o.id}">$${cur.toFixed(2)}</span>
-          <span class="font-bold ${pnlColor} w-12" id="pnl-${o.id}">${pnlStr}</span>
-          <span class="text-gray-500">Trail</span>
-          <span class="text-blue-300" id="trail-${o.id}">${trailStr}</span>
-          <span class="text-gray-500">RSI</span>
-          <span id="rsi-${o.id}">${(() => {
-            if (!strat || rsiVal === '--') return rsiVal;
-            const cur = parseFloat(rsiVal);
-            const exitLvl = o.direction==='LONG' ? parseFloat(strat.rsi_exit||70) : (100-parseFloat(strat.rsi_exit||70));
-            const arrow = o.direction==='LONG' ? '>' : '<';
-            const pct = o.direction==='LONG' ? (cur/exitLvl*100) : ((100-cur)/(100-exitLvl)*100);
-            const col = pct >= 85 ? 'color:#f85149' : pct >= 60 ? 'color:#d29922' : 'color:#3fb950';
-            return '<span style="'+col+'">'+cur.toFixed(1)+'</span><span style="color:#8b949e">'+arrow+'</span><span style="color:#bc8cff">'+exitLvl.toFixed(0)+'</span>';
-          })()}</span>
-          <span class="text-gray-500">Init</span>
-          <span class="text-yellow-300">${initProfit}</span>
-          <span class="text-gray-500">Stop</span>
-          <span class="text-red-400">${strat ? parseFloat(strat.stop_loss||2).toFixed(1)+'%' : '--'}</span>
-          <span class="text-gray-500">Decay</span>
-          <span class="text-orange-300">${strat ? parseFloat(strat.decay_start||1).toFixed(1)+'h' : '--'}</span>          <span class="text-gray-600">${o.broker}</span>
-          <span class="text-purple-400 font-bold">${o.candle_time || "--"}</span>
-          <button ${isClosed?'disabled':''} onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
-            class="${isClosed?'bg-gray-600 cursor-not-allowed':'bg-blue-700 hover:bg-blue-600'} text-white px-2 py-0.5 rounded font-bold">
-            📊
-          </button>
-          <button ${isClosed?'disabled':''} onclick="panicExitTrade(${o.id},'${o.symbol}','${o.broker}')"
-            class="${isClosed?'bg-gray-600 cursor-not-allowed':'bg-red-600 hover:bg-red-700'} text-white px-2 py-0.5 rounded font-bold">
-            ${isClosed?'✓':'🚨'}
-          </button>
-        </div>`;
-      }).join('');
-    }
 
     function checkAutoExit(order, pnl) {
        const strat = strategyMap[`${order.symbol}:${order.direction}:${order.candle_time}`]
