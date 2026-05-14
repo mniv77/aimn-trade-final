@@ -401,6 +401,7 @@ def tune_strategy_wf(strategy_id, symbol, direction, candle_time=None, cfg=None,
     highs  = [float(c['high'])  for c in candles]
     lows   = [float(c['low'])   for c in candles]
     closes = [float(c['close']) for c in candles]
+    volumes = [float(c['volume']) for c in candles]
     split  = int(len(closes) * train_pct)
     log("Total: " + str(len(closes)) + " | Train: " + str(split) + " | Test: " + str(len(closes)-split))
     best_train  = None
@@ -419,7 +420,7 @@ def tune_strategy_wf(strategy_id, symbol, direction, candle_time=None, cfg=None,
             'trail_start': trail_start, 'trail_minus': trail_minus,
             **fixed
         }
-        train_result = backtest(highs[:split], lows[:split], closes[:split], direction, params, bar_minutes)
+        train_result = backtest(highs[:split], lows[:split], closes[:split], direction, params, bar_minutes, volumes)
         if not train_result:
             continue
         s = score(train_result, score_metric)
@@ -492,6 +493,7 @@ def tune_strategy(strategy_id, symbol, direction, candle_time=None, cfg=None, br
     highs  = [float(c['high'])  for c in candles]
     lows   = [float(c['low'])   for c in candles]
     closes = [float(c['close']) for c in candles]
+    volumes = [float(c['volume']) for c in candles]
     log(f"  Fetched {len(closes)} candles ({timeframe})")
 
     best_result = None
@@ -513,7 +515,7 @@ def tune_strategy(strategy_id, symbol, direction, candle_time=None, cfg=None, br
             'stop_loss': stop_loss, 'trail_start': trail_start,
             'trail_minus': trail_minus, **fixed
         }
-        result = backtest(highs, lows, closes, direction, params, bar_minutes)
+        result = backtest(highs, lows, closes, direction, params, bar_minutes, volumes)
         if not result:
             continue
         s = score(result, score_metric)
