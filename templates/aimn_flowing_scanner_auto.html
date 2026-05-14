@@ -935,6 +935,8 @@
           <span class="text-gray-500 font-mono">Exit:$${parseFloat(o.exit_price||0).toFixed(2)}</span>
           `}
         </div>`;
+      }).join('');
+    }
 
     function checkAutoExit(order, pnl) {
        const strat = strategyMap[`${order.symbol}:${order.direction}:${order.candle_time}`]
