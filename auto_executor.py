@@ -89,7 +89,6 @@ def load_strategies(cursor):
             sp.macd_signal,
             sp.signal_prev,
             sp.macd_crossover,
-            sp.volume_ratio,
             b.name           as broker_name
         FROM strategy_params sp
         JOIN broker_products bp ON sp.broker_product_id = bp.id
@@ -226,41 +225,29 @@ def check_and_execute_signals():
                 rsi_extreme    = rsi_real >= 92  # Extreme overbought — bypass MACD filter
                 macd_signal    = macd_negative and macd_falling or rsi_extreme
 
-            # ── VOLUME SOFT BOOST ────────────────────────────────
-            volume_ratio = float(s['volume_ratio'] or 1.0)
-            big_volume   = volume_ratio >= 2.0
-
             if rsi_signal and macd_signal:
-                vol_tag = f"🔥 VOL SPIKE x{volume_ratio:.1f}!" if big_volume else f"vol={volume_ratio:.1f}"
                 log(f"🚀 SIGNAL: {symbol} {direction} @ ${price:,.2f} | "
                     f"RSI={rsi_real:.1f} (thr={rsi_entry:.1f}) | "
-                    f"MACD={macd_val:.4f} | {vol_tag}")
+                    f"MACD={macd_val:.4f} prev={macd_prev_val:.4f} | "
+                    f"Crossover={crossover}")
 
-                # ── DUPLICATE GUARD — check DB again right before inserting ──
-                cursor.execute("""
-                    SELECT COUNT(*) as cnt FROM active_trades
-                    WHERE symbol = %s AND direction = %s AND status = 'OPEN'
-                """, (symbol, direction))
-                if cursor.fetchone()['cnt'] > 0:
-                    log(f"  ⚠️  Duplicate guard: {symbol} {direction} already open, skipping")
-                    locked_symbols.add(f"{symbol}_{direction}")
-                    continue
+                log(f"🚀 SIGNAL: {symbol} {direction} @ ${price:,.2f} | "
+                    f"RSI={rsi_real:.1f} (threshold={rsi_entry:.1f}) | "
+                    f"MACD={macd_val:.4f}")
 
                 # Open trade in active_trades
                 cursor.execute("""
                     INSERT INTO active_trades
                     (broker_product_id, broker_name, symbol, direction,
                      entry_price, entry_time, last_price, peak_profit,
-                     status, strategy_id, candle_time)
-                    VALUES (%s, %s, %s, %s, %s, NOW(), %s, -999.0, 'OPEN', %s, %s)
+                     status, strategy_id, candle_time, big_volume)
+                    VALUES (%s, %s, %s, %s, %s, NOW(), %s, -999.0, 'OPEN', %s, %s, %s)
                 """, (product_id, broker, symbol, direction,
-                      price, price, s['strategy_id'], s['candle_time']))
+                      price, price, s['strategy_id'], s['candle_time'],
+                      1 if big_volume else 0))
 
                 log(f"✅ Trade opened: {symbol} {direction} @ ${price:,.2f} "
                     f"[strategy_id={s['strategy_id']}]")
-
-                if big_volume:
-                    log(f"  🔥 BIG VOLUME ENTRY: x{volume_ratio:.1f} avg — wider trail & longer hold applied")
 
                 # Place real order for Alpaca brokers
                 if broker.upper() in ('ALPACA', 'ALPACA-ETF'):
@@ -346,6 +333,14 @@ def monitor_and_exit_trades():
                 decay_rate   = float(trade['decay_rate']     or DEFAULT_DECAY_RATE)
                 rsi_exit     = float(trade['rsi_exit']       or DEFAULT_RSI_EXIT)
                 rsi_real     = float(trade['rsi_real']       or 50.0)
+
+                # ── Volume soft boost — wider trail, longer decay ──
+                big_volume = int(trade.get('big_volume') or 0)
+                if big_volume:
+                    trail_start = trail_start * 0.7
+                    trail_drop  = trail_drop  * 2.0
+                    decay_start = decay_start * 2.0
+                    log(f"  🔥 {symbol} VOL BOOST active — trail_start={trail_start:.2f}% decay_start={decay_start:.2f}h")
 
                 # ── Calculate P&L ──────────────────────────
                 if direction == 'LONG':
