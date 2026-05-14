@@ -143,12 +143,10 @@ def check_and_execute_signals():
               AND (
                   (exit_reason = 'STOP' AND exit_time > DATE_SUB(NOW(), INTERVAL 120 MINUTE))
                   OR
-                 (exit_reason != 'STOP' AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE))
+                  (exit_reason != 'STOP' AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE))
               )
-              AND exit_reason NOT LIKE '%PANIC%'
         """)
         rows = cursor.fetchall()
-
         locked_symbols = set()
         for r in rows:
             symbol    = r['symbol']
