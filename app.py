@@ -113,6 +113,14 @@ def tuning():
 def orders():
     return render_or_404("orders.html")
 
+@app.route("/tuning_ori")
+def tuning_ori():
+    return render_or_404("tuning_ori.html")
+
+@app.route("/test_scanner")
+def test_scanner():
+    return render_or_404("test_dashboard.html")
+
 @app.route("/trade-tester")
 def trade_tester():
     return render_or_404("trade_tester.html")

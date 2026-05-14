@@ -68,7 +68,9 @@ def indicators_loop():
 # THREAD 3: AUTO EXECUTOR — every 1 second
 # ════════════════════════════════════════════════════════════
 def executor_loop():
-    log("🤖 Auto Executor thread started")
+    log("🤖 Auto Executor thread started — waiting 2 min for indicators to warm up...")
+    time.sleep(120)
+    log("🤖 Auto Executor — starting signal scanning")
     cycle = 0
     while True:
         try:
