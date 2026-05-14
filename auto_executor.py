@@ -123,7 +123,7 @@ def check_and_execute_signals():
             SELECT DISTINCT broker_name FROM active_trades
             WHERE status = 'OPEN'
         """)
-        locked_brokers = {r['broker_name'] for r in cursor.fetchall()}
+        locked_brokers = {r['broker_name'].upper() for r in cursor.fetchall()}
 
         # ── SMART COOLDOWN ────────────────────────────────────
         # STOP loss exit      → lock BOTH directions 30 min
@@ -198,7 +198,7 @@ def check_and_execute_signals():
                     continue
 
             # Skip if broker or symbol already locked
-            if broker in locked_brokers:
+            if broker.upper() in locked_brokers:if broker in locked_brokers:
                 continue
             if f"{symbol}_{direction}" in locked_symbols:
                 continue
@@ -268,7 +268,7 @@ def check_and_execute_signals():
                             log(f"  ❌ Alpaca order FAILED: {symbol} | {result.error}")
 
                 # Lock broker and symbol
-                locked_brokers.add(broker)
+                locked_brokers.add(broker.upper())
                 locked_symbols.add(f"{symbol}_{direction}")
 
     except Exception as e:
