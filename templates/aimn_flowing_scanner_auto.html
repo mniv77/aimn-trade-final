@@ -74,6 +74,20 @@
       </div>
 
       <!-- Signal strip — shown when a new signal fires -->
+      <div id="strip-signal" class="hidden flex items-center gap-3 px-4 py-2 border-t border-blue-700 bg-blue-950 text-sm">
+        <span class="text-blue-300 font-bold animate-pulse">⚡ SIGNAL</span>
+        <span id="strip-symbol" class="font-mono font-bold text-white text-base"></span>
+        <span id="strip-direction" class="text-xs px-2 py-1 rounded font-bold bg-green-700 text-green-200"></span>
+        <span class="text-gray-400">@</span>
+        <span id="strip-sig-price" class="font-mono text-white"></span>
+        <button id="strip-enter-btn" onclick="stripEnterOrder()"
+          class="ml-2 bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded font-bold transition-all">
+          🚀 Enter Order
+        </button>
+        <button onclick="stripDismiss()"
+          class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded font-bold transition-all">
+          ✕ Dismiss
+        </button>
       </div>
     <div class="text-center mt-3">
       <div class="inline-flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg">
@@ -670,12 +684,13 @@
       stripDirection = signalData.signal || 'BUY';
 
       el('strip-signal').classList.remove('hidden');
-      el('strip-symbol').textContent = signalData.symbol;
+      el('strip-symbol').textContent = ' ' + signalData.symbol + ' ';
+
       const dirEl = el('strip-direction');
       dirEl.textContent = stripDirection;
       dirEl.className = 'text-xs px-2 py-1 rounded font-bold ' +
         (stripDirection === 'BUY' ? 'bg-green-700 text-green-200' : 'bg-red-700 text-red-200');
-      el('strip-sig-price').textContent = '$' + (parseFloat(signalData.price)||0).toFixed(2);
+      el('strip-sig-price').textContent = ' $' + (parseFloat(signalData.price)||0).toFixed(2);
 
       updateScanResultsDisplay();
       updateExchangeStatusDisplay();
@@ -869,7 +884,57 @@
           initProfit = parseFloat(strat.init_profit || 0).toFixed(1) + '%';
         }
 
-        return `<div class="flex items-center gap-2 px-4 py-1.5 border-t border-gray-700 ${bgClass} text-xs">
+        // Exit reason display
+        const exitTag = isClosed
+          ? `<span class="px-2 py-0.5 rounded font-bold bg-gray-700 text-yellow-300">${o.exit_reason || 'CLOSED'}</span>`
+          : '';
+
+        // Volume spike
+        const volRatio = o.volume_ratio ? parseFloat(o.volume_ratio).toFixed(1) : '--';
+        const volColor = parseFloat(volRatio) >= 2.0 ? 'text-orange-400 font-bold' : 'text-gray-500';
+
+        return `<div class="flex items-center gap-2 px-4 py-1.5 border-t border-gray-700 ${bgClass} text-xs flex-wrap">
+          <span class="${indicatorColor} font-bold">${indicatorIcon}</span>
+          <span class="text-gray-400">${o.broker_name || o.broker || '--'}</span>
+          <span class="text-white font-bold">${o.symbol}</span>
+          <span class="px-1.5 py-0.5 rounded font-bold ${dirClass}">${dir}</span>
+          <span class="text-purple-400 font-bold">${o.candle_time || '--'}</span>
+          <span class="text-gray-300 font-mono" id="dur-${o.id}">⏱${durStr}</span>
+          <span class="text-gray-500">Entry</span>
+          <span class="font-mono text-white">$${entry.toFixed(2)}</span>
+          <span class="text-gray-500">Now</span>
+          <span class="font-mono text-white" id="now-${o.id}">$${cur.toFixed(2)}</span>
+          <span class="font-bold ${pnlColor} w-14" id="pnl-${o.id}">${pnlStr}</span>
+          <span class="text-gray-500">Trail</span>
+          <span class="text-blue-300" id="trail-${o.id}">${trailStr}</span>
+          <span class="text-gray-500">RSI</span>
+          <span id="rsi-${o.id}">${(() => {
+            if (!strat || rsiVal === '--') return rsiVal;
+            const cur = parseFloat(rsiVal);
+            const exitLvl = o.direction==='LONG' ? parseFloat(strat.rsi_exit||70) : (100-parseFloat(strat.rsi_exit||70));
+            const arrow = o.direction==='LONG' ? '>' : '<';
+            const pct = o.direction==='LONG' ? (cur/exitLvl*100) : ((100-cur)/(100-exitLvl)*100);
+            const col = pct >= 85 ? 'color:#f85149' : pct >= 60 ? 'color:#d29922' : 'color:#3fb950';
+            return '<span style="'+col+'">'+cur.toFixed(1)+'</span><span style="color:#8b949e">'+arrow+'</span><span style="color:#bc8cff">'+exitLvl.toFixed(0)+'</span>';
+          })()}</span>
+          <span class="text-gray-500">Gate</span>
+          <span class="text-yellow-300">${initProfit}</span>
+          <span class="text-gray-500">Stop</span>
+          <span class="text-red-400">${strat ? parseFloat(strat.stop_loss||2).toFixed(1)+'%' : '--'}</span>
+          <span class="text-gray-500">Decay</span>
+          <span class="text-orange-300">${strat ? parseFloat(strat.decay_start||1).toFixed(1)+'h' : '--'}</span>
+          <span class="text-gray-500">Vol</span>
+          <span class="${volColor}">${volRatio}x</span>
+          ${exitTag}
+          ${!isClosed ? `
+          <button onclick="panicExitTrade(${o.id},'${o.symbol}','${o.broker}')"
+            class="bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded font-bold">🚨</button>
+          <button onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
+            class="bg-blue-700 hover:bg-blue-600 text-white px-2 py-0.5 rounded font-bold">📊</button>
+          ` : `
+          <span class="text-gray-500 font-mono">Exit:$${parseFloat(o.exit_price||0).toFixed(2)}</span>
+          `}
+        </div>`;
           <span class="${indicatorColor} font-bold">${indicatorIcon}</span>
           <span class="text-white font-bold w-16">${o.symbol}</span>
           <span class="px-1.5 py-0.5 rounded font-bold ${dirClass}">${dir}</span>
