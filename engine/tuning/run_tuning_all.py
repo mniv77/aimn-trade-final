@@ -227,6 +227,7 @@ def run_all():
                         cfg=cfg, broker_name=sym['broker_name'],
                         train_pct=0.5)
                     if result:
+                        success += 1
                         results.append(result)
                         train = result.get('train_result') or {}
                         test  = result.get('test_result') or {}
