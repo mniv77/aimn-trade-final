@@ -414,15 +414,20 @@ def api_trades_active():
             import datetime
             import time as time_module
             entry_ms = int(r['entry_time'].timestamp() * 1000) if isinstance(r['entry_time'], datetime.datetime) else int(time_module.time() * 1000)
+            exit_ms = int(r['exit_time'].timestamp() * 1000) if r.get('exit_time') else None
             result.append({
             "id": r['id'], "symbol": r['symbol'],
             "direction": r['direction'],
             "side": "BUY" if r['direction'] == "LONG" else "SELL",
             "entry_price": r['entry_price'], "last_price": r['last_price'],
             "peak_profit": r['peak_profit'], "broker": r['broker_name'],
+            "broker_name": r['broker_name'],
             "entry_time": entry_ms or str(r['entry_time']),
             "status": r['status'],
             "candle_time": r['candle_time'] or "--",
+            "exit_price": float(r['exit_price']) if r.get('exit_price') else None,
+            "exit_time": exit_ms,
+            "exit_reason": r.get('exit_reason') or '',
         })
         return jsonify(result)
     except Exception as e:
