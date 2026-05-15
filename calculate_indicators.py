@@ -98,6 +98,7 @@ def fetch_prices_gemini(symbol, candle_time='1h', bars=200):
                 'closes': [float(c[4]) for c in candles[-bars:]],
                 'highs' : [float(c[2]) for c in candles[-bars:]],
                 'lows'  : [float(c[3]) for c in candles[-bars:]],
+                'volumes': [float(c[5]) for c in candles[-bars:]],
             }
         log(f"  ❌ Gemini HTTP {r.status_code} for {symbol}")
         return None
@@ -127,6 +128,7 @@ def fetch_prices_alpaca(symbol, api_key, api_secret, candle_time='1h', bars=200)
                 'closes': [float(b['c']) for b in bars_],
                 'highs' : [float(b['h']) for b in bars_],
                 'lows'  : [float(b['l']) for b in bars_],
+                'volumes': [float(b['v']) for b in bars_],
             }
         log(f"  ❌ Alpaca HTTP {r.status_code} for {symbol}: {r.text[:100]}")
         return None
@@ -235,9 +237,34 @@ def process_strategies(cursor, alpaca_key, alpaca_secret):
                         symbol, alpaca_key, alpaca_secret,
                         candle_time, rsi_len + 50)
                 candle_cache[cache_key] = data
+
+                # ── Save last 50 candles to DB for volume history ──
+                if data and data.get('closes'):
+                    try:
+                        n = len(data['closes'])
+                        start = max(0, n - 50)
+                        for j in range(start, n):
+                            cursor.execute("""
+                                INSERT INTO candles
+                                    (symbol, timeframe, timestamp, open, high, low, close, volume)
+                                VALUES (%s, %s, NOW() - INTERVAL %s MINUTE, %s, %s, %s, %s, %s)
+                                ON DUPLICATE KEY UPDATE
+                                    close=%s, volume=%s
+                            """, (
+                                symbol, candle_time,
+                                (n - 1 - j) * BAR_MINUTES_MAP.get(candle_time, 60),
+                                data['closes'][j],
+                                data['highs'][j],
+                                data['lows'][j],
+                                data['closes'][j],
+                                data.get('volumes', [0]*n)[j],
+                                data['closes'][j],
+                                data.get('volumes', [0]*n)[j],
+                            ))
+                    except Exception as ve:
+                        log(f"  ⚠️ Candle save error {symbol}: {ve}")
             else:
                 data = candle_cache[cache_key]
-
             if not data or len(data['closes']) < 30:
                 log(f"  ❌ {symbol} {candle_time} — insufficient data")
                 continue
