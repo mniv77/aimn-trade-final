@@ -11,7 +11,7 @@ from datetime import datetime
 
 # ── Import all modules ───────────────────────────────────────
 from price_updater import update_prices
-from auto_executor import check_and_execute_signals, monitor_and_exit_trades
+from auto_executor import check_volume_signals, check_and_execute_signals, monitor_and_exit_trades
 from calculate_indicators import run_calculator_cycle
 
 # ── Log rotation settings ────────────────────────────────────
@@ -75,6 +75,7 @@ def executor_loop():
     while True:
         try:
             cycle += 1
+            check_volume_signals()
             check_and_execute_signals()
             monitor_and_exit_trades()
             if cycle % 30 == 0:
