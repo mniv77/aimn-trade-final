@@ -231,7 +231,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
 
                 # RULE 2: TRAIL EXIT
                 elif peak_profit >= active_trail_start:
-                    trail_level = peak_profit - active_trail_minus:
+                    trail_level = peak_profit - active_trail_minus
                     if current_pnl <= trail_level:
                         exit_reason = 'TRAIL'
                         exit_hit    = True
