@@ -10,7 +10,6 @@ import mysql.connector
 import time
 from datetime import datetime
 import db_config as config
-import pytz
 
 # ── Fallback defaults (only if strategy_params missing) ─────
 DEFAULT_STOP_LOSS    = 0.5
@@ -110,6 +109,167 @@ def load_strategies(cursor):
     return cursor.fetchall()
 
 
+ # ═══════════════════════════════════════════════════════════
+# VOLUME SPIKE ENGINE — Priority 1 entry
+# Detects institutional moves via volume spike
+# No RSI/MACD tuning needed — pure volume + price confirmation
+# ═══════════════════════════════════════════════════════════
+def check_volume_signals():
+    conn   = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Find brokers with open trades
+        cursor.execute("""
+            SELECT DISTINCT broker_name FROM active_trades
+            WHERE status = 'OPEN'
+        """)
+        locked_brokers = {r['broker_name'].upper() for r in cursor.fetchall()}
+
+        # Smart cooldown — same as regular strategy
+        cursor.execute("""
+            SELECT symbol, direction, exit_reason
+            FROM active_trades
+            WHERE status = 'OPEN'
+            UNION
+            SELECT symbol, direction, exit_reason
+            FROM active_trades
+            WHERE status = 'CLOSED'
+              AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+        """)
+        rows = cursor.fetchall()
+        locked_symbols = set()
+        for r in rows:
+            locked_symbols.add(f"{r['symbol']}_{r['direction']}")
+            if 'STOP' in (r['exit_reason'] or ''):
+                opposite = 'SHORT' if r['direction'] == 'LONG' else 'LONG'
+                locked_symbols.add(f"{r['symbol']}_{opposite}")
+
+        # Load all active symbols
+        cursor.execute("""
+            SELECT bp.id as product_id, bp.local_ticker as symbol,
+                   b.name as broker_name, bp.last_price,
+                   ms.is_24_7
+            FROM broker_products bp
+            JOIN brokers b ON bp.broker_id = b.id
+            LEFT JOIN market_sessions ms ON bp.session_id = ms.id
+            WHERE bp.is_active = 1
+        """)
+        products = cursor.fetchall()
+
+        for p in products:
+            broker     = p['broker_name']
+            symbol     = p['symbol']
+            product_id = p['product_id']
+            price      = float(p['last_price'] or 0)
+
+            if price <= 0:
+                continue
+
+            # Market hours check for stocks
+            if broker.upper() in ('ALPACA', 'ALPACA-ETF', 'WEBULL'):
+                now_et = datetime.now(pytz.timezone('US/Eastern'))
+                market_open = now_et.weekday() < 5 and \
+                              now_et.hour * 60 + now_et.minute >= 570 and \
+                              now_et.hour * 60 + now_et.minute < 960
+                if not market_open:
+                    continue
+
+            # Skip if broker locked
+            if broker.upper() in locked_brokers:
+                continue
+
+            # Get last candle for volume + price move
+            cursor.execute("""
+                SELECT open, close, volume, timeframe
+                FROM candles
+                WHERE symbol = %s
+                ORDER BY timestamp DESC LIMIT 1
+            """, (symbol,))
+            candle = cursor.fetchone()
+            if not candle or not candle['volume']:
+                continue
+
+            # Get 20-bar average volume
+            cursor.execute("""
+                SELECT AVG(volume) as avg_vol
+                FROM (
+                    SELECT volume FROM candles
+                    WHERE symbol = %s
+                    ORDER BY timestamp DESC LIMIT 21
+                ) t
+            """, (symbol,))
+            avg_row = cursor.fetchone()
+            avg_vol = float(avg_row['avg_vol'] or 0)
+            if avg_vol <= 0:
+                continue
+
+            current_vol  = float(candle['volume'])
+            volume_ratio = current_vol / avg_vol
+            candle_open  = float(candle['open']  or price)
+            candle_close = float(candle['close'] or price)
+
+            # Price move this candle
+            price_move_pct = ((candle_close - candle_open) / candle_open) * 100
+
+            # Volume spike threshold
+            VOL_SPIKE     = 3.0   # 3x average
+            PRICE_CONFIRM = 0.3   # 0.3% move minimum
+
+            if volume_ratio < VOL_SPIKE:
+                continue
+
+            # Determine direction from candle color
+            if price_move_pct >= PRICE_CONFIRM:
+                direction = 'LONG'
+            elif price_move_pct <= -PRICE_CONFIRM:
+                direction = 'SHORT'
+            else:
+                continue  # Spike but no clear direction
+
+            # Skip if symbol+direction locked
+            if f"{symbol}_{direction}" in locked_symbols:
+                continue
+
+            log(f"🔥 VOL SPIKE: {symbol} {direction} | "
+                f"vol={volume_ratio:.1f}x avg | "
+                f"move={price_move_pct:+.2f}% | "
+                f"price=${price:,.2f}")
+
+            # Duplicate guard
+            cursor.execute("""
+                SELECT COUNT(*) as cnt FROM active_trades
+                WHERE symbol=%s AND direction=%s AND status='OPEN'
+            """, (symbol, direction))
+            if cursor.fetchone()['cnt'] > 0:
+                continue
+
+            # Enter trade with fixed volume params
+            cursor.execute("""
+                INSERT INTO active_trades
+                (broker_product_id, broker_name, symbol, direction,
+                 entry_price, entry_time, last_price, peak_profit,
+                 status, strategy_id, candle_time, big_volume)
+                VALUES (%s,%s,%s,%s,%s,NOW(),%s,-999.0,'OPEN',NULL,%s,1)
+            """, (product_id, broker, symbol, direction,
+                  price, price, candle['timeframe']))
+
+            log(f"✅ VOL TRADE opened: {symbol} {direction} @ ${price:,.2f} "
+                f"[vol={volume_ratio:.1f}x]")
+
+            locked_brokers.add(broker.upper())
+            locked_symbols.add(f"{symbol}_{direction}")
+
+    except Exception as e:
+        log(f"❌ Volume signal error: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
+
+
+
 # ═══════════════════════════════════════════════════════════
 # ENTRY ENGINE
 # Checks RSI + MACD signals from strategy_params
@@ -188,6 +348,8 @@ def check_and_execute_signals():
 
             # Skip if market is closed for this broker
             if broker.upper() in ('ALPACA', 'ALPACA-ETF', 'WEBULL'):
+                from datetime import datetime
+                import pytz
                 et = pytz.timezone('US/Eastern')
                 now_et = datetime.now(et)
                 market_open = now_et.weekday() < 5 and \
@@ -197,7 +359,7 @@ def check_and_execute_signals():
                     continue
 
             # Skip if broker or symbol already locked
-            if broker.upper() in locked_brokers:
+            if broker.upper() in locked_brokers:if broker in locked_brokers:
                 continue
             if f"{symbol}_{direction}" in locked_symbols:
                 continue
@@ -335,6 +497,16 @@ def monitor_and_exit_trades():
                 decay_rate   = float(trade['decay_rate']     or DEFAULT_DECAY_RATE)
                 rsi_exit     = float(trade['rsi_exit']       or DEFAULT_RSI_EXIT)
                 rsi_real     = float(trade['rsi_real']       or 50.0)
+
+                               # ── Volume trade — use fixed params, no decay, trail only ──
+                is_vol_trade = int(trade.get('big_volume') or 0) and trade.get('strategy_id') is None
+                if is_vol_trade:
+                    stop_loss   = 0.5    # tight stop
+                    trail_start = 0.5    # trail kicks in early
+                    trail_drop  = 0.3    # tight trail
+                    decay_start = 999.0  # no decay — trail handles exit
+                    init_profit = 0.0    # no gate
+                    log(f"  🔥 VOL TRADE params: stop=0.5% trail=0.5% no_decay")
 
                 # ── Volume soft boost — wider trail, longer decay ──
                 big_volume = int(trade.get('big_volume') or 0)
