@@ -16,6 +16,11 @@ DEFAULT_RSI_LOOKBACK = 100
 DEFAULT_CANDLE_TIME  = '1h'
 SLEEP_SECONDS        = 10
 
+BAR_MINUTES_MAP = {
+    '1m': 1, '5m': 5, '15m': 15, '30m': 30,
+    '1h': 60, '1hr': 60, '2h': 120, '6hr': 360, '1day': 1440,
+}
+
 INTERVAL_MAP = {
     '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m',
     '1h': '1hr', '1hr': '1hr', '2h': '2hr', '6h': '6hr', '1d': '1day'
