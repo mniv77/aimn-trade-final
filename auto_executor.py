@@ -10,6 +10,7 @@ import mysql.connector
 import time
 from datetime import datetime
 import db_config as config
+import pytz
 
 # ── Fallback defaults (only if strategy_params missing) ─────
 DEFAULT_STOP_LOSS    = 0.5
@@ -349,7 +350,6 @@ def check_and_execute_signals():
             # Skip if market is closed for this broker
             if broker.upper() in ('ALPACA', 'ALPACA-ETF', 'WEBULL'):
                 from datetime import datetime
-                import pytz
                 et = pytz.timezone('US/Eastern')
                 now_et = datetime.now(et)
                 market_open = now_et.weekday() < 5 and \
