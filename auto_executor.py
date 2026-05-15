@@ -359,7 +359,7 @@ def check_and_execute_signals():
                     continue
 
             # Skip if broker or symbol already locked
-            if broker.upper() in locked_brokers:if broker in locked_brokers:
+            if broker.upper() in locked_brokers:
                 continue
             if f"{symbol}_{direction}" in locked_symbols:
                 continue
