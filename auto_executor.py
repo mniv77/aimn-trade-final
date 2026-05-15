@@ -187,7 +187,6 @@ def check_and_execute_signals():
 
             # Skip if market is closed for this broker
             if broker.upper() in ('ALPACA', 'ALPACA-ETF', 'WEBULL'):
-                from datetime import datetime
                 import pytz
                 et = pytz.timezone('US/Eastern')
                 now_et = datetime.now(et)
