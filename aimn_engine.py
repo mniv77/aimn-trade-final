@@ -12,6 +12,7 @@ from datetime import datetime
 # ── Import all modules ───────────────────────────────────────
 from price_updater import update_prices
 from auto_executor import check_volume_signals, check_and_execute_signals, monitor_and_exit_trades
+from volume_spike_hunter import check_volume_spikes
 from calculate_indicators import run_calculator_cycle
 
 # ── Log rotation settings ────────────────────────────────────
@@ -84,6 +85,27 @@ def executor_loop():
         except Exception as e:
             log(f"❌ Executor error: {e}")
             time.sleep(5)
+
+# ════════════════════════════════════════════════════════════
+# THREAD 4: spike_hunter_loop
+# ════════════════════════════════════════════════════════════
+
+def spike_hunter_loop():
+    log("Thread 4: Volume Spike Hunter — every 500ms")
+    cycle = 0
+    while True:
+        try:
+            cycle += 1
+            check_volume_spikes()
+            if cycle % 120 == 0:  # every 60 seconds
+                log(f"[VOL-HUNTER] Alive — cycle {cycle}, watching for spikes")
+            time.sleep(0.5)        except Exception as e:
+            log(f"Spike hunter error: {e}")
+            time.sleep(1)
+
+t4 = threading.Thread(target=spike_hunter_loop, daemon=True)
+t4.start()
+
 
 # ════════════════════════════════════════════════════════════
 # MAIN — start all three threads
