@@ -99,7 +99,8 @@ def spike_hunter_loop():
             check_volume_spikes()
             if cycle % 120 == 0:  # every 60 seconds
                 log(f"[VOL-HUNTER] Alive — cycle {cycle}, watching for spikes")
-            time.sleep(0.5)        except Exception as e:
+            time.sleep(0.5)
+        except Exception as e:
             log(f"Spike hunter error: {e}")
             time.sleep(1)
 
