@@ -570,15 +570,10 @@ def monitor_and_exit_trades():
                 # The bigger the peak, the more room we give it
                 elif peak_profit >= trail_start:
                     # Dynamic trail_minus based on peak size
-                    if peak_profit >= 5.0:
-                        dynamic_drop = 2.0
-                    elif peak_profit >= 3.0:
-                        dynamic_drop = 1.0
-                    elif peak_profit >= 2.0:
-                        dynamic_drop = 0.5
-                    elif peak_profit >= 1.0:
-                        dynamic_drop = 0.3
-                    else:
+                    # Dynamic drop = 20% of peak profit
+                    dynamic_drop = round(peak_profit * 0.20, 2)
+                    if dynamic_drop < 0.1:
+                        dynamic_drop = 0.1  # minimum 0.1%                    else:
                         dynamic_drop = trail_drop
                     trail_level = peak_profit - dynamic_drop
                     if pnl <= trail_level and duration_seconds >= 300:
