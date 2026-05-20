@@ -375,15 +375,23 @@ def check_and_execute_signals():
                 rsi_signal     = rsi_real <= rsi_entry
                 macd_positive  = macd_val > 0
                 macd_rising    = macd_val > macd_prev_val
-                rsi_extreme    = rsi_real <= 8   # Extreme oversold — bypass MACD filter
+                rsi_extreme    = rsi_real <= 8
                 macd_signal    = macd_positive and macd_rising or rsi_extreme
+                # Trend filter — block LONG if 1hr MACD is negative (downtrend)
+                trend_ok = macd_val > 0 or rsi_extreme
 
             else:  # SHORT
                 rsi_signal     = rsi_real >= (100 - rsi_entry)
                 macd_negative  = macd_val < 0
                 macd_falling   = macd_val < macd_prev_val
-                rsi_extreme    = rsi_real >= 92  # Extreme overbought — bypass MACD filter
+                rsi_extreme    = rsi_real >= 92
                 macd_signal    = macd_negative and macd_falling or rsi_extreme
+                # Trend filter — block SHORT if 1hr MACD is positive (uptrend)
+                trend_ok = macd_val < 0 or rsi_extreme
+
+            if not trend_ok:
+                continue  # Skip against trend
+
 
             # ── VOLUME SOFT BOOST ────────────────────────────────
             volume_ratio = float(s['volume_ratio'] or 1.0)
