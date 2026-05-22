@@ -297,3 +297,6 @@ def run_calculator():
 
 if __name__ == "__main__":
     run_calculator()
+
+
+run_calculator_cycle = run_calculator

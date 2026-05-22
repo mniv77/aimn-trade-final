@@ -13,7 +13,7 @@ from datetime import datetime
 from price_updater import update_prices
 from auto_executor import check_volume_signals, check_and_execute_signals, monitor_and_exit_trades
 from volume_spike_hunter import check_volume_spikes
-from calculate_indicators import run_calculator_cycle
+from calculate_indicators import run_calculator as run_calculator_cycle
 
 # ── Log rotation settings ────────────────────────────────────
 LOG_FILE     = '/home/MeirNiv/aimn-trade-final/engine.log'
