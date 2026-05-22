@@ -1,423 +1,299 @@
-# calculate_indicators.py - AiMN V3.1
-# All parameters read from strategy_params per symbol — no hardcoded values!
-# Gemini crypto  — fetches candles from Gemini API (24/7)
-# Alpaca stocks  — fetches bars from Alpaca API (NYSE hours only)
-# Writes last_price, rsi_real, macd, price_updated_at to broker_products
-
+# calculate_indicators.py - AiMN V3.1 WITH VOLUME SPIKE DETECTION
 import mysql.connector
 import requests
 import time
-from datetime import datetime
-import pytz
+from collections import defaultdict
 import db_config as config
-
-# ── Fallback defaults (only used if DB read fails) ────────────
-DEFAULT_RSI_LOOKBACK = 100
-DEFAULT_CANDLE_TIME  = '1h'
-SLEEP_SECONDS        = 10
-
-BAR_MINUTES_MAP = {
-    '1m': 1, '5m': 5, '15m': 15, '30m': 30,
-    '1h': 60, '1hr': 60, '2h': 120, '6hr': 360, '1day': 1440,
-}
-
-INTERVAL_MAP = {
-    '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m',
-    '1h': '1hr', '1hr': '1hr', '2h': '2hr', '6h': '6hr', '1d': '1day'
-}
-ALPACA_TIMEFRAME = {
-    '1m': '1Min', '5m': '5Min', '15m': '15Min', '30m': '30Min',
-    '1h': '1Hour', '1hr': '1Hour', '2h': '2Hour', '1d': '1Day'
-}
 
 def get_db():
     return mysql.connector.connect(
-        host=config.DB_HOST, user=config.DB_USER,
-        password=config.DB_PASSWORD, database=config.DB_NAME,
+        host=config.DB_HOST,
+        user=config.DB_USER,
+        password=config.DB_PASSWORD,
+        database=config.DB_NAME,
         autocommit=True
     )
 
-def log(msg):
-    print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
+# ==========================================
+# PRICE & VOLUME HISTORY CACHE
+# ==========================================
+price_history = defaultdict(list)
+volume_history = defaultdict(list)
+MAX_HISTORY_BARS = 200
 
-# ── Market hours check ────────────────────────────────────────
-def is_market_open(session):
-    if session['is_24_7']:
-        return True
-    try:
-        tz  = pytz.timezone(session['timezone'] or 'US/Eastern')
-        now = datetime.now(tz)
-        if now.weekday() >= 5 and not session['trade_weekends']:
-            return False
-        start = datetime.strptime(str(session['start_time']), '%H:%M:%S').time()
-        end   = datetime.strptime(str(session['end_time']),   '%H:%M:%S').time()
-        return start <= now.time() <= end
-    except Exception as e:
-        log(f"  ⚠️  Market hours error: {e}")
-        return False
-
-# ── Load strategy params per product ─────────────────────────
-def load_strategy_params(cursor, product_id):
+def fetch_historical_data_gemini(symbol, candle_time, bars=30):
     """
-    Load best active strategy params for this product.
-    Returns dict with rsi_len, candle_time.
-    Falls back to defaults if nothing found.
+    Fetches historical candles from Gemini including VOLUME.
+    Returns: (prices_list, volumes_list) or (None, None)
     """
     try:
-        cursor.execute("""
-            SELECT rsi_len, candle_time
-            FROM strategy_params
-            WHERE broker_product_id = %s
-              AND active = 1
-            ORDER BY pl_pct DESC
-            LIMIT 1
-        """, (product_id,))
-        row = cursor.fetchone()
-        if row:
-            return {
-                'rsi_len'    : int(row['rsi_len'])    if row['rsi_len']    else DEFAULT_RSI_LOOKBACK,
-                'candle_time': row['candle_time']      if row['candle_time'] else DEFAULT_CANDLE_TIME,
-            }
+        clean_symbol = symbol.replace("/", "").lower()
+        url = f"https://api.gemini.com/v2/candles/{clean_symbol}/{candle_time}"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            candles = response.json()
+            # Gemini format: [timestamp, open, high, low, close, volume]
+            prices = [float(c[4]) for c in candles[:bars]]  # close prices
+            volumes = [float(c[5]) for c in candles[:bars]]  # volumes
+            
+            prices.reverse()  # oldest first
+            volumes.reverse()  # oldest first
+            
+            return prices, volumes
+        
+        return None, None
+        
     except Exception as e:
-        log(f"  ⚠️  load_strategy_params error for product {product_id}: {e}")
-
-    return {
-        'rsi_len'    : DEFAULT_RSI_LOOKBACK,
-        'candle_time': DEFAULT_CANDLE_TIME,
-    }
-
-# ── Gemini price fetch ────────────────────────────────────────
-def fetch_prices_gemini(symbol, candle_time='1h', bars=200):
-    try:
-        clean    = symbol.replace('/', '').lower()
-        interval = INTERVAL_MAP.get(candle_time, '1hr')
-        url      = f"https://api.gemini.com/v2/candles/{clean}/{interval}"
-        r        = requests.get(url, timeout=10)
-        if r.status_code == 200:
-            data = r.json()
-            if not isinstance(data, list):
-                log(f"  ❌ Gemini unexpected response for {symbol}: {data}")
-                return None
-            candles = sorted(data, key=lambda x: x[0])
-            return {
-                'closes': [float(c[4]) for c in candles[-bars:]],
-                'highs' : [float(c[2]) for c in candles[-bars:]],
-                'lows'  : [float(c[3]) for c in candles[-bars:]],
-                'volumes': [float(c[5]) for c in candles[-bars:]],
-            }
-        log(f"  ❌ Gemini HTTP {r.status_code} for {symbol}")
-        return None
-    except Exception as e:
-        log(f"  ❌ Gemini fetch error {symbol}: {e}")
-        return None
-
-# ── Alpaca bars fetch ─────────────────────────────────────────
-def fetch_prices_alpaca(symbol, api_key, api_secret, candle_time='1h', bars=200):
-    try:
-        timeframe = ALPACA_TIMEFRAME.get(candle_time, '1Hour')
-        url       = f"https://data.alpaca.markets/v2/stocks/{symbol}/bars"
-        headers   = {
-            'APCA-API-KEY-ID':     api_key,
-            'APCA-API-SECRET-KEY': api_secret
-        }
-        params = {'timeframe': timeframe, 'limit': 10000,
-          'adjustment': 'raw', 'feed': 'sip',
-          'start': '2020-01-01', 'sort': 'asc'}
-        r = requests.get(url, headers=headers, params=params, timeout=10)
-        if r.status_code == 200:
-            bars_ = r.json().get('bars', [])
-            if not bars_:
-                log(f"  ⚠️  Alpaca: no bars for {symbol}")
-                return None
-            return {
-                'closes': [float(b['c']) for b in bars_],
-                'highs' : [float(b['h']) for b in bars_],
-                'lows'  : [float(b['l']) for b in bars_],
-                'volumes': [float(b['v']) for b in bars_],
-            }
-        log(f"  ❌ Alpaca HTTP {r.status_code} for {symbol}: {r.text[:100]}")
-        return None
-    except Exception as e:
-        log(f"  ❌ Alpaca fetch error {symbol}: {e}")
-        return None
-
-# ── Indicator math ────────────────────────────────────────────
-def calculate_ema(prices, period):
-    if len(prices) < period:
-        return None
-    mult = 2 / (period + 1)
-    ema  = sum(prices[:period]) / period
-    for p in prices[period:]:
-        ema = (p - ema) * mult + ema
-    return ema
-
-def calculate_macd(prices, fast=12, slow=26, signal=9):
-    try:
-        if len(prices) < slow + signal + 10:
-            return None, None
-        macd_values = []
-        for i in range(slow, len(prices)):
-            ef = calculate_ema(prices[:i+1], fast)
-            es = calculate_ema(prices[:i+1], slow)
-            if ef and es:
-                macd_values.append(ef - es)
-        if len(macd_values) < signal:
-            return None, None
-        macd_line   = macd_values[-1]
-        signal_line = calculate_ema(macd_values, signal)
-        return round(macd_line, 6), round(signal_line, 6) if signal_line else None
-    except:
+        print(f"  ❌ Error fetching {symbol} {candle_time}: {e}")
         return None, None
 
-def calculate_rsi_real(closes, highs, lows, lookback):
-    """RSI Real using high/low range over lookback bars"""
+def detect_volume_spike(volumes, threshold=3.0):
+    """
+    Detects if current volume is abnormally high (spike).
+    
+    Args:
+        volumes: List of volume values [oldest...newest]
+        threshold: Multiplier (default 3.0 = current > 3x average)
+    
+    Returns: (is_spike, current_volume, avg_volume)
+    """
+    if not volumes or len(volumes) < 2:
+        return False, 0.0, 0.0
+    
+    current_volume = volumes[-1]
+    
+    # Calculate average of previous bars (exclude current)
+    avg_volume = sum(volumes[:-1]) / len(volumes[:-1])
+    
+    # Avoid division by zero
+    if avg_volume == 0:
+        return False, current_volume, avg_volume
+    
+    # Check if spike
+    is_spike = current_volume > (avg_volume * threshold)
+    
+    return is_spike, current_volume, avg_volume
+
+def calculate_rsi_real(current_price, hi, lo):
+    """
+    Calculates RSI Real using the TradingView formula:
+    RSI Real = ((close - lo) / (hi - lo)) * 100
+    """
     try:
-        hi = max(highs[-lookback:])
-        lo = min(lows[-lookback:])
         if hi <= lo:
             return None
-        current = closes[-1]
-        return round(max(0, min(100, ((current - lo) / (hi - lo)) * 100)), 2)
+        
+        rsi_real = ((current_price - lo) / (hi - lo)) * 100
+        rsi_real = max(0, min(100, rsi_real))
+        
+        return round(rsi_real, 2)
     except:
         return None
 
-# ── Core processing ───────────────────────────────────────────
-def process_strategies(cursor, alpaca_key, alpaca_secret):
-    """Calculate RSI and MACD per strategy — each gets its own rsi_len and candle_time"""
-    cursor.execute("""
-        SELECT
-            sp.id as strategy_id,
-            sp.rsi_len,
-            sp.candle_time,
-            sp.direction,
-            sp.macd_fast,
-            sp.macd_slow,
-            sp.macd_sig,
-            bp.id as product_id,
-            bp.local_ticker as symbol,
-            b.name as broker_name,
-            ms.is_24_7, ms.start_time, ms.end_time,
-            ms.timezone, ms.trade_weekends
-        FROM strategy_params sp
-        JOIN broker_products bp ON sp.broker_product_id = bp.id
-        JOIN brokers b ON bp.broker_id = b.id
-        LEFT JOIN market_sessions ms ON bp.session_id = ms.id
-        WHERE sp.active = 1
-          AND bp.is_active = 1
-          AND b.name IN ('Gemini', 'Alpaca', 'Alpaca-ETF')
-        ORDER BY bp.local_ticker, sp.direction, sp.candle_time
-    """)
-    strategies = cursor.fetchall()
+def calculate_ema(prices, period):
+    """Calculates Exponential Moving Average."""
+    if len(prices) < period:
+        return None
+    
+    multiplier = 2 / (period + 1)
+    ema = sum(prices[:period]) / period
+    
+    for price in prices[period:]:
+        ema = (price - ema) * multiplier + ema
+    
+    return ema
 
-    # Cache candles per symbol+timeframe to avoid re-fetching
-    candle_cache = {}
+def calculate_macd(prices, fast, slow, signal):
+    """
+    Calculates MACD line.
+    Returns: macd_value or None
+    """
+    try:
+        if len(prices) < slow + signal:
+            return None
+        
+        ema_fast = calculate_ema(prices, fast)
+        ema_slow = calculate_ema(prices, slow)
+        
+        if ema_fast is None or ema_slow is None:
+            return None
+        
+        macd_line = ema_fast - ema_slow
+        return round(macd_line, 4)
+        
+    except Exception as e:
+        print(f"MACD calculation error: {e}")
+        return None
 
-    for s in strategies:
-        symbol      = s['symbol']
-        broker_name = s['broker_name']
-        strategy_id = s['strategy_id']
-        product_id  = s['product_id']
-        rsi_len     = int(s['rsi_len']    or DEFAULT_RSI_LOOKBACK)
-        candle_time = s['candle_time']    or DEFAULT_CANDLE_TIME
-        direction   = s['direction']
+def check_and_update_range(strategy_id, current_price, current_hi, current_lo):
+    """
+    Checks if price has broken out of the stored range.
+    Updates rsi_real_max and rsi_real_min if needed.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    needs_update = False
+    new_hi = current_hi
+    new_lo = current_lo
+    
+    if current_price > current_hi:
+        new_hi = current_price
+        needs_update = True
+        print(f"⚠️ Strategy {strategy_id}: Price {current_price} broke above max {current_hi}")
+    
+    if current_price < current_lo:
+        new_lo = current_price
+        needs_update = True
+        print(f"⚠️ Strategy {strategy_id}: Price {current_price} broke below min {current_lo}")
+    
+    if needs_update:
+        cursor.execute("""
+            UPDATE strategy_params 
+            SET rsi_real_max = %s, rsi_real_min = %s
+            WHERE id = %s
+        """, (new_hi, new_lo, strategy_id))
+        print(f"✅ Strategy {strategy_id}: Range updated to [{new_lo}, {new_hi}]")
+    
+    cursor.close()
+    conn.close()
+    
+    return new_hi, new_lo
 
-        if not is_market_open(s):
-            if broker_name == 'Alpaca':
-                log(f"  ⏰ NYSE CLOSED: {symbol} — skipping")
-            continue
-
-        try:
-            # Cache key per symbol+timeframe
-            cache_key = f"{symbol}_{candle_time}"
-
-            if cache_key not in candle_cache:
-                data = None
-                if broker_name == 'Gemini':
-                    data = fetch_prices_gemini(symbol, candle_time, rsi_len + 50)
-                elif broker_name in ('Alpaca', 'Alpaca-ETF'):
-                    if not alpaca_key:
-                        log(f"  ⚠️ No Alpaca credentials — skipping {symbol}")
-                        continue
-                    data = fetch_prices_alpaca(
-                        symbol, alpaca_key, alpaca_secret,
-                        candle_time, rsi_len + 50)
-                candle_cache[cache_key] = data
-
-                # ── Save last 50 candles to DB for volume history ──
-                if data and data.get('closes'):
-                    try:
-                        n = len(data['closes'])
-                        start = max(0, n - 50)
-                        for j in range(start, n):
-                            cursor.execute("""
-                                INSERT INTO candles
-                                    (symbol, timeframe, timestamp, open, high, low, close, volume)
-                                VALUES (%s, %s, NOW() - INTERVAL %s MINUTE, %s, %s, %s, %s, %s)
-                                ON DUPLICATE KEY UPDATE
-                                    close=%s, volume=%s
-                            """, (
-                                symbol, candle_time,
-                                (n - 1 - j) * BAR_MINUTES_MAP.get(candle_time, 60),
-                                data['closes'][j],
-                                data['highs'][j],
-                                data['lows'][j],
-                                data['closes'][j],
-                                data.get('volumes', [0]*n)[j],
-                                data['closes'][j],
-                                data.get('volumes', [0]*n)[j],
-                            ))
-                    except Exception as ve:
-                        log(f"  ⚠️ Candle save error {symbol}: {ve}")
-            else:
-                data = candle_cache[cache_key]
-            if not data or len(data['closes']) < 30:
-                log(f"  ❌ {symbol} {candle_time} — insufficient data")
-                continue
-
-            closes = data['closes']
-            highs  = data['highs']
-            lows   = data['lows']
-
-            current_price = closes[-1]
-
-            # RSI Real — per strategy rsi_len
-            rsi_real = calculate_rsi_real(closes, highs, lows, rsi_len) or 0.0
-
-            # MACD
-            macd_fast = int(s['macd_fast'] or 12)
-            macd_slow = int(s['macd_slow'] or 26)
-            macd_sig  = int(s['macd_sig']  or 9)
-            macd_val, signal_val = calculate_macd(closes, macd_fast, macd_slow, macd_sig)
-            macd_prev_val, signal_prev_val = calculate_macd(closes[:-1], macd_fast, macd_slow, macd_sig)
-            if macd_val is None:
-                macd_val = 0.0
-            if signal_val is None:
-                signal_val = 0.0
-            if macd_prev_val is None:
-                macd_prev_val = 0.0
-            if signal_prev_val is None:
-                signal_prev_val = 0.0
-
-            # Detect crossover
-            if macd_prev_val <= signal_prev_val and macd_val > signal_val:
-                crossover = 'BULLISH'
-            elif macd_prev_val >= signal_prev_val and macd_val < signal_val:
-                crossover = 'BEARISH'
-            else:
-                crossover = 'NONE'
-
-            # MACD direction (rising or falling)
-            macd_rising  = macd_val > macd_prev_val
-            macd_falling = macd_val < macd_prev_val
-            if macd_val is None:
-                macd_val = 0.0
-
-            # ✅ Write RSI/MACD to strategy_params row
-            # ✅ Compute volume ratio (current bar vs 20-bar average)
-            try:
-                cursor.execute("""
-                    SELECT volume FROM candles
-                    WHERE symbol = %s AND timeframe = %s
-                    ORDER BY timestamp DESC LIMIT 21
-                """, (symbol, candle_time))
-                vol_rows = cursor.fetchall()
-                if vol_rows and len(vol_rows) >= 2:
-                    current_vol = float(vol_rows[0]['volume'])
-                    avg_vol = sum(float(r['volume']) for r in vol_rows[1:]) / len(vol_rows[1:])
-                    volume_ratio = round(current_vol / avg_vol, 4) if avg_vol > 0 else 1.0
-                else:
-                    volume_ratio = 1.0
-            except:
-                volume_ratio = 1.0
-
-            # ✅ Write RSI/MACD/Volume to strategy_params row
-            cursor.execute("""
-                UPDATE strategy_params
-                SET rsi_real       = %s,
-                    macd           = %s,
-                    macd_prev      = %s,
-                    macd_signal    = %s,
-                    signal_prev    = %s,
-                    macd_crossover = %s,
-                    volume_ratio   = %s
-                WHERE id = %s
-            """, (rsi_real, macd_val, macd_prev_val,
-                  signal_val, signal_prev_val,
-                  crossover, volume_ratio, strategy_id))            # price update handled by price_updater.py only
-
-            # ✅ Update active_trades price
-            cursor.execute("""
-                UPDATE active_trades
-                SET last_price = %s
-                WHERE broker_product_id = %s AND status = 'OPEN'
-            """, (current_price, product_id))
-
-            log(f"  ✅ {broker_name} {symbol} {direction} [{candle_time}] | "
-                f"${current_price:,.2f} | RSI={rsi_real:.1f} | "
-                f"MACD={macd_val:.4f} | rsi_len={rsi_len}")
-
-        except Exception as e:
-            log(f"  ❌ Error {symbol} {direction} [{candle_time}]: {e}")
-            continue
-# ── Main loop ─────────────────────────────────────────────────
 def run_calculator():
-    log("=" * 60)
-    log("HaGolem Auto Trading by AiMN - INDICATOR ENGINE")
-    log("✅ All params read from strategy_params per symbol")
-    log("=" * 60)
-
-    alpaca_key = alpaca_secret = None
-    cycle = 0
-
+    print("=" * 60)
+    print("AiMN V3.1 - INDICATOR CALCULATION ENGINE")
+    print("WITH VOLUME SPIKE DETECTION")
+    print("=" * 60)
+    print("Detecting volume spikes > 3x average (30-bar window)")
+    print("=" * 60)
+    
+    cycle_count = 0
+    
     while True:
         conn = None
         try:
-            cycle += 1
-            conn   = get_db()
+            cycle_count += 1
+            conn = get_db()
             cursor = conn.cursor(dictionary=True)
-
-            if not alpaca_key:
-                cursor.execute("SELECT api_key, api_secret FROM brokers WHERE name = 'Alpaca' LIMIT 1")
-                row = cursor.fetchone()
-                if row and row['api_key']:
-                    alpaca_key    = row['api_key']
-                    alpaca_secret = row['api_secret']
-                    log("  ✅ Alpaca credentials loaded")
-
-            log(f"\n[Cycle {cycle}]")
-            process_strategies(cursor, alpaca_key, alpaca_secret)
+            
+            # Fetch all active strategies
+            cursor.execute("""
+                SELECT 
+                    sp.id,
+                    sp.broker_product_id,
+                    sp.direction,
+                    sp.candle_time,
+                    sp.rsi_entry,
+                    sp.rsi_exit,
+                    sp.macd_fast,
+                    sp.macd_slow,
+                    sp.macd_sig,
+                    sp.rsi_real_max,
+                    sp.rsi_real_min,
+                    sp.last_price,
+                    bp.local_ticker as symbol,
+                    b.name as broker_name
+                FROM strategy_params sp
+                JOIN broker_products bp ON sp.broker_product_id = bp.id
+                JOIN brokers b ON bp.broker_id = b.id
+                WHERE sp.active = 1
+                ORDER BY sp.id
+            """)
+            
+            strategies = cursor.fetchall()
+            
+            if not strategies:
+                print(f"[{time.strftime('%H:%M:%S')}] No active strategies found.")
+                time.sleep(5)
+                continue
+            
+            print(f"\n[Cycle {cycle_count}] Processing {len(strategies)} strategies at {time.strftime('%H:%M:%S')}")
+            
+            for strat in strategies:
+                try:
+                    strategy_id = strat['id']
+                    symbol = strat['symbol']
+                    broker_name = strat['broker_name']
+                    current_price = float(strat['last_price'] or 0)
+                    candle_time = strat['candle_time']
+                    
+                    if current_price <= 0:
+                        continue
+                    
+                    # Get range values
+                    hi = float(strat['rsi_real_max'] or 0)
+                    lo = float(strat['rsi_real_min'] or 0)
+                    
+                    if hi <= 0 or lo <= 0 or hi <= lo:
+                        cursor.execute("""
+                            UPDATE strategy_params 
+                            SET rsi_real = 0, volume_spike = 0
+                            WHERE id = %s
+                        """, (strategy_id,))
+                        continue
+                    
+                    # ==========================================
+                    # FETCH VOLUME DATA (Gemini only for now)
+                    # ==========================================
+                    volume_spike_flag = 0
+                    current_volume = 0.0
+                    avg_volume = 0.0
+                    
+                    if broker_name == 'Gemini':
+                        prices, volumes = fetch_historical_data_gemini(symbol, candle_time, bars=30)
+                        
+                        if volumes:
+                            is_spike, current_volume, avg_volume = detect_volume_spike(volumes, threshold=3.0)
+                            
+                            if is_spike:
+                                volume_spike_flag = 1
+                                print(f"  🔴 SPIKE! Strategy #{strategy_id} ({symbol}): Vol={current_volume:.0f} vs Avg={avg_volume:.0f} ({current_volume/avg_volume:.1f}x)")
+                    
+                    # ==========================================
+                    # CHECK AND UPDATE RANGE
+                    # ==========================================
+                    hi, lo = check_and_update_range(strategy_id, current_price, hi, lo)
+                    
+                    # ==========================================
+                    # CALCULATE RSI REAL
+                    # ==========================================
+                    rsi_real = calculate_rsi_real(current_price, hi, lo)
+                    
+                    if rsi_real is None:
+                        continue
+                    
+                    # ==========================================
+                    # UPDATE DATABASE WITH VOLUME DATA
+                    # ==========================================
+                    cursor.execute("""
+                        UPDATE strategy_params 
+                        SET rsi_real = %s,
+                            volume_spike = %s,
+                            current_volume = %s,
+                            avg_volume = %s
+                        WHERE id = %s
+                    """, (rsi_real, volume_spike_flag, current_volume, avg_volume, strategy_id))
+                    
+                    spike_indicator = "🔴" if volume_spike_flag else "✅"
+                    print(f"  {spike_indicator} Strategy #{strategy_id} ({symbol} {strat['direction']}): RSI={rsi_real:.2f} | Vol={current_volume:.0f} (avg={avg_volume:.0f})")
+                    
+                except Exception as e:
+                    print(f"  ❌ Error processing strategy #{strat.get('id', '?')}: {e}")
+                    continue
+            
             cursor.close()
             conn.close()
-
+            
         except Exception as e:
-            log(f"🔥 ERROR: {e}")
+            print(f"\n🔥 CALCULATOR ERROR: {e}")
+            import traceback
+            traceback.print_exc()
             if conn:
                 conn.close()
-
-        time.sleep(SLEEP_SECONDS)
-
-# ── Single cycle for external callers ─────────────────────────
-def run_calculator_cycle():
-    conn = None
-    try:
-        conn   = get_db()
-        cursor = conn.cursor(dictionary=True)
-
-        alpaca_key = alpaca_secret = None
-        cursor.execute("SELECT api_key, api_secret FROM brokers WHERE name='Alpaca' LIMIT 1")
-        row = cursor.fetchone()
-        if row and row['api_key']:
-            alpaca_key    = row['api_key']
-            alpaca_secret = row['api_secret']
-
-        process_strategies(cursor, alpaca_key, alpaca_secret)
-        cursor.close()
-        conn.close()
-
-    except Exception as e:
-        log(f"❌ Cycle error: {e}")
-        if conn:
-            conn.close()
+        
+        time.sleep(3)
 
 if __name__ == "__main__":
     run_calculator()

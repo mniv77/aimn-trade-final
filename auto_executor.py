@@ -1,27 +1,61 @@
 # auto_executor.py - AiMN V3.1
-# FIXED: Reads all params from strategy_params (not broker_products)
-# FIXED: RSI entry filter added
-# FIXED: RSI exit added
-# FIXED: Trail exit bug fixed (no gate check)
-# FIXED: Hardcoded params replaced with tuned values per symbol/direction
+# Called by aimn_engine.py Thread 3
+#
+# Functions exported:
+#   check_volume_signals()       — volume pre-filter (stub, expandable)
+#   check_and_execute_signals()  — entry logic
+#   monitor_and_exit_trades()    — exit logic
+#
+# ═══════════════════════════════════════════════════════════
+# FIXES vs old safe_auto_executor.py:
+#
+# FIX 1  — price always from broker_products.last_price (no direct Gemini call)
+# FIX 2  — locked_symbols keyed on symbol+direction (not broker-level lock)
+# FIX 3  — 300-second minimum before STOP or TRAIL can fire
+# FIX 4  — 20% sanity check blocks phantom losses (MSFT -61% fix)
+# FIX 5  — TIME-STOP: exit stagnant/losing trades after TIME_STOP_HOURS
+# FIX 6  — smart cooldown: STOP locks both directions 2hr; TRAIL/RSI frees opposite immediately
+# FIX 7  — MACD rising/falling directional filter with extreme RSI override
+# FIX 8  — stale price guard: skip if price_updated_at > MAX_PRICE_AGE_SECONDS
+# FIX 9  — duplicate trade guard: one open trade per symbol+direction
 # ═══════════════════════════════════════════════════════════
 
 import mysql.connector
 import time
-from datetime import datetime
-import db_config as config
+from datetime import datetime, timedelta
 import pytz
+import db_config as config
 
-# ── Fallback defaults (only if strategy_params missing) ─────
-DEFAULT_STOP_LOSS    = 0.5
-DEFAULT_TRAIL_START  = 0.5
-DEFAULT_TRAIL_DROP   = 0.5
-DEFAULT_INIT_PROFIT  = 0.5
-DEFAULT_DECAY_START  = 1.0
-DEFAULT_DECAY_RATE   = 0.5
-DEFAULT_RSI_ENTRY    = 35.0
-DEFAULT_RSI_EXIT     = 70.0
+# ── Constants ────────────────────────────────────────────────
+MAX_PRICE_AGE_SECONDS  = 30      # skip stale prices older than this
+MIN_TRADE_SECONDS      = 300     # STOP/TRAIL cannot fire in first 5 minutes
+STOP_COOLDOWN_MINUTES  = 120     # after STOP: both directions locked 2 hours
+TRAIL_COOLDOWN_MINUTES = 30      # after TRAIL/RSI/DECAY: only same direction locked
+TIME_STOP_HOURS        = 3.0     # exit trade if stagnant/losing after this many hours
+TIME_STOP_MIN_PNL      = -0.10   # TIME-STOP only fires if P&L below this threshold
+SANITY_MAX_PNL         = 20.0    # skip if abs(pnl) > 20% — phantom loss guard
 
+# Default fallback params (used if strategy_params value is NULL)
+DEFAULT_PARAMS = {
+    'rsi_entry':      30.0,
+    'rsi_exit':       70.0,
+    'stop_loss':       2.0,
+    'trailing_start':  1.5,
+    'trailing_drop':   0.5,
+    'init_profit':     1.0,
+    'decay_start':     2.0,
+    'decay_rate':      0.5,
+    'candle_time':    '1h',
+}
+
+# In-memory lock set: entries are "SYMBOL_DIRECTION" e.g. "ETH/USD_SHORT"
+# Values: datetime when lock expires
+locked_symbols = {}   # { "ETH/USD_SHORT": datetime_expires }
+
+def log(msg):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+
+# ── DB ───────────────────────────────────────────────────────
 def get_db():
     return mysql.connector.connect(
         host=config.DB_HOST,
@@ -31,47 +65,90 @@ def get_db():
         autocommit=True
     )
 
-def get_alpaca_broker(cursor, broker_name):
+# ── Lock helpers ─────────────────────────────────────────────
+def is_locked(symbol, direction):
+    """Check if symbol+direction is currently locked"""
+    key = f"{symbol}_{direction}"
+    expires = locked_symbols.get(key)
+    if expires and datetime.now() < expires:
+        return True
+    if key in locked_symbols:
+        del locked_symbols[key]  # expired, clean up
+    return False
+
+def lock_symbol(symbol, direction, minutes):
+    key = f"{symbol}_{direction}"
+    locked_symbols[key] = datetime.now() + timedelta(minutes=minutes)
+    log(f"  🔒 Locked {key} for {minutes} min")
+
+def apply_exit_cooldown(symbol, direction, exit_reason):
+    """
+    Smart cooldown after exit:
+    - STOP  → lock BOTH directions for 2 hours
+    - TRAIL/RSI/DECAY/TIME-STOP → lock same direction only for 30 min
+                                   opposite direction freed immediately
+    """
+    opposite = 'SHORT' if direction == 'LONG' else 'LONG'
+    if 'STOP' in exit_reason:
+        lock_symbol(symbol, direction, STOP_COOLDOWN_MINUTES)
+        lock_symbol(symbol, opposite,  STOP_COOLDOWN_MINUTES)
+        log(f"  🔒 STOP cooldown: {symbol} BOTH directions locked {STOP_COOLDOWN_MINUTES}min")
+    else:
+        lock_symbol(symbol, direction, TRAIL_COOLDOWN_MINUTES)
+        # Remove opposite lock if it exists — free for immediate re-entry
+        opp_key = f"{symbol}_{opposite}"
+        if opp_key in locked_symbols:
+            del locked_symbols[opp_key]
+        log(f"  ✅ {exit_reason}: {symbol}_{opposite} FREE for immediate re-entry")
+
+# ── Market hours ─────────────────────────────────────────────
+def is_market_open(broker_name):
+    """Return True if broker market is open right now"""
+    if broker_name.upper() in ('GEMINI',):
+        return True  # Crypto is 24/7
+    # Alpaca / stocks: NYSE Mon-Fri 9:30-16:00 ET
+    et = pytz.timezone('US/Eastern')
+    now_et = datetime.now(et)
+    if now_et.weekday() >= 5:
+        return False
+    minutes = now_et.hour * 60 + now_et.minute
+    return 570 <= minutes < 960  # 9:30am to 4:00pm
+
+# ── Price helpers ────────────────────────────────────────────
+def get_live_price_from_db(symbol):
+    """
+    Always read from broker_products.last_price — written by price_updater thread.
+    Returns (price, age_seconds) or (0, 9999) on failure.
+    """
     try:
-        cursor.execute(
-            "SELECT api_key, api_secret FROM brokers WHERE name=%s LIMIT 1",
-            (broker_name,)
-        )
+        conn   = get_db()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT last_price, price_updated_at
+            FROM broker_products
+            WHERE local_ticker = %s
+            LIMIT 1
+        """, (symbol,))
         row = cursor.fetchone()
-        if not row or not row['api_key']:
-            return None
-        import alpaca_trade_api as tradeapi
-        base_url = "https://paper-api.alpaca.markets"
-        api = tradeapi.REST(
-            key_id=row['api_key'],
-            secret_key=row['api_secret'],
-            base_url=base_url,
-            api_version='v2'
-        )
-        from brokers.alpaca_client import AlpacaBroker
-        return AlpacaBroker(api)
+        cursor.close()
+        conn.close()
+        if row and row['last_price']:
+            price = float(row['last_price'])
+            age   = 9999
+            if row['price_updated_at']:
+                age = (datetime.now() - row['price_updated_at']).total_seconds()
+            return price, age
     except Exception as e:
-        log(f"  ⚠️  Alpaca broker init failed: {e}")
-        return None
+        log(f"  ⚠️ get_live_price_from_db error ({symbol}): {e}")
+    return 0.0, 9999
 
-def log(msg):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
-
-
-# ═══════════════════════════════════════════════════════════
-# LOAD STRATEGY PARAMS — reads tuned values from strategy_params
-# ═══════════════════════════════════════════════════════════
+# ── Load strategies ──────────────────────────────────────────
 def load_strategies(cursor):
-    """
-    Load all active strategies with their tuned parameters.
-    Returns list of dicts — one per symbol/direction/timeframe.
-    """
+    """Load all active strategies with their tuned params and live indicator values"""
     cursor.execute("""
         SELECT
-            sp.id            as strategy_id,
+            sp.id,
             sp.direction,
-            sp.candle_time,
-            sp.rsi_len,
             sp.rsi_entry,
             sp.rsi_exit,
             sp.stop_loss,
@@ -80,643 +157,368 @@ def load_strategies(cursor):
             sp.init_profit,
             sp.decay_start,
             sp.decay_rate,
-            bp.rsi_real,
-            bp.macd,
-            sp.active,
-            bp.id            as product_id,
-            bp.local_ticker  as symbol,
-            bp.last_price,
+            sp.candle_time,
+            sp.entry_price,
+            sp.entry_time,
+            sp.peak_profit,
+            sp.active_order_id,
+            sp.rsi_real,
+            sp.macd,
             sp.macd_prev,
             sp.macd_signal,
-            sp.signal_prev,
-            sp.macd_crossover,
-            sp.volume_ratio,
-            b.name           as broker_name
+            bp.id          AS product_id,
+            bp.local_ticker AS symbol,
+            bp.last_price,
+            bp.price_updated_at,
+            b.name         AS broker_name
         FROM strategy_params sp
         JOIN broker_products bp ON sp.broker_product_id = bp.id
         JOIN brokers b          ON bp.broker_id = b.id
         WHERE sp.active = 1
           AND bp.is_active = 1
-        ORDER BY bp.local_ticker, sp.direction,
-        CASE sp.candle_time
-            WHEN '1hr' THEN 1
-            WHEN '1h'  THEN 2
-            WHEN '30m' THEN 3
-            WHEN '5m'  THEN 4
-            WHEN '1m'  THEN 5
-            ELSE 6
-        END
+        ORDER BY sp.id
     """)
     return cursor.fetchall()
 
-
- # ═══════════════════════════════════════════════════════════
-# VOLUME SPIKE ENGINE — Priority 1 entry
-# Detects institutional moves via volume spike
-# No RSI/MACD tuning needed — pure volume + price confirmation
-# ═══════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
+# THREAD ENTRY POINT 1: VOLUME SIGNALS (stub — expandable)
+# ══════════════════════════════════════════════════════════════
 def check_volume_signals():
-    conn   = get_db()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        # Find brokers with open trades
-        cursor.execute("""
-            SELECT DISTINCT broker_name FROM active_trades
-            WHERE status = 'OPEN'
-        """)
-        locked_brokers = {r['broker_name'].upper() for r in cursor.fetchall()}
+    """
+    Placeholder for volume spike pre-filter.
+    Currently a no-op — volume_spike_hunter.py handles this separately.
+    """
+    pass
 
-        # Smart cooldown — same as regular strategy
-        cursor.execute("""
-            SELECT symbol, direction, exit_reason
-            FROM active_trades
-            WHERE status = 'OPEN'
-            UNION
-            SELECT symbol, direction, exit_reason
-            FROM active_trades
-            WHERE status = 'CLOSED'
-              AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
-        """)
-        rows = cursor.fetchall()
-        locked_symbols = set()
-        for r in rows:
-            locked_symbols.add(f"{r['symbol']}_{r['direction']}")
-            if 'STOP' in (r['exit_reason'] or ''):
-                opposite = 'SHORT' if r['direction'] == 'LONG' else 'LONG'
-                locked_symbols.add(f"{r['symbol']}_{opposite}")
-
-        # Load all active symbols
-        cursor.execute("""
-            SELECT bp.id as product_id, bp.local_ticker as symbol,
-                   b.name as broker_name, bp.last_price,
-                   ms.is_24_7
-            FROM broker_products bp
-            JOIN brokers b ON bp.broker_id = b.id
-            LEFT JOIN market_sessions ms ON bp.session_id = ms.id
-            WHERE bp.is_active = 1
-        """)
-        products = cursor.fetchall()
-
-        for p in products:
-            broker     = p['broker_name']
-            symbol     = p['symbol']
-            product_id = p['product_id']
-            price      = float(p['last_price'] or 0)
-
-            if price <= 0:
-                continue
-
-            # Market hours check for stocks
-            if broker.upper() in ('ALPACA', 'ALPACA-ETF', 'WEBULL'):
-                now_et = datetime.now(pytz.timezone('US/Eastern'))
-                market_open = now_et.weekday() < 5 and \
-                              now_et.hour * 60 + now_et.minute >= 570 and \
-                              now_et.hour * 60 + now_et.minute < 960
-                if not market_open:
-                    continue
-
-            # Skip if broker locked
-            if broker.upper() in locked_brokers:
-                continue
-
-            # Get last candle for volume + price move
-            cursor.execute("""
-                SELECT open, close, volume, timeframe
-                FROM candles
-                WHERE symbol = %s
-                ORDER BY timestamp DESC LIMIT 1
-            """, (symbol,))
-            candle = cursor.fetchone()
-            if not candle or not candle['volume']:
-                continue
-
-            # Get 20-bar average volume
-            cursor.execute("""
-                SELECT AVG(volume) as avg_vol
-                FROM (
-                    SELECT volume FROM candles
-                    WHERE symbol = %s
-                    ORDER BY timestamp DESC LIMIT 21
-                ) t
-            """, (symbol,))
-            avg_row = cursor.fetchone()
-            avg_vol = float(avg_row['avg_vol'] or 0)
-            if avg_vol <= 0:
-                continue
-
-            current_vol  = float(candle['volume'])
-            volume_ratio = current_vol / avg_vol
-            candle_open  = float(candle['open']  or price)
-            candle_close = float(candle['close'] or price)
-
-            # Price move this candle
-            price_move_pct = ((candle_close - candle_open) / candle_open) * 100
-
-            # Volume spike threshold
-            VOL_SPIKE     = 3.0   # 3x average
-            PRICE_CONFIRM = 0.3   # 0.3% move minimum
-
-            if volume_ratio < VOL_SPIKE:
-                continue
-
-            # Determine direction from candle color
-            if price_move_pct >= PRICE_CONFIRM:
-                direction = 'LONG'
-            elif price_move_pct <= -PRICE_CONFIRM:
-                direction = 'SHORT'
-            else:
-                continue  # Spike but no clear direction
-
-            # Skip if symbol+direction locked
-            if f"{symbol}_{direction}" in locked_symbols:
-                continue
-
-            log(f"🔥 VOL SPIKE: {symbol} {direction} | "
-                f"vol={volume_ratio:.1f}x avg | "
-                f"move={price_move_pct:+.2f}% | "
-                f"price=${price:,.2f}")
-
-            # Duplicate guard
-            cursor.execute("""
-                SELECT COUNT(*) as cnt FROM active_trades
-                WHERE symbol=%s AND direction=%s AND status='OPEN'
-            """, (symbol, direction))
-            if cursor.fetchone()['cnt'] > 0:
-                continue
-
-            # Enter trade with fixed volume params
-            cursor.execute("""
-                INSERT INTO active_trades
-                (broker_product_id, broker_name, symbol, direction,
-                 entry_price, entry_time, last_price, peak_profit,
-                 status, strategy_id, candle_time, big_volume)
-                VALUES (%s,%s,%s,%s,%s,NOW(),%s,-999.0,'OPEN',NULL,%s,1)
-            """, (product_id, broker, symbol, direction,
-                  price, price, candle['timeframe']))
-
-            log(f"✅ VOL TRADE opened: {symbol} {direction} @ ${price:,.2f} "
-                f"[vol={volume_ratio:.1f}x]")
-
-            locked_brokers.add(broker.upper())
-            locked_symbols.add(f"{symbol}_{direction}")
-
-    except Exception as e:
-        log(f"❌ Volume signal error: {e}")
-    finally:
-        cursor.close()
-        conn.close()
-
-
-
-
-
-
-# ═══════════════════════════════════════════════════════════
-# ENTRY ENGINE
-# Checks RSI + MACD signals from strategy_params
-# One open trade per broker at a time
-# ═══════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
+# THREAD ENTRY POINT 2: ENTRY SIGNALS
+# ══════════════════════════════════════════════════════════════
 def check_and_execute_signals():
+    """
+    Scan all active strategies, check entry conditions, open trades.
+
+    Entry conditions:
+      LONG:  RSI <= rsi_entry  AND  MACD positive AND MACD rising
+             (override: RSI <= 8 extreme oversold bypasses MACD filter)
+      SHORT: RSI >= (100-rsi_entry)  AND  MACD negative AND MACD falling
+             (override: RSI >= 92 extreme overbought bypasses MACD filter)
+    """
     conn   = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        # Find brokers with open trades
-        cursor.execute("""
-            SELECT DISTINCT broker_name FROM active_trades
-            WHERE status = 'OPEN'
-        """)
-        locked_brokers = {r['broker_name'].upper() for r in cursor.fetchall()}
-
-        # ── SMART COOLDOWN ────────────────────────────────────
-        # STOP loss exit      → lock BOTH directions 30 min
-        # TRAIL/RSI exit      → lock same direction only (opposite is FREE!)
-        # DECAY exit          → lock same direction only
-        # Open trade          → lock same direction always
-        cursor.execute("""
-            SELECT symbol, direction, exit_reason,
-                   CONCAT(symbol, '_', direction) as symbol_dir
-            FROM active_trades
-            WHERE status = 'OPEN'
-            UNION
-            SELECT symbol, direction, exit_reason,
-                   CONCAT(symbol, '_', direction) as symbol_dir
-            FROM active_trades
-            WHERE status = 'CLOSED'
-              AND (
-                  (exit_reason = 'STOP' AND exit_time > DATE_SUB(NOW(), INTERVAL 120 MINUTE))
-                  OR
-                  (exit_reason != 'STOP' AND exit_time > DATE_SUB(NOW(), INTERVAL 30 MINUTE))
-              )
-        """)
-        rows = cursor.fetchall()
-        locked_symbols = set()
-        for r in rows:
-            symbol    = r['symbol']
-            direction = r['direction']
-            reason    = r['exit_reason'] or ''
-
-            # Always lock same direction
-            locked_symbols.add(f"{symbol}_{direction}")
-
-            # Only STOP locks opposite direction too
-            if 'STOP' in reason:
-                opposite = 'SHORT' if direction == 'LONG' else 'LONG'
-                locked_symbols.add(f"{symbol}_{opposite}")
-                log(f"  🔒 STOP cooldown: {symbol} both directions locked 30min")
-            elif 'TRAIL' in reason or 'RSI' in reason:
-                opposite = 'SHORT' if direction == 'LONG' else 'LONG'
-                log(f"  ✅ {reason} exit: {symbol}_{opposite} FREE for immediate entry!")
-
-        # Load all active strategies with tuned params
         strategies = load_strategies(cursor)
+        log(f"  📡 Entry scan: {len(strategies)} strategies")
 
         for s in strategies:
-            broker     = s['broker_name']
-            symbol     = s['symbol']
-            direction  = s['direction']
-            product_id = s['product_id']
-            price      = float(s['last_price'] or 0)
+            try:
+                symbol    = s['symbol']
+                direction = s['direction']
+                broker    = s['broker_name']
 
-            # Read RSI and MACD from strategy_params (written by calculate_indicators)
-            rsi_real   = float(s['rsi_real'] or 50.0)
-            macd_val   = float(s['macd']     or 0.0)
-
-            # Tuned entry params
-            rsi_entry  = float(s['rsi_entry'] or DEFAULT_RSI_ENTRY)
-
-            if price <= 0:
-                continue
-
-            # Skip if market is closed for this broker
-            if broker.upper() in ('ALPACA', 'ALPACA-ETF', 'WEBULL'):
-                from datetime import datetime
-                et = pytz.timezone('US/Eastern')
-                now_et = datetime.now(et)
-                market_open = now_et.weekday() < 5 and \
-                              now_et.hour * 60 + now_et.minute >= 570 and \
-                              now_et.hour * 60 + now_et.minute < 960
-                if not market_open:
+                # Skip if already in a trade
+                if s['active_order_id'] is not None:
                     continue
 
-            # Skip if broker or symbol already locked
-            if broker.upper() in locked_brokers:
-                continue
-            if f"{symbol}_{direction}" in locked_symbols:
-                continue
+                # Skip if locked
+                if is_locked(symbol, direction):
+                    continue
 
-            # ── ENTRY CONDITIONS ─────────────────────────────────
-            # LONG:  RSI oversold AND MACD positive AND MACD rising
-            # SHORT: RSI overbought AND MACD negative AND MACD falling
-            macd_prev_val    = float(s['macd_prev']     or 0.0)
-            macd_signal_val  = float(s['macd_signal']   or 0.0)
-            crossover        = s['macd_crossover']       or 'NONE'
+                # Skip if market closed
+                if not is_market_open(broker):
+                    continue
 
-            if direction == 'LONG':
-                rsi_signal     = rsi_real <= rsi_entry
-                macd_positive  = macd_val > 0
-                macd_rising    = macd_val > macd_prev_val
-                rsi_extreme    = rsi_real <= 8
-                macd_signal    = macd_positive and macd_rising or rsi_extreme
-                # Trend filter — block LONG if 1hr MACD is negative (downtrend)
-                trend_ok = macd_val > 0 or rsi_extreme
+                # Get price and check freshness
+                price, age = get_live_price_from_db(symbol)
+                if price <= 0:
+                    continue
+                if age > MAX_PRICE_AGE_SECONDS:
+                    log(f"  ⏭️ STALE: {symbol} price is {age:.0f}s old — skipping")
+                    continue
 
-            else:  # SHORT
-                rsi_signal     = rsi_real >= (100 - rsi_entry)
-                macd_negative  = macd_val < 0
-                macd_falling   = macd_val < macd_prev_val
-                rsi_extreme    = rsi_real >= 92
-                macd_signal    = macd_negative and macd_falling or rsi_extreme
-                # Trend filter — block SHORT if 1hr MACD is positive (uptrend)
-                trend_ok = macd_val < 0 or rsi_extreme
+                # Read indicators from strategy_params (written by calculate_indicators)
+                rsi_real      = float(s['rsi_real']   or 50.0)
+                macd_val      = float(s['macd']        or 0.0)
+                macd_prev_val = float(s['macd_prev']   or 0.0)
 
-            if not trend_ok:
-                continue  # Skip against trend
+                # Entry thresholds
+                rsi_entry = float(s['rsi_entry'] or DEFAULT_PARAMS['rsi_entry'])
 
+                # ── Entry condition logic ──────────────────
+                if direction == 'LONG':
+                    rsi_signal   = rsi_real <= rsi_entry
+                    macd_positive = macd_val > 0
+                    macd_rising   = macd_val > macd_prev_val
+                    rsi_extreme   = rsi_real <= 8   # extreme oversold — bypass MACD
+                    macd_signal   = (macd_positive and macd_rising) or rsi_extreme
+                else:  # SHORT
+                    rsi_signal    = rsi_real >= (100 - rsi_entry)
+                    macd_negative = macd_val < 0
+                    macd_falling  = macd_val < macd_prev_val
+                    rsi_extreme   = rsi_real >= 92  # extreme overbought — bypass MACD
+                    macd_signal   = (macd_negative and macd_falling) or rsi_extreme
 
-            # ── VOLUME SOFT BOOST ────────────────────────────────
-            volume_ratio = float(s['volume_ratio'] or 1.0)
-            big_volume   = volume_ratio >= 2.0
+                if not (rsi_signal and macd_signal):
+                    continue
 
-            if rsi_signal and macd_signal:
-                log(f"🚀 SIGNAL: {symbol} {direction} @ ${price:,.2f} | "
+                # ── Duplicate trade guard ──────────────────
+                cursor.execute("""
+                    SELECT id FROM active_trades
+                    WHERE symbol = %s AND direction = %s AND status = 'OPEN'
+                    LIMIT 1
+                """, (symbol, direction))
+                if cursor.fetchone():
+                    log(f"  ⚠️ DUPLICATE GUARD: {symbol} {direction} already open")
+                    continue
+
+                log(f"  🚀 SIGNAL: {symbol} {direction} @ ${price:,.4f} | "
                     f"RSI={rsi_real:.1f} (thr={rsi_entry:.1f}) | "
-                    f"MACD={macd_val:.4f} prev={macd_prev_val:.4f} | "
-                    f"Crossover={crossover}")
+                    f"MACD={macd_val:.4f} prev={macd_prev_val:.4f}")
 
-                log(f"🚀 SIGNAL: {symbol} {direction} @ ${price:,.2f} | "
-                    f"RSI={rsi_real:.1f} (threshold={rsi_entry:.1f}) | "
-                    f"MACD={macd_val:.4f}")
-
-                # Open trade in active_trades
+                # ── Open trade ─────────────────────────────
+                candle_time = s['candle_time'] or DEFAULT_PARAMS['candle_time']
                 cursor.execute("""
                     INSERT INTO active_trades
-                    (broker_product_id, broker_name, symbol, direction,
-                     entry_price, entry_time, last_price, peak_profit,
-                     status, strategy_id, candle_time, big_volume)
-                    VALUES (%s, %s, %s, %s, %s, NOW(), %s, -999.0, 'OPEN', %s, %s, %s)
-                """, (product_id, broker, symbol, direction,
-                      price, price, s['strategy_id'], s['candle_time'],
-                      1 if big_volume else 0))
+                        (strategy_id, symbol, broker_name, direction,
+                         candle_time, entry_price, entry_time, status,
+                         rsi_at_entry, macd_at_entry)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW(), 'OPEN', %s, %s)
+                """, (s['id'], symbol, broker, direction,
+                      candle_time, price, rsi_real, macd_val))
 
-                log(f"✅ Trade opened: {symbol} {direction} @ ${price:,.2f} "
-                    f"[strategy_id={s['strategy_id']}]")
+                trade_id = cursor.lastrowid
 
-                # Place real order for Alpaca brokers
-                if broker.upper() in ('ALPACA', 'ALPACA-ETF'):
-                    alpaca = get_alpaca_broker(cursor, broker)
-                    if alpaca:
-                        side = 'buy' if direction == 'LONG' else 'sell'
-                        result = alpaca.open_market(symbol, side, qty=1)
-                        if result.ok:
-                            log(f"  📈 Alpaca order placed: {symbol} {side} | order_id={result.order_id}")
-                            cursor.execute(
-                                "UPDATE active_trades SET broker_order_id=%s WHERE broker_name=%s AND symbol=%s AND status='OPEN' ORDER BY id DESC LIMIT 1",
-                                (result.order_id, broker, symbol)
-                            )
-                        else:
-                            log(f"  ❌ Alpaca order FAILED: {symbol} | {result.error}")
+                cursor.execute("""
+                    UPDATE strategy_params
+                    SET active_order_id = %s,
+                        entry_price     = %s,
+                        entry_time      = NOW(),
+                        peak_profit     = -999.00
+                    WHERE id = %s
+                """, (trade_id, price, s['id']))
 
-                # Lock broker and symbol
-                locked_brokers.add(broker.upper())
-                locked_symbols.add(f"{symbol}_{direction}")
+                log(f"  ✅ OPENED: {symbol} {direction} @ ${price:,.4f} | trade_id={trade_id}")
+
+            except Exception as e:
+                log(f"  ❌ Entry error ({s.get('symbol','?')}): {e}")
+                continue
 
     except Exception as e:
-        log(f"❌ Entry error: {e}")
+        log(f"❌ check_and_execute_signals error: {e}")
     finally:
         cursor.close()
         conn.close()
 
-
-# ═══════════════════════════════════════════════════════════
-# EXIT ENGINE
-# Monitors active_trades using TUNED params from strategy_params
-# Exit rules (matching backtest exactly):
-#   1. Stop Loss     — always active
-#   2. Trail Exit    — no gate check (fixed bug)
-#   3. RSI Exit      — when RSI crosses exit threshold + profit >= gate
-#   4. Decay Exit    — after decay_start hours, gate decays to 0
-# ═══════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
+# THREAD ENTRY POINT 3: EXIT MONITORING
+# ══════════════════════════════════════════════════════════════
 def monitor_and_exit_trades():
+    """
+    Monitor all open trades and execute exits.
+
+    Exit rules (in order):
+      RULE 0 — Sanity check: skip if abs(pnl) > 20% (phantom loss guard)
+      RULE 1 — STOP LOSS: pnl <= -stop_loss  (only after 300s)
+      RULE 2 — TRAILING STOP: peak reached trail_start, now dropped trail_drop  (only after 300s)
+      RULE 3 — RSI EXIT: RSI at target AND pnl >= gate
+      RULE 4 — DECAY GATE: profit decaying below gate after decay_start hours
+      RULE 5 — TIME-STOP: still open after TIME_STOP_HOURS with pnl < TIME_STOP_MIN_PNL
+    """
     conn   = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        # Get all open trades with their strategy params
-        cursor.execute("""
-            SELECT
-                at.*,
-                sp.stop_loss,
-                sp.trailing_start,
-                sp.trailing_drop,
-                sp.init_profit,
-                sp.decay_start,
-                sp.decay_rate,
-                sp.rsi_exit,
-                sp.rsi_real,
-                sp.candle_time,
-                bp.last_price as live_price
-            FROM active_trades at
-            LEFT JOIN strategy_params sp ON at.strategy_id = sp.id
-            LEFT JOIN broker_products bp ON at.broker_product_id = bp.id
-            WHERE at.status = 'OPEN'
-        """)
-        trades = cursor.fetchall()
+        strategies = load_strategies(cursor)
+        open_trades = [s for s in strategies if s['active_order_id'] is not None
+                                              and s['entry_price'] is not None
+                                              and float(s['entry_price'] or 0) > 0]
 
-        if not trades:
+        if not open_trades:
             return
 
-        for trade in trades:
-            try:
-                trade_id      = trade['id']
-                symbol        = trade['symbol']
-                direction     = trade['direction']
-                entry_price   = float(trade['entry_price']  or 0)
-                current_price = float(trade['live_price'] or trade['last_price'] or 0)
-                entry_time    = trade['entry_time']
+        log(f"  👁️ Monitoring {len(open_trades)} open trade(s)")
 
-                if entry_price <= 0 or current_price <= 0:
+        for s in open_trades:
+            try:
+                symbol     = s['symbol']
+                direction  = s['direction']
+                entry_price = float(s['entry_price'])
+
+                # Get fresh price
+                current_price, age = get_live_price_from_db(symbol)
+                if current_price <= 0:
+                    log(f"  ⏭️ {symbol}: no price")
                     continue
 
-                # ── Load tuned params (fallback to defaults if no strategy) ──
-                stop_loss    = float(trade['stop_loss']      or DEFAULT_STOP_LOSS)
-                trail_start  = float(trade['trailing_start'] or DEFAULT_TRAIL_START)
-                trail_drop   = float(trade['trailing_drop']  or DEFAULT_TRAIL_DROP)
-                init_profit  = float(trade['init_profit']    or DEFAULT_INIT_PROFIT)
-                decay_start  = float(trade['decay_start']    or DEFAULT_DECAY_START)
-                decay_rate   = float(trade['decay_rate']     or DEFAULT_DECAY_RATE)
-                rsi_exit     = float(trade['rsi_exit']       or DEFAULT_RSI_EXIT)
-                rsi_real     = float(trade['rsi_real']       or 50.0)
-
-                               # ── Volume trade — use fixed params, no decay, trail only ──
-                is_vol_trade = int(trade.get('big_volume') or 0) and trade.get('strategy_id') is None
-                if is_vol_trade:
-                    stop_loss   = 0.5    # tight stop
-                    trail_start = 0.5    # trail kicks in early
-                    trail_drop  = 0.3    # tight trail
-                    decay_start = 999.0  # no decay — trail handles exit
-                    init_profit = 0.0    # no gate
-                    log(f"  🔥 VOL TRADE params: stop=0.5% trail=0.5% no_decay")
-
-                # ── Volume soft boost — wider trail, longer decay ──
-                big_volume = int(trade.get('big_volume') or 0)
-                if big_volume:
-                    trail_start = trail_start * 0.7
-                    trail_drop  = trail_drop  * 2.0
-                    decay_start = decay_start * 2.0
-                    log(f"  🔥 {symbol} VOL BOOST active — trail_start={trail_start:.2f}% decay_start={decay_start:.2f}h")
-
-                # ── Calculate P&L ──────────────────────────
+                # Calculate raw P&L
                 if direction == 'LONG':
                     pnl = ((current_price - entry_price) / entry_price) * 100
                 else:
                     pnl = ((entry_price - current_price) / entry_price) * 100
 
-               # ── SANITY CHECK — reject bad price data ───
-                if abs(pnl) > 20:
-                    log(f"  ⚠️  SANITY CHECK FAILED: {symbol} P&L={pnl:.2f}% — likely bad price data, skipping")
+                # ── RULE 0: Sanity check ───────────────────
+                if abs(pnl) > SANITY_MAX_PNL:
+                    log(f"  🚫 SANITY: {symbol} {direction} pnl={pnl:+.2f}% — phantom loss? Skipping")
                     continue
 
-                # ── Duration ───────────────────────────────
-                duration_seconds = (datetime.now() - entry_time).total_seconds() if entry_time else 0
-                duration_hours   = duration_seconds / 3600.0
-
-                # ── Peak profit tracking ───────────────────
-                peak_profit = float(trade['peak_profit'] or -999.0)
-
-                # ── Current Gate with decay ────────────────
-                # If peak already exceeded init_profit — disable decay
-                # Let TRAIL/RSI/STOP handle the exit
-                if peak_profit >= init_profit:
-                    current_gate = 0
-                elif duration_hours >= decay_start:
-                    decay_amount = (duration_hours - decay_start) * decay_rate
-                    current_gate = max(0.0, init_profit - decay_amount)
+                # Calculate duration
+                entry_time = s.get('entry_time')
+                if entry_time:
+                    if isinstance(entry_time, str):
+                        entry_dt = datetime.strptime(entry_time, '%Y-%m-%d %H:%M:%S')
+                    else:
+                        entry_dt = entry_time
+                    duration_seconds = (datetime.now() - entry_dt).total_seconds()
+                    hours = duration_seconds / 3600
                 else:
-                    current_gate = init_profit
-                if pnl > peak_profit:
-                    peak_profit = pnl
+                    duration_seconds = 0
+                    hours = 0
+
+                # Update peak profit
+                peak = float(s.get('peak_profit') or -999)
+                if pnl > peak:
+                    peak = pnl
                     cursor.execute(
-                        "UPDATE active_trades SET peak_profit=%s WHERE id=%s",
-                        (peak_profit, trade_id)
+                        "UPDATE strategy_params SET peak_profit = %s WHERE id = %s",
+                        (peak, s['id'])
                     )
 
-                # ── Log every cycle ────────────────────────
-                dur_str = f"{int(duration_hours)}h{int((duration_hours%1)*60)}m"
-                log(f"  👁  {symbol} {direction} | "
-                    f"P&L:{pnl:+.2f}% | Peak:{peak_profit:.2f}% | "
-                    f"Gate:{current_gate:.2f}% | RSI:{rsi_real:.1f} | "
-                    f"Dur:{dur_str}")
+                # Get exit params
+                stop_loss      = float(s.get('stop_loss')       or DEFAULT_PARAMS['stop_loss'])
+                rsi_exit_thr   = float(s.get('rsi_exit')        or DEFAULT_PARAMS['rsi_exit'])
+                trail_start    = float(s.get('trailing_start')   or DEFAULT_PARAMS['trailing_start'])
+                trail_drop     = float(s.get('trailing_drop')    or DEFAULT_PARAMS['trailing_drop'])
+                init_profit    = float(s.get('init_profit')      or DEFAULT_PARAMS['init_profit'])
+                decay_start    = float(s.get('decay_start')      or DEFAULT_PARAMS['decay_start'])
+                decay_rate     = float(s.get('decay_rate')       or DEFAULT_PARAMS['decay_rate'])
+                rsi_current    = float(s.get('rsi_real')         or 50.0)
 
-                # ══ EXIT LOGIC — matches backtest exactly ══
+                # Decayed profit gate
+                if hours > decay_start:
+                    gate = max(0, init_profit - ((hours - decay_start) * decay_rate))
+                else:
+                    gate = init_profit
+
+                log(f"  👁️  {symbol} {direction} | "
+                    f"P&L:{pnl:+.2f}% | Peak:{peak:.2f}% | Gate:{gate:.2f}% | "
+                    f"RSI:{rsi_current:.1f} | {hours:.1f}h | {duration_seconds:.0f}s")
+
                 exit_reason = None
 
-                # ── RULE 1: STOP LOSS — always active ──────
-                if pnl <= -stop_loss and duration_seconds >= 300:
-                    exit_reason = "STOP"
-                    log(f"  🛑 STOP LOSS: {symbol} | P&L:{pnl:.2f}%")
+                # ── RULE 1: STOP LOSS (only after 300s) ───
+                if pnl <= -stop_loss:
+                    if duration_seconds >= MIN_TRADE_SECONDS:
+                        exit_reason = f"STOP (pnl={pnl:+.2f}%, limit=-{stop_loss}%)"
+                    else:
+                        log(f"  ⏳ STOP suppressed: only {duration_seconds:.0f}s old (need {MIN_TRADE_SECONDS}s)")
 
-                # ── RULE 2: TRAIL EXIT — Dynamic trailing stop ─────
-                # The bigger the peak, the more room we give it
-                elif peak_profit >= trail_start:
-                    # Dynamic trail_minus based on peak size
-                    # Dynamic drop = 20% of peak profit
-                    dynamic_drop = round(peak_profit * 0.20, 2)
-                    if dynamic_drop < 0.1:
-                        dynamic_drop = 0.1  # minimum 0.1%                    else:
-                        dynamic_drop = trail_drop
-                    trail_level = peak_profit - dynamic_drop
-                    if pnl <= trail_level and duration_seconds >= 300:
-                        exit_reason = "TRAIL-EXIT"
-                        log(f"  📉 TRAIL EXIT: {symbol} | "
-                            f"Peak:{peak_profit:.2f}% → Now:{pnl:.2f}% "
-                            f"(dynamic_drop={dynamic_drop:.2f}% trail={trail_level:.2f}%)")
+                # ── RULE 2: TRAILING STOP (only after 300s) ─
+                elif peak >= trail_start:
+                    trail_level = peak - trail_drop
+                    if pnl <= trail_level and trail_level > 0:
+                        if duration_seconds >= MIN_TRADE_SECONDS:
+                            exit_reason = f"TRAIL (peak={peak:.2f}%, trail={trail_level:.2f}%)"
+                        else:
+                            log(f"  ⏳ TRAIL suppressed: only {duration_seconds:.0f}s old")
 
-                # ── RULE 3: RSI EXIT ────────────────────────
-                # Exit when RSI crosses exit threshold
-                # AND current profit >= current gate
-                # BUT skip if big move detected (peak > 1.5%) — let it run!
-                big_move = peak_profit >= 1.5
-                if not exit_reason and not big_move:
-                    if direction == 'LONG' and rsi_real >= rsi_exit and pnl >= current_gate:
-                        exit_reason = "RSI-EXIT"
-                        log(f"  📊 RSI EXIT: {symbol} LONG | "
-                            f"RSI:{rsi_real:.1f} >= {rsi_exit:.1f} | "
-                            f"P&L:{pnl:.2f}% >= Gate:{current_gate:.2f}%")
-                    elif direction == 'SHORT' and rsi_real <= (100 - rsi_exit) and pnl >= current_gate:
-                        exit_reason = "RSI-EXIT"
-                        log(f"  📊 RSI EXIT: {symbol} SHORT | "
-                            f"RSI:{rsi_real:.1f} <= {100-rsi_exit:.1f} | "
-                            f"P&L:{pnl:.2f}% >= Gate:{current_gate:.2f}%")
+                # ── RULE 3: RSI EXIT ───────────────────────
+                elif pnl >= gate:
+                    if direction == 'LONG' and rsi_current >= rsi_exit_thr:
+                        exit_reason = f"RSI-EXIT (RSI={rsi_current:.1f} >= {rsi_exit_thr})"
+                    elif direction == 'SHORT' and rsi_current <= (100 - rsi_exit_thr):
+                        exit_reason = f"RSI-EXIT (RSI={rsi_current:.1f} <= {100 - rsi_exit_thr:.1f})"
 
-                # ── RULE 4: DECAY EXIT ──────────────────────
-                # After decay_start hours, gate decays toward 0
-                # Exit when current profit >= decayed gate
-                # BUT skip if trailing is active — let trailing catch bigger moves!
-                trailing_active = peak_profit >= trail_start
-                if not exit_reason and duration_hours >= decay_start and not trailing_active and not big_move:
-                    if pnl >= current_gate:
-                        exit_reason = "DECAY-EXIT"
-                        log(f"  ⏰ DECAY EXIT: {symbol} | "
-                            f"P&L:{pnl:.2f}% >= Gate:{current_gate:.2f}% "
-                            f"after {duration_hours:.1f}h")
+                # ── RULE 4: DECAY GATE ─────────────────────
+                elif hours > decay_start and pnl > 0 and pnl >= gate:
+                    exit_reason = f"DECAY (pnl={pnl:+.2f}%, gate={gate:.2f}%, {hours:.1f}h)"
 
-                # ── RULE 5: TIME STOP ───────────────────────
-                # Case 1: Never went positive after 2 hours
-                # Case 2: After 3 hours, peak < 30% of init_profit target
-                lazy_trade = (duration_hours >= 3.0 and
-                              peak_profit < (init_profit * 0.3) and
-                              init_profit > 0)
-                if not exit_reason and (
-                    (duration_hours >= 2.0 and peak_profit < 0) or lazy_trade
-                ):
-                    exit_reason = "TIME-STOP"
-                    log(f"  ⏱️ TIME STOP: {symbol} | "
-                        f"Peak:{peak_profit:.2f}% < target after {duration_hours:.1f}h | "
-                        f"P&L:{pnl:.2f}%")
+                # ── RULE 5: TIME-STOP ──────────────────────
+                elif hours >= TIME_STOP_HOURS and pnl < TIME_STOP_MIN_PNL:
+                    exit_reason = f"TIME-STOP ({hours:.1f}h, pnl={pnl:+.2f}%)"
 
-                # ── EXECUTE EXIT ───────────────────────────
+                # ── Execute exit ───────────────────────────
                 if exit_reason:
-                    # Save to orders table
-                    cursor.execute("""
-                        INSERT INTO orders (
-                            strategy_id, symbol, broker, side, candle_time,
-                            entry_price, exit_price, pnl_percent,
-                            duration_seconds, status, exit_reason,
-                            created_at
-                        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
-                    """, (
-                        trade.get('strategy_id'),
-                        symbol,
-                        trade['broker_name'],
-                        direction,
-                        trade.get('candle_time', '1hr'),
-                        entry_price,
-                        current_price,
-                        round(pnl, 4),
-                        int(duration_seconds),
-                        'CLOSED',
-                        exit_reason,
-                    ))
-
-                    # Close the active trade
-                    cursor.execute("""
-                        UPDATE active_trades
-                        SET status      = 'CLOSED',
-                            exit_price  = %s,
-                            exit_time   = NOW(),
-                            exit_reason = %s
-                        WHERE id = %s
-                    """, (current_price, exit_reason, trade_id))
-
-                    # Close real Alpaca position
-                    broker_name = trade.get('broker_name', '')
-                    if broker_name.upper() in ('ALPACA', 'ALPACA-ETF'):
-                        alpaca = get_alpaca_broker(cursor, broker_name)
-                        if alpaca:
-                            side = 'buy' if direction == 'LONG' else 'sell'
-                            result = alpaca.close_market(symbol, side, qty=1)
-                            if result.ok:
-                                log(f"  📉 Alpaca position closed: {symbol} | order_id={result.order_id}")
-                            else:
-                                log(f"  ❌ Alpaca close FAILED: {symbol} | {result.error}")
-
-                    log(f"  ✅ CLOSED: {symbol} {direction} | "
-                        f"{exit_reason} | P&L:{pnl:+.2f}% | "
-                        f"Entry:${entry_price:,.2f} Exit:${current_price:,.2f} | "
-                        f"{dur_str}")
+                    _close_trade(cursor, s, current_price, pnl, duration_seconds, exit_reason)
+                    apply_exit_cooldown(symbol, direction, exit_reason)
 
             except Exception as e:
-                import traceback
-                log(f"  ❌ Error trade #{trade.get('id','?')}: {e}")
-                log(f"  TRACEBACK: {traceback.format_exc()}")
+                log(f"  ❌ Exit error ({s.get('symbol','?')}): {e}")
                 continue
 
     except Exception as e:
-        log(f"❌ Monitor error: {e}")
+        log(f"❌ monitor_and_exit_trades error: {e}")
     finally:
         cursor.close()
         conn.close()
 
+# ── Close trade ───────────────────────────────────────────────
+def _close_trade(cursor, s, current_price, pnl, duration_seconds, exit_reason):
+    """Save closed trade to orders and clear active_order_id in strategy_params"""
+    strategy_id = s['id']
+    symbol      = s['symbol']
+    direction   = s['direction']
+    broker      = s['broker_name']
+    entry_price = float(s['entry_price'])
+    candle_time = s.get('candle_time') or '1h'
 
-# ═══════════════════════════════════════════════════════════
-# STANDALONE — for testing outside aimn_engine.py
-# ═══════════════════════════════════════════════════════════
+    try:
+        # Save to orders
+        cursor.execute("""
+            INSERT INTO orders
+                (strategy_id, symbol, broker, side, candle_time,
+                 entry_price, exit_price, pnl_percent, duration_seconds,
+                 status, exit_reason, exit_time)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'CLOSED', %s, NOW())
+        """, (
+            strategy_id, symbol, broker, direction, candle_time,
+            entry_price, current_price, round(pnl, 4), int(duration_seconds),
+            exit_reason
+        ))
+
+        # Also update active_trades if table exists
+        try:
+            cursor.execute("""
+                UPDATE active_trades
+                SET status = 'CLOSED', exit_price = %s, exit_time = NOW(),
+                    pnl_percent = %s, exit_reason = %s
+                WHERE id = %s
+            """, (current_price, round(pnl, 4), exit_reason, s['active_order_id']))
+        except Exception:
+            pass  # active_trades table is optional
+
+        # Clear strategy_params active state
+        cursor.execute("""
+            UPDATE strategy_params
+            SET active_order_id = NULL,
+                entry_price     = NULL,
+                entry_time      = NULL,
+                peak_profit     = -999.00
+            WHERE id = %s
+        """, (strategy_id,))
+
+        log(f"  🚪 EXIT: {symbol} {direction} @ ${current_price:.4f} | "
+            f"{exit_reason} | P&L: {pnl:+.2f}% | {duration_seconds:.0f}s")
+
+    except Exception as e:
+        log(f"  ❌ _close_trade error ({symbol}): {e}")
+
+# ══════════════════════════════════════════════════════════════
+# STANDALONE TEST
+# ══════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    print("=" * 60)
-    print("AiMN V3.1 - AUTO EXECUTOR (Fixed)")
-    print("=" * 60)
-    print("✅ Reads params from strategy_params (tuned values)")
-    print("✅ RSI entry filter: RSI Real + MACD sign")
-    print("✅ RSI exit: fires when RSI crosses threshold + profit >= gate")
-    print("✅ Trail exit: no gate check (catches sudden moves)")
-    print("✅ Decay exit: after decay_start hours")
-    print("=" * 60)
-    cycle = 0
+    print("=" * 65)
+    print("AiMN V3.1 — AUTO EXECUTOR (standalone mode)")
+    print("=" * 65)
+    print(f"MIN_TRADE_SECONDS : {MIN_TRADE_SECONDS}s (STOP/TRAIL suppressed before this)")
+    print(f"SANITY_MAX_PNL    : {SANITY_MAX_PNL}% (phantom loss guard)")
+    print(f"TIME_STOP_HOURS   : {TIME_STOP_HOURS}h at pnl < {TIME_STOP_MIN_PNL}%")
+    print(f"STOP_COOLDOWN     : {STOP_COOLDOWN_MINUTES}min both directions")
+    print(f"TRAIL_COOLDOWN    : {TRAIL_COOLDOWN_MINUTES}min same direction only")
+    print("=" * 65)
     while True:
         try:
-            cycle += 1
+            check_volume_signals()
             check_and_execute_signals()
             monitor_and_exit_trades()
-            time.sleep(1)
+            time.sleep(2)
         except KeyboardInterrupt:
             print("\n⛔ Stopped")
             break

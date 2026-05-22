@@ -117,32 +117,31 @@ if __name__ == "__main__":
     print("=" * 60)
     print("✅ Thread 1: Price Updater        — every 5 seconds")
     print("✅ Thread 2: Calculate Indicators — every 3 seconds")
-    print("✅ Thread 3: Auto Executor        — every 1 second")
+    print("✅ Thread 3: Auto Executor        — every 2 seconds")
+    print("✅ Thread 4: Volume Spike Hunter  — every 500ms")
     print("✅ Log rotation at 10MB")
     print("=" * 60)
 
-    # Start price updater first
     t1 = threading.Thread(target=price_loop, daemon=True)
     t1.start()
-
-    # Wait 3 seconds for first prices
     time.sleep(3)
 
-    # Start indicators thread
     t2 = threading.Thread(target=indicators_loop, daemon=True)
     t2.start()
-
-    # Wait 3 more seconds for first indicators
     time.sleep(3)
 
-    # Start executor last
     t3 = threading.Thread(target=executor_loop, daemon=True)
     t3.start()
 
-    log("🚀 All 3 threads running!")
+    t4 = threading.Thread(target=spike_hunter_loop, daemon=True)
+    t4.start()
 
-    # Keep main thread alive + check log rotation every 5 minutes
+    log("🚀 All 4 threads running!")
+
     while True:
         time.sleep(300)
         rotate_log()
-        log("💓 Engine heartbeat — all threads active")
+        for name, t in [("Price", t1), ("Indicators", t2), ("Executor", t3), ("SpikeHunter", t4)]:
+            if not t.is_alive():
+                log(f"⚠️ WARNING: {name} thread is DEAD!")
+        log("💓 Engine heartbeat — all threads checked")

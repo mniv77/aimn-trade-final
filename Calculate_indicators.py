@@ -90,12 +90,26 @@ def run_calculator():
                     if len(closes) >= 35:
                         macd_val = round(ema(closes, 12) - ema(closes, 26), 4)
 
+                    # Calculate macd_prev (previous bar's MACD) for rising/falling filter
+                    macd_prev_val = 0.0
+                    if len(closes) >= 36:
+                        macd_prev_val = round(ema(closes[:-1], 12) - ema(closes[:-1], 26), 4)
+
+                    # Write to broker_products (price display)
                     cursor.execute("""
                         UPDATE broker_products
                         SET rsi_real = %s, macd = %s
                         WHERE id = %s
                     """, (rsi_real, macd_val, strat['broker_product_id']))
 
+                    # Write to strategy_params (executor reads from here)
+                    cursor.execute("""
+                        UPDATE strategy_params
+                        SET rsi_real   = %s,
+                            macd       = %s,
+                           macd_prev  = %s
+                      WHERE id = %s
+                    """, (rsi_real, macd_val, macd_prev_val, strategy_id))
                     if cycle_count % 10 == 0:
                         print(f"  ✅ {symbol} [{candle_time}] RSI={rsi_real} MACD={macd_val}")
 

@@ -1,0 +1,1104 @@
+<!-- templates/aimn_flowing_scanner_auto.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AIMn Flowing Scanner Dashboard - AUTO MODE v2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes scroll { 0% { transform: translateX(100%);} 100% { transform: translateX(-100%);} }
+    @keyframes scroll-reverse { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
+    .animate-scroll { animation: scroll 80s linear infinite; }
+    .animate-scroll-reverse { animation: scroll-reverse 60s linear infinite; }
+
+    @keyframes scanPulse { 0%,100%{ box-shadow:0 0 0 0 rgba(59,130,246,.7); transform:scale(1);} 50%{ box-shadow:0 0 0 10px rgba(59,130,246,0); transform:scale(1.02);} }
+    @keyframes scannerBeam { 0% { left: -100%; } 100% { left: 100%; } }
+
+    .row-testing{ animation:scanPulse 2s infinite; border:2px solid #3b82f6!important; position:relative; overflow:hidden; background:linear-gradient(90deg,rgba(59,130,246,.15),rgba(59,130,246,.25),rgba(59,130,246,.15)); }
+    .row-testing::before{ content:''; position:absolute; inset:0 auto 0 -100%; width:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent); animation:scannerBeam 2s infinite; }
+    .row-testing::after{ content:'AUTO-TRADING...'; position:absolute; top:2px; right:2px; background:#3b82f6; color:#fff; padding:2px 6px; border-radius:3px; font-size:10px; font-weight:700; }
+
+    .broker-available { background: rgba(0,128,0,0.15); border-color:#10b981; }
+    .broker-busy { background: rgba(255,140,0,0.15); border-color:#f59e0b; }
+    .broker-out-of-hours { background: rgba(251,191,36,0.2); border-color:#fbbf24; }  /* BRIGHT YELLOW for out of hours */
+
+    /* NEW: Filter-based coloring */
+    .symbol-filter-passed { background: rgba(0,200,0,0.12); border-left:4px solid #10b981; }  /* GREEN - Passed filters */
+    .symbol-filter-failed { background: rgba(234,179,8,0.08); border-left:4px solid #ca8a04; }  /* YELLOW/GOLD - Failed filters */
+    .symbol-busy-active { background: rgba(220,38,38,0.18); border-left:4px solid #dc2626; }  /* RED - Active trade */
+    .symbol-busy-blocked { background: rgba(120,53,15,0.18); border-left:4px solid #92400e; }  /* BROWN - Blocked */
+
+    .ticker-available { background:#065f46; border:1px solid #10b981; color:#d1fae5; }
+    .ticker-filter-warning { background:#065f46; border:1px solid #10b981; color:#d1fae5; }  /* Same as available, will add yellow dot */
+    .ticker-out-of-hours { background:#065f46; border:1px solid #10b981; color:#d1fae5; }  /* Same as available, will add yellow dot */
+    .ticker-active-trade { background:#991b1b; border:1px solid #ef4444; color:#fecaca; }  /* BRIGHT RED */
+    .ticker-blocked { background:#451a03; border:1px solid #78350f; color:#fcd34d; opacity:.85; }  /* BROWN for blocked */
+  </style>
+</head>
+<body class="bg-gray-900 text-white">
+  <div class="p-4 mb-4">
+    <h1 class="text-3xl font-bold text-center mb-2">🤖 AIMn Auto-Trading Scanner (Smart Filters)</h1>
+    <p class="text-center text-gray-400">Fully Automated Multi-Exchange Market Scanning & Trading</p>
+    <p class="text-center text-xs text-green-400 mt-1">⚡ AUTO MODE - Multi-Filter: RSI + ATR + Volume + Recency</p>
+
+    <!-- Inline Trade Strip -->
+    <div id="trade-strip" class="mt-4 rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
+      <!-- Header row -->
+      <div class="flex items-center gap-3 px-4 py-2 border-b border-gray-700">
+        <span id="strip-idle-text" class="text-gray-500 text-sm">📡 Scanning for signals...</span>
+        <span id="active-order-count" class="text-xs bg-gray-700 px-2 py-1 rounded">0 open</span>
+     </div>
+      <!-- Live positions — one row per open trade -->
+      <div id="active-orders-list"></div>
+
+      <!-- Signal strip — shown when a new signal fires -->
+      <div id="strip-signal" class="hidden flex items-center gap-3 px-4 py-2 border-t border-blue-700 bg-blue-950 text-sm">
+        <span class="text-blue-300 font-bold animate-pulse">⚡ SIGNAL</span>
+        <span id="strip-symbol" class="font-mono font-bold text-white text-base"></span>
+        <span id="strip-direction" class="text-xs px-2 py-1 rounded font-bold bg-green-700 text-green-200"></span>
+        <span class="text-gray-400">@</span>
+        <span id="strip-sig-price" class="font-mono text-white"></span>
+        <button id="strip-enter-btn" onclick="stripEnterOrder()"
+          class="ml-2 bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded font-bold transition-all">
+          🚀 Enter Order
+        </button>
+        <button onclick="stripDismiss()"
+          class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded font-bold transition-all">
+          ✕ Dismiss
+        </button>
+      </div>
+
+      <!-- Signal strip — shown when a new signal fires -->
+      <div id="strip-signal" class="hidden flex items-center gap-3 px-4 py-2 border-t border-blue-700 bg-blue-950 text-sm">
+        <span class="text-blue-300 font-bold animate-pulse">⚡ SIGNAL</span>
+        <span id="strip-symbol" class="font-mono font-bold text-white text-base"></span>
+        <span id="strip-direction" class="text-xs px-2 py-1 rounded font-bold bg-green-700 text-green-200"></span>
+        <span class="text-gray-400">@</span>
+        <span id="strip-sig-price" class="font-mono text-white"></span>
+        <button id="strip-enter-btn" onclick="stripEnterOrder()"
+          class="ml-2 bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded font-bold transition-all">
+          🚀 Enter Order
+        </button>
+        <button onclick="stripDismiss()"
+          class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded font-bold transition-all">
+          ✕ Dismiss
+        </button>
+      </div>
+    <div class="text-center mt-3">
+      <div class="inline-flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg">
+        <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+        <span class="text-sm font-semibold">Currently Testing: <span id="current-testing-symbol" class="font-mono">--</span></span>
+      </div>
+      <div class="text-xs text-gray-400 mt-1">
+        Row <span id="testing-row-number">-</span> •
+        Queue <span id="queue-size">0</span> •
+        Ready: <span id="ready-count" class="text-green-400">0</span>/<span id="total-count">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Broker Status -->
+  <div class="mx-4 mb-4 bg-gray-800 rounded-lg p-4">
+    <h2 class="text-xl font-semibold mb-3">Broker Status</h2>
+    <div id="exchange-status" class="grid grid-cols-1 md:grid-cols-5 gap-4"></div>
+  </div>
+
+  <!-- Rolling Belts -->
+  <div class="mb-4 bg-black border-y border-gray-700">
+    <div class="relative overflow-hidden py-3">
+      <div id="main-ticker" class="flex animate-scroll whitespace-nowrap"></div>
+    </div>
+    <div class="space-y-1">
+      <div class="relative overflow-hidden bg-gray-900 py-2">
+        <div id="flow-1" class="flex animate-scroll-reverse whitespace-nowrap"></div>
+      </div>
+      <div class="relative overflow-hidden bg-gray-900 py-2">
+        <div id="flow-2" class="flex animate-scroll whitespace-nowrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Scan Results -->
+  <div class="mx-4 bg-gray-800 rounded-lg p-4">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-xl font-semibold">Detailed Scan Results (Color-Coded)</h2>
+      <div class="flex items-center space-x-2 text-sm">
+        <div class="w-3 h-3 bg-blue-500 rounded animate-pulse"></div>
+        <span class="text-gray-400">Row <span id="testing-row-number-2">-</span> Currently Being Analyzed</span>
+      </div>
+    </div>
+    <div class="overflow-hidden">
+      <div class="grid grid-cols-10 gap-2 text-sm font-semibold text-gray-400 mb-2 px-2">
+        <div>Broker</div><div>Symbol</div><div>Status</div><div>Price</div><div>Change</div>
+        <div>Volume</div><div>RSI</div><div>Signal</div><div>Filters</div><div>Action</div>
+      </div>
+      <div id="scan-results" class="max-h-96 overflow-y-auto space-y-1"></div>
+    </div>
+  </div>
+
+  <div class="m-4 text-center">
+    <a href="/" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+      ← Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Legend -->
+  <div class="m-4 bg-gray-800 rounded-lg p-4">
+    <h3 class="text-lg font-semibold mb-2">Smart Filter System & Color Legend</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <div class="space-y-2">
+        <div><strong>Filter 1:</strong> RSI Extremes (< 25 or > 75)</div>
+        <div><strong>Filter 2:</strong> ATR > 1% (volatility)</div>
+        <div><strong>Filter 3:</strong> Volume spike OR Big move</div>
+        <div><strong>Filter 4:</strong> Recently traded (< 60 sec)</div>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center space-x-2"><div class="w-4 h-4 bg-green-500 rounded"></div><span><strong>GREEN</strong> - All filters passed, ready to trade</span></div>
+        <div class="flex items-center space-x-2"><div class="w-4 h-4 bg-yellow-400 rounded"></div><span><strong>YELLOW</strong> - Some filters failed OR out of trading hours</span></div>
+        <div class="flex items-center space-x-2"><div class="w-4 h-4 bg-red-500 rounded"></div><span><strong>RED</strong> - Currently trading</span></div>
+        <div class="flex items-center space-x-2"><div class="w-4 h-4 bg-yellow-800 rounded"></div><span><strong>BROWN</strong> - Blocked (same broker)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- State ---
+    let exchanges = {}, scanData = [], tickerItems = [];
+    const testingRowIndex = 3;
+    let activeTradeSymbol = null;
+    let activeTradeExchange = null;
+    let activeTradeExchangeNorm = null;
+    let activePopupWin = null;
+
+    // --- Inline trade strip state ---
+    let stripSignalData = null;
+    let stripTradeId = null;
+    let stripEntryPrice = 0;
+    let stripCurrentPrice = 0;
+    let stripDirection = '';
+    let stripPriceInterval = null;
+    let autoEnterSignals = true;  // auto-enter when signal fires (no manual click)
+    // Per-trade live price map: tradeId → currentPrice
+    let livePriceMap = {};
+    let peakProfitMap = {};  // tradeId → peak P&L % reached
+
+    const MAX_CONCURRENT = 1;
+    const MIN_GAP_BETWEEN_MS = 45_000;
+    const BROKER_COOLDOWN_MS = 120_000;
+    const SYMBOL_COOLDOWN_MS = 180_000;  // 3 min cooldown per symbol after exit
+
+    let lastPopupAt = 0;
+    let lastByBroker = {};
+    let lastBySymbol = {};  // symbol → last exit timestamp
+    let popupQueue = [];
+    let isOpening = false;
+
+    const el = id => document.getElementById(id);
+    const normEx = s => String(s || "").toUpperCase().replace(/[^A-Z]/g, "");
+
+    // --- Trading hours checker ---
+    function isMarketOpen(exchange) {
+      const now = new Date();
+      const day = now.getDay(); // 0=Sunday, 6=Saturday
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const timeInMinutes = hours * 60 + minutes;
+
+      const exNorm = normEx(exchange);
+
+      // Crypto markets: 24/7
+      if (exNorm === 'CRYPTO') {
+        return true;
+      }
+
+      // Forex: Closed on weekends (Saturday & Sunday)
+      if (exNorm === 'FOREX') {
+        return day !== 0 && day !== 6;
+      }
+
+      // Stock markets (NYSE, NASDAQ, ALPACA, ALPACA-ETF): Mon-Fri, 9:30 AM - 4:00 PM ET
+      // Converting to your local time (PST/PDT) - assuming this runs in browser local time
+      // For simplicity, using a basic weekday + hour check
+      // NYSE/NASDAQ: Closed on weekends
+      if (exNorm === 'NYSE' || exNorm === 'NASDAQ' || exNorm === 'ALPACA' || exNorm === 'ALPACAETF' || exNorm === 'WEBULL') {
+        if (day === 0 || day === 6) return false; // Weekend
+        // Market hours: 9:30 AM - 4:00 PM ET (convert if needed)
+        // Using 6:30 AM - 1:00 PM PST as approximate conversion
+        const marketOpen = 6 * 60 + 30;  // 6:30 AM PST
+        const marketClose = 13 * 60;      // 1:00 PM PST
+        return timeInMinutes >= marketOpen && timeInMinutes < marketClose;
+      }
+
+      // Futures: Closed on weekends (Saturday & Sunday)
+      // Some markets open Sunday evening, but simplified to closed all weekend
+      if (exNorm === 'FUTURES') {
+        if (day === 0 || day === 6) return false; // Closed Saturday and Sunday
+        return true; // Open Mon-Fri
+      }
+
+      return true; // Default to open for unknown exchanges
+    }
+
+    // --- DB-driven strategy config ---
+    let symbols = [];
+    let strategyMap = {};  // "SYMBOL:DIRECTION" -> strategy params from tuner
+
+    async function loadScannerConfig() {
+      try {
+        const [symResp, stratResp] = await Promise.all([
+          fetch('/api/scanner/symbols'),
+          fetch('/api/scanner/strategies')
+        ]);
+        const symData = await symResp.json();
+        const stratData = await stratResp.json();
+
+        symbols = (symData.symbols || []).map(s => ({
+          symbol: s.symbol,
+          exchange: s.broker.toUpperCase()
+        }));
+
+        strategyMap = {};
+        (stratData.strategies || []).forEach(s => {
+            const key = `${s.symbol}:${s.direction}:${s.candle_time}`;
+            strategyMap[key] = s;        });
+      } catch(e) {
+        console.warn('loadScannerConfig failed, using fallback symbols', e);
+      }
+    }
+
+    // --- Real price refresh from backend ---
+    async function refreshScanPrices() {
+      try {
+        const resp = await fetch('/api/scanner/prices');
+        const data = await resp.json();
+        if (!data.prices || !data.prices.length) return;
+        const priceMap = {};
+        data.prices.forEach(p => { if (p.price) priceMap[p.symbol] = p.price; });
+        scanData.forEach(item => {
+          if (priceMap[item.symbol]) {
+            const px = priceMap[item.symbol];
+            item.price = px > 1000 ? px.toFixed(2) : px > 10 ? px.toFixed(4) : px.toFixed(6);
+          }
+        });
+      } catch(e) {
+        console.warn('refreshScanPrices failed', e);
+      }
+    }
+
+    // --- Real RSI + ATR snapshot from backend (cached 10 min) ---
+    async function refreshScanSnapshot() {
+      try {
+        const resp = await fetch('/api/scanner/snapshot');
+        const data = await resp.json();
+        if (!data.symbols || !data.symbols.length) return;
+        const snapMap = {};
+        data.symbols.forEach(s => { snapMap[s.symbol] = s; });
+        scanData.forEach(item => {
+          const snap = snapMap[item.symbol];
+          if (!snap) return;
+          if (snap.price != null)   item.price   = snap.price > 1000 ? snap.price.toFixed(2) : snap.price.toFixed(4);
+          if (snap.rsi  != null) item.rsi     = snap.rsi;
+          if (snap.atr_pct != null) item.atr_pct = snap.atr_pct;
+          if (snap.change != null)  item.change  = snap.change;
+          if (snap.macd != null)    item.macd    = snap.macd;
+          const longS  = strategyMap[`${item.symbol}:LONG`];
+          const shortS = strategyMap[`${item.symbol}:SHORT`];
+          const bt = longS  ? parseFloat(longS.rsi_entry)  : 30;
+          const st = shortS ? (100 - parseFloat(shortS.rsi_entry)) : 70;
+          item.signal = snap.rsi <= bt ? 'BUY' : snap.rsi >= st ? 'SELL' : 'NEUTRAL';
+          item.last_trade_seconds = 30;
+          item.filters = checkFilters(item);
+        });
+        updateScanResultsDisplay();
+      } catch(e) {
+        console.warn('refreshScanSnapshot failed', e);
+      }
+    }
+
+    // --- Smart filter checker ---
+    function checkFilters(item) {
+      const longStrat  = strategyMap[`${item.symbol}:LONG`];
+      const shortStrat = strategyMap[`${item.symbol}:SHORT`];
+
+      const buyThreshold  = longStrat  ? parseFloat(longStrat.rsi_entry)  : 30;
+      const sellThreshold = shortStrat ? (100 - parseFloat(shortStrat.rsi_entry)) : 70;
+
+      const isBuySignal  = parseFloat(item.rsi) <= buyThreshold;
+      const isSellSignal = parseFloat(item.rsi) >= sellThreshold;
+      const rsiPass = isBuySignal || isSellSignal;
+
+      // MACD direction confirmation — matches tuner entry logic exactly
+      let macdPass = true;
+      if (item.macd != null) {
+        if (isBuySignal  && longStrat)  macdPass = item.macd > 0;  // LONG needs upward MACD
+        if (isSellSignal && shortStrat) macdPass = item.macd < 0;  // SHORT needs downward MACD
+      }
+
+      const allPassed = rsiPass && macdPass;
+      const score = [rsiPass, macdPass].filter(Boolean).length;
+
+      return { allPassed, score, rsiPass, macdPass };
+    }
+
+    // --- Generate sample data (KEEP ORIGINAL) ---
+    function generateSampleExchangeData() {
+          exchanges = {
+            'Alpaca'    : { scanning: true, activeSymbol: null, symbolCount: 250 },
+            'Alpaca-ETF': { scanning: true, activeSymbol: null, symbolCount: 50 },
+            'Gemini'    : { scanning: true, activeSymbol: null, symbolCount: 4 },
+            'Forex'     : { scanning: true, activeSymbol: null, symbolCount: 50 },
+            'Futures'   : { scanning: true, activeSymbol: null, symbolCount: 30 }
+          };
+        }
+
+    function generateSampleScanData() {
+      // Use DB symbols if loaded; fallback to defaults if none
+      const symList = symbols.length ? symbols : [
+        {symbol: 'BTC/USD', exchange: 'CRYPTO'},
+        {symbol: 'ETH/USD', exchange: 'CRYPTO'},
+        {symbol: 'AAPL',    exchange: 'ALPACA'},
+        {symbol: 'TSLA',    exchange: 'ALPACA'},
+        {symbol: 'NVDA',    exchange: 'ALPACA'},
+        {symbol: 'SPY',     exchange: 'NYSE'},
+        {symbol: 'QQQ',     exchange: 'NYSE'}
+      ];
+
+      scanData = symList.map(({symbol, exchange}) => {
+        let rsi, atr_pct, volume_ratio, last_trade_seconds;
+
+        // Give BTC and ETH good values so they pass filters
+        if (symbol === 'BTC/USD' || symbol === 'ETH/USD') {
+          rsi = Math.random() > 0.5 ? 20 : 78;  // Extreme RSI
+          atr_pct = 2.5;  // Good volatility
+          volume_ratio = 2.0;  // Good volume
+          last_trade_seconds = 30;  // Recent trade
+        } else {
+          rsi = (Math.random() * 100).toFixed(1);
+          atr_pct = (Math.random() * 4).toFixed(2);
+          volume_ratio = (Math.random() * 3).toFixed(2);
+          last_trade_seconds = Math.floor(Math.random() * 120);
+        }
+
+        const signal = rsi < 30 ? 'BUY' : rsi > 70 ? 'SELL' : 'NEUTRAL';
+
+        const item = {
+          symbol, exchange,
+          price: (Math.random() * 500 + 50).toFixed(2),
+          change: ((Math.random() - 0.5) * 10).toFixed(2),
+          volume: Math.floor(Math.random() * 1_000_000).toLocaleString(),
+          rsi: parseFloat(rsi),
+          signal,
+          quantity: exchange === 'CRYPTO' ? 0.01 : 10,
+          atr_pct: parseFloat(atr_pct),
+          volume_ratio: parseFloat(volume_ratio),
+          last_trade_seconds
+        };
+
+        // Add filter results
+        item.filters = checkFilters(item);
+        return item;
+      });
+    }
+
+    function generateSampleTickerData() {
+      const symList = symbols.length ? symbols : [
+        {symbol: 'BTC/USD', exchange: 'CRYPTO'},
+        {symbol: 'ETH/USD', exchange: 'CRYPTO'},
+        {symbol: 'AAPL', exchange: 'ALPACA'},
+        {symbol: 'TSLA', exchange: 'ALPACA'},
+        {symbol: 'NVDA', exchange: 'ALPACA'},
+        {symbol: 'SPY', exchange: 'NYSE'},
+        {symbol: 'QQQ', exchange: 'NYSE'},
+        {symbol: 'MSFT', exchange: 'NYSE'},
+        {symbol: 'AMZN', exchange: 'NYSE'},
+        {symbol: 'GOOGL', exchange: 'ALPACA'},
+        {symbol: 'GC-GOLD', exchange: 'FUTURES'},  // Gold futures
+        {symbol: 'ES-SPX', exchange: 'FUTURES'},  // S&P 500 E-mini futures
+        {symbol: 'CL-OIL', exchange: 'FUTURES'}   // Crude Oil futures
+      ];
+      tickerItems = symList.map(({symbol, exchange}) => {        const rsi = Math.random() * 100;
+        const atr_pct = Math.random() * 4;
+        const volume_ratio = Math.random() * 3;
+        const last_trade_seconds = Math.floor(Math.random() * 120);
+
+        const item = {
+          symbol, exchange,
+          price: (Math.random() * 500 + 50).toFixed(2),
+          change: ((Math.random() - 0.5) * 10).toFixed(2),
+          signal: Math.random() > 0.6 ? (Math.random() > 0.5 ? 'BUY' : 'SELL') : 'NEUTRAL',
+          rsi, atr_pct, volume_ratio, last_trade_seconds
+        };
+
+        item.filters = checkFilters(item);
+        return item;
+      });
+    }
+
+    // --- UI renderers ---
+    function updateExchangeStatusDisplay() {
+      const container = el('exchange-status');
+      if (!container) return;
+      container.innerHTML = '';
+      Object.entries(exchanges).forEach(([name, info]) => {
+        const nameNorm = normEx(name);
+        const isAvailable = !activeTradeExchangeNorm || activeTradeExchangeNorm !== nameNorm;
+        const marketOpen = isMarketOpen(name);
+
+        let statusClass, statusColor, statusText;
+
+        if (!marketOpen) {
+          // Out of trading hours - YELLOW
+          statusClass = 'broker-out-of-hours';
+          statusColor = 'text-yellow-300';
+          statusText = '🟡 CLOSED (Out of Hours)';
+        } else if (isAvailable) {
+          // Available - GREEN
+          statusClass = 'broker-available';
+          statusColor = 'text-green-300';
+          statusText = '🟢 AVAILABLE';
+        } else {
+          // Trading - ORANGE
+          statusClass = 'broker-busy';
+          statusColor = 'text-orange-300';
+          statusText = '🔴 TRADING: ' + (activeTradeSymbol ?? '');
+        }
+
+        const div = document.createElement('div');
+        div.className = `${statusClass} border-2 rounded-lg p-3 transition-all duration-500`;
+        div.innerHTML = `
+          <div class="font-bold text-lg">${name}</div>
+          <div class="text-sm mt-1">${info.symbolCount ?? '--'} symbols</div>
+          <div class="text-xs mt-2 ${statusColor}">
+            ${statusText}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateTickerDisplay() {
+      ['main-ticker', 'flow-1', 'flow-2'].forEach(containerId => {
+        const container = el(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        tickerItems.forEach(item => {
+          const exNorm = normEx(item.exchange);
+          const marketOpen = isMarketOpen(item.exchange);
+          let klass = 'ticker-available';
+          let indicator = '🟢'; // Default green dot
+
+          // Priority order: Active Trade (RED) > Blocked (BROWN) > Out-of-hours (YELLOW) > Available (GREEN)
+          // NOTE: Horizontal ticker does NOT show yellow for failed filters - only for out-of-hours
+          if (activeTradeSymbol && item.symbol === activeTradeSymbol) {
+            klass = 'ticker-active-trade';
+            indicator = '🔴';
+          } else if (activeTradeExchangeNorm && exNorm === activeTradeExchangeNorm) {
+            klass = 'ticker-blocked';
+            indicator = '🟤';
+          } else if (!marketOpen) {
+            indicator = '🟡'; // Yellow dot ONLY for out of hours
+          }
+          // Removed: filter check - horizontal ticker only cares about trading hours
+
+          const div = document.createElement('div');
+          div.className = `${klass} px-4 py-2 mx-2 rounded inline-block transition-colors duration-500`;
+          div.innerHTML = `
+            <span class="mr-1">${indicator}</span>
+            <span class="font-mono font-semibold">${item.symbol}</span>
+            <span class="ml-2">$${Number(item.price).toFixed(2)}</span>
+            <span class="ml-2 ${parseFloat(item.change) >= 0 ? 'text-green-300' : 'text-red-300'}">${Number(item.change).toFixed(2)}%</span>
+            ${item.signal && item.signal !== 'NEUTRAL' ? `<span class="ml-1 text-xs ${item.signal === 'BUY' ? 'text-green-300' : 'text-red-300'}">${item.signal}</span>` : ''}`;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function updateScanResultsDisplay() {
+      const container = el('scan-results');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let readyCount = 0;
+
+      scanData.filter(row => {
+        if (row.symbol === activeTradeSymbol) return true;
+        if ((!row.rsi || row.rsi === 0) && row.exchange === 'GEMINI') return false;
+        const hasStrategy = Object.keys(strategyMap).some(k => k.startsWith(`${row.symbol}:LONG`) || k.startsWith(`${row.symbol}:SHORT`));
+        if (!hasStrategy) return false;
+        return row.filters.allPassed || isMarketOpen(row.exchange);
+      }).forEach((row, index) => {
+        const isTestingRow = (index === testingRowIndex);
+        const rowExNorm = normEx(row.exchange);
+        const marketOpen = isMarketOpen(row.exchange);
+        let statusClass = '';
+        let statusText = '';
+
+        if (isTestingRow) {
+          statusClass = 'row-testing';
+          statusText = '🔍 TESTING NOW';
+        } else if (row.symbol === activeTradeSymbol) {
+          statusClass = 'symbol-busy-active';
+          statusText = '🔴 TRADING';
+        } else if (activeTradeExchangeNorm && rowExNorm === activeTradeExchangeNorm) {
+          statusClass = 'symbol-busy-blocked';
+          statusText = '🟤 BLOCKED';
+        } else if (!marketOpen) {
+          // Market is closed - show as yellow even if filters would pass
+          statusClass = 'symbol-filter-failed';  // YELLOW
+          statusText = '🟡 MARKET CLOSED';
+        } else if (row.filters.allPassed) {
+          statusClass = 'symbol-filter-passed';  // GREEN
+          statusText = '🟢 READY';
+          readyCount++;
+        } else if (marketOpen) {
+          statusClass = 'symbol-filter-passed';  // GREEN - market open, strategy active
+          statusText = '🟢 ACTIVE';
+          readyCount++;
+        } else {
+          statusClass = 'symbol-filter-failed';  // YELLOW
+          statusText = '🟡 MARKET CLOSED';
+        }
+        const filterScore = `${row.filters.score}/4`;
+        const filterColor = row.filters.score === 4 ? 'text-green-400' : row.filters.score >= 2 ? 'text-yellow-400' : 'text-red-400';
+
+        // Dynamic RSI thresholds from tuned strategy params
+        const longStrat  = strategyMap[`${row.symbol}:LONG`];
+        const shortStrat = strategyMap[`${row.symbol}:SHORT`];
+        const buyThresh  = longStrat  ? parseFloat(longStrat.rsi_entry)  : 30;
+        const sellThresh = shortStrat ? (100 - parseFloat(shortStrat.rsi_entry)) : 70;
+
+        const div = document.createElement('div');
+        div.className = `grid grid-cols-10 gap-2 p-2 mb-1 rounded ${statusClass} text-sm items-center`;
+        div.innerHTML = `
+          <div class="font-semibold">${row.exchange}</div>
+          <div class="font-mono font-bold ${isTestingRow ? 'text-xl' : ''}">${row.symbol}</div>
+          <div class="text-xs font-semibold">${statusText}</div>
+          <div>$${row.price}</div>
+          <div class="${parseFloat(row.change) >= 0 ? 'text-green-400' : 'text-red-400'}">${row.change}%</div>
+          <div class="text-xs">${row.volume}</div>
+          <div class="${parseFloat(row.rsi) <= buyThresh ? 'text-green-400 font-bold' : parseFloat(row.rsi) >= sellThresh ? 'text-red-400 font-bold' : ''}">${row.rsi}</div>
+          <div class="font-semibold ${row.signal === 'BUY' ? 'text-green-400' : row.signal === 'SELL' ? 'text-red-400' : 'text-gray-400'}">${row.signal}</div>
+          <div class="text-xs font-bold ${filterColor}">${filterScore}</div>
+          <div class="text-xs">
+            ${isTestingRow ? '🎯 ANALYZING' : row.filters.allPassed ? '✅ READY' : '⚠️ WAIT'}
+          </div>`;
+        container.appendChild(div);
+      });
+
+      if (scanData[testingRowIndex]) {
+        el('current-testing-symbol').textContent = scanData[testingRowIndex].symbol;
+        el('testing-row-number').textContent = testingRowIndex + 1;
+        el('testing-row-number-2').textContent = testingRowIndex + 1;
+      }
+      el('queue-size').textContent = popupQueue.length;
+      el('ready-count').textContent = readyCount;
+      el('total-count').textContent = scanData.length;
+    }
+
+    // --- Rotation & heartbeat ---
+    function conveyorBeltRotate() {
+      if (scanData.length === 0) return;
+      const first = scanData.shift();
+      scanData.push(first);
+      // Recalculate filters with latest data
+      scanData.forEach(item => { item.filters = checkFilters(item); });
+      updateScanResultsDisplay();
+      checkAndOpenPopups();
+    }
+
+    function tickerHeartbeat() {
+      tickerItems.forEach(item => {
+        const base = parseFloat(item.price);
+        const delta = (Math.random() - 0.5) * 0.8;
+        const next = Math.max(0.01, base + delta);
+        item.price = next.toFixed(2);
+        item.change = (((next - base) / Math.max(0.01, base)) * 100).toFixed(2);
+      });
+      updateTickerDisplay();
+    }
+
+    // --- Popup throttle/queue ---
+    function brokerCooling(nex) {
+      const t = lastByBroker[nex] || 0;
+      return (Date.now() - t) < BROKER_COOLDOWN_MS;
+    }
+
+    function eligibleNow(row) {
+      const nex = normEx(row.exchange);
+      if (stripSignalData || stripTradeId) return false;
+      if (activeTradeExchangeNorm && nex === activeTradeExchangeNorm) return false;
+      if (Date.now() - lastPopupAt < MIN_GAP_BETWEEN_MS) return false;
+      if (brokerCooling(nex)) return false;
+      // Per-symbol cooldown (3 min after exit)
+      if (lastBySymbol[row.symbol] && (Date.now() - lastBySymbol[row.symbol] < SYMBOL_COOLDOWN_MS)) return false;
+      return true;
+    }
+
+    function enqueuePopup(row) {
+      const nex = normEx(row.exchange);
+      const already = popupQueue.some(r => r.symbol === row.symbol && normEx(r.exchange) === nex);
+      if (!already) popupQueue.push({...row});
+      el('queue-size').textContent = popupQueue.length;
+    }
+
+    function processPopupQueue() {
+      if (isOpening) return;
+      if (popupQueue.length === 0) return;
+      const cand = popupQueue[0];
+      if (!eligibleNow(cand)) return;
+
+      isOpening = true;
+      popupQueue.shift();
+      openTradePopupForSignal(cand);
+      lastPopupAt = Date.now();
+
+      // No popup window to watch — strip manages its own state
+    }
+
+    function checkAndOpenPopups() {
+      const row = scanData[testingRowIndex];
+      if (!row) return;
+
+      // Check if market is open for this exchange
+      const marketOpen = isMarketOpen(row.exchange);
+
+      // ONLY open popup if market is open AND ALL filters passed AND valid signal
+      if (marketOpen && (row.signal === 'BUY' || row.signal === 'SELL') && row.filters.allPassed) {
+        enqueuePopup(row);
+      }
+      processPopupQueue();
+    }
+
+    // --- Inline trade strip ---
+    function openTradePopupForSignal(signalData) {
+      if (!el('strip-signal')) { isOpening = false; return; }
+      activeTradeSymbol = signalData.symbol;
+      activeTradeExchange = signalData.exchange;
+      activeTradeExchangeNorm = normEx(signalData.exchange);
+      stripSignalData = signalData;
+      stripDirection = signalData.signal || 'BUY';
+
+      el('strip-signal').classList.remove('hidden');
+      el('strip-symbol').textContent = ' ' + signalData.symbol + ' ';
+
+      const dirEl = el('strip-direction');
+      dirEl.textContent = stripDirection;
+      dirEl.className = 'text-xs px-2 py-1 rounded font-bold ' +
+        (stripDirection === 'BUY' ? 'bg-green-700 text-green-200' : 'bg-red-700 text-red-200');
+      el('strip-sig-price').textContent = ' $' + (parseFloat(signalData.price)||0).toFixed(2);
+
+      updateScanResultsDisplay();
+      updateExchangeStatusDisplay();
+      updateTickerDisplay();
+      setTimeout(() => { isOpening = false; }, 200);
+
+      // Auto-enter if enabled
+      if (autoEnterSignals) {
+        setTimeout(() => { stripEnterOrder(); }, 1000);  // 1-sec delay so user sees signal
+      }
+    }
+
+    async function stripEnterOrder() {
+      if (!stripSignalData) return;
+      // Block if symbol already has an open trade
+      const alreadyOpen = _ordersCache.find(o => o.symbol === stripSignalData.symbol && o.status !== 'CLOSED');
+      if (alreadyOpen) { alert(`${stripSignalData.symbol} already has an open trade.`); stripDismiss(); return; }
+      el('strip-enter-btn').disabled = true;
+      el('strip-enter-btn').textContent = '⏳ Entering...';
+
+      try {
+        const r = await fetch(`/api/live_price?symbol=${encodeURIComponent(stripSignalData.symbol)}&exchange=${encodeURIComponent(stripSignalData.exchange)}`);
+        const d = await r.json();
+        stripEntryPrice = d.price || parseFloat(stripSignalData.price) || 0;
+      } catch(e) { stripEntryPrice = parseFloat(stripSignalData.price) || 0; }
+      stripCurrentPrice = stripEntryPrice;
+
+      fetch('/api/trade/open', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({symbol: stripSignalData.symbol, exchange: stripSignalData.exchange,
+                              side: stripDirection, qty: 1, price: stripEntryPrice})
+      }).then(r=>r.json()).then(d=>{
+        if (d.ok) {
+          stripTradeId = d.trade_id;
+          _ordersCache.push({id: d.trade_id, symbol: stripSignalData.symbol,
+            broker: stripSignalData.exchange, direction: stripDirection === 'BUY' ? 'LONG' : 'SHORT',
+            entry_price: stripEntryPrice, last_price: stripEntryPrice, entry_time: Date.now()});
+          livePriceMap[d.trade_id] = stripEntryPrice;
+          peakProfitMap[d.trade_id] = 0;
+          renderOrderRows(_ordersCache);
+          el('active-order-count').textContent = `${_ordersCache.length} open`;
+          if (!_ordersInterval) { _ordersInterval = setInterval(tickOrderPrices, 3000); tickOrderPrices(); }
+          el('strip-signal').classList.add('hidden');
+          stripSignalData = null;
+        } else {
+          el('strip-enter-btn').disabled = false;
+          el('strip-enter-btn').textContent = '🚀 Enter Order';
+          alert('Failed to open trade: ' + (d.error || 'Unknown error'));
+        }
+      }).catch(e=>{
+        el('strip-enter-btn').disabled = false;
+        el('strip-enter-btn').textContent = '🚀 Enter Order';
+        alert('Network error: ' + e.message);
+      });
+    }
+
+    function stripDismiss() {
+      stripSignalData = null;
+      activeTradeSymbol = null; activeTradeExchange = null; activeTradeExchangeNorm = null;
+      el('strip-signal').classList.add('hidden');
+      isOpening = false;
+      updateExchangeStatusDisplay(); updateScanResultsDisplay(); updateTickerDisplay();
+      setTimeout(processPopupQueue, 300);
+    }
+
+
+    function stripPanicExit() {
+      // trade stays open after dismiss — executor handles exit
+    }
+
+    // --- Manual test buttons ---
+    function openTradePopupTestStock() {
+      openTradePopupForSignal({
+        symbol:'AAPL', exchange:'ALPACA', signal:'BUY', quantity:10,
+        price:'175.50', change:'+2.5', rsi:'22.3', volume:'1000000',
+        filters: {allPassed: true, score: 4}
+      });
+    }
+
+    function openTradePopupTestCrypto() {
+      openTradePopupForSignal({
+        symbol:'BTC/USD', exchange:'CRYPTO', signal:'BUY', quantity:0.01,
+        price:'43250.00', change:'+3.2', rsi:'18.5', volume:'500000',
+        filters: {allPassed: true, score: 4}
+      });
+    }
+
+    window.openTradePopupTestStock = openTradePopupTestStock;
+    window.openTradePopupTestCrypto = openTradePopupTestCrypto;
+
+    function testCurrentSymbol() {
+      const row = scanData[testingRowIndex];
+      if (!row) return;
+      openTradePopupForSignal({
+        symbol: row.symbol, exchange: row.exchange, signal: row.signal || 'BUY',
+        quantity: 1, price: row.price, change: row.change, rsi: row.rsi,
+        volume: row.volume_ratio, filters: row.filters || {allPassed: true, score: 4}
+      });
+    }
+
+    // --- Boot ---
+    async function init() {
+      await loadScannerConfig();
+      generateSampleExchangeData();
+      generateSampleScanData();
+      generateSampleTickerData();
+      await refreshScanPrices();
+      await refreshScanSnapshot();
+      updateExchangeStatusDisplay();
+      updateTickerDisplay();
+      updateScanResultsDisplay();
+
+      setInterval(conveyorBeltRotate, 4000);
+      setInterval(tickerHeartbeat, 1500);
+      setInterval(() => {
+        updateExchangeStatusDisplay();
+        updateTickerDisplay();
+      }, 5000);
+      setInterval(refreshScanPrices, 60000);
+      setInterval(refreshScanSnapshot, 600000);
+    }
+
+    // Render one compact row per open trade, update live prices every 3s
+    let _ordersCache = [];
+    let _ordersInterval = null;
+
+    function renderOrderRows(orders) {
+      const list = el('active-orders-list');
+      if (!orders.length) { list.innerHTML = ''; return; }
+      list.innerHTML = orders.map(o => {
+        const isClosed = o.status === 'CLOSED';
+        const bgClass = isClosed ? 'bg-gray-800' : 'bg-red-950';
+        const indicatorColor = isClosed ? 'text-gray-500' : 'text-red-400';
+        const indicatorIcon = isClosed ? '⚫' : '🔴';
+
+        // Seed livePriceMap from last_price if not yet fetched
+        if (!isClosed && livePriceMap[o.id] == null) livePriceMap[o.id] = parseFloat(o.last_price || o.entry_price || 0);
+        const cur = isClosed ? parseFloat(o.exit_price || 0) : livePriceMap[o.id];
+        const entry = parseFloat(o.entry_price || 0);
+        const peak = parseFloat(o.peak_profit || 0);
+        const dir = o.direction === 'LONG' ? 'BUY' : 'SELL';
+        const pnl = isClosed ? o.final_pnl : (dir === 'BUY' ? (cur - entry) / entry * 100 : (entry - cur) / entry * 100);
+        const pnlColor = pnl >= 0 ? (isClosed ? 'text-gray-400' : 'text-green-400') : (isClosed ? 'text-gray-400' : 'text-red-400');
+        const dirClass = isClosed ? 'bg-gray-700 text-gray-400' : (dir === 'BUY' ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200');
+        const pnlStr = (pnl>=0?'+':'') + pnl.toFixed(2) + '%';
+
+        // Time duration - frozen at exit time if closed
+        const entryMs = typeof o.entry_time === 'number' ? o.entry_time : new Date(o.entry_time).getTime();
+        const endMs = isClosed ? (typeof o.exit_time === 'number' ? o.exit_time : new Date(o.exit_time).getTime()) : Date.now();
+        const mins = Math.floor((endMs - entryMs) / 60000);
+        const durStr = mins >= 60 ? `${Math.floor(mins/60)}h${mins%60}m` : `${mins}m`;
+
+        const totalMins = Math.max(1, mins);
+        const profitPerHour = entry > 0 ? (pnl / totalMins * 60).toFixed(2) : '0.00';
+        const pphColor = parseFloat(profitPerHour) >= 0 ? 'text-green-300' : 'text-red-300';
+
+        // Strategy params
+        const strat = strategyMap[`${o.symbol}:${o.direction}:${o.candle_time}`] || strategyMap[`${o.symbol}:${o.direction}:1hr`] || strategyMap[`${o.symbol}:${o.direction}:1h`];
+        const trailStart = strat ? parseFloat(strat.trailing_start || 1.0) : 1.0;
+        const trailDrop  = strat ? parseFloat(strat.trailing_drop  || 0.5) : 0.5;
+        const localPeak  = peakProfitMap[o.id] || 0;
+        let trailStr = '--';
+        if (!isClosed && localPeak >= trailStart && entry > 0) {
+          const trailPx = dir === 'BUY'
+            ? entry * (1 + (localPeak - trailDrop) / 100)
+            : entry * (1 - (localPeak - trailDrop) / 100);
+          // Sanity: trail must not cross entry
+          if ((dir === 'BUY' && trailPx >= entry) || (dir === 'SELL' && trailPx <= entry)) {
+            trailStr = '$' + trailPx.toFixed(2);
+          }
+        }
+        const scanRow = scanData.find(s => s.symbol === o.symbol);
+        const rsiVal = isClosed ? '--' : (scanRow ? parseFloat(scanRow.rsi||0).toFixed(1) : '--');
+        const rsiColor = isClosed ? 'text-gray-500' : (scanRow && scanRow.rsi <= 30 ? 'text-green-300' : scanRow && scanRow.rsi >= 70 ? 'text-red-300' : 'text-purple-300');
+        // Show live decayed init_profit threshold
+        let initProfit = '--';
+        if (strat && !isClosed) {
+          const _initP = parseFloat(strat.init_profit || 1.0);
+          const _decayStart = parseFloat(strat.decay_start || 0.5);
+          const _decayRate  = parseFloat(strat.decay_rate  || 0.5);
+          const _entMs = typeof o.entry_time === 'number' ? o.entry_time : new Date(o.entry_time).getTime();
+          const _hrs = (Date.now() - _entMs) / 3600000;
+          const _decayed = _hrs > _decayStart ? Math.max(0, _initP - (_hrs - _decayStart) * _decayRate) : _initP;
+          initProfit = _decayed.toFixed(2) + '%' + (_hrs > _decayStart ? ' ↓' : '');
+        } else if (strat) {
+          initProfit = parseFloat(strat.init_profit || 0).toFixed(1) + '%';
+        }
+
+        // Exit reason display
+        const exitTag = isClosed
+          ? `<span class="px-2 py-0.5 rounded font-bold bg-gray-700 text-yellow-300">${o.exit_reason || 'CLOSED'}</span>`
+          : '';
+
+        // Volume spike
+        const volRatio = o.volume_ratio ? parseFloat(o.volume_ratio).toFixed(1) : '--';
+        const volColor = parseFloat(volRatio) >= 2.0 ? 'text-orange-400 font-bold' : 'text-gray-500';
+
+        return `<div class="flex items-center gap-2 px-4 py-1.5 border-t border-gray-700 ${bgClass} text-xs flex-wrap">
+          <span class="${indicatorColor} font-bold">${indicatorIcon}</span>
+          <span class="text-gray-400">${o.broker_name || o.broker || '--'}</span>
+          <span class="text-white font-bold">${o.symbol}</span>
+          <span class="px-1.5 py-0.5 rounded font-bold ${dirClass}">${dir}</span>
+          <span class="text-purple-400 font-bold">${o.candle_time || '--'}</span>
+          <span class="text-gray-300 font-mono" id="dur-${o.id}">⏱${durStr}</span>
+          <span class="text-gray-500">Entry</span>
+          <span class="font-mono text-white">$${entry.toFixed(2)}</span>
+          <span class="text-gray-500">Now</span>
+          <span class="font-mono text-white" id="now-${o.id}">$${cur.toFixed(2)}</span>
+          <span class="font-bold ${pnlColor} w-14" id="pnl-${o.id}">${pnlStr}</span>
+          <span class="text-gray-500">Trail</span>
+          <span class="text-blue-300" id="trail-${o.id}">${trailStr}</span>
+          <span class="text-gray-500">RSI</span>
+          <span id="rsi-${o.id}">${(() => {
+            if (!strat || rsiVal === '--') return rsiVal;
+            const cur = parseFloat(rsiVal);
+            const exitLvl = o.direction==='LONG' ? parseFloat(strat.rsi_exit||70) : (100-parseFloat(strat.rsi_exit||70));
+            const arrow = o.direction==='LONG' ? '>' : '<';
+            const pct = o.direction==='LONG' ? (cur/exitLvl*100) : ((100-cur)/(100-exitLvl)*100);
+            const col = pct >= 85 ? 'color:#f85149' : pct >= 60 ? 'color:#d29922' : 'color:#3fb950';
+            return '<span style="'+col+'">'+cur.toFixed(1)+'</span><span style="color:#8b949e">'+arrow+'</span><span style="color:#bc8cff">'+exitLvl.toFixed(0)+'</span>';
+          })()}</span>
+          <span class="text-gray-500">Gate</span>
+          <span class="text-yellow-300">${initProfit}</span>
+          <span class="text-gray-500">Stop</span>
+          <span class="text-red-400">${strat ? parseFloat(strat.stop_loss||2).toFixed(1)+'%' : '--'}</span>
+          <span class="text-gray-500">Decay</span>
+          <span class="text-orange-300">${strat ? parseFloat(strat.decay_start||1).toFixed(1)+'h' : '--'}</span>
+          <span class="text-gray-500">Vol</span>
+          <span class="${volColor}">${volRatio}x</span>
+          ${exitTag}
+          ${!isClosed ? `
+          <button onclick="panicExitTrade(${o.id},'${o.symbol}','${o.broker}')"
+            class="bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded font-bold">🚨</button>
+          <button onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
+            class="bg-blue-700 hover:bg-blue-600 text-white px-2 py-0.5 rounded font-bold">📊</button>
+          ` : `
+          <span class="text-gray-500 font-mono">Exit:$${parseFloat(o.exit_price||0).toFixed(2)}</span>
+          `}
+        </div>`;
+      }).join('');
+    }
+
+    function checkAutoExit(order, pnl) {
+       const strat = strategyMap[`${order.symbol}:${order.direction}:${order.candle_time}`]
+           || strategyMap[`${order.symbol}:${order.direction}:1hr`]
+           || strategyMap[`${order.symbol}:${order.direction}:1h`];
+      if (!strat) return;
+
+      const stopLoss   = parseFloat(strat.stop_loss      || 0.5);
+      const trailStart = parseFloat(strat.trailing_start || 1.0);
+      const trailDrop  = parseFloat(strat.trailing_drop  || 0.5);
+      const initProfit = parseFloat(strat.init_profit    || 1.0);
+      const decayStart = parseFloat(strat.decay_start    || 0.5);  // hours
+      const decayRate  = parseFloat(strat.decay_rate     || 0.5);  // % per hour
+
+      const entryMs = typeof order.entry_time === 'number' ? order.entry_time : new Date(order.entry_time).getTime();
+      const elapsedHours = (Date.now() - entryMs) / 3600000;
+      const peak = peakProfitMap[order.id] || 0;
+
+      let reason = null;
+
+      // 1. Stop loss
+      if (pnl <= -stopLoss) {
+        reason = `🛑 Stop Loss (-${stopLoss.toFixed(2)}%)`;
+      }
+      // 2. Trailing stop (only after peak reaches trail_start)
+      else if (peak >= trailStart) {
+        const trailLevel = peak - trailDrop;
+        if (pnl <= trailLevel && trailLevel > 0) {
+          reason = `📉 Trail Exit (peak +${peak.toFixed(2)}%, trail ${trailLevel.toFixed(2)}%)`;
+        }
+      }
+      // 3. RSI exit (early phase only — before decay_start, needs min profit)
+      else if (elapsedHours < decayStart && pnl >= initProfit) {
+        const scanRow = scanData.find(s => s.symbol === order.symbol);
+        if (scanRow && scanRow.rsi != null) {
+          const curRsi = parseFloat(scanRow.rsi);
+          const rsiExit = parseFloat(strat.rsi_exit || 70);
+          if (order.direction === 'LONG'  && curRsi >= rsiExit) {
+            reason = `📊 RSI Exit (RSI ${curRsi.toFixed(1)} ≥ ${rsiExit})`;
+          } else if (order.direction === 'SHORT' && curRsi <= (100 - rsiExit)) {
+            reason = `📊 RSI Exit (RSI ${curRsi.toFixed(1)} ≤ ${(100 - rsiExit).toFixed(1)})`;
+          }
+        }
+      }
+      // 4. Decay exit (after decay_start hours, threshold decays toward 0)
+      else if (elapsedHours > decayStart) {
+        const decayed = Math.max(0, initProfit - (elapsedHours - decayStart) * decayRate);
+        if (pnl > 0 && pnl >= decayed) {
+          reason = `⏳ Decay Exit (+${pnl.toFixed(2)}%, thresh ${decayed.toFixed(2)}% after ${elapsedHours.toFixed(1)}h)`;
+        }
+      }
+
+      if (reason) panicExitTrade(order.id, order.symbol, order.broker, reason);
+    }
+
+    async function tickOrderPrices() {
+      for (const o of _ordersCache) {
+        try {
+          const broker = (o.broker || '').toUpperCase();
+          const exchange = (broker === 'GEMINI' || broker === 'COINBASE') ? 'CRYPTO' : broker;
+          const r = await fetch(`/api/live_price?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(exchange)}`);
+          const d = await r.json();
+          if (d.price) {
+            livePriceMap[o.id] = d.price;
+            const oEntry = parseFloat(o.entry_price || 0);
+            if (oEntry > 0) {
+              const oDir = o.direction === 'LONG' ? 'BUY' : 'SELL';
+              const oPnl = oDir === 'BUY'
+                ? (d.price - oEntry) / oEntry * 100
+                : (oEntry - d.price) / oEntry * 100;
+              if (!peakProfitMap[o.id] || oPnl > peakProfitMap[o.id]) peakProfitMap[o.id] = oPnl;
+              // Auto-exit check
+              // checkAutoExit disabled — executor handles all exits
+            }
+          }
+        } catch(e) {}
+      }
+      renderOrderRows(_ordersCache);
+    }
+
+
+async function panicExitTrade(tradeId, symbol, broker, autoReason) {
+      const cur = livePriceMap[tradeId];
+      if (!cur) { alert('No live price available for ' + symbol); return; }      const order = _ordersCache.find(o => o.id === tradeId);
+      if (!order) return;
+      const entry = parseFloat(order.entry_price || 0);
+      const dir = order.direction === 'LONG' ? 'BUY' : 'SELL';
+      const pnl = dir === 'BUY' ? (cur - entry) / entry * 100 : (entry - cur) / entry * 100;
+      const exitTime = new Date();
+      await fetch('/api/trade/close', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({trade_id: tradeId, symbol, pnl, reason: autoReason || '🚨 PANIC EXIT', exit_price: cur})
+      });
+      const nex = normEx(broker);
+      lastByBroker[nex] = Date.now();
+      lastBySymbol[symbol] = Date.now();  // 3-min cooldown for this symbol
+      if (stripTradeId === tradeId) {
+        stripTradeId = null; stripSignalData = null;
+        clearInterval(stripPriceInterval); stripPriceInterval = null;
+      }
+      // Mark as closed with frozen exit data
+      order.status = 'CLOSED';
+      order.exit_time = exitTime.getTime();
+      order.exit_price = cur;
+      order.final_pnl = pnl;
+      renderOrderRows(_ordersCache);
+      el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
+      // Remove after 2 minutes
+      setTimeout(() => {
+        _ordersCache = _ordersCache.filter(o => o.id !== tradeId);
+        delete livePriceMap[tradeId];
+        delete peakProfitMap[tradeId];
+        renderOrderRows(_ordersCache);
+        el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
+      }, 120000);
+      activeTradeSymbol = _ordersCache.filter(o=>o.status!=='CLOSED').length ? _ordersCache[0].symbol : null;
+      activeTradeExchange = _ordersCache.filter(o=>o.status!=='CLOSED').length ? _ordersCache[0].broker : null;
+      activeTradeExchangeNorm = activeTradeExchange ? normEx(activeTradeExchange) : null;
+      updateExchangeStatusDisplay(); updateScanResultsDisplay(); updateTickerDisplay();
+      setTimeout(processPopupQueue, 300);
+    }
+
+    async function refreshActiveOrders() {
+      try {
+        const resp = await fetch('/api/trades/active');
+        const orders = await resp.json();
+        // Keep recently closed trades visible for 2 minutes
+        const now = Date.now();
+        const recentlyClosed = _ordersCache.filter(o =>
+            o.status === 'CLOSED' &&
+            o.exit_time &&
+            (now - (typeof o.exit_time === 'number' ? o.exit_time : new Date(o.exit_time).getTime())) < 120000
+        );
+        _ordersCache = [...orders, ...recentlyClosed];
+        el('active-order-count').textContent = `${orders.length} open`;
+
+        // Sync activeTradeSymbol for scanner display
+        if (orders.length > 0) {
+          activeTradeSymbol = orders[0].symbol;
+          activeTradeExchange = orders[0].broker || '';
+          activeTradeExchangeNorm = normEx(orders[0].broker || '');
+          // Track first open trade in strip state if not already tracking
+          if (!stripTradeId) {
+            const t = orders[0];
+            stripTradeId = t.id;
+            stripSignalData = {symbol: t.symbol, exchange: t.broker || ''};
+            stripDirection = t.direction === 'LONG' ? 'BUY' : 'SELL';
+            stripEntryPrice = parseFloat(t.entry_price) || 0;
+          }
+        } else if (activeTradeSymbol) {
+          activeTradeSymbol = null; activeTradeExchange = null; activeTradeExchangeNorm = null;
+          stripTradeId = null; stripSignalData = null;
+          clearInterval(stripPriceInterval); stripPriceInterval = null;
+          updateExchangeStatusDisplay(); updateScanResultsDisplay(); updateTickerDisplay();
+          setTimeout(processPopupQueue, 300);
+        }
+
+        renderOrderRows(orders);
+        // Start price tick if we have orders
+        if (orders.length && !_ordersInterval) {
+          _ordersInterval = setInterval(tickOrderPrices, 3000);
+          tickOrderPrices();
+        } else if (!orders.length && _ordersInterval) {
+          clearInterval(_ordersInterval); _ordersInterval = null;
+        }
+      } catch(e) {}
+    }
+    setInterval(refreshActiveOrders, 10000);
+    refreshActiveOrders();
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

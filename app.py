@@ -328,7 +328,8 @@ def api_scanner_strategies():
                    sp.rsi_entry, sp.rsi_exit, sp.stop_loss,
                    sp.trailing_start, sp.trailing_drop, sp.init_profit,
                    sp.decay_start, sp.decay_rate,
-                   sp.macd_fast, sp.macd_slow, sp.macd_signal
+                   sp.macd_fast, sp.macd_slow, sp.macd_signal,
+                   sp.volume_spike, sp.current_volume, sp.avg_volume
             FROM strategy_params sp
             JOIN broker_products bp ON sp.broker_product_id = bp.id
             JOIN brokers b ON bp.broker_id = b.id
@@ -341,6 +342,76 @@ def api_scanner_strategies():
         return jsonify({"strategies": rows})
     except Exception as e:
         return jsonify({"strategies": [], "error": str(e)}), 500
+
+#======================================================================
+
+@app.route('/finalize_order', methods=['POST'])
+def finalize_order():
+    """Save completed trade to orders table and clear active_order_id"""
+    try:
+        data = request.json
+        strategy_id = data.get('strategy_id')
+        exit_price = data.get('exit_price')
+        pnl = data.get('pnl')
+        duration = data.get('duration')
+        symbol = data.get('symbol')
+        broker = data.get('broker')
+        direction = data.get('direction')
+        candle_time = data.get('candle_time')
+        entry_price = data.get('entry_price')
+
+        from db import get_db_connection
+        conn, cursor = get_db_connection()
+        if isinstance(conn, tuple):
+            conn = conn[0]
+
+
+        if isinstance(conn, tuple):
+            conn = conn[0]
+#        cursor = conn.cursor()
+
+        # Insert into orders table
+        cursor.execute("""
+            INSERT INTO orders
+            (strategy_id, symbol, broker, side, candle_time,
+             entry_price, exit_price, pnl_percent, duration_seconds,
+             status, exit_reason)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            strategy_id,
+            symbol,
+            broker,
+            direction,
+            candle_time,
+            entry_price,
+            exit_price,
+            pnl,
+            duration,
+            'CLOSED',
+            'PANIC_EXIT'
+        ))
+
+        # Clear the active order from strategy
+        cursor.execute("""
+            UPDATE strategy_params
+            SET active_order_id = NULL,
+                entry_price = NULL,
+                entry_time = NULL
+            WHERE id = %s
+        """, (strategy_id,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        print(f"✅ Order saved: {symbol} {direction} | P&L: {pnl}%")
+        return jsonify({'success': True})
+
+    except Exception as e:
+        print(f"❌ Error finalizing order: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+#=================================================================
 
 # Basic strategy/tuning settings
 _DEFAULT_SETTINGS = {
@@ -657,14 +728,31 @@ def api_trade_open():
                entry_price, entry_time, last_price, status)
             VALUES (%s, %s, %s, %s, %s, NOW(), %s, 'OPEN')
         """, (bp_id, broker, symbol, direction, entry_price, entry_price))
+
         trade_id = cursor.lastrowid
+
+        # UPDATE strategy_params so executor can monitor this trade
+        cursor.execute("""
+            UPDATE strategy_params sp
+            JOIN broker_products bp ON sp.broker_product_id = bp.id
+            SET sp.active_order_id = %s,
+                sp.entry_price = %s,
+                sp.entry_time = NOW(),
+                sp.peak_profit = -999.00
+            WHERE bp.local_ticker = %s
+              AND sp.direction = %s
+              AND sp.active = 1
+            LIMIT 1
+        """, (trade_id, entry_price, symbol, direction))
+
+        conn.commit()  # Commit both inserts
         conn.close()
 
         return jsonify({"ok": True, "trade_id": trade_id, "symbol": symbol,
                         "direction": direction, "entry_price": entry_price, "broker": broker})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
 
+    except Exception as e:  # ← REMOVE THE # HERE!
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 @app.route("/api/trade/close", methods=["POST"])
 def api_trade_close():
