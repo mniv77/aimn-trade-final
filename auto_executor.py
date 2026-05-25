@@ -168,11 +168,13 @@ def load_strategies(cursor):
             sp.macd_signal,
             bp.id          AS product_id,
             bp.local_ticker AS symbol,
+            at.entry_time  AS at_entry_time,
             bp.last_price,
             bp.price_updated_at,
             b.name         AS broker_name
         FROM strategy_params sp
         JOIN broker_products bp ON sp.broker_product_id = bp.id
+        LEFT JOIN active_trades at ON at.id = sp.active_order_id AND at.status = 'OPEN'
         JOIN brokers b          ON bp.broker_id = b.id
         WHERE sp.active = 1
           AND bp.is_active = 1
@@ -360,7 +362,7 @@ def monitor_and_exit_trades():
                     continue
 
                 # Calculate duration
-                entry_time = s.get('entry_time')
+                entry_time = s.get("entry_time") or s.get("at_entry_time")
                 if entry_time:
                     if isinstance(entry_time, str):
                         entry_dt = datetime.strptime(entry_time, '%Y-%m-%d %H:%M:%S')
@@ -465,8 +467,8 @@ def _close_trade(cursor, s, current_price, pnl, duration_seconds, exit_reason):
             INSERT INTO orders
                 (strategy_id, symbol, broker, side, candle_time,
                  entry_price, exit_price, pnl_percent, duration_seconds,
-                 status, exit_reason, exit_time)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'CLOSED', %s, NOW())
+                 status, exit_reason, exit_time, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'CLOSED', %s, NOW(), NOW())
         """, (
             strategy_id, symbol, broker, direction, candle_time,
             entry_price, current_price, round(pnl, 4), int(duration_seconds),
