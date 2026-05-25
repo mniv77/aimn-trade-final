@@ -165,6 +165,7 @@ def load_strategies(cursor):
             sp.rsi_real,
             sp.macd,
             sp.macd_prev,
+            sp.rsi_prev,
             sp.macd_signal,
             bp.id          AS product_id,
             bp.local_ticker AS symbol,
@@ -239,6 +240,7 @@ def check_and_execute_signals():
 
                 # Read indicators from strategy_params (written by calculate_indicators)
                 rsi_real      = float(s['rsi_real']   or 50.0)
+                rsi_prev_val  = float(s['rsi_prev']   or 50.0)
                 macd_val      = float(s['macd']        or 0.0)
                 macd_prev_val = float(s['macd_prev']   or 0.0)
 
@@ -247,19 +249,23 @@ def check_and_execute_signals():
 
                 # ── Entry condition logic ──────────────────
                 if direction == 'LONG':
-                    rsi_signal   = rsi_real <= rsi_entry
+                    rsi_signal    = rsi_real <= rsi_entry
+                    rsi_bouncing  = rsi_real > rsi_prev_val  # RSI turning up
                     macd_positive = macd_val > 0
                     macd_rising   = macd_val > macd_prev_val
-                    rsi_extreme   = rsi_real <= 8   # extreme oversold — bypass MACD
+                    rsi_extreme   = rsi_real <= 8
                     macd_signal   = (macd_positive and macd_rising) or rsi_extreme
+                    bounce_signal = rsi_bouncing or rsi_extreme
                 else:  # SHORT
                     rsi_signal    = rsi_real >= (100 - rsi_entry)
+                    rsi_bouncing  = rsi_real < rsi_prev_val  # RSI turning down
                     macd_negative = macd_val < 0
                     macd_falling  = macd_val < macd_prev_val
-                    rsi_extreme   = rsi_real >= 92  # extreme overbought — bypass MACD
+                    rsi_extreme   = rsi_real >= 92
                     macd_signal   = (macd_negative and macd_falling) or rsi_extreme
+                    bounce_signal = rsi_bouncing or rsi_extreme
 
-                if not (rsi_signal and macd_signal):
+                if not (rsi_signal and macd_signal and bounce_signal):
                     continue
 
                 # ── Duplicate trade guard ──────────────────
