@@ -268,14 +268,24 @@ def check_and_execute_signals():
                 if not (rsi_signal and macd_signal and bounce_signal):
                     continue
 
-                # ── Duplicate trade guard ──────────────────
+                # ── Duplicate trade guard — block ANY open trade on same symbol ──
                 cursor.execute("""
-                    SELECT id FROM active_trades
-                    WHERE symbol = %s AND direction = %s AND status = 'OPEN'
+                    SELECT id, direction FROM active_trades
+                    WHERE symbol = %s AND status = 'OPEN'
                     LIMIT 1
-                """, (symbol, direction))
-                if cursor.fetchone():
-                    log(f"  ⚠️ DUPLICATE GUARD: {symbol} {direction} already open")
+                """, (symbol,))
+                existing = cursor.fetchone()
+                if existing:
+                    log(f"  ⚠️ DUPLICATE GUARD: {symbol} already has {existing['direction']} open")
+                    continue
+
+                # ── Max concurrent trades limit ─────────────────
+                cursor.execute("""
+                    SELECT COUNT(*) as cnt FROM active_trades WHERE status = 'OPEN'
+                """)
+                total_open = cursor.fetchone()['cnt']
+                if total_open >= 3:
+                    log(f"  ⚠️ MAX TRADES: {total_open} open trades, skipping {symbol}")
                     continue
 
                 log(f"  🚀 SIGNAL: {symbol} {direction} @ ${price:,.4f} | "
