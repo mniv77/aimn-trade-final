@@ -135,13 +135,13 @@ def main():
             cycle += 1
             print(f"\n[Cycle {cycle}] {time.strftime('%H:%M:%S')}", flush=True)
             update_prices()
-            time.sleep(5)
+            time.sleep(2)
         except KeyboardInterrupt:
             print("\n👋 Stopped")
             break
         except Exception as e:
             print(f"💥 Error: {e}", flush=True)
-            time.sleep(5)
+            time.sleep(2)
 
 if __name__ == "__main__":
     main()
