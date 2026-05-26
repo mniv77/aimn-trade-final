@@ -96,7 +96,7 @@ def update_prices():
             price = fetch_gemini_price(p['symbol'])
             if not price or price <= 0:
                 continue
-            cursor.execute("UPDATE broker_products SET last_price = %s, price_updated_at = NOW() WHERE id = %s", (price, p['id']))
+            cursor.execute("UPDATE broker_products SET price_prev3=price_prev2, price_prev2=price_prev1, price_prev1=last_price, last_price = %s, price_updated_at = NOW() WHERE id = %s", (price, p['id']))
             cursor.execute("UPDATE active_trades SET last_price = %s WHERE broker_product_id = %s AND status = 'OPEN'", (price, p['id']))
             print(f"✅ {p['symbol']}: ${price:,.2f}", flush=True)
 
@@ -110,7 +110,7 @@ def update_prices():
                 price = prices.get(sym, 0)
                 if not price or price <= 0:
                     continue
-                cursor.execute("UPDATE broker_products SET last_price = %s, price_updated_at = NOW() WHERE id = %s", (price, p['id']))
+                cursor.execute("UPDATE broker_products SET price_prev3=price_prev2, price_prev2=price_prev1, price_prev1=last_price, last_price = %s, price_updated_at = NOW() WHERE id = %s", (price, p['id']))
                 cursor.execute("UPDATE active_trades SET last_price = %s WHERE broker_product_id = %s AND status = 'OPEN'", (price, p['id']))
                 print(f"✅ {sym}: ${price:,.2f}", flush=True)
         elif stock_products:

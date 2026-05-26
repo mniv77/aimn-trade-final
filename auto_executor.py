@@ -171,6 +171,7 @@ def load_strategies(cursor):
             bp.local_ticker AS symbol,
             at.entry_time  AS at_entry_time,
             bp.last_price,
+            bp.price_prev3,
             bp.price_updated_at,
             b.name         AS broker_name
         FROM strategy_params sp
@@ -229,6 +230,15 @@ def check_and_execute_signals():
                 # Skip if market closed
                 if not is_market_open(broker):
                     continue
+
+                # Trend filter — don't enter LONG in downtrend or SHORT in uptrend
+                price_prev3 = float(s.get('price_prev3') or 0)
+                current_px  = float(s.get('last_price') or 0)
+                if price_prev3 > 0 and current_px > 0:
+                    if direction == 'LONG' and current_px < price_prev3:
+                        continue  # price falling — skip LONG
+                    if direction == 'SHORT' and current_px > price_prev3:
+                        continue  # price rising — skip SHORT
 
                 # Get price and check freshness
                 price, age = get_live_price_from_db(symbol)
