@@ -12,20 +12,20 @@ from datetime import datetime
 # Timeframes by broker type
 CRYPTO_TFS = [
     {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 8000},  # ~11 months
-    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 5000},  # ~3.5 months
+    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 8000},  # ~3.5 months
     {'tf': '5m',  'candle_time': '5m',  'bar_minutes': 5,   'bars': 8000},  # ~28 trading days
 ]
 STOCK_TFS = [
     {'tf': '5m',  'candle_time': '5m',  'bar_minutes': 5,  'bars': 8000},
-    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30, 'bars': 3000},
+    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30, 'bars': 8000},
 ]
 FOREX_TFS = [
-    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 3000},  # ~6 months
-    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 3000},  # ~3 months
+    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 8000},  # ~6 months
+    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 8000},  # ~3 months
 ]
 FUTURES_TFS = [
-    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 3000},  # ~6 months
-    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 3000},  # ~3 months
+    {'tf': '1hr', 'candle_time': '1hr', 'bar_minutes': 60,  'bars': 8000},  # ~6 months
+    {'tf': '30m', 'candle_time': '30m', 'bar_minutes': 30,  'bars': 8000},  # ~3 months
 ]
 
 BROKER_TFS = {
