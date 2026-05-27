@@ -478,8 +478,15 @@ def api_trades_active():
                    sp.rsi_real, sp.pl_pct
             FROM active_trades at
             LEFT JOIN broker_products bp ON bp.local_ticker = at.symbol
-            LEFT JOIN strategy_params sp ON sp.broker_product_id = bp.id
-              AND sp.direction = at.direction AND sp.active = 1
+            LEFT JOIN strategy_params sp ON sp.id = (
+                SELECT id FROM strategy_params sp2
+                JOIN broker_products bp2 ON sp2.broker_product_id = bp2.id
+                WHERE bp2.local_ticker = at.symbol
+                  AND sp2.direction = at.direction
+                  AND sp2.active = 1
+                ORDER BY sp2.pl_pct DESC
+                LIMIT 1
+            )
             WHERE at.status = 'OPEN'
                OR (status = 'CLOSED' AND exit_time > DATE_SUB(NOW(), INTERVAL 2 MINUTE))
             ORDER BY entry_time DESC
