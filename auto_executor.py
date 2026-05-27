@@ -165,6 +165,7 @@ def load_strategies(cursor):
             sp.rsi_real,
             sp.macd,
             sp.macd_prev,
+            sp.cooldown_until,
             sp.rsi_prev,
             sp.macd_signal,
             bp.id          AS product_id,
@@ -263,6 +264,10 @@ def check_and_execute_signals():
 
                 # Skip if already in a trade
                 if s['active_order_id'] is not None:
+                    continue
+
+                # Skip if in cooldown
+                if s.get("cooldown_until") and datetime.now() < s["cooldown_until"]:
                     continue
 
                 # Skip if locked

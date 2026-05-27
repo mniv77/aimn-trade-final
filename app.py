@@ -396,7 +396,8 @@ def finalize_order():
             UPDATE strategy_params
             SET active_order_id = NULL,
                 entry_price = NULL,
-                entry_time = NULL
+                entry_time = NULL,
+                cooldown_until = DATE_ADD(NOW(), INTERVAL 2 HOUR)
             WHERE id = %s
         """, (strategy_id,))
 
