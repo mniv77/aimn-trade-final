@@ -470,11 +470,17 @@ def api_trades_active():
         from db import get_db_connection
         conn, cursor = get_db_connection()
         cursor.execute("""
-            SELECT id, symbol, direction, entry_price, entry_time,
-                   last_price, peak_profit, status, broker_name, candle_time,
-                   exit_price, exit_time, exit_reason
-            FROM active_trades
-            WHERE status = 'OPEN'
+            SELECT at.id, at.symbol, at.direction, at.entry_price, at.entry_time,
+                   at.last_price, at.peak_profit, at.status, at.broker_name, at.candle_time,
+                   at.exit_price, at.exit_time, at.exit_reason,
+                   sp.stop_loss, sp.trailing_start, sp.trailing_drop,
+                   sp.init_profit, sp.decay_start, sp.decay_rate, sp.rsi_exit,
+                   sp.rsi_real, sp.pl_pct
+            FROM active_trades at
+            LEFT JOIN broker_products bp ON bp.local_ticker = at.symbol
+            LEFT JOIN strategy_params sp ON sp.broker_product_id = bp.id
+              AND sp.direction = at.direction AND sp.active = 1
+            WHERE at.status = 'OPEN'
                OR (status = 'CLOSED' AND exit_time > DATE_SUB(NOW(), INTERVAL 2 MINUTE))
             ORDER BY entry_time DESC
             LIMIT 20
@@ -500,6 +506,14 @@ def api_trades_active():
             "exit_price": float(r['exit_price']) if r.get('exit_price') else None,
             "exit_time": exit_ms,
             "exit_reason": r.get('exit_reason') or '',
+            "stop_loss": float(r['stop_loss']) if r.get('stop_loss') else 2.0,
+            "trailing_start": float(r['trailing_start']) if r.get('trailing_start') else 1.0,
+            "trailing_drop": float(r['trailing_drop']) if r.get('trailing_drop') else 0.5,
+            "init_profit": float(r['init_profit']) if r.get('init_profit') else 1.0,
+            "decay_start": float(r['decay_start']) if r.get('decay_start') else 2.0,
+            "decay_rate": float(r['decay_rate']) if r.get('decay_rate') else 0.5,
+            "rsi_exit": float(r['rsi_exit']) if r.get('rsi_exit') else 70.0,
+            "rsi_real": float(r['rsi_real']) if r.get('rsi_real') else 50.0,
         })
         return jsonify(result)
     except Exception as e:
