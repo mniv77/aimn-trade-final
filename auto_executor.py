@@ -27,7 +27,7 @@ import pytz
 import db_config as config
 
 # ── Constants ────────────────────────────────────────────────
-MAX_PRICE_AGE_SECONDS  = 30      # skip stale prices older than this
+MAX_PRICE_AGE_SECONDS  = 60      # skip stale prices older than this
 MIN_TRADE_SECONDS      = 300     # STOP/TRAIL cannot fire in first 5 minutes
 STOP_COOLDOWN_MINUTES  = 120     # after STOP: both directions locked 2 hours
 TRAIL_COOLDOWN_MINUTES = 30      # after TRAIL/RSI/DECAY: only same direction locked
