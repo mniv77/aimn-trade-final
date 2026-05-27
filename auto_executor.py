@@ -187,6 +187,39 @@ def load_strategies(cursor):
 # ══════════════════════════════════════════════════════════════
 # THREAD ENTRY POINT 1: VOLUME SIGNALS (stub — expandable)
 # ══════════════════════════════════════════════════════════════
+def relink_open_trades():
+    """On engine startup, relink any open active_trades back to strategy_params"""
+    conn   = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT at.id, at.symbol, at.direction, at.entry_price, at.entry_time
+            FROM active_trades at
+            WHERE at.status = 'OPEN'
+        """)
+        open_trades = cursor.fetchall()
+        for t in open_trades:
+            cursor.execute("""
+                UPDATE strategy_params sp
+                JOIN broker_products bp ON sp.broker_product_id = bp.id
+                SET sp.active_order_id = %s,
+                    sp.entry_price     = %s,
+                    sp.entry_time      = %s,
+                    sp.peak_profit     = -999.00
+                WHERE bp.local_ticker = %s
+                  AND sp.direction    = %s
+                  AND sp.active       = 1
+                  AND sp.active_order_id IS NULL
+                LIMIT 1
+            """, (t['id'], t['entry_price'], t['entry_time'], t['symbol'], t['direction']))
+            log(f"  🔗 Relinked {t['symbol']} {t['direction']} trade {t['id']} to strategy_params")
+        log(f"  ✅ Relinked {len(open_trades)} open trades on startup")
+    except Exception as e:
+        log(f"  ❌ relink_open_trades error: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
 def check_volume_signals():
     """
     Placeholder for volume spike pre-filter.

@@ -11,7 +11,7 @@ from datetime import datetime
 
 # ── Import all modules ───────────────────────────────────────
 from price_updater import update_prices
-from auto_executor import check_volume_signals, check_and_execute_signals, monitor_and_exit_trades
+from auto_executor import check_volume_signals, check_and_execute_signals, monitor_and_exit_trades, relink_open_trades
 from volume_spike_hunter import check_volume_spikes
 from calculate_indicators import run_calculator as run_calculator_cycle
 
@@ -72,6 +72,7 @@ def executor_loop():
     log("🤖 Auto Executor thread started — waiting 2 min for indicators to warm up...")
     time.sleep(120)
     log("🤖 Auto Executor — starting signal scanning")
+        relink_open_trades()
     cycle = 0
     while True:
         try:
