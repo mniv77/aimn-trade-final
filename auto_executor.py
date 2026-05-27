@@ -448,14 +448,14 @@ def monitor_and_exit_trades():
                             log(f"  ⏳ TRAIL suppressed: only {duration_seconds:.0f}s old")
 
                 # ── RULE 3: RSI EXIT ───────────────────────
-                elif pnl >= gate:
+                elif pnl >= gate and gate > 0:
                     if direction == 'LONG' and rsi_current >= rsi_exit_thr:
                         exit_reason = f"RSI-EXIT (RSI={rsi_current:.1f} >= {rsi_exit_thr})"
                     elif direction == 'SHORT' and rsi_current <= (100 - rsi_exit_thr):
                         exit_reason = f"RSI-EXIT (RSI={rsi_current:.1f} <= {100 - rsi_exit_thr:.1f})"
 
                 # ── RULE 4: DECAY GATE ─────────────────────
-                elif hours > decay_start and pnl > 0 and pnl >= gate:
+                elif hours > decay_start and pnl > 0:
                     exit_reason = f"DECAY (pnl={pnl:+.2f}%, gate={gate:.2f}%, {hours:.1f}h)"
 
                 # ── RULE 5: TIME-STOP ──────────────────────
