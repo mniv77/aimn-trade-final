@@ -199,18 +199,28 @@ def relink_open_trades():
         """)
         open_trades = cursor.fetchall()
         for t in open_trades:
+            # Find best matching strategy (highest pl_pct)
             cursor.execute("""
-                UPDATE strategy_params sp
+                SELECT sp.id FROM strategy_params sp
                 JOIN broker_products bp ON sp.broker_product_id = bp.id
-                SET sp.active_order_id = %s,
-                    sp.entry_price     = %s,
-                    sp.entry_time      = %s,
-                    sp.peak_profit     = -999.00
                 WHERE bp.local_ticker = %s
                   AND sp.direction    = %s
                   AND sp.active       = 1
                   AND sp.active_order_id IS NULL
-            """, (t['id'], t['entry_price'], t['entry_time'], t['symbol'], t['direction']))
+                ORDER BY sp.pl_pct DESC
+                LIMIT 1
+            """, (t['symbol'], t['direction']))
+            best = cursor.fetchone()
+            if not best:
+                continue
+            cursor.execute("""
+                UPDATE strategy_params
+                SET active_order_id = %s,
+                    entry_price     = %s,
+                    entry_time      = %s,
+                    peak_profit     = -999.00
+                WHERE id = %s
+            """, (t['id'], t['entry_price'], t['entry_time'], best['id']))
             log(f"  🔗 Relinked {t['symbol']} {t['direction']} trade {t['id']} to strategy_params")
         log(f"  ✅ Relinked {len(open_trades)} open trades on startup")
     except Exception as e:
