@@ -472,7 +472,7 @@ def monitor_and_exit_trades():
                         log(f"  ⏳ STOP suppressed: only {duration_seconds:.0f}s old (need {MIN_TRADE_SECONDS}s)")
 
                 # ── RULE 2: TRAILING STOP (only after 300s) ─
-                elif peak >= trail_start:
+                if peak >= trail_start:
                     trail_level = peak - trail_drop
                     if pnl <= trail_level and trail_level > 0:
                         if duration_seconds >= MIN_TRADE_SECONDS:
