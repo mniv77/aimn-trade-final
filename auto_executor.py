@@ -541,8 +541,8 @@ def _close_trade(cursor, s, current_price, pnl, duration_seconds, exit_reason):
                     pnl_percent = %s, exit_reason = %s
                 WHERE id = %s
             """, (current_price, round(pnl, 4), exit_reason, s['active_order_id']))
-        except Exception:
-            pass  # active_trades table is optional
+        except Exception as e:
+            log(f'  ⚠️ active_trades update error: {e}')
 
         # Clear strategy_params active state
         cursor.execute("""
