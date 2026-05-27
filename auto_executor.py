@@ -488,11 +488,11 @@ def monitor_and_exit_trades():
                         exit_reason = f"RSI-EXIT (RSI={rsi_current:.1f} <= {100 - rsi_exit_thr:.1f})"
 
                 # ── RULE 4: DECAY GATE ─────────────────────
-                elif hours > decay_start and pnl > 0:
+                if not exit_reason and hours > decay_start and pnl > 0 and pnl >= gate:
                     exit_reason = f"DECAY (pnl={pnl:+.2f}%, gate={gate:.2f}%, {hours:.1f}h)"
 
                 # ── RULE 5: TIME-STOP ──────────────────────
-                elif hours >= TIME_STOP_HOURS and pnl < TIME_STOP_MIN_PNL:
+                if not exit_reason and hours >= TIME_STOP_HOURS and pnl < TIME_STOP_MIN_PNL:
                     exit_reason = f"TIME-STOP ({hours:.1f}h, pnl={pnl:+.2f}%)"
 
                 # ── Execute exit ───────────────────────────
