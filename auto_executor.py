@@ -210,7 +210,6 @@ def relink_open_trades():
                   AND sp.direction    = %s
                   AND sp.active       = 1
                   AND sp.active_order_id IS NULL
-                LIMIT 1
             """, (t['id'], t['entry_price'], t['entry_time'], t['symbol'], t['direction']))
             log(f"  🔗 Relinked {t['symbol']} {t['direction']} trade {t['id']} to strategy_params")
         log(f"  ✅ Relinked {len(open_trades)} open trades on startup")
