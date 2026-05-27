@@ -253,168 +253,50 @@ def check_and_execute_signals():
     conn   = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        strategies = load_strategies(cursor)
-        log(f"  📡 Entry scan: {len(strategies)} strategies")
-
-        for s in strategies:
-            try:
-                symbol    = s['symbol']
-                direction = s['direction']
-                broker    = s['broker_name']
-
-                # Skip if already in a trade
-                if s['active_order_id'] is not None:
-                    continue
-
-                # Skip if in cooldown
-                if s.get("cooldown_until") and datetime.now() < s["cooldown_until"]:
-                    continue
-
-                # Skip if locked
-                if is_locked(symbol, direction):
-                    continue
-
-                # Skip if market closed
-                if not is_market_open(broker):
-                    continue
-
-                # Trend filter — don't enter LONG in downtrend or SHORT in uptrend
-                price_prev3 = float(s.get('price_prev3') or 0)
-                current_px  = float(s.get("last_price") or 0) or price_prev3
-                if price_prev3 > 0 and current_px > 0:
-                    if direction == 'LONG' and current_px < price_prev3:
-                        continue  # price falling — skip LONG
-                    if direction == 'SHORT' and current_px > price_prev3:
-                        continue  # price rising — skip SHORT
-
-                # Get price and check freshness
-                price, age = get_live_price_from_db(symbol)
-                if price <= 0:
-                    continue
-                if age > MAX_PRICE_AGE_SECONDS:
-                    log(f"  ⏭️ STALE: {symbol} price is {age:.0f}s old — skipping")
-                    continue
-
-                # Read indicators from strategy_params (written by calculate_indicators)
-                rsi_real      = float(s['rsi_real']   or 50.0)
-                rsi_prev_val  = float(s['rsi_prev']   or 50.0)
-                macd_val      = float(s['macd']        or 0.0)
-                macd_prev_val = float(s['macd_prev']   or 0.0)
-
-                # Entry thresholds
-                rsi_entry = float(s['rsi_entry'] or DEFAULT_PARAMS['rsi_entry'])
-
-                # ── Entry condition logic ──────────────────
-                if direction == 'LONG':
-                    rsi_signal    = rsi_real <= rsi_entry
-                    rsi_bouncing  = rsi_real > rsi_prev_val  # RSI turning up
-                    macd_positive = macd_val > 0
-                    macd_rising   = macd_val > macd_prev_val
-                    rsi_extreme   = rsi_real <= 8
-                    macd_signal   = (macd_positive and macd_rising) or rsi_extreme
-                    bounce_signal = rsi_bouncing or rsi_extreme
-                else:  # SHORT
-                    rsi_signal    = rsi_real >= (100 - rsi_entry)
-                    rsi_bouncing  = rsi_real < rsi_prev_val  # RSI turning down
-                    macd_negative = macd_val < 0
-                    macd_falling  = macd_val < macd_prev_val
-                    rsi_extreme   = rsi_real >= 92
-                    macd_signal   = (macd_negative and macd_falling) or rsi_extreme
-                    bounce_signal = rsi_bouncing or rsi_extreme
-
-                if not (rsi_signal and macd_signal and bounce_signal):
-                    continue
-
-                # ── Duplicate trade guard — block ANY open trade on same symbol ──
-                cursor.execute("""
-                    SELECT id, direction FROM active_trades
-                    WHERE symbol = %s AND status = 'OPEN'
-                    LIMIT 1
-                """, (symbol,))
-                existing = cursor.fetchone()
-                if existing:
-                    log(f"  ⚠️ DUPLICATE GUARD: {symbol} already has {existing['direction']} open")
-                    continue
-
-                # ── Max concurrent trades limit ─────────────────
-                cursor.execute("""
-                    SELECT COUNT(*) as cnt FROM active_trades WHERE status = 'OPEN'
-                """)
-                total_open = cursor.fetchone()['cnt']
-                if total_open >= 3:
-                    log(f"  ⚠️ MAX TRADES: {total_open} open trades, skipping {symbol}")
-                    continue
-
-                log(f"  🚀 SIGNAL: {symbol} {direction} @ ${price:,.4f} | "
-                    f"RSI={rsi_real:.1f} (thr={rsi_entry:.1f}) | "
-                    f"MACD={macd_val:.4f} prev={macd_prev_val:.4f}")
-
-                # ── Open trade ─────────────────────────────
-                candle_time = s['candle_time'] or DEFAULT_PARAMS['candle_time']
-                cursor.execute("""
-                    INSERT INTO active_trades
-                        (strategy_id, symbol, broker_name, direction,
-                         candle_time, entry_price, entry_time, status,
-                         rsi_at_entry, macd_at_entry)
-                    VALUES (%s, %s, %s, %s, %s, %s, NOW(), 'OPEN', %s, %s)
-                """, (s['id'], symbol, broker, direction,
-                      candle_time, price, rsi_real, macd_val))
-
-                trade_id = cursor.lastrowid
-
-                cursor.execute("""
-                    UPDATE strategy_params
-                    SET active_order_id = %s,
-                        entry_price     = %s,
-                        entry_time      = NOW(),
-                        peak_profit     = -999.00
-                    WHERE id = %s
-                """, (trade_id, price, s['id']))
-
-                log(f"  ✅ OPENED: {symbol} {direction} @ ${price:,.4f} | trade_id={trade_id}")
-
-            except Exception as e:
-                log(f"  ❌ Entry error ({s.get('symbol','?')}): {e}")
-                continue
-
-    except Exception as e:
-        log(f"❌ check_and_execute_signals error: {e}")
-    finally:
-        cursor.close()
-        conn.close()
-
-# ══════════════════════════════════════════════════════════════
-# THREAD ENTRY POINT 3: EXIT MONITORING
-# ══════════════════════════════════════════════════════════════
-def monitor_and_exit_trades():
-    """
-    Monitor all open trades and execute exits.
-
-    Exit rules (in order):
-      RULE 0 — Sanity check: skip if abs(pnl) > 20% (phantom loss guard)
-      RULE 1 — STOP LOSS: pnl <= -stop_loss  (only after 300s)
-      RULE 2 — TRAILING STOP: peak reached trail_start, now dropped trail_drop  (only after 300s)
-      RULE 3 — RSI EXIT: RSI at target AND pnl >= gate
-      RULE 4 — DECAY GATE: profit decaying below gate after decay_start hours
-      RULE 5 — TIME-STOP: still open after TIME_STOP_HOURS with pnl < TIME_STOP_MIN_PNL
-    """
-    conn   = get_db()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        strategies = load_strategies(cursor)
-        open_trades = [s for s in strategies if s['active_order_id'] is not None
-                                              and s['entry_price'] is not None
-                                              and float(s['entry_price'] or 0) > 0]
-
+        # Read directly from active_trades — single source of truth
+        cursor.execute("""
+            SELECT at.id, at.symbol, at.direction, at.entry_price,
+                   at.entry_time, at.broker_name, at.candle_time, at.peak_profit
+            FROM active_trades at
+            WHERE at.status = 'OPEN'
+              AND at.entry_price IS NOT NULL AND at.entry_price > 0
+        """)
+        open_trades = cursor.fetchall()
         if not open_trades:
             return
-
         log(f"  👁️ Monitoring {len(open_trades)} open trade(s)")
-
-        for s in open_trades:
+        for trade in open_trades:
+            cursor.execute("""
+                SELECT sp.* FROM strategy_params sp
+                JOIN broker_products bp ON sp.broker_product_id = bp.id
+                WHERE bp.local_ticker = %s AND sp.direction = %s AND sp.active = 1
+                ORDER BY sp.pl_pct DESC LIMIT 1
+            """, (trade['symbol'], trade['direction']))
+            sp = cursor.fetchone() or {}
+            def sp_float(key, default):
+                return float(sp.get(key) or default)
+            s = {
+                'id': sp.get('id'),
+                'symbol': trade['symbol'],
+                'direction': trade['direction'],
+                'entry_price': float(trade['entry_price']),
+                'entry_time': trade['entry_time'],
+                'peak_profit': float(trade.get('peak_profit') or -999),
+                'active_order_id': trade['id'],
+                'broker_name': trade.get('broker_name', 'Gemini'),
+                'candle_time': trade.get('candle_time') or '1h',
+                'rsi_real': sp_float('rsi_real', 50),
+                'stop_loss': sp_float('stop_loss', DEFAULT_PARAMS['stop_loss']),
+                'trailing_start': sp_float('trailing_start', DEFAULT_PARAMS['trailing_start']),
+                'trailing_drop': sp_float('trailing_drop', DEFAULT_PARAMS['trailing_drop']),
+                'rsi_exit': sp_float('rsi_exit', DEFAULT_PARAMS['rsi_exit']),
+                'init_profit': sp_float('init_profit', DEFAULT_PARAMS['init_profit']),
+                'decay_start': sp_float('decay_start', DEFAULT_PARAMS['decay_start']),
+                'decay_rate': sp_float('decay_rate', DEFAULT_PARAMS['decay_rate']),
+            }
             try:
-                symbol     = s['symbol']
-                direction  = s['direction']
+                symbol = s['symbol']
+                direction = s['direction']
                 entry_price = float(s['entry_price'])
 
                 # Get fresh price
