@@ -280,7 +280,7 @@ def check_and_execute_signals():
 
                 # Trend filter — don't enter LONG in downtrend or SHORT in uptrend
                 price_prev3 = float(s.get('price_prev3') or 0)
-                current_px  = float(s.get('last_price') or 0)
+                current_px  = float(s.get("last_price") or 0) or price_prev3
                 if price_prev3 > 0 and current_px > 0:
                     if direction == 'LONG' and current_px < price_prev3:
                         continue  # price falling — skip LONG
