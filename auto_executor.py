@@ -250,6 +250,8 @@ def check_and_execute_signals():
       SHORT: RSI >= (100-rsi_entry)  AND  MACD negative AND MACD falling
              (override: RSI >= 92 extreme overbought bypasses MACD filter)
     """
+def monitor_and_exit_trades():
+    """Monitor all open trades and execute exits."""
     conn   = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -273,8 +275,7 @@ def check_and_execute_signals():
                 ORDER BY sp.pl_pct DESC LIMIT 1
             """, (trade['symbol'], trade['direction']))
             sp = cursor.fetchone() or {}
-            def sp_float(key, default):
-                return float(sp.get(key) or default)
+
             s = {
                 'id': sp.get('id'),
                 'symbol': trade['symbol'],
@@ -285,14 +286,14 @@ def check_and_execute_signals():
                 'active_order_id': trade['id'],
                 'broker_name': trade.get('broker_name', 'Gemini'),
                 'candle_time': trade.get('candle_time') or '1h',
-                'rsi_real': sp_float('rsi_real', 50),
-                'stop_loss': sp_float('stop_loss', DEFAULT_PARAMS['stop_loss']),
-                'trailing_start': sp_float('trailing_start', DEFAULT_PARAMS['trailing_start']),
-                'trailing_drop': sp_float('trailing_drop', DEFAULT_PARAMS['trailing_drop']),
-                'rsi_exit': sp_float('rsi_exit', DEFAULT_PARAMS['rsi_exit']),
-                'init_profit': sp_float('init_profit', DEFAULT_PARAMS['init_profit']),
-                'decay_start': sp_float('decay_start', DEFAULT_PARAMS['decay_start']),
-                'decay_rate': sp_float('decay_rate', DEFAULT_PARAMS['decay_rate']),
+                'rsi_real': float(sp.get('rsi_real') or 50),
+                'stop_loss': float(sp.get('stop_loss') or DEFAULT_PARAMS['stop_loss']),
+                'trailing_start': float(sp.get('trailing_start') or DEFAULT_PARAMS['trailing_start']),
+                'trailing_drop': float(sp.get('trailing_drop') or DEFAULT_PARAMS['trailing_drop']),
+                'rsi_exit': float(sp.get('rsi_exit') or DEFAULT_PARAMS['rsi_exit']),
+                'init_profit': float(sp.get('init_profit') or DEFAULT_PARAMS['init_profit']),
+                'decay_start': float(sp.get('decay_start') or DEFAULT_PARAMS['decay_start']),
+                'decay_rate': float(sp.get('decay_rate') or DEFAULT_PARAMS['decay_rate']),
             }
             try:
                 symbol = s['symbol']
