@@ -72,7 +72,7 @@ def executor_loop():
     log("🤖 Auto Executor thread started — waiting 2 min for indicators to warm up...")
     time.sleep(120)
     log("🤖 Auto Executor — starting signal scanning")
-        relink_open_trades()
+    relink_open_trades()
     cycle = 0
     while True:
         try:
