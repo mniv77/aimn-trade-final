@@ -37,7 +37,7 @@ SANITY_MAX_PNL         = 20.0    # skip if abs(pnl) > 20% — phantom loss guard
 
 # Default fallback params (used if strategy_params value is NULL)
 DEFAULT_PARAMS = {
-    'rsi_entry':      30.0,
+    'rsi_entry':      25.0,
     'rsi_exit':       70.0,
     'stop_loss':       2.0,
     'trailing_start':  1.5,
@@ -370,7 +370,7 @@ def monitor_and_exit_trades():
 
                 # ── RULE 2: TRAILING STOP (only after 300s) ─
                 if peak >= trail_start:
-                    trail_level = peak - trail_drop
+                    trail_level = peak * 0.90  # 10% of peak
                     if pnl <= trail_level and trail_level > 0:
                         if duration_seconds >= MIN_TRADE_SECONDS:
                             exit_reason = f"TRAIL (peak={peak:.2f}%, trail={trail_level:.2f}%)"
