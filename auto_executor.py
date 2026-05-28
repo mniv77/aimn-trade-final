@@ -241,15 +241,89 @@ def check_volume_signals():
 # THREAD ENTRY POINT 2: ENTRY SIGNALS
 # ══════════════════════════════════════════════════════════════
 def check_and_execute_signals():
-    """
-    Scan all active strategies, check entry conditions, open trades.
+    """Scan all active strategies, check entry conditions, open trades."""
+    conn   = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        strategies = load_strategies(cursor)
+        log(f"  📡 Entry scan: {len(strategies)} strategies")
+        for s in strategies:
+            try:
+                symbol    = s["symbol"]
+                direction = s["direction"]
+                broker    = s["broker_name"]
+                if s["active_order_id"] is not None:
+                    continue
+                if s.get("cooldown_until") and datetime.now() < s["cooldown_until"]:
+                    continue
+                if is_locked(symbol, direction):
+                    continue
+                if not is_market_open(broker):
+                    continue
+                price_prev3 = float(s.get("price_prev3") or 0)
+                current_px  = float(s.get("last_price") or 0) or price_prev3
+                if price_prev3 > 0 and current_px > 0:
+                    if direction == "LONG" and current_px < price_prev3:
+                        continue
+                    if direction == "SHORT" and current_px > price_prev3:
+                        continue
+                price, age = get_live_price_from_db(symbol)
+                if price <= 0:
+                    continue
+                if age > MAX_PRICE_AGE_SECONDS:
+                    continue
+                rsi_real      = float(s["rsi_real"]   or 50.0)
+                rsi_prev_val  = float(s["rsi_prev"]   or 50.0)
+                macd_val      = float(s["macd"]        or 0.0)
+                macd_prev_val = float(s["macd_prev"]   or 0.0)
+                rsi_entry     = float(s["rsi_entry"]   or DEFAULT_PARAMS["rsi_entry"])
+                if direction == "LONG":
+                    rsi_signal    = rsi_real <= rsi_entry
+                    rsi_bouncing  = rsi_real > rsi_prev_val
+                    macd_rising   = macd_val > macd_prev_val
+                    rsi_extreme   = rsi_real <= 8
+                    macd_signal   = macd_rising or rsi_extreme
+                    bounce_signal = rsi_bouncing or rsi_extreme
+                else:
+                    rsi_signal    = rsi_real >= (100 - rsi_entry)
+                    rsi_bouncing  = rsi_real < rsi_prev_val
+                    macd_falling  = macd_val < macd_prev_val
+                    rsi_extreme   = rsi_real >= 92
+                    macd_signal   = macd_falling or rsi_extreme
+                    bounce_signal = rsi_bouncing or rsi_extreme
+                if not (rsi_signal and macd_signal and bounce_signal):
+                    continue
+                cursor.execute("SELECT id FROM active_trades WHERE symbol=%s AND direction=%s AND status='OPEN' LIMIT 1", (symbol, direction))
+                if cursor.fetchone():
+                    log(f"  ⚠️ DUPLICATE GUARD: {symbol} already has {direction} open")
+                    continue
+                cursor.execute("SELECT COUNT(*) as cnt FROM active_trades WHERE status='OPEN'")
+                if cursor.fetchone()["cnt"] >= 3:
+                    log(f"  ⚠️ MAX TRADES: skipping {symbol}")
+                    continue
+                log(f"  🚀 SIGNAL: {symbol} {direction} @ ${price:,.4f} | RSI={rsi_real:.1f}")
+                candle_time = s["candle_time"] or DEFAULT_PARAMS["candle_time"]
+                cursor.execute("""
+                    INSERT INTO active_trades
+                        (broker_product_id, broker_name, symbol, direction,
+                         candle_time, entry_price, entry_time, last_price, status)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s, 'OPEN')
+                """, (s["product_id"], broker, symbol, direction, candle_time, price, price))
+                trade_id = cursor.lastrowid
+                cursor.execute("""
+                    UPDATE strategy_params SET active_order_id=%s, entry_price=%s,
+                    entry_time=NOW(), peak_profit=-999.00 WHERE id=%s
+                """, (trade_id, price, s["id"]))
+                log(f"  ✅ OPENED: {symbol} {direction} @ ${price:,.4f} | trade_id={trade_id}")
+            except Exception as e:
+                log(f"  ❌ Entry error ({s.get('symbol','?')}): {e}")
+                continue
+    except Exception as e:
+        log(f"❌ check_and_execute_signals error: {e}")
+    finally:
+        cursor.close()
+        conn.close()
 
-    Entry conditions:
-      LONG:  RSI <= rsi_entry  AND  MACD positive AND MACD rising
-             (override: RSI <= 8 extreme oversold bypasses MACD filter)
-      SHORT: RSI >= (100-rsi_entry)  AND  MACD negative AND MACD falling
-             (override: RSI >= 92 extreme overbought bypasses MACD filter)
-    """
 def monitor_and_exit_trades():
     """Monitor all open trades and execute exits."""
     conn   = get_db()
