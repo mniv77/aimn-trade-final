@@ -293,9 +293,10 @@ def check_and_execute_signals():
                     bounce_signal = rsi_bouncing or rsi_extreme
                 if not (rsi_signal and macd_signal and bounce_signal):
                     continue
-                cursor.execute("SELECT id FROM active_trades WHERE symbol=%s AND direction=%s AND status='OPEN' LIMIT 1", (symbol, direction))
-                if cursor.fetchone():
-                    log(f"  ⚠️ DUPLICATE GUARD: {symbol} already has {direction} open")
+                cursor.execute("SELECT id, direction FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
+                existing = cursor.fetchone()
+                if existing:
+                    log(f"  ⚠️ DUPLICATE GUARD: {symbol} already has {existing['direction']} open")
                     continue
                 cursor.execute("SELECT COUNT(*) as cnt FROM active_trades WHERE status='OPEN'")
                 if cursor.fetchone()["cnt"] >= 3:
