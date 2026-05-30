@@ -26,7 +26,7 @@ DEFAULT = {
     'decay_rate'         : 0.5,
     'timeframe'          : '1hr',
     'bars'               : 8000,
-    'min_trades'         : 10,
+    'min_trades'         : 5,
     'score_metric'       : 'profit_per_day',
 }
 
