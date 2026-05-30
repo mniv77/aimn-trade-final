@@ -272,6 +272,25 @@ def check_and_execute_signals():
                     continue
                 if age > MAX_PRICE_AGE_SECONDS:
                     continue
+                # ── Higher Timeframe Trend Check ──────────────
+                try:
+                    import requests as _req
+                    _clean = symbol.replace("/", "").lower()
+                    _r = _req.get(f"https://api.gemini.com/v2/candles/{_clean}/1hr", timeout=5)
+                    if _r.status_code == 200:
+                        _candles = sorted(_r.json(), key=lambda x: x[0])
+                        if len(_candles) >= 2:
+                            _last = _candles[-1]
+                            _open, _close = float(_last[1]), float(_last[4])
+                            if direction == "LONG" and _close <= _open:
+                                log(f"  HTF BLOCK: {symbol} 1hr bearish - skip LONG")
+                                continue
+                            if direction == "SHORT" and _close >= _open:
+                                log(f"  HTF BLOCK: {symbol} 1hr bullish - skip SHORT")
+                                continue
+                except Exception:
+                    pass
+
                 rsi_real      = float(s["rsi_real"]   or 50.0)
                 rsi_prev_val  = float(s["rsi_prev"]   or 50.0)
                 macd_val      = float(s["macd"]        or 0.0)
@@ -410,8 +429,8 @@ def monitor_and_exit_trades():
                 if pnl > peak:
                     peak = pnl
                     cursor.execute(
-                        "UPDATE strategy_params SET peak_profit = %s WHERE id = %s",
-                        (peak, s['id'])
+                        "UPDATE active_trades SET peak_profit = %s WHERE id = %s",
+                        (peak, s['active_order_id'])
                     )
 
                 # Get exit params
