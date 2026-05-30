@@ -184,10 +184,14 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
             macd_curr = macd_line[i]
             if direction == 'LONG':
                 macd_rising = (i > 0) and (macd_line[i] > macd_line[i-1])
-                entry_cond = (rsi <= rsi_entry) and (macd_curr > 0 or macd_rising)
+                rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
+                rsi_bouncing = rsi > rsi_prev
+                entry_cond = (rsi <= rsi_entry) and macd_rising and (rsi_bouncing or rsi <= 8)
             else:
                 macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
-                entry_cond = (rsi >= (100 - rsi_entry)) and (macd_curr < 0 or macd_falling)
+                rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
+                rsi_bouncing = rsi < rsi_prev
+                entry_cond = (rsi >= (100 - rsi_entry)) and macd_falling and (rsi_bouncing or rsi >= 92)
             if entry_cond:
                 in_trade    = True
                 entry_price = closes[i]
@@ -231,7 +235,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
 
                 # RULE 2: TRAIL EXIT
                 elif peak_profit >= active_trail_start:
-                    trail_level = peak_profit - active_trail_minus
+                    trail_level = peak_profit * 0.90  # 10% of peak
                     if current_pnl <= trail_level:
                         exit_reason = 'TRAIL'
                         exit_hit    = True
