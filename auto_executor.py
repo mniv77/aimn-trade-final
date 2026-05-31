@@ -365,9 +365,17 @@ def monitor_and_exit_trades():
             cursor.execute("""
                 SELECT sp.* FROM strategy_params sp
                 JOIN broker_products bp ON sp.broker_product_id = bp.id
-                WHERE bp.local_ticker = %s AND sp.direction = %s AND sp.active = 1
-                ORDER BY sp.pl_pct DESC LIMIT 1
-            """, (trade['symbol'], trade['direction']))
+                WHERE sp.active_order_id = %s
+                LIMIT 1
+            """, (trade['id'],))
+            sp = cursor.fetchone()
+            if not sp:
+                cursor.execute("""
+                    SELECT sp.* FROM strategy_params sp
+                    JOIN broker_products bp ON sp.broker_product_id = bp.id
+                    WHERE bp.local_ticker = %s AND sp.direction = %s AND sp.active = 1
+                    ORDER BY sp.pl_pct DESC LIMIT 1
+                """, (trade['symbol'], trade['direction']))
             sp = cursor.fetchone() or {}
 
             s = {
