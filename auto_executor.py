@@ -376,7 +376,7 @@ def monitor_and_exit_trades():
                     WHERE bp.local_ticker = %s AND sp.direction = %s AND sp.active = 1
                     ORDER BY sp.pl_pct DESC LIMIT 1
                 """, (trade['symbol'], trade['direction']))
-            sp = cursor.fetchone() or {}
+                sp = cursor.fetchone() or {}
 
             s = {
                 'id': sp.get('id'),
