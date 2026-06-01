@@ -470,9 +470,14 @@ def monitor_and_exit_trades():
                     else:
                         log(f"  ⏳ STOP suppressed: only {duration_seconds:.0f}s old (need {MIN_TRADE_SECONDS}s)")
 
-                # ── RULE 2: TRAILING STOP (only after 300s) ─
+                # ── RULE 2: TRAILING STOP (two-phase) ─────
                 if peak >= trail_start:
-                    trail_level = peak * 0.90  # 10% of peak
+                    # Phase 1: small profit — give 15% room
+                    if peak < 1.0:
+                        trail_level = peak * 0.85
+                    # Phase 2: larger profit — tighten to 10%
+                    else:
+                        trail_level = peak * 0.90
                     if pnl <= trail_level and trail_level > 0:
                         if duration_seconds >= MIN_TRADE_SECONDS:
                             exit_reason = f"TRAIL (peak={peak:.2f}%, trail={trail_level:.2f}%)"
