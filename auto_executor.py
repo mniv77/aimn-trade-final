@@ -299,14 +299,14 @@ def check_and_execute_signals():
                 if direction == "LONG":
                     rsi_signal    = rsi_real <= rsi_entry
                     rsi_bouncing  = rsi_real > rsi_prev_val
-                    macd_rising   = macd_val > macd_prev_val
+                    macd_rising   = macd_val > macd_prev_val or macd_prev_val == 0.0
                     rsi_extreme   = rsi_real <= 8
                     macd_signal   = macd_rising or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
                 else:
                     rsi_signal    = rsi_real >= (100 - rsi_entry)
                     rsi_bouncing  = rsi_real < rsi_prev_val
-                    macd_falling  = macd_val < macd_prev_val
+                    macd_falling  = macd_val < macd_prev_val or macd_prev_val == 0.0
                     rsi_extreme   = rsi_real >= 92
                     macd_signal   = macd_falling or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
