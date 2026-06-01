@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AiMN V3.1 — Status Report | June 1, 2026</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 960px; margin: 0 auto; padding: 20px 20px 60px; line-height: 1.6; color: #1a1a2e; background: #f5f7fa; }
+  h1 { font-size: 1.8em; color: #0a3d62; border-bottom: 3px solid #0a3d62; padding-bottom: 10px; }
+  h2 { font-size: 1.2em; color: #0a3d62; border-left: 4px solid #0a3d62; padding-left: 12px; margin-top: 2em; }
+  h3 { font-size: 1em; color: #444; margin-top: 1.2em; }
+  .meta { color: #666; font-size: 0.9em; margin-bottom: 2em; }
+  .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0; }
+  .stat-card { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; }
+  .stat-card .number { font-size: 2em; font-weight: bold; }
+  .stat-card .label { font-size: 0.85em; color: #666; margin-top: 4px; }
+  .green { color: #27ae60; }
+  .red { color: #e74c3c; }
+  .blue { color: #2980b9; }
+  .orange { color: #e67e22; }
+  .section-box { background: white; border-radius: 10px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9em; margin-top: 10px; }
+  th { background: #0a3d62; color: white; padding: 8px 12px; text-align: left; }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+  tr:hover td { background: #f0f4ff; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
+  .badge-green { background: #d4edda; color: #155724; }
+  .badge-red { background: #f8d7da; color: #721c24; }
+  .badge-blue { background: #cce5ff; color: #004085; }
+  .badge-orange { background: #fff3cd; color: #856404; }
+  .fix-item { padding: 8px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 10px; }
+  .fix-icon { font-size: 1.2em; flex-shrink: 0; }
+  .todo-item { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+  .priority-high { border-left: 3px solid #e74c3c; padding-left: 10px; }
+  .priority-med { border-left: 3px solid #e67e22; padding-left: 10px; }
+  .priority-low { border-left: 3px solid #27ae60; padding-left: 10px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:600px){ .status-grid{grid-template-columns:1fr;} .two-col{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<h1>🤖 AiMN V3.1 — Full Status Report</h1>
+<div class="meta">📅 Monday, June 1, 2026 &nbsp;|&nbsp; 📍 PythonAnywhere — meirniv.pythonanywhere.com &nbsp;|&nbsp; 🔗 GitHub: mniv77/aimn-trade-final</div>
+
+<!-- SYSTEM STATUS -->
+<div class="status-grid">
+  <div class="stat-card">
+    <div class="number green">✅</div>
+    <div class="label">Engine Running<br><small>4 threads active</small></div>
+  </div>
+  <div class="stat-card">
+    <div class="number blue">12</div>
+    <div class="label">Active Strategies<br><small>ETF + Stocks only</small></div>
+  </div>
+  <div class="stat-card">
+    <div class="number orange">+1.80%</div>
+    <div class="label">Live PnL Today<br><small>Backtest vs Live</small></div>
+  </div>
+</div>
+
+<!-- ACTIVE TRADES -->
+<div class="section-box">
+  <h2>📊 Active Trades (as of report time)</h2>
+  <table>
+    <tr><th>Symbol</th><th>Broker</th><th>Direction</th><th>Entry Price</th><th>P&L</th><th>RSI</th><th>Gate</th><th>Stop</th><th>Status</th></tr>
+    <tr>
+      <td><strong>USO</strong></td>
+      <td>Alpaca-ETF</td>
+      <td><span class="badge badge-red">SHORT</span></td>
+      <td>$137.36</td>
+      <td class="red">-0.46%</td>
+      <td>100.0</td>
+      <td>0.10%</td>
+      <td>1.0%</td>
+      <td><span class="badge badge-orange">WATCHING</span></td>
+    </tr>
+  </table>
+  <p style="font-size:0.85em;color:#666;margin-top:10px;">⚠️ USO RSI=100 (extreme overbought) but price rising. Stop at -1.0% is safe. Monitoring for reversal.</p>
+</div>
+
+<!-- BROKER STRATEGY BREAKDOWN -->
+<div class="section-box">
+  <h2>🏦 Active Strategy Breakdown</h2>
+  <div class="two-col">
+    <div>
+      <h3>By Broker</h3>
+      <table>
+        <tr><th>Broker</th><th>Strategies</th><th>Status</th></tr>
+        <tr><td>Alpaca-ETF</td><td>14</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+        <tr><td>Alpaca (Stocks)</td><td>9</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+        <tr><td>Gemini (Crypto)</td><td>22</td><td><span class="badge badge-red">PAUSED</span></td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Top Strategies (by backtest pl_pct)</h3>
+      <table>
+        <tr><th>Symbol</th><th>Dir</th><th>TF</th><th>Backtest</th></tr>
+        <tr><td>USO</td><td>SHORT</td><td>5m</td><td class="green">+16.84%</td></tr>
+        <tr><td>UNG</td><td>SHORT</td><td>5m</td><td class="green">+9.56%</td></tr>
+        <tr><td>GLD</td><td>LONG</td><td>5m</td><td class="green">+7.40%</td></tr>
+        <tr><td>GDX</td><td>SHORT</td><td>5m</td><td class="green">+6.75%</td></tr>
+        <tr><td>TSLA</td><td>SHORT</td><td>1hr</td><td class="green">+6.60%</td></tr>
+        <tr><td>QQQ</td><td>LONG</td><td>1hr</td><td class="green">+5.38%</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- FIXES COMPLETED -->
+<div class="section-box">
+  <h2>✅ Fixes Completed (This Session)</h2>
+
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>pnl_percent column added to active_trades</strong> — root cause of repeated stop loss fires. Stops now close properly.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Monitor reads from active_trades directly</strong> — no more orphaned trades losing their monitoring link.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>HTF (Higher Timeframe) trend filter</strong> — only enter LONG if 1hr candle bullish, SHORT if 1hr bearish. Eliminates the "Ostrich Effect."</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>DECAY exit fixed</strong> — RULE 4 now independent with <code>if not exit_reason</code>. No longer blocked by RULE 2 trail.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Proportional trail (10% of peak)</strong> — trail_level = peak × 0.90. Scales with profit size.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Peak profit updates active_trades</strong> — was updating wrong table (strategy_params). Now correct.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Monitor uses linked strategy via active_order_id</strong> — no more wrong gate/params from different strategy.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Duplicate guard blocks any direction same symbol</strong> — no more BTC LONG + BTC SHORT simultaneously.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Relink on engine restart</strong> — open trades relink to strategy_params automatically.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Panic exit cooldown (2 hours)</strong> — no more immediate re-entry after panic close.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>TIME_STOP_MIN_PNL = 0.00%</strong> — exits any stagnant negative trade after 3 hours.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Market hours block on manual entries</strong> — scanner UI cannot open stock trades outside 9:30–4:00 ET.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>RSI bounce confirmation</strong> — RSI must be turning (not just at extreme) before entry.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Tuner synced with live rules</strong> — RSI bounce, MACD rising only, proportional trail all in backtest.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Old April strategies deactivated</strong> — only strategies tuned May 29+ are active.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Crypto strategies paused</strong> — Gemini strategies deactivated. Focus on ETF/stocks only.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>entry_time from active_trades</strong> — duration/gate calculation now uses correct trade entry time.</div></div>
+  <div class="fix-item"><div class="fix-icon">✅</div><div><strong>Price trend filter (price_prev3)</strong> — blocks LONG in falling market, SHORT in rising market.</div></div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="section-box">
+  <h2>🏗️ System Architecture</h2>
+  <div class="two-col">
+    <div>
+      <h3>4-Thread Engine</h3>
+      <table>
+        <tr><th>Thread</th><th>Function</th><th>Interval</th></tr>
+        <tr><td>Thread 1</td><td>Price Updater</td><td>2 seconds</td></tr>
+        <tr><td>Thread 2</td><td>Indicators (RSI/MACD)</td><td>3 seconds</td></tr>
+        <tr><td>Thread 3</td><td>Entry + Exit Executor</td><td>~3 seconds</td></tr>
+        <tr><td>Thread 4</td><td>Volume Spike Hunter</td><td>500ms</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Entry Rules (Live)</h3>
+      <table>
+        <tr><th>Filter</th><th>Condition</th></tr>
+        <tr><td>RSI Signal</td><td>RSI ≤ rsi_entry (LONG)</td></tr>
+        <tr><td>RSI Bounce</td><td>rsi_real > rsi_prev</td></tr>
+        <tr><td>MACD</td><td>MACD rising</td></tr>
+        <tr><td>HTF Trend</td><td>1hr candle matches direction</td></tr>
+        <tr><td>Price Trend</td><td>price > price_prev3 (LONG)</td></tr>
+        <tr><td>Cooldown</td><td>cooldown_until check</td></tr>
+        <tr><td>Max trades</td><td>≤ 3 concurrent</td></tr>
+        <tr><td>Duplicate</td><td>No same symbol open</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h3 style="margin-top:16px;">Exit Rules (in order)</h3>
+  <table>
+    <tr><th>#</th><th>Rule</th><th>Condition</th></tr>
+    <tr><td>0</td><td>Sanity Check</td><td>Skip if abs(pnl) > 20%</td></tr>
+    <tr><td>1</td><td>Stop Loss</td><td>pnl ≤ -stop_loss (after 300s)</td></tr>
+    <tr><td>2</td><td>Trail Stop</td><td>peak × 0.90 (10% of peak)</td></tr>
+    <tr><td>3</td><td>RSI Exit</td><td>RSI at threshold AND pnl ≥ gate</td></tr>
+    <tr><td>4</td><td>Decay Gate</td><td>hours > decay_start AND pnl > 0 AND pnl ≥ gate</td></tr>
+    <tr><td>5</td><td>Time Stop</td><td>hours ≥ 3.0 AND pnl &lt; 0.00%</td></tr>
+  </table>
+</div>
+
+<!-- PENDING ITEMS -->
+<div class="section-box">
+  <h2>📋 Pending Items</h2>
+
+  <h3 style="color:#e74c3c;">🔴 High Priority</h3>
+  <div class="todo-item priority-high"><strong>Crypto separate strategy</strong> — trend-following approach for BTC/ETH/SOL/LINK instead of mean-reversion. Separate tuning with 4hr/daily timeframes, wider stops.</div>
+  <div class="todo-item priority-high"><strong>Persistent relinking</strong> — active_order_id still occasionally lost on restart. Need more robust relink_open_trades() function.</div>
+  <div class="todo-item priority-high"><strong>RSI display on screen</strong> — screen shows rsi_exit threshold instead of live RSI. Fix /api/trades/active to return live rsi_real.</div>
+
+  <h3 style="color:#e67e22; margin-top:16px;">🟡 Medium Priority</h3>
+  <div class="todo-item priority-med"><strong>Auto-tuner alignment</strong> — HTF filter not yet in backtest. Add 1hr candle trend check to auto_tuner.py backtest simulation.</div>
+  <div class="todo-item priority-med"><strong>IBKR integration</strong> — apply for Interactive Brokers API for options, futures, forex access.</div>
+  <div class="todo-item priority-med"><strong>Profit/hour metric</strong> — add to dashboard and use as tuning score metric.</div>
+  <div class="todo-item priority-med"><strong>2-minute exit display</strong> — show recently closed trades on scanner screen for 2 minutes.</div>
+
+  <h3 style="color:#27ae60; margin-top:16px;">🟢 Lower Priority</h3>
+  <div class="todo-item priority-low"><strong>Transition to real money</strong> — when paper trading proves consistent 3+ days of positive PnL.</div>
+  <div class="todo-item priority-low"><strong>Gemini WebSocket</strong> — real-time price streaming instead of REST polling.</div>
+  <div class="todo-item priority-low"><strong>A/B testing dashboard</strong> — test strategies in parallel before deploying.</div>
+  <div class="todo-item priority-low"><strong>HaGOLEM co-founder search</strong> — continue via Israeli-American Council, BIRD Foundation outreach.</div>
+</div>
+
+<!-- DB COMMANDS -->
+<div class="section-box">
+  <h2>🛠️ Useful DB Commands</h2>
+  <p style="font-size:0.85em;color:#666;">Run these on PythonAnywhere to get current data:</p>
+  <pre style="background:#1a1a2e;color:#00ff88;padding:16px;border-radius:8px;font-size:0.82em;overflow-x:auto;">
+# Today's P&L summary
+mysql -u MeirNiv -p'mayyam28' -h MeirNiv.mysql.pythonanywhere-services.com 'MeirNiv$default' -e "
+SELECT COUNT(*) trades, ROUND(SUM(pnl_percent),2) total_pnl,
+SUM(CASE WHEN pnl_percent>0 THEN 1 ELSE 0 END) wins,
+SUM(CASE WHEN pnl_percent<=0 THEN 1 ELSE 0 END) losses
+FROM orders WHERE DATE(exit_time)=CURDATE();"
+
+# Active strategies count
+mysql -u MeirNiv -p'mayyam28' -h MeirNiv.mysql.pythonanywhere-services.com 'MeirNiv$default' -e "
+SELECT b.name, COUNT(*) strategies FROM strategy_params sp
+JOIN broker_products bp ON sp.broker_product_id=bp.id
+JOIN brokers b ON bp.broker_id=b.id
+WHERE sp.active=1 GROUP BY b.name;"
+
+# Open trades
+mysql -u MeirNiv -p'mayyam28' -h MeirNiv.mysql.pythonanywhere-services.com 'MeirNiv$default' -e "
+SELECT id, symbol, direction, entry_price, entry_time FROM active_trades WHERE status='OPEN';"
+  </pre>
+</div>
+
+<div style="text-align:center;margin-top:40px;color:#666;font-size:0.85em;border-top:1px solid #eee;padding-top:20px;">
+  AiMN V3.1 — Automated Intelligent Money Navigator<br>
+  Built by Meir Niv | Los Angeles, CA | June 1, 2026<br>
+  <em>Funding HaGOLEM — The Android for Humanoid Robots</em>
+</div>
+
+</body>
+</html>
