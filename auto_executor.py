@@ -326,9 +326,17 @@ def check_and_execute_signals():
                 cursor.execute("""
                     INSERT INTO active_trades
                         (broker_product_id, broker_name, symbol, direction,
-                         candle_time, entry_price, entry_time, last_price, status)
-                    VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s, 'OPEN')
-                """, (s["product_id"], broker, symbol, direction, candle_time, price, price))
+                         candle_time, entry_price, entry_time, last_price, status,
+                         stop_loss, trailing_start, init_profit, decay_start, decay_rate, rsi_exit)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s, 'OPEN',
+                            %s, %s, %s, %s, %s, %s)
+                """, (s["product_id"], broker, symbol, direction, candle_time, price, price,
+                        float(s.get("stop_loss") or DEFAULT_PARAMS["stop_loss"]),
+                        float(s.get("trailing_start") or DEFAULT_PARAMS["trailing_start"]),
+                        float(s.get("init_profit") or DEFAULT_PARAMS["init_profit"]),
+                        float(s.get("decay_start") or DEFAULT_PARAMS["decay_start"]),
+                        float(s.get("decay_rate") or DEFAULT_PARAMS["decay_rate"]),
+                        float(s.get("rsi_exit") or DEFAULT_PARAMS["rsi_exit"])))
                 trade_id = cursor.lastrowid
                 cursor.execute("""
                     UPDATE strategy_params SET active_order_id=%s, entry_price=%s,
@@ -389,12 +397,12 @@ def monitor_and_exit_trades():
                 'broker_name': trade.get('broker_name', 'Gemini'),
                 'candle_time': trade.get('candle_time') or '1h',
                 'rsi_real': float(sp.get('rsi_real') or 50),
-                'stop_loss': float(sp.get('stop_loss') or DEFAULT_PARAMS['stop_loss']),
-                'trailing_start': float(sp.get('trailing_start') or DEFAULT_PARAMS['trailing_start']),
+                'stop_loss': float(trade.get('stop_loss') or sp.get('stop_loss') or DEFAULT_PARAMS['stop_loss']),
+                'trailing_start': float(trade.get('trailing_start') or sp.get('trailing_start') or DEFAULT_PARAMS['trailing_start']),
                 'trailing_drop': float(sp.get('trailing_drop') or DEFAULT_PARAMS['trailing_drop']),
-                'rsi_exit': float(sp.get('rsi_exit') or DEFAULT_PARAMS['rsi_exit']),
-                'init_profit': float(sp.get('init_profit') or DEFAULT_PARAMS['init_profit']),
-                'decay_start': float(sp.get('decay_start') or DEFAULT_PARAMS['decay_start']),
+                'rsi_exit': float(trade.get('rsi_exit') or sp.get('rsi_exit') or DEFAULT_PARAMS['rsi_exit']),
+                'init_profit': float(trade.get('init_profit') or sp.get('init_profit') or DEFAULT_PARAMS['init_profit']),
+                'decay_start': float(trade.get('decay_start') or sp.get('decay_start') or DEFAULT_PARAMS['decay_start']),
                 'decay_rate': float(sp.get('decay_rate') or DEFAULT_PARAMS['decay_rate']),
             }
             try:
