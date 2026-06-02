@@ -346,7 +346,7 @@ def tune_crypto_strategy(symbol, direction, timeframe, cfg=None):
                     rsi_len=%s, rsi_entry=%s, stop_loss=%s,
                     trailing_start=%s, trailing_drop=%s, rsi_exit=%s,
                     init_profit=%s, decay_start=%s, decay_rate=%s,
-                    pl_pct=%s, last_tuned=NOW(), active=1
+                    pl_pct=%s, last_tuned=NOW(), active=0
                 WHERE id=%s
             """, (best_params['rsi_len'], best_params['rsi_entry'], best_params['stop_loss'],
                   best_params['trail_start'], best_params['trail_minus'], best_params['rsi_exit'],
@@ -359,7 +359,7 @@ def tune_crypto_strategy(symbol, direction, timeframe, cfg=None):
                     (broker_product_id, direction, candle_time, rsi_len, rsi_entry,
                      stop_loss, trailing_start, trailing_drop, rsi_exit,
                      init_profit, decay_start, decay_rate, pl_pct, last_tuned, active)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW(),1)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW(),0)
             """, (bp_id, direction, timeframe,
                   best_params['rsi_len'], best_params['rsi_entry'], best_params['stop_loss'],
                   best_params['trail_start'], best_params['trail_minus'], best_params['rsi_exit'],
