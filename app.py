@@ -694,6 +694,10 @@ def api_trade_open():
 
         direction = "LONG" if side == "BUY" else "SHORT"
 
+        # Block crypto manual entries while Gemini is paused
+        if broker.upper() in ('GEMINI', 'COINBASE', 'CRYPTO'):
+            return jsonify({'ok': False, 'error': 'Crypto trading is currently paused'}), 400
+
         try:
             exchange = "CRYPTO" if broker.upper() in ("GEMINI", "COINBASE", "CRYPTO") else broker.upper()
             quote = _get_provider().get_price(symbol, exchange)
