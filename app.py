@@ -1350,6 +1350,27 @@ def api_manual_tune_save():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
+
+@app.route("/api/crypto/status")
+def api_crypto_status():
+    from db import get_db_connection
+    conn, cursor = get_db_connection()
+    cursor.execute("SELECT COUNT(*) as active FROM strategy_params sp JOIN broker_products bp ON sp.broker_product_id=bp.id JOIN brokers b ON bp.broker_id=b.id WHERE b.name='Gemini' AND sp.active=1")
+    row = cursor.fetchone()
+    conn.close()
+    return jsonify({"active": row["active"]})
+
+@app.route("/api/crypto/active", methods=["POST"])
+def api_crypto_active():
+    data = request.get_json() or {}
+    val = int(data.get("active", 0))
+    from db import get_db_connection
+    conn, cursor = get_db_connection()
+    cursor.execute("UPDATE strategy_params sp JOIN broker_products bp ON sp.broker_product_id=bp.id JOIN brokers b ON bp.broker_id=b.id SET sp.active=%s WHERE b.name='Gemini'", (val,))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True, "message": "Crypto ENABLED" if val else "Crypto PAUSED"})
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)
