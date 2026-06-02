@@ -40,6 +40,17 @@
     <h1 class="text-3xl font-bold text-center mb-2">🤖 AIMn Auto-Trading Scanner (Smart Filters)</h1>
     <p class="text-center text-gray-400">Fully Automated Multi-Exchange Market Scanning & Trading</p>
     <p class="text-center text-xs text-green-400 mt-1">⚡ AUTO MODE - Multi-Filter: RSI + ATR + Volume + Recency</p>
+    <div class="flex justify-center gap-3 mt-2">
+      <button id="crypto-enable-btn" onclick="setCryptoActive(1)"
+        class="px-4 py-1 text-xs font-bold rounded bg-blue-700 hover:bg-blue-600 text-white">
+        🪙 Enable Crypto
+      </button>
+      <button id="crypto-pause-btn" onclick="setCryptoActive(0)"
+        class="px-4 py-1 text-xs font-bold rounded bg-red-800 hover:bg-red-700 text-white">
+        🔴 Pause Crypto
+      </button>
+      <span id="crypto-status" class="text-xs text-gray-400 self-center">Crypto: checking...</span>
+    </div>
 
     <div id="trade-strip" class="mt-4 rounded-lg border border-gray-700 bg-gray-800 overflow-hidden">
       <div class="flex items-center gap-3 px-4 py-2 border-b border-gray-700">
@@ -1035,6 +1046,32 @@
     refreshActiveOrders();
 
     document.addEventListener('DOMContentLoaded', init);
+    async function setCryptoActive(val) {
+      const status = document.getElementById('crypto-status');
+      status.textContent = val ? 'Enabling...' : 'Pausing...';
+      try {
+        const res = await fetch('/api/crypto/active', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({active: val})
+        });
+        const data = await res.json();
+        status.textContent = data.message || (val ? 'Crypto: ENABLED' : 'Crypto: PAUSED');
+        status.className = val ? 'text-xs text-green-400 self-center' : 'text-xs text-red-400 self-center';
+      } catch(e) { status.textContent = 'Error!'; }
+    }
+    async function checkCryptoStatus() {
+      try {
+        const res = await fetch('/api/crypto/status');
+        const data = await res.json();
+        const el = document.getElementById('crypto-status');
+        el.textContent = data.active > 0 ? 'Crypto: ENABLED ' + data.active + ' strategies' : 'Crypto: PAUSED';
+        el.className = data.active > 0 ? 'text-xs text-green-400 self-center' : 'text-xs text-red-400 self-center';
+      } catch(e) {}
+    }
+    checkCryptoStatus();
+    setInterval(checkCryptoStatus, 30000);
+
   </script>
 </body>
 </html>
