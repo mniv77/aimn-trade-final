@@ -727,12 +727,36 @@ def api_trade_open():
         except Exception:
             pass
 
+        # Fetch strategy params for this symbol/direction
+        sp_params = {}
+        try:
+            cursor.execute("""
+                SELECT stop_loss, trailing_start, init_profit, decay_start, decay_rate, rsi_exit
+                FROM strategy_params sp
+                JOIN broker_products bp ON sp.broker_product_id = bp.id
+                WHERE bp.local_ticker = %s AND sp.direction = %s AND sp.active = 1
+                ORDER BY sp.pl_pct DESC LIMIT 1
+            """, (symbol, direction))
+            sp_row = cursor.fetchone()
+            if sp_row:
+                sp_params = sp_row
+        except Exception:
+            pass
+
         cursor.execute("""
             INSERT INTO active_trades
               (broker_product_id, broker_name, symbol, direction,
-               entry_price, entry_time, last_price, status)
-            VALUES (%s, %s, %s, %s, %s, NOW(), %s, 'OPEN')
-        """, (bp_id, broker, symbol, direction, entry_price, entry_price))
+               entry_price, entry_time, last_price, status,
+               stop_loss, trailing_start, init_profit, decay_start, decay_rate, rsi_exit)
+            VALUES (%s, %s, %s, %s, %s, NOW(), %s, 'OPEN',
+                    %s, %s, %s, %s, %s, %s)
+        """, (bp_id, broker, symbol, direction, entry_price, entry_price,
+                float(sp_params.get('stop_loss') or 0.5),
+                float(sp_params.get('trailing_start') or 0.5),
+                float(sp_params.get('init_profit') or 1.0),
+                float(sp_params.get('decay_start') or 2.0),
+                float(sp_params.get('decay_rate') or 0.5),
+                float(sp_params.get('rsi_exit') or 65.0)))
 
         trade_id = cursor.lastrowid
 
