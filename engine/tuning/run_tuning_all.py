@@ -82,7 +82,7 @@ def get_symbols():
             FROM broker_products bp
             JOIN brokers b ON bp.broker_id = b.id
             WHERE bp.is_active = 1
-            AND b.name IN ('Gemini', 'Alpaca')
+            AND b.name IN ('Alpaca', 'Alpaca-ETF')
             ORDER BY b.name, bp.local_ticker
         """)
         rows = cursor.fetchall()
