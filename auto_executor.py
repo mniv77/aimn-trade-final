@@ -310,7 +310,22 @@ def check_and_execute_signals():
                     rsi_extreme   = rsi_real >= 92
                     macd_signal   = macd_falling or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
-                if not (rsi_signal and macd_signal and bounce_signal):
+                # ── PULLBACK FILTER: never enter at peak ──────
+                price_prev1 = float(s.get("price_prev1") or price)
+                price_prev2 = float(s.get("price_prev2") or price)
+                price_prev3 = float(s.get("price_prev3") or price)
+                recent_high = max(price, price_prev1, price_prev2, price_prev3)
+                recent_low  = min(price, price_prev1, price_prev2, price_prev3)
+                if direction == "LONG":
+                    # Price must be at least 0.2% below recent high (not entering at peak)
+                    pullback_ok = price <= recent_high * 0.998
+                else:
+                    # Price must be at least 0.2% above recent low (not entering at bottom)
+                    pullback_ok = price >= recent_low * 1.002
+
+                if not (rsi_signal and macd_signal and bounce_signal and pullback_ok):
+                    if not pullback_ok:
+                        log(f"  ⛔ PEAK BLOCK: {symbol} {direction} price at peak/low - skip")
                     continue
                 cursor.execute("SELECT id, direction FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
                 existing = cursor.fetchone()

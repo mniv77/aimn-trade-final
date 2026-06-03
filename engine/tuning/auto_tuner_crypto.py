@@ -124,6 +124,9 @@ def backtest_crypto(highs, lows, closes, direction, params, bar_minutes, volumes
                     avg_vol = sum(volumes[i-20:i]) / 20
                     vol_ok = volumes[i] >= avg_vol * 0.8  # at least 80% of average
                 entry_cond = (rsi <= rsi_entry) and macd_rising and (rsi_bouncing or rsi <= 8) and htf_ok and vol_ok
+                if entry_cond and i >= 3:
+                    recent_high = max(closes[i-3:i+1])
+                    entry_cond = closes[i] <= recent_high * 0.998
             else:
                 macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
                 rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
@@ -134,6 +137,9 @@ def backtest_crypto(highs, lows, closes, direction, params, bar_minutes, volumes
                     avg_vol = sum(volumes[i-20:i]) / 20
                     vol_ok = volumes[i] >= avg_vol * 0.8
                 entry_cond = (rsi >= (100 - rsi_entry)) and macd_falling and (rsi_bouncing or rsi >= 92) and htf_ok and vol_ok
+                if entry_cond and i >= 3:
+                    recent_low = min(closes[i-3:i+1])
+                    entry_cond = closes[i] >= recent_low * 1.002
 
             if entry_cond:
                 in_trade = True

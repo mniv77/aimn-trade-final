@@ -189,6 +189,10 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                 # HTF trend filter: last candle must be bullish (close > open)
                 htf_ok = (i >= 1) and (closes[i] > closes[i-1])
                 entry_cond = (rsi <= rsi_entry) and macd_rising and (rsi_bouncing or rsi <= 8) and htf_ok
+                # Pullback filter for LONG: price must be 0.2% below recent high
+                if entry_cond and i >= 3:
+                    recent_high = max(closes[i-3:i+1])
+                    entry_cond = closes[i] <= recent_high * 0.998
             else:
                 macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
                 rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
@@ -196,6 +200,10 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                 # HTF trend filter: last candle must be bearish (close < open)
                 htf_ok = (i >= 1) and (closes[i] < closes[i-1])
                 entry_cond = (rsi >= (100 - rsi_entry)) and macd_falling and (rsi_bouncing or rsi >= 92) and htf_ok
+                # Pullback filter for SHORT: price must be 0.2% above recent low
+                if entry_cond and i >= 3:
+                    recent_low = min(closes[i-3:i+1])
+                    entry_cond = closes[i] >= recent_low * 1.002
             if entry_cond:
                 in_trade    = True
                 entry_price = closes[i]
