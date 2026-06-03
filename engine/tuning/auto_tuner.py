@@ -336,7 +336,14 @@ def save_best_params(strategy_id, params, result):
         log("❌ DB connection failed")
         return
     try:
-        is_active = 1 if result['total_pnl'] > 0 else 0
+        # Check if this is a Gemini strategy - keep paused if so
+        cursor.execute("""SELECT b.name FROM strategy_params sp 
+            JOIN broker_products bp ON sp.broker_product_id=bp.id
+            JOIN brokers b ON bp.broker_id=b.id
+            WHERE sp.id=%s""", (strategy_id,))
+        broker_row = cursor.fetchone()
+        broker_name = broker_row['name'] if broker_row else ''
+        is_active = 0 if broker_name == 'Gemini' else (1 if result['total_pnl'] > 0 else 0)
         cursor.execute("""
             UPDATE strategy_params
             SET rsi_len        = %s,
