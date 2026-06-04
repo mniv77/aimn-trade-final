@@ -189,10 +189,16 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                 # HTF trend filter: last candle must be bullish (close > open)
                 htf_ok = (i >= 1) and (closes[i] > closes[i-1])
                 entry_cond = (rsi <= rsi_entry) and macd_rising and (rsi_bouncing or rsi <= 8) and htf_ok
-                # Pullback filter for LONG: price must be 0.2% below recent high
+                # Pullback + V-Bottom filter for LONG
                 if entry_cond and i >= 3:
                     recent_high = max(closes[i-3:i+1])
-                    entry_cond = closes[i] <= recent_high * 0.998
+                    pullback_ok = closes[i] <= recent_high * 0.998
+                    drop_pct    = (closes[i-3] - closes[i-1]) / closes[i-3] * 100 if closes[i-3] > 0 else 0
+                    rapid_drop  = drop_pct >= 0.3
+                    recovering  = closes[i] > closes[i-1]
+                    true_bottom = closes[i-1] < closes[i-2] < closes[i-3]
+                    v_bottom    = rapid_drop and recovering and true_bottom
+                    entry_cond  = pullback_ok and (v_bottom or (macd_rising and rsi_bouncing))
             else:
                 macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
                 rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
@@ -200,10 +206,16 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                 # HTF trend filter: last candle must be bearish (close < open)
                 htf_ok = (i >= 1) and (closes[i] < closes[i-1])
                 entry_cond = (rsi >= (100 - rsi_entry)) and macd_falling and (rsi_bouncing or rsi >= 92) and htf_ok
-                # Pullback filter for SHORT: price must be 0.2% above recent low
+                # Pullback + V-Top filter for SHORT
                 if entry_cond and i >= 3:
-                    recent_low = min(closes[i-3:i+1])
-                    entry_cond = closes[i] >= recent_low * 1.002
+                    recent_low  = min(closes[i-3:i+1])
+                    pullback_ok = closes[i] >= recent_low * 1.002
+                    rise_pct    = (closes[i-1] - closes[i-3]) / closes[i-3] * 100 if closes[i-3] > 0 else 0
+                    rapid_rise  = rise_pct >= 0.3
+                    reversing   = closes[i] < closes[i-1]
+                    true_top    = closes[i-1] > closes[i-2] > closes[i-3]
+                    v_bottom    = rapid_rise and reversing and true_top
+                    entry_cond  = pullback_ok and (v_bottom or (macd_falling and rsi_bouncing))
             if entry_cond:
                 in_trade    = True
                 entry_price = closes[i]

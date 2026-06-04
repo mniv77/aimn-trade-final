@@ -321,17 +321,21 @@ def check_and_execute_signals():
                     pullback_ok = price <= recent_high * 0.998
                     # V-BOTTOM: rapid drop then recovery
                     # price_prev3 was high, price_prev1 was the low, now recovering
-                    rapid_drop    = price_prev3 > price_prev1 * 1.003  # dropped 0.3%+
-                    recovering    = price > price_prev1                  # now turning up
-                    v_bottom      = rapid_drop and recovering
+                    drop_pct   = (price_prev3 - price_prev1) / price_prev3 * 100 if price_prev3 > 0 else 0
+                    rapid_drop = drop_pct >= 0.3
+                    recovering = price > price_prev1
+                    true_bottom = price_prev1 < price_prev2 < price_prev3
+                    v_bottom   = rapid_drop and recovering and true_bottom
                 else:
                     # Price must be at least 0.2% above recent low (not entering at bottom)
                     pullback_ok = price >= recent_low * 1.002
                     # V-TOP: rapid rise then reversal
                     # price_prev3 was low, price_prev1 was the high, now dropping
-                    rapid_rise    = price_prev3 < price_prev1 * 0.997  # rose 0.3%+
-                    reversing     = price < price_prev1                  # now turning down
-                    v_bottom      = rapid_rise and reversing
+                    rise_pct   = (price_prev1 - price_prev3) / price_prev3 * 100 if price_prev3 > 0 else 0
+                    rapid_rise = rise_pct >= 0.3
+                    reversing  = price < price_prev1
+                    true_top   = price_prev1 > price_prev2 > price_prev3
+                    v_bottom   = rapid_rise and reversing and true_top
 
                 # V-bottom gives extra confidence - can relax MACD requirement
                 if v_bottom and rsi_signal and bounce_signal and pullback_ok:
