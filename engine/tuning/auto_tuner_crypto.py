@@ -387,6 +387,24 @@ def tune_crypto_strategy(symbol, direction, timeframe, cfg=None):
                   pl_pct))
             log(f"  Created new strategy id={cursor.lastrowid}")
 
+        # Save to tuning_history for display on tuning runs page
+        try:
+            cursor.execute("""
+                INSERT INTO tuning_history
+                    (strategy_id, rsi_len, rsi_entry, stop_loss,
+                     trailing_start, trailing_drop, winrate, avg_pnl,
+                     pl_pct, trades_tested, tuned_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            """, (
+                sp_id,
+                best_params['rsi_len'], best_params['rsi_entry'], best_params['stop_loss'],
+                best_params['trail_start'], best_params['trail_minus'],
+                test_result['win_rate'],
+                round(test_result['total_pnl'] / max(test_result['trades'],1), 4),
+                pl_pct, test_result['trades']
+            ))
+        except Exception as e:
+            log(f"  tuning_history error: {e}")
         conn.commit()
         log(f"SAVED - {symbol} {direction} [{timeframe}] Test={pl_pct}%")
 
