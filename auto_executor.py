@@ -319,11 +319,24 @@ def check_and_execute_signals():
                 if direction == "LONG":
                     # Price must be at least 0.2% below recent high (not entering at peak)
                     pullback_ok = price <= recent_high * 0.998
+                    # V-BOTTOM: rapid drop then recovery
+                    # price_prev3 was high, price_prev1 was the low, now recovering
+                    rapid_drop    = price_prev3 > price_prev1 * 1.003  # dropped 0.3%+
+                    recovering    = price > price_prev1                  # now turning up
+                    v_bottom      = rapid_drop and recovering
                 else:
                     # Price must be at least 0.2% above recent low (not entering at bottom)
                     pullback_ok = price >= recent_low * 1.002
+                    # V-TOP: rapid rise then reversal
+                    # price_prev3 was low, price_prev1 was the high, now dropping
+                    rapid_rise    = price_prev3 < price_prev1 * 0.997  # rose 0.3%+
+                    reversing     = price < price_prev1                  # now turning down
+                    v_bottom      = rapid_rise and reversing
 
-                if not (rsi_signal and macd_signal and bounce_signal and pullback_ok):
+                # V-bottom gives extra confidence - can relax MACD requirement
+                if v_bottom and rsi_signal and bounce_signal and pullback_ok:
+                    log(f"  🎯 V-BOTTOM: {symbol} {direction} rapid reversal detected!")
+                elif not (rsi_signal and macd_signal and bounce_signal and pullback_ok):
                     if not pullback_ok:
                         log(f"  ⛔ PEAK BLOCK: {symbol} {direction} price at peak/low - skip")
                     continue
