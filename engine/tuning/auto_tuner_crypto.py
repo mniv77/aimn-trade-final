@@ -126,7 +126,12 @@ def backtest_crypto(highs, lows, closes, direction, params, bar_minutes, volumes
                 entry_cond = (rsi <= rsi_entry) and macd_rising and (rsi_bouncing or rsi <= 8) and htf_ok and vol_ok
                 if entry_cond and i >= 3:
                     recent_high = max(closes[i-3:i+1])
-                    entry_cond = closes[i] <= recent_high * 0.998
+                    pullback_ok = closes[i] <= recent_high * 0.998
+                    # V-Bottom bonus: rapid drop then recovery
+                    rapid_drop = closes[i-3] > closes[i-1] * 1.003
+                    recovering = closes[i] > closes[i-1]
+                    v_bottom = rapid_drop and recovering
+                    entry_cond = pullback_ok and (v_bottom or (macd_rising and rsi_bouncing))
             else:
                 macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
                 rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
@@ -139,7 +144,12 @@ def backtest_crypto(highs, lows, closes, direction, params, bar_minutes, volumes
                 entry_cond = (rsi >= (100 - rsi_entry)) and macd_falling and (rsi_bouncing or rsi >= 92) and htf_ok and vol_ok
                 if entry_cond and i >= 3:
                     recent_low = min(closes[i-3:i+1])
-                    entry_cond = closes[i] >= recent_low * 1.002
+                    pullback_ok = closes[i] >= recent_low * 1.002
+                    # V-Top bonus: rapid rise then reversal
+                    rapid_rise = closes[i-3] < closes[i-1] * 0.997
+                    reversing = closes[i] < closes[i-1]
+                    v_bottom = rapid_rise and reversing
+                    entry_cond = pullback_ok and (v_bottom or (macd_falling and rsi_bouncing))
 
             if entry_cond:
                 in_trade = True
