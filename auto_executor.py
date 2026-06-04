@@ -548,6 +548,11 @@ def _close_trade(cursor, s, current_price, pnl, duration_seconds, exit_reason):
     candle_time = s.get('candle_time') or '1h'
 
     try:
+        # Guard: check if trade already closed to prevent duplicate exits
+        cursor.execute("SELECT id FROM active_trades WHERE id=%s AND status='OPEN'", (s['active_order_id'],))
+        if not cursor.fetchone():
+            log(f'  ⚠️ DUPLICATE EXIT BLOCKED: {symbol} trade already closed')
+            return
         # Save to orders
         cursor.execute("""
             INSERT INTO orders
