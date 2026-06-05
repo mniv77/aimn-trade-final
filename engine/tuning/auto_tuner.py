@@ -198,7 +198,12 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                     recovering  = closes[i] > closes[i-1]
                     true_bottom = closes[i-1] < closes[i-2] < closes[i-3]
                     v_bottom    = rapid_drop and recovering and true_bottom
-                    entry_cond  = pullback_ok and (v_bottom or (macd_rising and rsi_bouncing))
+                    # Slope direction change for LONG: was falling, now rising
+                    slope_down  = closes[i-1] < closes[i-2] < closes[i-3]
+                    momentum_slowing_dn = (closes[i-2]-closes[i-1]) < (closes[i-3]-closes[i-2])
+                    direction_flip_up   = closes[i] > closes[i-1]
+                    slope_reversal_long = slope_down and momentum_slowing_dn and direction_flip_up
+                    entry_cond  = pullback_ok and (v_bottom or slope_reversal_long or (macd_rising and rsi_bouncing))
             else:
                 macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
                 rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
@@ -206,8 +211,8 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                 # HTF trend filter: last candle must be bearish (close < open)
                 htf_ok = (i >= 1) and (closes[i] < closes[i-1])
                 entry_cond = (rsi >= (100 - rsi_entry)) and macd_falling and (rsi_bouncing or rsi >= 92) and htf_ok
-                # Pullback + V-Top filter for SHORT
-                if entry_cond and i >= 3:
+                # Pullback + V-Top + Slope Direction Change filter for SHORT
+                if entry_cond and i >= 4:
                     recent_low  = min(closes[i-3:i+1])
                     pullback_ok = closes[i] >= recent_low * 1.002
                     rise_pct    = (closes[i-1] - closes[i-3]) / closes[i-3] * 100 if closes[i-3] > 0 else 0
@@ -215,7 +220,12 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                     reversing   = closes[i] < closes[i-1]
                     true_top    = closes[i-1] > closes[i-2] > closes[i-3]
                     v_bottom    = rapid_rise and reversing and true_top
-                    entry_cond  = pullback_ok and (v_bottom or (macd_falling and rsi_bouncing))
+                    # Slope direction change: was rising, now falling
+                    slope_up    = closes[i-1] > closes[i-2] > closes[i-3]
+                    momentum_slowing = (closes[i-1]-closes[i-2]) < (closes[i-2]-closes[i-3])
+                    direction_flip   = closes[i] < closes[i-1]
+                    slope_reversal   = slope_up and momentum_slowing and direction_flip
+                    entry_cond  = pullback_ok and (v_bottom or slope_reversal or (macd_falling and rsi_bouncing))
             if entry_cond:
                 in_trade    = True
                 entry_price = closes[i]
