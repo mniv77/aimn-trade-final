@@ -48,20 +48,34 @@ def run_calculator():
                     symbol      = strat["symbol"]
                     candle_time = strat["candle_time"] or "1hr"
                     rsi_len     = int(strat["rsi_len"] or 100)
+                    is_crypto = '/' in symbol
                     interval_map = {"1m":"1m","5m":"5m","15m":"15m","30m":"30m","1h":"1hr","1hr":"1hr","2h":"2hr","6h":"6hr","1d":"1day"}
-                    gemini_tf = interval_map.get(candle_time, "1hr")
-                    clean     = symbol.replace("/", "").lower()
-                    url       = f"https://api.gemini.com/v2/candles/{clean}/{gemini_tf}"
-                    r = requests.get(url, timeout=10)
-                    if r.status_code != 200:
-                        continue
-                    data = r.json()
-                    if not isinstance(data, list) or len(data) < rsi_len:
-                        continue
-                    candles = sorted(data, key=lambda x: x[0])
-                    highs   = [float(c[2]) for c in candles]
-                    lows    = [float(c[3]) for c in candles]
-                    closes  = [float(c[4]) for c in candles]
+                    if is_crypto:
+                        gemini_tf = interval_map.get(candle_time, "1hr")
+                        clean     = symbol.replace("/", "").lower()
+                        url       = f"https://api.gemini.com/v2/candles/{clean}/{gemini_tf}"
+                        r = requests.get(url, timeout=10)
+                        if r.status_code != 200:
+                            continue
+                        data = r.json()
+                        if not isinstance(data, list) or len(data) < rsi_len:
+                            continue
+                        candles = sorted(data, key=lambda x: x[0])
+                        highs   = [float(c[2]) for c in candles]
+                        lows    = [float(c[3]) for c in candles]
+                        closes  = [float(c[4]) for c in candles]
+                    else:
+                        try:
+                            from engine.tuning.candle_fetcher import fetch_yahoo_candles
+                            bars = fetch_yahoo_candles(symbol, candle_time, limit=500)
+                            if not bars or len(bars) < rsi_len:
+                                continue
+                            highs  = [float(b['high'])  for b in bars]
+                            lows   = [float(b['low'])   for b in bars]
+                            closes = [float(b['close']) for b in bars]
+                        except Exception as ae:
+                            print(f"  Alpaca candle error {symbol}: {ae}")
+                            continue
                     hi = max(highs[-rsi_len:])
                     lo = min(lows[-rsi_len:])
                     if hi <= lo:
