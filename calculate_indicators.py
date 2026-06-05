@@ -66,15 +66,31 @@ def run_calculator():
                         closes  = [float(c[4]) for c in candles]
                     else:
                         try:
-                            from engine.tuning.candle_fetcher import fetch_yahoo_candles
-                            bars = fetch_yahoo_candles(symbol, candle_time, limit=500)
-                            if not bars or len(bars) < rsi_len:
+                            tf_map = {"5m":"5Min","30m":"30Min","1hr":"1Hour","1h":"1Hour"}
+                            alpaca_tf = tf_map.get(candle_time, "1Hour")
+                            cursor2 = conn.cursor(dictionary=True)
+                            cursor2.execute("SELECT api_key, api_secret FROM brokers WHERE name='Alpaca' LIMIT 1")
+                            creds = cursor2.fetchone()
+                            cursor2.close()
+                            if not creds:
                                 continue
-                            highs  = [float(b['high'])  for b in bars]
-                            lows   = [float(b['low'])   for b in bars]
-                            closes = [float(b['close']) for b in bars]
+                            headers = {
+                                'APCA-API-KEY-ID': creds['api_key'],
+                                'APCA-API-SECRET-KEY': creds['api_secret']
+                            }
+                            url = f"https://data.alpaca.markets/v2/stocks/{symbol}/bars"
+                            params = {'timeframe': alpaca_tf, 'limit': 500, 'adjustment': 'raw'}
+                            resp = requests.get(url, headers=headers, params=params, timeout=10)
+                            if resp.status_code != 200:
+                                continue
+                            raw = resp.json().get('bars', [])
+                            if not raw or len(raw) < rsi_len:
+                                continue
+                            highs  = [float(b['h']) for b in raw]
+                            lows   = [float(b['l']) for b in raw]
+                            closes = [float(b['c']) for b in raw]
                         except Exception as ae:
-                            print(f"  Alpaca candle error {symbol}: {ae}")
+                            print(f"  Stock candle error {symbol}: {ae}")
                             continue
                     hi = max(highs[-rsi_len:])
                     lo = min(lows[-rsi_len:])
