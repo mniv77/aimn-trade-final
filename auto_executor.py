@@ -322,7 +322,8 @@ def check_and_execute_signals():
                     # V-BOTTOM: rapid drop then recovery
                     # price_prev3 was high, price_prev1 was the low, now recovering
                     drop_pct   = (price_prev3 - price_prev1) / price_prev3 * 100 if price_prev3 > 0 else 0
-                    rapid_drop = drop_pct >= 0.3
+                    vb_threshold = 0.5 if symbol in ('NVDA', 'TSLA', 'LINK/USD') else 0.3
+                    rapid_drop = drop_pct >= vb_threshold
                     recovering = price > price_prev1
                     true_bottom = price_prev1 < price_prev2 < price_prev3
                     v_bottom   = rapid_drop and recovering and true_bottom
@@ -332,7 +333,8 @@ def check_and_execute_signals():
                     # V-TOP: rapid rise then reversal
                     # price_prev3 was low, price_prev1 was the high, now dropping
                     rise_pct   = (price_prev1 - price_prev3) / price_prev3 * 100 if price_prev3 > 0 else 0
-                    rapid_rise = rise_pct >= 0.3
+                    vb_threshold = 0.5 if symbol in ('NVDA', 'TSLA', 'LINK/USD') else 0.3
+                    rapid_rise = rise_pct >= vb_threshold
                     reversing  = price < price_prev1
                     true_top   = price_prev1 > price_prev2 > price_prev3
                     v_bottom   = rapid_rise and reversing and true_top
