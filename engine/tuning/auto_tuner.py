@@ -203,7 +203,10 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                     momentum_slowing_dn = (closes[i-2]-closes[i-1]) < (closes[i-3]-closes[i-2])
                     direction_flip_up   = closes[i] > closes[i-1]
                     slope_reversal_long = slope_down and momentum_slowing_dn and direction_flip_up
-                    entry_cond  = pullback_ok and (v_bottom or slope_reversal_long or (macd_rising and rsi_bouncing))
+                    # Strong signals (v_bottom or slope_reversal) don't need pullback
+                    strong_signal = v_bottom or slope_reversal_long
+                    weak_signal   = macd_rising and rsi_bouncing and pullback_ok
+                    entry_cond    = strong_signal or weak_signal
             else:
                 macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
                 rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
@@ -225,7 +228,10 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                     momentum_slowing = (closes[i-1]-closes[i-2]) < (closes[i-2]-closes[i-3])
                     direction_flip   = closes[i] < closes[i-1]
                     slope_reversal   = slope_up and momentum_slowing and direction_flip
-                    entry_cond  = pullback_ok and (v_bottom or slope_reversal or (macd_falling and rsi_bouncing))
+                    # Strong signals (v_bottom or slope_reversal) don't need pullback
+                    strong_signal = v_bottom or slope_reversal
+                    weak_signal   = macd_falling and rsi_bouncing and pullback_ok
+                    entry_cond    = strong_signal or weak_signal
             if entry_cond:
                 in_trade    = True
                 entry_price = closes[i]
