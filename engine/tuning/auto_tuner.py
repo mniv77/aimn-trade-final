@@ -186,9 +186,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                 macd_rising = (i > 0) and (macd_line[i] > macd_line[i-1])
                 rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
                 rsi_bouncing = rsi > rsi_prev
-                # HTF trend filter: last candle must be bullish (close > open)
-                htf_ok = (i >= 1) and (closes[i] > closes[i-1])
-                entry_cond = (rsi <= rsi_entry) and macd_rising and (rsi_bouncing or rsi <= 8) and htf_ok
+                entry_cond = (rsi <= rsi_entry) and macd_rising and (rsi_bouncing or rsi <= 8)
                 # Keep entry simple for tuning - just RSI + MACD + HTF
                 # Pullback and V-Bottom enforced in live executor only
                 pass
@@ -196,9 +194,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                 macd_falling = (i > 0) and (macd_line[i] < macd_line[i-1])
                 rsi_prev = calc_rsi_real(highs, lows, closes, i-1, rsi_len) or rsi
                 rsi_bouncing = rsi < rsi_prev
-                # HTF trend filter: last candle must be bearish (close < open)
-                htf_ok = (i >= 1) and (closes[i] < closes[i-1])
-                entry_cond = (rsi >= (100 - rsi_entry)) and macd_falling and (rsi_bouncing or rsi >= 92) and htf_ok
+                entry_cond = (rsi >= (100 - rsi_entry)) and macd_falling and (rsi_bouncing or rsi >= 92)
                 # Keep entry simple for tuning - just RSI + MACD + HTF
                 # Pullback and V-Bottom enforced in live executor only
                 pass
