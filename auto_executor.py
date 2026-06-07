@@ -181,6 +181,7 @@ def load_strategies(cursor):
         JOIN brokers b          ON bp.broker_id = b.id
         WHERE sp.active = 1
           AND bp.is_active = 1
+          AND b.trading_enabled = 1
         ORDER BY sp.id
     """)
     return cursor.fetchall()

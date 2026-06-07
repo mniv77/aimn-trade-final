@@ -1367,6 +1367,7 @@ def api_crypto_active():
     from db import get_db_connection
     conn, cursor = get_db_connection()
     cursor.execute("UPDATE strategy_params sp JOIN broker_products bp ON sp.broker_product_id=bp.id JOIN brokers b ON bp.broker_id=b.id SET sp.active=%s WHERE b.name='Gemini'", (val,))
+    cursor.execute("UPDATE brokers SET trading_enabled=%s WHERE name='Gemini'", (val,))
     conn.commit()
     conn.close()
     return jsonify({"ok": True, "message": "Crypto ENABLED" if val else "Crypto PAUSED"})
