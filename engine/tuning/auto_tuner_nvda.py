@@ -74,10 +74,11 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
             if direction=="LONG":
                 rsi_signal=rsi<=rsi_entry; rsi_bouncing=rsi>rsi_prev
                 macd_rising=ml[i]>ml[i-1]
-                dp=(closes[i-3]-closes[i-1])/closes[i-3]*100 if closes[i-3]>0 else 0
-                tb=closes[i-1]<closes[i-2]<closes[i-3]
-                rec=closes[i]>closes[i-1]
-                vb=(dp>=0.3) and tb and rec
+                dp=(closes[i-4]-closes[i-2])/closes[i-4]*100 if closes[i-4]>0 else 0
+                tb=closes[i-2]<closes[i-3]<closes[i-4]
+                b1up=closes[i-1]>closes[i-2]
+                b2up=closes[i]>closes[i-1]
+                vb=(dp>=0.5) and tb and b1up and b2up
                 sd=closes[i-1]<closes[i-2]<closes[i-3]
                 ms=(closes[i-2]-closes[i-1])<(closes[i-3]-closes[i-2])
                 fu=closes[i]>closes[i-1]
@@ -86,10 +87,11 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
             else:
                 rsi_signal=rsi>=(100-rsi_entry); rsi_bouncing=rsi<rsi_prev
                 macd_falling=ml[i]<ml[i-1]
-                rp=(closes[i-1]-closes[i-3])/closes[i-3]*100 if closes[i-3]>0 else 0
-                tt=closes[i-1]>closes[i-2]>closes[i-3]
-                rev=closes[i]<closes[i-1]
-                vt=(rp>=0.3) and tt and rev
+                rp=(closes[i-2]-closes[i-4])/closes[i-4]*100 if closes[i-4]>0 else 0
+                tt=closes[i-2]>closes[i-3]>closes[i-4]
+                b1dn=closes[i-1]<closes[i-2]
+                b2dn=closes[i]<closes[i-1]
+                vt=(rp>=0.5) and tt and b1dn and b2dn
                 su=closes[i-1]>closes[i-2]>closes[i-3]
                 ms=(closes[i-1]-closes[i-2])<(closes[i-2]-closes[i-3])
                 fd=closes[i]<closes[i-1]
