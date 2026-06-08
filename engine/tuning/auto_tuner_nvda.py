@@ -177,4 +177,5 @@ def tune_nvda(direction="LONG", timeframe="5m"):
 
 if __name__=="__main__":
     for d in ["LONG","SHORT"]:
-        tune_nvda(d,"5m")
+        for tf in ["1m","5m"]:
+            tune_nvda(d,tf)
