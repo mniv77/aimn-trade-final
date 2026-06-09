@@ -53,6 +53,54 @@ def calc_macd_series(closes, fast, slow, sig):
         sl[i] = sv
     return ml, sl
 
+def calc_v_score(closes, volumes, rsi, direction, i):
+    """Score 0-100 how major the V pattern is. >60 = enter."""
+    score = 0
+    if i < 6: return 0
+    
+    if direction == "LONG":
+        # 1. Drop magnitude (0-30 pts) — bigger drop = more major
+        bottom = min(closes[i-5:i])
+        drop_pct = (closes[i-5] - bottom) / closes[i-5] * 100 if closes[i-5] > 0 else 0
+        score += min(30, drop_pct * 15)
+        
+        # 2. Drop speed — consecutive down bars before bottom (0-20 pts)
+        down_bars = sum(1 for j in range(i-4, i-1) if closes[j] < closes[j-1])
+        score += down_bars * 6
+        
+        # 3. Volume spike at bottom (0-25 pts)
+        if volumes and len(volumes) > i:
+            avg_vol = sum(volumes[max(0,i-10):i-1]) / max(1, min(9, i-1))
+            vol_ratio = volumes[i-1] / avg_vol if avg_vol > 0 else 1
+            score += min(25, vol_ratio * 8)
+        else:
+            score += 10  # neutral if no volume
+        
+        # 4. RSI extreme (0-15 pts)
+        score += max(0, (20 - rsi) * 0.75)
+        
+        # 5. 2-bar recovery confirmed (0-10 pts)
+        if closes[i] > closes[i-1] > closes[i-2]:
+            score += 10
+    else:
+        # SHORT — V-Top scoring
+        top = max(closes[i-5:i])
+        rise_pct = (top - closes[i-5]) / closes[i-5] * 100 if closes[i-5] > 0 else 0
+        score += min(30, rise_pct * 15)
+        up_bars = sum(1 for j in range(i-4, i-1) if closes[j] > closes[j-1])
+        score += up_bars * 6
+        if volumes and len(volumes) > i:
+            avg_vol = sum(volumes[max(0,i-10):i-1]) / max(1, min(9, i-1))
+            vol_ratio = volumes[i-1] / avg_vol if avg_vol > 0 else 1
+            score += min(25, vol_ratio * 8)
+        else:
+            score += 10
+        score += max(0, (rsi - 80) * 0.75)
+        if closes[i] < closes[i-1] < closes[i-2]:
+            score += 10
+    
+    return min(100, score)
+
 def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
     rsi_len=params["rsi_len"]; rsi_entry=params["rsi_entry"]
     stop_loss=params["stop_loss"]; trail_start=params["trail_start"]
@@ -86,7 +134,9 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
                 ms=(closes[i-2]-closes[i-1])<(closes[i-3]-closes[i-2])
                 fu=closes[i]>closes[i-1]
                 sr=sd and ms and fu
-                entry_cond=rsi_signal and (vb or sr or (macd_rising and rsi_bouncing))
+                v_score=calc_v_score(closes,[],rsi,direction,i)
+                v_score=calc_v_score(closes,[],rsi,direction,i)
+                entry_cond=rsi_signal and (vb or sr or (macd_rising and rsi_bouncing)) and v_score>=50 and v_score>=50
             else:
                 rsi_signal=rsi>=(100-rsi_entry); rsi_bouncing=rsi<rsi_prev
                 macd_falling=ml[i]<ml[i-1]
@@ -99,7 +149,9 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
                 ms=(closes[i-1]-closes[i-2])<(closes[i-2]-closes[i-3])
                 fd=closes[i]<closes[i-1]
                 sr=su and ms and fd
-                entry_cond=rsi_signal and (vt or sr or (macd_falling and rsi_bouncing))
+                v_score=calc_v_score(closes,[],rsi,direction,i)
+                v_score=calc_v_score(closes,[],rsi,direction,i)
+                entry_cond=rsi_signal and (vt or sr or (macd_falling and rsi_bouncing)) and v_score>=50 and v_score>=50
             if entry_cond:
                 in_trade=True; entry_price=closes[i]
                 peak_profit=-999.0; entry_bar=i
