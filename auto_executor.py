@@ -317,6 +317,10 @@ def check_and_execute_signals():
                 price_prev3 = float(s.get("price_prev3") or price)
                 recent_high = max(price, price_prev1, price_prev2, price_prev3)
                 recent_low  = min(price, price_prev1, price_prev2, price_prev3)
+                # ── TREND STATE (NVDA/TSLA) ───────────────────
+                prices = [price_prev3, price_prev2, price_prev1, price]
+                ups = sum(1 for j in range(1,4) if prices[j]>prices[j-1])
+                trend_state = "CLIMBING" if ups>=3 else ("DESCENDING" if ups<=1 else "SIDEWAYS")
                 if direction == "LONG":
                     # Price must be at least 0.2% below recent high (not entering at peak)
                     pullback_ok = price <= recent_high * 0.998
@@ -327,7 +331,9 @@ def check_and_execute_signals():
                     rapid_drop = drop_pct >= vb_threshold
                     recovering = price > price_prev1
                     true_bottom = price_prev1 < price_prev2 < price_prev3
-                    v_bottom   = rapid_drop and recovering and true_bottom
+                    # For NVDA: only enter LONG when trend was DESCENDING (real V-bottom)
+                    state_ok = (trend_state == "DESCENDING") if symbol == "NVDA" else True
+                    v_bottom   = rapid_drop and recovering and true_bottom and state_ok
                 else:
                     # Price must be at least 0.2% above recent low (not entering at bottom)
                     pullback_ok = price >= recent_low * 1.002
@@ -338,7 +344,9 @@ def check_and_execute_signals():
                     rapid_rise = rise_pct >= vb_threshold
                     reversing  = price < price_prev1
                     true_top   = price_prev1 > price_prev2 > price_prev3
-                    v_bottom   = rapid_rise and reversing and true_top
+                    # For NVDA: only enter SHORT when trend was CLIMBING (real V-top)
+                    state_ok = (trend_state == "CLIMBING") if symbol == "NVDA" else True
+                    v_bottom   = rapid_rise and reversing and true_top and state_ok
 
                 # V-bottom gives extra confidence - can relax MACD requirement
                 if v_bottom and rsi_signal and bounce_signal and pullback_ok:
