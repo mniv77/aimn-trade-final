@@ -321,6 +321,14 @@ def check_and_execute_signals():
                 prices = [price_prev3, price_prev2, price_prev1, price]
                 ups = sum(1 for j in range(1,4) if prices[j]>prices[j-1])
                 trend_state = "CLIMBING" if ups>=3 else ("DESCENDING" if ups<=1 else "SIDEWAYS")
+                # ── ACTIVITY FILTER: skip flat/sideways moves ──
+                if symbol in ("NVDA", "TSLA"):
+                    price_range = recent_high - recent_low
+                    activity_pct = price_range / price * 100 if price > 0 else 0
+                    is_active = activity_pct >= 0.30  # must have moved 0.30%+ in last 4 bars
+                    if not is_active:
+                        log(f"  💤 FLAT BLOCK: {symbol} {direction} range={activity_pct:.2f}% — skip")
+                        continue
                 if direction == "LONG":
                     # Price must be at least 0.2% below recent high (not entering at peak)
                     pullback_ok = price <= recent_high * 0.998
@@ -524,7 +532,13 @@ def monitor_and_exit_trades():
                 # ── RULE 2: TRAILING STOP (two-phase) ─────
                 if peak >= trail_start:
                     # Phase 1: small profit — give 15% room
-                    if peak < 1.0:
+                    # NVDA special: very tight until 0.3% then loose to ride major V
+                    if symbol == "NVDA":
+                        if peak < 0.3:
+                            trail_level = peak * 0.70  # very tight — filter minor V
+                        else:
+                            trail_level = peak * 0.85  # loose — ride the major V!
+                    elif peak < 1.0:
                         trail_level = peak * 0.85
                     # Phase 2: larger profit — tighten to 10%
                     else:
