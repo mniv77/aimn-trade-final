@@ -471,6 +471,7 @@
 
       scanData.filter(row => {
         if (row.symbol === activeTradeSymbol) return true;
+        if (row.exchange === 'GEMINI' && !cryptoEnabled) return false;
         if ((!row.rsi || row.rsi === 0) && row.exchange === 'GEMINI') return false;
         const hasStrategy = Object.keys(strategyMap).some(k => k.startsWith(`${row.symbol}:LONG`) || k.startsWith(`${row.symbol}:SHORT`));
         if (!hasStrategy) return false;
@@ -1060,10 +1061,12 @@
         status.className = val ? 'text-xs text-green-400 self-center' : 'text-xs text-red-400 self-center';
       } catch(e) { status.textContent = 'Error!'; }
     }
+    let cryptoEnabled = false;
     async function checkCryptoStatus() {
       try {
         const res = await fetch('/api/crypto/status');
         const data = await res.json();
+        cryptoEnabled = data.active > 0;
         const el = document.getElementById('crypto-status');
         el.textContent = data.active > 0 ? 'Crypto: ENABLED ' + data.active + ' strategies' : 'Crypto: PAUSED';
         el.className = data.active > 0 ? 'text-xs text-green-400 self-center' : 'text-xs text-red-400 self-center';
