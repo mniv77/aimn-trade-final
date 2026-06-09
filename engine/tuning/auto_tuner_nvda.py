@@ -71,6 +71,9 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
             rsi=calc_rsi_real(highs,lows,closes,i,rsi_len)
             if rsi is None: continue
             rsi_prev=calc_rsi_real(highs,lows,closes,i-1,rsi_len) or rsi
+            # TREND STATE MACHINE
+            ups=sum(1 for j in range(max(0,i-5),i) if closes[j]>closes[j-1])
+            state="CLIMBING" if ups>=4 else ("DESCENDING" if ups<=1 else "SIDEWAYS")
             if direction=="LONG":
                 rsi_signal=rsi<=rsi_entry; rsi_bouncing=rsi>rsi_prev
                 macd_rising=ml[i]>ml[i-1]
@@ -78,7 +81,7 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
                 tb=closes[i-2]<closes[i-3]<closes[i-4]
                 b1up=closes[i-1]>closes[i-2]
                 b2up=closes[i]>closes[i-1]
-                vb=(dp>=0.5) and tb and b1up and b2up
+                vb=(dp>=0.3) and tb and b1up and b2up and state=="DESCENDING"
                 sd=closes[i-1]<closes[i-2]<closes[i-3]
                 ms=(closes[i-2]-closes[i-1])<(closes[i-3]-closes[i-2])
                 fu=closes[i]>closes[i-1]
@@ -91,7 +94,7 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
                 tt=closes[i-2]>closes[i-3]>closes[i-4]
                 b1dn=closes[i-1]<closes[i-2]
                 b2dn=closes[i]<closes[i-1]
-                vt=(rp>=0.5) and tt and b1dn and b2dn
+                vt=(rp>=0.3) and tt and b1dn and b2dn and state=="CLIMBING"
                 su=closes[i-1]>closes[i-2]>closes[i-3]
                 ms=(closes[i-1]-closes[i-2])<(closes[i-2]-closes[i-3])
                 fd=closes[i]<closes[i-1]
