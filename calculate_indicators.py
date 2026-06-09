@@ -112,12 +112,16 @@ def run_calculator():
                     cursor.execute("UPDATE broker_products SET rsi_real = %s, macd = %s WHERE id = %s", (rsi_real, macd_val, strat["broker_product_id"]))
                     cursor.execute("""
                         UPDATE strategy_params
-                        SET rsi_prev  = rsi_real,
-                            rsi_real  = %s,
-                            macd      = %s,
-                            macd_prev = %s
+                        SET rsi_prev     = rsi_real,
+                            rsi_real     = %s,
+                            macd         = %s,
+                            macd_prev    = %s,
+                            candle_prev4 = candle_prev3,
+                            candle_prev3 = candle_prev2,
+                            candle_prev2 = candle_prev1,
+                            candle_prev1 = %s
                         WHERE id = %s
-                    """, (rsi_real, macd_val, macd_prev_val, strategy_id))
+                    """, (rsi_real, macd_val, macd_prev_val, closes[-1], strategy_id))
                     if cycle_count % 10 == 0:
                         print(f"  RSI={rsi_real} prev={rsi_prev} MACD={macd_val} {symbol}")
                 except Exception as e:

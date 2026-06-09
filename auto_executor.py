@@ -172,8 +172,14 @@ def load_strategies(cursor):
             bp.local_ticker AS symbol,
             at.entry_time  AS at_entry_time,
             bp.last_price,
+            bp.price_prev1,
+            bp.price_prev2,
             bp.price_prev3,
             bp.price_updated_at,
+            sp.candle_prev1,
+            sp.candle_prev2,
+            sp.candle_prev3,
+            sp.candle_prev4,
             b.name         AS broker_name
         FROM strategy_params sp
         JOIN broker_products bp ON sp.broker_product_id = bp.id
@@ -315,8 +321,12 @@ def check_and_execute_signals():
                 price_prev1 = float(s.get("price_prev1") or price)
                 price_prev2 = float(s.get("price_prev2") or price)
                 price_prev3 = float(s.get("price_prev3") or price)
-                recent_high = max(price, price_prev1, price_prev2, price_prev3)
-                recent_low  = min(price, price_prev1, price_prev2, price_prev3)
+                cp1 = float(s.get("candle_prev1") or price_prev1)
+                cp2 = float(s.get("candle_prev2") or price_prev2)
+                cp3 = float(s.get("candle_prev3") or price_prev3)
+                cp4 = float(s.get("candle_prev4") or price_prev3)
+                recent_high = max(price, cp1, cp2, cp3)
+                recent_low  = min(price, cp1, cp2, cp3)
                 # ── TREND STATE (NVDA/TSLA) ───────────────────
                 prices = [price_prev3, price_prev2, price_prev1, price]
                 ups = sum(1 for j in range(1,4) if prices[j]>prices[j-1])
@@ -334,11 +344,11 @@ def check_and_execute_signals():
                     pullback_ok = price <= recent_high * 0.998
                     # V-BOTTOM: rapid drop then recovery
                     # price_prev3 was high, price_prev1 was the low, now recovering
-                    drop_pct   = (price_prev3 - price_prev1) / price_prev3 * 100 if price_prev3 > 0 else 0
+                    drop_pct   = (cp3 - cp1) / cp3 * 100 if cp3 > 0 else 0
                     vb_threshold = 0.5 if symbol in ('NVDA', 'TSLA', 'LINK/USD') else 0.3
                     rapid_drop = drop_pct >= vb_threshold
-                    recovering = price > price_prev1
-                    true_bottom = price_prev1 < price_prev2 < price_prev3
+                    recovering = price > cp1
+                    true_bottom = cp1 < cp2 < cp3
                     # For NVDA: only enter LONG when trend was DESCENDING (real V-bottom)
                     state_ok = (trend_state == "DESCENDING") if symbol == "NVDA" else True
                     # V-Score: major V filter for NVDA
@@ -357,11 +367,11 @@ def check_and_execute_signals():
                     pullback_ok = price >= recent_low * 1.002
                     # V-TOP: rapid rise then reversal
                     # price_prev3 was low, price_prev1 was the high, now dropping
-                    rise_pct   = (price_prev1 - price_prev3) / price_prev3 * 100 if price_prev3 > 0 else 0
+                    rise_pct   = (cp1 - cp3) / cp3 * 100 if cp3 > 0 else 0
                     vb_threshold = 0.5 if symbol in ('NVDA', 'TSLA', 'LINK/USD') else 0.3
                     rapid_rise = rise_pct >= vb_threshold
-                    reversing  = price < price_prev1
-                    true_top   = price_prev1 > price_prev2 > price_prev3
+                    reversing  = price < cp1
+                    true_top   = cp1 > cp2 > cp3
                     # For NVDA: only enter SHORT when trend was CLIMBING (real V-top)
                     state_ok = (trend_state == "CLIMBING") if symbol == "NVDA" else True
                     v_bottom   = rapid_rise and reversing and true_top and state_ok
