@@ -341,6 +341,16 @@ def check_and_execute_signals():
                     true_bottom = price_prev1 < price_prev2 < price_prev3
                     # For NVDA: only enter LONG when trend was DESCENDING (real V-bottom)
                     state_ok = (trend_state == "DESCENDING") if symbol == "NVDA" else True
+                    # V-Score: major V filter for NVDA
+                    if symbol == "NVDA":
+                        prices_list = [price_prev3, price_prev2, price_prev1, price]
+                        bottom = min(prices_list)
+                        drop_pct2 = (price_prev3 - bottom) / price_prev3 * 100 if price_prev3 > 0 else 0
+                        down_bars2 = sum(1 for j in range(1,4) if prices_list[j] < prices_list[j-1])
+                        two_bar_rec = price > price_prev1 > price_prev2
+                        v_score = min(100, drop_pct2*15 + down_bars2*6 + max(0,(20-rsi_real)*0.75) + (10 if two_bar_rec else 0))
+                        log(f"  📊 V-SCORE: {symbol} {direction} score={v_score:.0f}")
+                        state_ok = state_ok and v_score >= 50
                     v_bottom   = rapid_drop and recovering and true_bottom and state_ok
                 else:
                     # Price must be at least 0.2% above recent low (not entering at bottom)
