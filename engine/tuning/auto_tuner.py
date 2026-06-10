@@ -146,7 +146,7 @@ def calc_supertrend(highs, lows, closes, period=7, multiplier=2.0):
     return direction_st
 
 
-def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
+def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None, symbol=""):
     rsi_len     = params['rsi_len']
     rsi_entry   = params['rsi_entry']
     stop_loss   = params['stop_loss']
@@ -206,6 +206,9 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                 active_stop = stop_loss
                 # Volume soft boost
                 big_volume = False
+                # NVDA backtest logger
+                if symbol == "NVDA":                    with open("/home/MeirNiv/aimn-trade-final/nvda_trades.log", "a") as f:
+                        f.write(f"[BACKTEST] ENTRY | {direction} | ${entry_price:.2f} | bar={i}\n")
                 if volumes and i >= 20:
                     avg_vol = sum(volumes[i-20:i]) / 20
                     vol_ratio = volumes[i] / avg_vol if avg_vol > 0 else 1.0
@@ -289,6 +292,11 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
                     wins += 1
                 total_duration_hours += dur_hours
                 in_trade    = False
+                # NVDA backtest logger
+                if symbol == "NVDA":
+                    dur_str = f"{int(dur_hours)}h{int((dur_hours%1)*60)}m"
+                    with open("/home/MeirNiv/aimn-trade-final/nvda_trades.log", "a") as f:
+                        f.write(f"[BACKTEST] EXIT  | {direction} | ${closes[i]:.2f} | {current_pnl:+.2f}% | {exit_reason} | {dur_str}\n")
                 peak_profit = -999.0
 
     if trades < min_trades:
@@ -300,6 +308,7 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None):
         'trades'          : trades,
         'wins'            : wins,
         'winrate'         : round(wins / trades * 100, 2),
+
         'avg_pnl'         : round(total_pnl / trades, 4),
         'total_pnl'       : round(total_pnl, 4),
         'profit_per_hour' : profit_per_hour,
@@ -331,7 +340,7 @@ def save_best_params(strategy_id, params, result):
         return
     try:
         # Check if this is a Gemini strategy - keep paused if so
-        cursor.execute("""SELECT b.name FROM strategy_params sp 
+        cursor.execute("""SELECT b.name FROM strategy_params sp
             JOIN broker_products bp ON sp.broker_product_id=bp.id
             JOIN brokers b ON bp.broker_id=b.id
             WHERE sp.id=%s""", (strategy_id,))
