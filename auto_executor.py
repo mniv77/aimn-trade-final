@@ -311,6 +311,7 @@ def check_and_execute_signals():
                     rsi_extreme   = rsi_real <= 8
                     macd_signal   = macd_rising or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
+                    trend_ok      = macd_val > 0 or rsi_extreme
                 else:
                     rsi_signal    = rsi_real >= (100 - rsi_entry)
                     rsi_bouncing  = rsi_real < rsi_prev_val
@@ -318,6 +319,10 @@ def check_and_execute_signals():
                     rsi_extreme   = rsi_real >= 92
                     macd_signal   = macd_falling or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
+                    trend_ok      = macd_val < 0 or rsi_extreme
+                if not trend_ok:
+                    log(f"  🚫 TREND BLOCK: {symbol} {direction} MACD={macd_val:.4f} — skip")
+                    continue
                 # ── PULLBACK FILTER: never enter at peak ──────
                 price_prev1 = float(s.get("price_prev1") or price)
                 price_prev2 = float(s.get("price_prev2") or price)
