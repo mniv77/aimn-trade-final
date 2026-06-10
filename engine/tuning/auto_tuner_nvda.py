@@ -221,10 +221,10 @@ def tune_nvda(direction="LONG", timeframe="5m"):
         log("NO VALID PARAMS"); return
     log(f"TRAIN: PnL={best_train['total_pnl']}% WR={best_train['win_rate']}% trades={best_train['trades']}")
     test=backtest_nvda(highs[split:],lows[split:],closes[split:],direction,best_params,bm)
-    if not test or test["total_pnl"]<=-1.0:
-        log("TEST NEGATIVE — NOT SAVED"); return
+    if not test or test["total_pnl"]<=-2.0:
+        log("TEST VERY NEGATIVE — NOT SAVED"); return
     if test["total_pnl"] < 0:
-        log(f"TEST slightly negative {test['total_pnl']}% — saving anyway (train was strong)")
+        log(f"TEST slightly negative {test['total_pnl']}% — saving anyway (train WR={best_train['win_rate']}%)")
     log(f"TEST: PnL={test['total_pnl']}% WR={test['win_rate']}% trades={test['trades']}")
     conn,cursor=get_db_connection()
     try:
