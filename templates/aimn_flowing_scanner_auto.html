@@ -638,6 +638,19 @@
 
     async function stripEnterOrder() {
       if (!stripSignalData) return;
+      // Market hours check — block stock entries outside NYSE hours
+      const exchange = (stripSignalData.exchange || '').toUpperCase();
+      if (exchange !== 'GEMINI') {
+        const now = new Date();
+        const et = new Date(now.toLocaleString('en-US', {timeZone: 'America/New_York'}));
+        const mins = et.getHours() * 60 + et.getMinutes();
+        const isWeekend = et.getDay() === 0 || et.getDay() === 6;
+        if (isWeekend || mins < 570 || mins >= 960) {
+          console.log('Market closed — blocking auto-enter for', stripSignalData.symbol);
+          stripDismiss();
+          return;
+        }
+      }
       const alreadyOpen = _ordersCache.find(o => o.symbol === stripSignalData.symbol && o.status !== 'CLOSED');
       if (alreadyOpen) { alert(`${stripSignalData.symbol} already has an open trade.`); stripDismiss(); return; }
       el('strip-enter-btn').disabled = true;
@@ -776,7 +789,7 @@
         const trailStart = strat ? parseFloat(strat.trailing_start || 1.0) : 1.0;
         const trailDrop  = strat ? parseFloat(strat.trailing_drop  || 0.5) : 0.5;
         const localPeak  = peakProfitMap[o.id] || 0;
-        
+
         // FIXED: Trail distance calculation
         let trailStr = '--';
         let trailDistStr = '';
@@ -784,24 +797,24 @@
           const trailPx = dir === 'BUY'
             ? entry * (1 + (localPeak - trailDrop) / 100)
             : entry * (1 - (localPeak - trailDrop) / 100);
-          
+
           if ((dir === 'BUY' && trailPx >= entry) || (dir === 'SELL' && trailPx <= entry)) {
             // Calculate % distance to trail exit
-            const distPct = dir === 'BUY' 
+            const distPct = dir === 'BUY'
               ? ((cur - trailPx) / trailPx * 100)  // LONG: how far above trail
               : ((trailPx - cur) / cur * 100);      // SHORT: how far below trail
-            
+
             const arrow = dir === 'BUY' ? '↓' : '↑';
             const distColor = Math.abs(distPct) < 0.3 ? 'text-red-400' : Math.abs(distPct) < 0.5 ? 'text-orange-400' : 'text-yellow-400';
             trailDistStr = `<span class="${distColor}"> (${arrow}${Math.abs(distPct).toFixed(2)}% to exit)</span>`;
             trailStr = '$' + trailPx.toFixed(2) + trailDistStr;
           }
         }
-        
+
         const scanRow = scanData.find(s => s.symbol === o.symbol);
         const rsiVal = isClosed ? '--' : (scanRow ? parseFloat(scanRow.rsi||0).toFixed(1) : '--');
         const rsiColor = isClosed ? 'text-gray-500' : (scanRow && scanRow.rsi <= 30 ? 'text-green-300' : scanRow && scanRow.rsi >= 70 ? 'text-red-300' : 'text-purple-300');
-        
+
         let initProfit = '--';
         if (strat && !isClosed) {
           const _initP = parseFloat(strat.init_profit || 1.0);
@@ -950,10 +963,10 @@
       const dir = direction || (order.direction === 'LONG' ? 'BUY' : 'SELL');
       const pnl = dir === 'BUY' ? (cur - entry) / entry * 100 : (entry - cur) / entry * 100;
       const exitTime = new Date();
-      
+
       const entryMs = typeof order.entry_time === 'number' ? order.entry_time : new Date(order.entry_time).getTime();
       const durSecs = Math.floor((exitTime.getTime() - entryMs) / 1000);
-      
+
       // Call /finalize_order instead of /api/trade/close
       await fetch('/finalize_order', {
         method: 'POST',
@@ -970,7 +983,7 @@
           duration: durSecs
         })
       });
-      
+
       const nex = normEx(broker);
       lastByBroker[nex] = Date.now();
       lastBySymbol[symbol] = Date.now();
@@ -978,7 +991,7 @@
         stripTradeId = null; stripSignalData = null;
         clearInterval(stripPriceInterval); stripPriceInterval = null;
       }
-      
+
       order.status = 'CLOSED';
       order.exit_time = exitTime.getTime();
       order.exit_price = cur;
@@ -986,7 +999,7 @@
       order.exit_reason = autoReason || 'PANIC EXIT';
       renderOrderRows(_ordersCache);
       el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
-      
+
       setTimeout(() => {
         _ordersCache = _ordersCache.filter(o => o.id !== tradeId);
         delete livePriceMap[tradeId];
@@ -994,7 +1007,7 @@
         renderOrderRows(_ordersCache);
         el('active-order-count').textContent = `${_ordersCache.filter(o=>o.status!=='CLOSED').length} open`;
       }, 120000);
-      
+
       activeTradeSymbol = _ordersCache.filter(o=>o.status!=='CLOSED').length ? _ordersCache[0].symbol : null;
       activeTradeExchange = _ordersCache.filter(o=>o.status!=='CLOSED').length ? _ordersCache[0].broker : null;
       activeTradeExchangeNorm = activeTradeExchange ? normEx(activeTradeExchange) : null;
