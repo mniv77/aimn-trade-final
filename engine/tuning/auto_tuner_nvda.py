@@ -122,6 +122,13 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
             # TREND STATE MACHINE
             ups=sum(1 for j in range(max(0,i-5),i) if closes[j]>closes[j-1])
             state="CLIMBING" if ups>=4 else ("DESCENDING" if ups<=1 else "SIDEWAYS")
+            # Count sustained trend bars before current bar
+            last_dir = 1 if closes[i-1]>closes[i-2] else -1
+            trend_count=0
+            for tj in range(i-2, max(0,i-15), -1):
+                bd = 1 if closes[tj]>closes[tj-1] else -1
+                if bd==last_dir: trend_count+=1
+                else: break
             if direction=="LONG":
                 rsi_signal=rsi<=rsi_entry; rsi_bouncing=rsi>rsi_prev
                 macd_rising=ml[i]>ml[i-1]
@@ -136,6 +143,8 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
                 sr=sd and ms and fu
                 v_score=calc_v_score(closes,[],rsi,direction,i)
                 v_score=calc_v_score(closes,[],rsi,direction,i)
+                trend_bonus=min(20,trend_count*3)
+                v_score=min(100,v_score+trend_bonus)
                 entry_cond=rsi_signal and (vb or sr or (macd_rising and rsi_bouncing)) and v_score>=50 and v_score>=50
             else:
                 rsi_signal=rsi>=(100-rsi_entry); rsi_bouncing=rsi<rsi_prev
@@ -151,6 +160,8 @@ def backtest_nvda(highs, lows, closes, direction, params, bar_minutes):
                 sr=su and ms and fd
                 v_score=calc_v_score(closes,[],rsi,direction,i)
                 v_score=calc_v_score(closes,[],rsi,direction,i)
+                trend_bonus=min(20,trend_count*3)
+                v_score=min(100,v_score+trend_bonus)
                 entry_cond=rsi_signal and (vt or sr or (macd_falling and rsi_bouncing)) and v_score>=50 and v_score>=50
             if entry_cond:
                 in_trade=True; entry_price=closes[i]

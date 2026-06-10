@@ -98,6 +98,16 @@ def run_calculator():
                         continue
                     rsi_real = round(((closes[-1] - lo) / (hi - lo)) * 100, 2)
                     rsi_real = max(0, min(100, rsi_real))
+                    # Count consecutive bars in same direction
+                    trend_bars_count = 0
+                    if len(closes) >= 3:
+                        last_dir = 1 if closes[-1] > closes[-2] else -1
+                        for j in range(len(closes)-2, max(0, len(closes)-20), -1):
+                            bar_dir = 1 if closes[j] > closes[j-1] else -1
+                            if bar_dir == last_dir:
+                                trend_bars_count += 1
+                            else:
+                                break
                     hi_prev = max(highs[-rsi_len-1:-1])
                     lo_prev = min(lows[-rsi_len-1:-1])
                     rsi_prev = 0.0
@@ -119,9 +129,10 @@ def run_calculator():
                             candle_prev4 = candle_prev3,
                             candle_prev3 = candle_prev2,
                             candle_prev2 = candle_prev1,
-                            candle_prev1 = %s
+                            candle_prev1 = %s,
+                            trend_bars   = %s
                         WHERE id = %s
-                    """, (rsi_real, macd_val, macd_prev_val, closes[-1], strategy_id))
+                    """, (rsi_real, macd_val, macd_prev_val, closes[-1], trend_bars_count, strategy_id))
                     if cycle_count % 10 == 0:
                         print(f"  RSI={rsi_real} prev={rsi_prev} MACD={macd_val} {symbol}")
                 except Exception as e:

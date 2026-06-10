@@ -180,6 +180,7 @@ def load_strategies(cursor):
             sp.candle_prev2,
             sp.candle_prev3,
             sp.candle_prev4,
+            sp.trend_bars,
             b.name         AS broker_name
         FROM strategy_params sp
         JOIN broker_products bp ON sp.broker_product_id = bp.id
@@ -358,7 +359,10 @@ def check_and_execute_signals():
                         drop_pct2 = (price_prev3 - bottom) / price_prev3 * 100 if price_prev3 > 0 else 0
                         down_bars2 = sum(1 for j in range(1,4) if prices_list[j] < prices_list[j-1])
                         two_bar_rec = price > price_prev1 > price_prev2
-                        v_score = min(100, drop_pct2*15 + down_bars2*6 + max(0,(20-rsi_real)*0.75) + (10 if two_bar_rec else 0))
+                        trend_b = int(s.get("trend_bars") or 0)
+                        trend_bonus = min(20, trend_b * 3)  # up to 20 pts for 6+ bars trend
+                        v_score = min(100, drop_pct2*15 + down_bars2*6 + max(0,(20-rsi_real)*0.75) + (10 if two_bar_rec else 0) + trend_bonus)
+                        log(f"  📊 V-SCORE: {symbol} {direction} score={v_score:.0f} trend={trend_b}bars")
                         log(f"  📊 V-SCORE: {symbol} {direction} score={v_score:.0f}")
                         state_ok = state_ok and v_score >= 50
                     v_bottom   = rapid_drop and recovering and true_bottom and state_ok
