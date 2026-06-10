@@ -402,6 +402,12 @@ def check_and_execute_signals():
                     log(f"  ⚠️ MAX TRADES: skipping {symbol}")
                     continue
                 log(f"  🚀 SIGNAL: {symbol} {direction} @ ${price:,.4f} | RSI={rsi_real:.1f}")
+                # ── NVDA Trade Logger ─────────────────────────
+                if symbol == "NVDA":
+                    with open("/home/MeirNiv/aimn-trade-final/nvda_trades.log", "a") as f:
+                        from datetime import datetime as dt
+                        v_scr = int(s.get("v_score") or 0)
+                        f.write(f"{dt.utcnow().strftime('%Y-%m-%d %H:%M')} | ENTRY | {direction} | ${price:.2f} | RSI={rsi_real:.1f} | MACD={macd_val:.4f}\n")
                 candle_time = s["candle_time"] or DEFAULT_PARAMS["candle_time"]
                 cursor.execute("""
                     INSERT INTO active_trades
@@ -660,6 +666,12 @@ def _close_trade(cursor, s, current_price, pnl, duration_seconds, exit_reason):
 
         log(f"  🚪 EXIT: {symbol} {direction} @ ${current_price:.4f} | "
             f"{exit_reason} | P&L: {pnl:+.2f}% | {duration_seconds:.0f}s")
+        # ── NVDA Trade Logger ─────────────────────────
+        if symbol == "NVDA":
+            with open("/home/MeirNiv/aimn-trade-final/nvda_trades.log", "a") as f:
+                from datetime import datetime as dt
+                dur_str = f"{int(duration_seconds//3600)}h{int((duration_seconds%3600)//60)}m"
+                f.write(f"{dt.utcnow().strftime('%Y-%m-%d %H:%M')} | EXIT  | {direction} | ${current_price:.2f} | {pnl:+.2f}% | {exit_reason} | {dur_str}\n")
 
     except Exception as e:
         log(f"  ❌ _close_trade error ({symbol}): {e}")
