@@ -578,7 +578,10 @@ def monitor_and_exit_trades():
                     # Phase 2: larger profit — tighten to 10%
                     else:
                         trail_level = peak * 0.90
-                    if pnl <= trail_level and trail_level > 0:
+                    # Break-even floor — trail never below entry
+                    if trail_level < 0:
+                        trail_level = 0.0  # minimum break-even
+                    if pnl <= trail_level and trail_level >= 0:
                         if duration_seconds >= MIN_TRADE_SECONDS:
                             exit_reason = f"TRAIL (peak={peak:.2f}%, trail={trail_level:.2f}%)"
                         else:
