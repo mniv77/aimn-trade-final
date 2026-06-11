@@ -309,6 +309,7 @@ def api_scanner_symbols():
             JOIN broker_products bp ON sp.broker_product_id = bp.id
             JOIN brokers b ON bp.broker_id = b.id
             WHERE sp.active = 1
+            AND b.name NOT IN ('Futures', 'Forex', 'webull')
             ORDER BY bp.local_ticker
         """)
         rows = cursor.fetchall()
