@@ -207,7 +207,8 @@ def backtest(highs, lows, closes, direction, params, bar_minutes, volumes=None, 
                 # Volume soft boost
                 big_volume = False
                 # NVDA backtest logger
-                if symbol == "NVDA":                    with open("/home/MeirNiv/aimn-trade-final/nvda_trades.log", "a") as f:
+                if symbol == "NVDA":
+                    with open("/home/MeirNiv/aimn-trade-final/nvda_trades.log", "a") as f:
                         f.write(f"[BACKTEST] ENTRY | {direction} | ${entry_price:.2f} | bar={i}\n")
                 if volumes and i >= 20:
                     avg_vol = sum(volumes[i-20:i]) / 20
