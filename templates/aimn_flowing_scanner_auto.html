@@ -236,7 +236,8 @@
         if (!data.prices || !data.prices.length) return;
         const priceMap = {};
         data.prices.forEach(p => { if (p.price) priceMap[p.symbol] = p.price; });
-        scanData.forEach(item => {
+        // Also update tickerItems with real prices
+        tickerItems.forEach(item => {
           if (priceMap[item.symbol]) {
             const px = priceMap[item.symbol];
             item.price = px > 1000 ? px.toFixed(2) : px > 10 ? px.toFixed(4) : px.toFixed(6);
