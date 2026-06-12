@@ -638,6 +638,12 @@
 
     async function stripEnterOrder() {
       if (!stripSignalData) return;
+      // Check panic cooldown
+      if (window.panicCooldown && window.panicCooldown[stripSignalData.symbol] > Date.now()) {
+        console.log(`${stripSignalData.symbol} in panic cooldown — blocking entry`);
+        stripDismiss();
+        return;
+      }
       // Market hours check — block stock entries outside NYSE hours
       const exchange = (stripSignalData.exchange || '').toUpperCase();
       if (exchange !== 'GEMINI') {
@@ -699,9 +705,28 @@
       isOpening = false;
       updateExchangeStatusDisplay(); updateScanResultsDisplay(); updateTickerDisplay();
       setTimeout(processPopupQueue, 300);
+
     }
 
     function stripPanicExit() {
+      // Block re-entry for 5 minutes after panic close
+      if (stripSignalData) {
+        const sym = stripSignalData.symbol;
+        if (!window.panicCooldown) window.panicCooldown = {};
+        window.panicCooldown[sym] = Date.now() + 5 * 60 * 1000;
+        console.log(`Panic cooldown set for ${sym} — 5 minutes`);
+      }
+    }
+
+    // After panic close — block re-entry for 5 minutes
+    function stripPanicExit() {
+      // Block re-entry for 5 minutes after panic close
+      if (stripSignalData) {
+        const sym = stripSignalData.symbol;
+        if (!window.panicCooldown) window.panicCooldown = {};
+        window.panicCooldown[sym] = Date.now() + 5 * 60 * 1000;
+        console.log(`Panic cooldown set for ${sym} — 5 minutes`);
+      }
     }
 
     function openTradePopupTestStock() {
@@ -710,6 +735,7 @@
         price:'175.50', change:'+2.5', rsi:'22.3', volume:'1000000',
         filters: {allPassed: true, score: 4}
       });
+
     }
 
     function openTradePopupTestCrypto() {
