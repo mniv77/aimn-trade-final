@@ -311,7 +311,7 @@ def check_and_execute_signals():
                     rsi_extreme   = rsi_real <= 8
                     macd_signal   = macd_rising or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
-                    trend_ok      = macd_val > 0 or rsi_extreme
+                    trend_ok      = macd_val > 0 or rsi_extreme or (symbol == "NVDA" and rsi_real <= 15)
                 else:
                     rsi_signal    = rsi_real >= (100 - rsi_entry)
                     rsi_bouncing  = rsi_real < rsi_prev_val
@@ -413,16 +413,18 @@ def check_and_execute_signals():
                     INSERT INTO active_trades
                         (broker_product_id, broker_name, symbol, direction,
                          candle_time, entry_price, entry_time, last_price, status,
-                         stop_loss, trailing_start, init_profit, decay_start, decay_rate, rsi_exit)
+                         stop_loss, trailing_start, init_profit, decay_start, decay_rate, rsi_exit,
+                         strategy_id)
                     VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s, 'OPEN',
-                            %s, %s, %s, %s, %s, %s)
-                """, (s["product_id"], broker, symbol, direction, candle_time, price, price,
-                        float(s.get("stop_loss") or DEFAULT_PARAMS["stop_loss"]),
+                            %s, %s, %s, %s, %s, %s, %s)
+                """, (s["product_id"], broker, symbol, direction, candle_time, price, price,                        float(s.get("stop_loss") or DEFAULT_PARAMS["stop_loss"]),
                         float(s.get("trailing_start") or DEFAULT_PARAMS["trailing_start"]),
                         float(s.get("init_profit") or DEFAULT_PARAMS["init_profit"]),
                         float(s.get("decay_start") or DEFAULT_PARAMS["decay_start"]),
                         float(s.get("decay_rate") or DEFAULT_PARAMS["decay_rate"]),
-                        float(s.get("rsi_exit") or DEFAULT_PARAMS["rsi_exit"])))
+                        float(s.get("rsi_exit") or DEFAULT_PARAMS["rsi_exit"]),
+                        s["id"]))
+
                 trade_id = cursor.lastrowid
                 cursor.execute("""
                     UPDATE strategy_params SET active_order_id=%s, entry_price=%s,
