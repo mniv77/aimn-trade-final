@@ -308,7 +308,7 @@ def check_and_execute_signals():
                     rsi_signal    = rsi_real <= rsi_entry
                     rsi_bouncing  = rsi_real > rsi_prev_val
                     macd_rising   = macd_val > macd_prev_val or macd_prev_val == 0.0
-                    rsi_extreme   = rsi_real <= 8
+                    rsi_extreme   = rsi_real <= 20
                     macd_signal   = macd_rising or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
                     trend_ok      = macd_val > 0 or rsi_extreme or (symbol == "NVDA" and rsi_real <= 15)
@@ -316,7 +316,7 @@ def check_and_execute_signals():
                     rsi_signal    = rsi_real >= (100 - rsi_entry)
                     rsi_bouncing  = rsi_real < rsi_prev_val
                     macd_falling  = macd_val < macd_prev_val or macd_prev_val == 0.0
-                    rsi_extreme   = rsi_real >= 92
+                    rsi_extreme   = rsi_real >= 80
                     macd_signal   = macd_falling or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
                     trend_ok      = macd_val < 0 or rsi_extreme
