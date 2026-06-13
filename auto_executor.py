@@ -290,12 +290,15 @@ def check_and_execute_signals():
                         if len(_candles) >= 2:
                             _last = _candles[-1]
                             _open, _close = float(_last[1]), float(_last[4])
-                            if direction == "LONG" and _close <= _open:
+
+                            rsi_check = float(s.get("rsi_real") or 50.0)
+                            if direction == "LONG" and _close <= _open and rsi_check > 20:
                                 log(f"  HTF BLOCK: {symbol} 1hr bearish - skip LONG")
                                 continue
-                            if direction == "SHORT" and _close >= _open:
+                            if direction == "SHORT" and _close >= _open and rsi_check < 80:
                                 log(f"  HTF BLOCK: {symbol} 1hr bullish - skip SHORT")
                                 continue
+
                 except Exception:
                     pass
 
