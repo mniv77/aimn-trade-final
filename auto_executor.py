@@ -295,7 +295,7 @@ def check_and_execute_signals():
                             if direction == "LONG" and _close <= _open and rsi_check > 20:
                                 log(f"  HTF BLOCK: {symbol} 1hr bearish - skip LONG")
                                 continue
-                            if direction == "SHORT" and _close >= _open and rsi_check < 80:
+                            if direction == "SHORT" and _close >= _open and rsi_check < 75:
                                 log(f"  HTF BLOCK: {symbol} 1hr bullish - skip SHORT")
                                 continue
 
@@ -319,7 +319,7 @@ def check_and_execute_signals():
                     rsi_signal    = rsi_real >= (100 - rsi_entry)
                     rsi_bouncing  = rsi_real < rsi_prev_val
                     macd_falling  = macd_val < macd_prev_val or macd_prev_val == 0.0
-                    rsi_extreme   = rsi_real >= 80
+                    rsi_extreme   = rsi_real >= 75
                     macd_signal   = macd_falling or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
                     trend_ok      = macd_val < 0 or rsi_extreme
