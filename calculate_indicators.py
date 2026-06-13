@@ -71,21 +71,30 @@ def run_calculator():
                             volumes = [float(c[5]) for c in candles]
                         n = len(closes)
                         start = max(0, n - 50)
+
                         for j in range(start, n):
-                            ts_minutes = (n - 1 - j) * (5 if '5m' in candle_time else 30 if '30m' in candle_time else 60)
+                            if is_crypto and candles:
+                                # Use actual Unix timestamp from Gemini API
+                                from datetime import datetime as dt
+                                ts = dt.utcfromtimestamp(candles[j][0] / 1000)
+                            else:
+                                ts_minutes = (n - 1 - j) * (5 if '5m' in candle_time else 30 if '30m' in candle_time else 60)
+                                from datetime import datetime as dt, timedelta
+                                ts = dt.utcnow() - timedelta(minutes=ts_minutes)
                             cursor.execute("""
                                 INSERT INTO candles
                                     (symbol, timeframe, timestamp, open, high, low, close, volume)
-                                VALUES (%s, %s, NOW() - INTERVAL %s MINUTE, %s, %s, %s, %s, %s)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                                 ON DUPLICATE KEY UPDATE
                                     close=%s, volume=%s
                             """, (
-                                symbol, candle_time, ts_minutes,
+                                symbol, candle_time, ts,
                                 closes[j], highs[j], lows[j], closes[j],
                                 volumes[j] if volumes else 0,
                                 closes[j],
                                 volumes[j] if volumes else 0,
                             ))
+
                     except Exception as ve:
                         pass
                     hi = max(highs[-rsi_len:])
