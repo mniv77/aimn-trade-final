@@ -88,8 +88,11 @@ def run_calculator():
                             ))
                     except Exception as ve:
                         pass
-                    # ───────────────────────────────────────────────────                   if hi <= lo:
+                    hi = max(highs[-rsi_len:])
+                    lo = min(lows[-rsi_len:])
+                    if hi <= lo:
                         continue
+
                     rsi_real = round(((closes[-1] - lo) / (hi - lo)) * 100, 2)
                     rsi_real = max(0, min(100, rsi_real))
                     # Count consecutive bars in same direction
