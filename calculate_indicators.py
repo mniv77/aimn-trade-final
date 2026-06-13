@@ -64,37 +64,31 @@ def run_calculator():
                         highs   = [float(c[2]) for c in candles]
                         lows    = [float(c[3]) for c in candles]
                         closes  = [float(c[4]) for c in candles]
-                    else:
-                        try:
-                            tf_map = {"5m":"5Min","30m":"30Min","1hr":"1Hour","1h":"1Hour"}
-                            alpaca_tf = tf_map.get(candle_time, "1Hour")
-                            cursor2 = conn.cursor(dictionary=True)
-                            cursor2.execute("SELECT api_key, api_secret FROM brokers WHERE name='Alpaca' LIMIT 1")
-                            creds = cursor2.fetchone()
-                            cursor2.close()
-                            if not creds:
-                                continue
-                            headers = {
-                                'APCA-API-KEY-ID': creds['api_key'],
-                                'APCA-API-SECRET-KEY': creds['api_secret']
-                            }
-                            url = f"https://data.alpaca.markets/v2/stocks/{symbol}/bars"
-                            params = {'timeframe': alpaca_tf, 'limit': 500, 'adjustment': 'raw'}
-                            resp = requests.get(url, headers=headers, params=params, timeout=10)
-                            if resp.status_code != 200:
-                                continue
-                            raw = resp.json().get('bars', [])
-                            if not raw or len(raw) < rsi_len:
-                                continue
-                            highs  = [float(b['h']) for b in raw]
-                            lows   = [float(b['l']) for b in raw]
-                            closes = [float(b['c']) for b in raw]
-                        except Exception as ae:
-                            print(f"  Stock candle error {symbol}: {ae}")
-                            continue
-                    hi = max(highs[-rsi_len:])
-                    lo = min(lows[-rsi_len:])
-                    if hi <= lo:
+                    # ── Save candles to DB for volume history ──────────
+                    try:
+                        volumes = []
+                        if is_crypto:
+                            volumes = [float(c[5]) for c in candles]
+                        n = len(closes)
+                        start = max(0, n - 50)
+                        for j in range(start, n):
+                            ts_minutes = (n - 1 - j) * (5 if '5m' in candle_time else 30 if '30m' in candle_time else 60)
+                            cursor.execute("""
+                                INSERT INTO candles
+                                    (symbol, timeframe, timestamp, open, high, low, close, volume)
+                                VALUES (%s, %s, NOW() - INTERVAL %s MINUTE, %s, %s, %s, %s, %s)
+                                ON DUPLICATE KEY UPDATE
+                                    close=%s, volume=%s
+                            """, (
+                                symbol, candle_time, ts_minutes,
+                                closes[j], highs[j], lows[j], closes[j],
+                                volumes[j] if volumes else 0,
+                                closes[j],
+                                volumes[j] if volumes else 0,
+                            ))
+                    except Exception as ve:
+                        pass
+                    # ───────────────────────────────────────────────────                   if hi <= lo:
                         continue
                     rsi_real = round(((closes[-1] - lo) / (hi - lo)) * 100, 2)
                     rsi_real = max(0, min(100, rsi_real))
