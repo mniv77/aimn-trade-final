@@ -55,3 +55,4 @@ __pycache__/
 .env
 engine.log
 engine.pid
+core.*

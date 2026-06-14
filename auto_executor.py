@@ -391,9 +391,11 @@ def check_and_execute_signals():
                 # V-bottom gives extra confidence - can relax MACD requirement
                 if v_bottom and rsi_signal and bounce_signal and pullback_ok:
                     log(f"  🎯 V-BOTTOM: {symbol} {direction} rapid reversal detected!")
-                elif not (rsi_signal and macd_signal and bounce_signal and pullback_ok):
+                else:
                     if not pullback_ok:
                         log(f"  ⛔ PEAK BLOCK: {symbol} {direction} price at peak/low - skip")
+                    elif not v_bottom:
+                        log(f"  ⏳ NO CONFIRMATION: {symbol} {direction} v_bottom not confirmed - skip")
                     continue
                 cursor.execute("SELECT id, direction FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
                 existing = cursor.fetchone()
