@@ -200,6 +200,12 @@ def check_volume_spikes():
                     continue
 
                 # SCENARIO 2: Different symbol — protect winners, exit losers
+                # Don't close trades opened less than 5 minutes ago
+                trade_age_sec = (datetime.utcnow() - existing_trade['entry_time']).total_seconds()
+                if trade_age_sec < 300:
+                    log(f"  Protecting {ex_symbol} (age={trade_age_sec:.0f}s, too new) — skip spike")
+                    continue
+
                 if current_pnl >= AUTO_EXIT_THRESHOLD:
                     log(f"  Protecting {ex_symbol} PnL={current_pnl:+.2f}% — skip spike")
                     continue
