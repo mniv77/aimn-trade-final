@@ -174,6 +174,19 @@ def check_volume_spikes():
 
             direction = 'LONG' if price_move > 0 else 'SHORT'
 
+            # Check if this symbol/direction has an active strategy
+            # (respects manual deactivation, e.g. LINK excluded for being too noisy)
+            cursor.execute("""
+                SELECT COUNT(*) as cnt FROM strategy_params sp
+                JOIN broker_products bp ON sp.broker_product_id=bp.id
+                WHERE bp.local_ticker=%s AND sp.direction=%s AND sp.active=1
+            """, (symbol, direction))
+            if cursor.fetchone()['cnt'] == 0:
+                log(f"  Spike {symbol} {direction} x{volume_ratio:.1f} but no active strategy - SKIP")
+                continue
+
+
+
             log(f"SPIKE DETECTED: {symbol} {direction} | vol={volume_ratio:.1f}x | move={price_move:+.2f}%")
 
             existing_trade = broker_trade_map.get(broker.upper())
@@ -223,33 +236,14 @@ def check_volume_spikes():
             if cursor.fetchone()['cnt'] > 0:
                 continue
 
-            # Look up matching strategy_id for proper risk params
-            cursor.execute("""
-                SELECT id, stop_loss, trailing_start, init_profit, decay_start, decay_rate, rsi_exit
-                FROM strategy_params
-                WHERE broker_product_id=%s AND direction=%s AND active=1
-                ORDER BY candle_time='5m' DESC, candle_time='30m' DESC
-                LIMIT 1
-            """, (product_id, direction))
-            matched = cursor.fetchone()
-            sid = matched['id'] if matched else None
-            sl = float(matched['stop_loss']) if matched else 1.0
-            ts = float(matched['trailing_start']) if matched else 0.5
-            ip = float(matched['init_profit']) if matched else 1.0
-            ds = float(matched['decay_start']) if matched else 2.0
-            dr = float(matched['decay_rate']) if matched else 0.1
-            re = float(matched['rsi_exit']) if matched else 65.0
-
             # SCENARIO 1: Enter spike trade
             cursor.execute("""
                 INSERT INTO active_trades
                 (broker_product_id, broker_name, symbol, direction,
                  entry_price, entry_time, last_price, peak_profit,
-                 status, strategy_id, candle_time, big_volume,
-                 stop_loss, trailing_start, init_profit, decay_start, decay_rate, rsi_exit)
-                VALUES (%s,%s,%s,%s,%s,NOW(),%s,-999.0,'OPEN',%s,'5m',1,%s,%s,%s,%s,%s,%s)
-            """, (product_id, broker, symbol, direction, last_price, last_price,
-                  sid, sl, ts, ip, ds, dr, re))
+                 status, strategy_id, candle_time, big_volume)
+                VALUES (%s,%s,%s,%s,%s,NOW(),%s,-999.0,'OPEN',NULL,'5m',1)
+            """, (product_id, broker, symbol, direction, last_price, last_price))
 
             log(f"  SPIKE TRADE OPENED: {symbol} {direction} @ ${last_price:,.2f} [vol={volume_ratio:.1f}x]")
 
