@@ -868,7 +868,15 @@ def settings():
 
 @app.route("/auto_tuner")
 def auto_tuner_page():
-    return render_template("auto_tuner.html", brokers=[])
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("SELECT DISTINCT name FROM brokers WHERE trading_enabled=1 ORDER BY name")
+        brokers = [r["name"] for r in cursor.fetchall()]
+        conn.close()
+    except:
+        brokers = ["Gemini", "Alpaca", "Alpaca-ETF"]
+    return render_template("auto_tuner.html", brokers=brokers)
 
 @app.route("/tuning_runs")
 def tuning_runs_page():
