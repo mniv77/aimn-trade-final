@@ -661,16 +661,7 @@ async function disableOldStrategies() {
         document.getElementById('rsi_exit_options').value = m.rsi_exit;
         if(document.getElementById('init_profit_options')) document.getElementById('init_profit_options').value = m.init_profit;
         if(document.getElementById('decay_start_options')) document.getElementById('decay_start_options').value = m.decay_start;
-        const brokerSel = document.getElementById('broker_select');
-        if(brokerSel) {
-            Array.from(brokerSel.options).forEach(opt => {
-                if(mode==='crypto') opt.hidden = opt.text && !opt.text.toLowerCase().includes('gemini') && opt.value!=='';
-                else opt.hidden = opt.text && opt.text.toLowerCase().includes('gemini');
-            });
-            brokerSel.value = '';
-            const symSel = document.getElementById('symbol_select');
-            if(symSel){ symSel.innerHTML='<option value="">-- Choose --</option>'; symSel.disabled=true; }
-        }
+        // Broker filtering removed - server-side already shows only active brokers
     }
     switchMode('etf');
 
