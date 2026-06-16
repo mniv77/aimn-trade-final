@@ -487,15 +487,22 @@ function formatResult(data) {
     loadSavedDefaults();
 })();
 
-brokerSelect.addEventListener("change", () => {
+brokerSelect.addEventListener("change", async () => {
     const brokerId = brokerSelect.value;
     symbolSelect.innerHTML = '<option value="">-- Choose --</option>';
-    symbolSelect.disabled  = !brokerId;
-    if (brokerId) {
-        allProducts
-            .filter(p => String(p.broker_id) === String(brokerId))
-            .forEach(p => symbolSelect.add(new Option(p.symbol, p.id)));
+    symbolSelect.disabled = !brokerId;
+    if (!brokerId) { validateForm(); return; }
+    // Reload products if not yet fetched
+    if (allProducts.length === 0) {
+        try {
+            const resp = await fetch("/get_brokers_and_symbols");
+            const data = await resp.json();
+            allProducts = data.products || [];
+        } catch(e) { console.error("Failed to load products:", e); }
     }
+    allProducts
+        .filter(p => String(p.broker_id) === String(brokerId))
+        .forEach(p => symbolSelect.add(new Option(p.symbol, p.id)));
     validateForm();
 });
 symbolSelect.addEventListener("change", validateForm);
