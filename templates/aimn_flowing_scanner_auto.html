@@ -903,13 +903,7 @@
           activeTradeSymbol = orders[0].symbol;
           activeTradeExchange = orders[0].broker || '';
           activeTradeExchangeNorm = normEx(orders[0].broker || '');
-          if (!stripTradeId) {
-            const t = orders[0];
-            stripTradeId = t.id;
-            stripSignalData = {symbol: t.symbol, exchange: t.broker || ''};
-            stripDirection = t.direction === 'LONG' ? 'BUY' : 'SELL';
-            stripEntryPrice = parseFloat(t.entry_price) || 0;
-          }
+          // strip variables removed - AUTO MODE handles entries
         } else if (activeTradeSymbol) {
           activeTradeSymbol = null; activeTradeExchange = null; activeTradeExchangeNorm = null;
           stripTradeId = null; stripSignalData = null;
