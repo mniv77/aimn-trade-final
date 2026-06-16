@@ -871,7 +871,13 @@ def auto_tuner_page():
     from db import get_db_connection
     try:
         conn, cursor = get_db_connection()
-        cursor.execute("SELECT DISTINCT name FROM brokers WHERE trading_enabled=1 ORDER BY name")
+        cursor.execute("""
+            SELECT DISTINCT b.name FROM brokers b
+            JOIN broker_products bp ON bp.broker_id=b.id
+            JOIN strategy_params sp ON sp.broker_product_id=bp.id
+            WHERE sp.active=1
+            ORDER BY b.name
+        """)
         brokers = [r["name"] for r in cursor.fetchall()]
         conn.close()
     except:
