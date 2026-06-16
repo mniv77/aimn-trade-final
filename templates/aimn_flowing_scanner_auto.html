@@ -858,10 +858,7 @@
       const nex = normEx(broker);
       lastByBroker[nex] = Date.now();
       lastBySymbol[symbol] = Date.now();
-      if (stripTradeId === tradeId) {
-        stripTradeId = null; stripSignalData = null;
-        clearInterval(stripPriceInterval); stripPriceInterval = null;
-      }
+      // strip cleanup removed
 
       order.status = 'CLOSED';
       order.exit_time = exitTime.getTime();
@@ -906,8 +903,7 @@
           // strip variables removed - AUTO MODE handles entries
         } else if (activeTradeSymbol) {
           activeTradeSymbol = null; activeTradeExchange = null; activeTradeExchangeNorm = null;
-          stripTradeId = null; stripSignalData = null;
-          clearInterval(stripPriceInterval); stripPriceInterval = null;
+          // strip cleanup removed
           updateExchangeStatusDisplay(); updateScanResultsDisplay(); updateTickerDisplay();
           setTimeout(processPopupQueue, 300);
         }
