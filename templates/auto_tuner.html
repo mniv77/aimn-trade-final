@@ -119,7 +119,7 @@
         <div class="grid-4">
             <div>
                 <label class="field-label">Broker</label>
-                <select id="broker_select">
+                <select id="broker_select" onchange="handleBrokerChange(this.value)">
                     <option value="">-- Choose --</option>
                     {% for b in brokers %}
                         <option value="{{ b.id }}">{{ b.name }}</option>
@@ -487,6 +487,22 @@ function formatResult(data) {
     loadSavedDefaults();
 })();
 
+async function handleBrokerChange(brokerId) {
+    symbolSelect.innerHTML = '<option value="">-- Choose --</option>';
+    symbolSelect.disabled = !brokerId;
+    if (!brokerId) { validateForm(); return; }
+    if (allProducts.length === 0) {
+        try {
+            const resp = await fetch("/get_brokers_and_symbols");
+            const data = await resp.json();
+            allProducts = data.products || [];
+        } catch(e) { console.error("Failed to load products:", e); }
+    }
+    allProducts
+        .filter(p => String(p.broker_id) === String(brokerId))
+        .forEach(p => symbolSelect.add(new Option(p.symbol, p.id)));
+    validateForm();
+}
 brokerSelect.addEventListener("change", async () => {
     const brokerId = brokerSelect.value;
     symbolSelect.innerHTML = '<option value="">-- Choose --</option>';
