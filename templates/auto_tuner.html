@@ -674,37 +674,7 @@ async function disableOldStrategies() {
     }
     switchMode('etf');
 
-    const MODES = {
-        etf: { rsi_len:'50,100,168', rsi_entry:'25,35,40', macd_fast:'12', macd_slow:'26', macd_sig:'9', stop_loss:'0.5,1.0,1.5', trail_start:'0.5,1.0,1.5', trail_minus:'0.1,0.15,0.2', rsi_exit:'65,70,75', init_profit:'0.1,0.5,1.5', decay_start:'0.5,1.0,2.0' },
-        crypto: { rsi_len:'20,50,100', rsi_entry:'15,20,25', macd_fast:'12', macd_slow:'26', macd_sig:'7', stop_loss:'1.0,1.5,2.0', trail_start:'0.3,0.5,0.8', trail_minus:'0.05,0.08,0.10', rsi_exit:'60,65,70', init_profit:'0.3,0.5,1.0', decay_start:'1.0,1.5,2.0' }
-    };
-    function switchMode(mode) {
-        const m = MODES[mode];
-        document.getElementById('tab-etf').className = 'mode-tab' + (mode==='etf' ? ' active-etf' : '');
-        document.getElementById('tab-crypto').className = 'mode-tab' + (mode==='crypto' ? ' active-crypto' : '');
-        document.getElementById('rsi_len_options').value = m.rsi_len;
-        document.getElementById('rsi_entry_options').value = m.rsi_entry;
-        document.getElementById('macd_fast').value = m.macd_fast;
-        document.getElementById('macd_slow').value = m.macd_slow;
-        document.getElementById('macd_sig').value = m.macd_sig;
-        document.getElementById('stop_loss_options').value = m.stop_loss;
-        document.getElementById('trail_start_options').value = m.trail_start;
-        document.getElementById('trail_minus_options').value = m.trail_minus;
-        document.getElementById('rsi_exit_options').value = m.rsi_exit;
-        if(document.getElementById('init_profit_options')) document.getElementById('init_profit_options').value = m.init_profit;
-        if(document.getElementById('decay_start_options')) document.getElementById('decay_start_options').value = m.decay_start;
-        const brokerSel = document.getElementById('broker_select');
-        if(brokerSel) {
-            Array.from(brokerSel.options).forEach(opt => {
-                if(mode==='crypto') opt.hidden = opt.text && !opt.text.toLowerCase().includes('gemini') && opt.value!=='';
-                else opt.hidden = opt.text && opt.text.toLowerCase().includes('gemini');
-            });
-            brokerSel.value = '';
-            const symSel = document.getElementById('symbol_select');
-            if(symSel){ symSel.innerHTML='<option value="">-- Choose --</option>'; symSel.disabled=true; }
-        }
-    }
-    switchMode('etf');
+    
 </script>
 </body>
 </html>
