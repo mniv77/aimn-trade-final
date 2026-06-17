@@ -64,10 +64,28 @@ def run_calculator():
                         highs   = [float(c[2]) for c in candles]
                         lows    = [float(c[3]) for c in candles]
                         closes  = [float(c[4]) for c in candles]
-                    # ── Save candles to DB for volume history ──────────
+                    else:
+                        # Stocks: fetch candles from DB
+                        cursor.execute("""
+                            SELECT open, high, low, close, volume, timestamp
+                            FROM candles
+                            WHERE symbol=%s AND timeframe=%s
+                            ORDER BY timestamp DESC LIMIT %s
+                        """, (symbol, candle_time, max(rsi_len + 5, 50)))
+                        rows = cursor.fetchall()
+                        if not rows or len(rows) < rsi_len:
+                            continue
+                        rows = rows[::-1]  # chronological
+                        candles = rows
+                        highs  = [float(r['high'])  for r in rows]
+                        lows   = [float(r['low'])   for r in rows]
+                        closes = [float(r['close']) for r in rows]
+                    # ── Save candles to DB for volume history (crypto only) ──
                     try:
                         volumes = []
-                        if is_crypto:
+                        if not is_crypto:
+                            pass  # stock candles already in DB
+                        elif is_crypto:
                             volumes = [float(c[5]) for c in candles]
                         n = len(closes)
                         start = max(0, n - 50)
