@@ -311,7 +311,7 @@ def check_and_execute_signals():
                     rsi_signal    = rsi_real <= rsi_entry
                     rsi_bouncing  = rsi_real > rsi_prev_val
                     macd_rising   = macd_val > macd_prev_val or macd_prev_val == 0.0
-                    rsi_extreme   = rsi_real <= 10
+                    rsi_extreme   = rsi_real <= 20
                     macd_signal   = macd_rising or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
                     trend_ok      = macd_val > 0 or rsi_extreme or (symbol == "NVDA" and rsi_real <= 15)
@@ -319,7 +319,7 @@ def check_and_execute_signals():
                     rsi_signal    = rsi_real >= (100 - rsi_entry)
                     rsi_bouncing  = rsi_real < rsi_prev_val
                     macd_falling  = macd_val < macd_prev_val or macd_prev_val == 0.0
-                    rsi_extreme = rsi_real >= 90
+                    rsi_extreme = rsi_real >= 80
                     macd_signal   = macd_falling or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
                     trend_ok      = macd_val < 0 or rsi_extreme
@@ -354,7 +354,7 @@ def check_and_execute_signals():
                     # V-BOTTOM: rapid drop then recovery
                     # price_prev3 was high, price_prev1 was the low, now recovering
                     drop_pct   = (cp3 - cp1) / cp3 * 100 if cp3 > 0 else 0
-                    vb_threshold = 0.5 if symbol in ('NVDA', 'TSLA', 'LINK/USD') else 0.3
+                    vb_threshold = 0.5 if symbol in ('NVDA', 'TSLA', 'LINK/USD') else 0.8
                     rapid_drop = drop_pct >= vb_threshold
                     recovering = price > cp1
                     true_bottom = cp1 < cp2 < cp3
@@ -380,7 +380,7 @@ def check_and_execute_signals():
                     # V-TOP: rapid rise then reversal
                     # price_prev3 was low, price_prev1 was the high, now dropping
                     rise_pct   = (cp1 - cp3) / cp3 * 100 if cp3 > 0 else 0
-                    vb_threshold = 0.5 if symbol in ('NVDA', 'TSLA', 'LINK/USD') else 0.3
+                    vb_threshold = 0.5 if symbol in ('NVDA', 'TSLA', 'LINK/USD') else 0.8
                     rapid_rise = rise_pct >= vb_threshold
                     reversing  = price < cp1
                     true_top   = cp1 > cp2 > cp3
