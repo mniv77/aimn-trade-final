@@ -34,14 +34,23 @@ def check_reversal(image_path, symbol, direction):
     except Exception as e:
         return {"verdict": "ERROR", "reason": f"Could not read image: {e}"}
 
+    direction_word = "bottom" if direction == "LONG" else "top"
+    entry_word = "LONG (buy)" if direction == "LONG" else "SHORT (sell)"
     prompt = (
-        f"You are reviewing a candlestick chart for {symbol}. "
-        f"A trading system wants to enter {direction} based on an extreme "
-        f"RSI reading. Has the price ACTUALLY reversed and shown at least "
-        f"2 candles of follow-through in the {direction} direction, or is "
-        f"this still mid-move / already extended? "
-        f'Respond ONLY with JSON, no other text: '
-        f'{{"verdict": "CONFIRMED|NOT_CONFIRMED|UNCLEAR", "reason": "brief explanation"}}'
+        f"You are an expert trader analyzing a {symbol} candlestick chart using V-pattern strategy. "
+        f"V-PATTERN RULES: "
+        f"V-LONG: Sharp decline left side, volume spike at bottom, 2+ GREEN candles recovering. "
+        f"V-SHORT: Sharp rally left side, volume spike at peak, 2+ RED candles declining. "
+        f"M-PATTERN: Double top, wait for breakdown below dip before SHORT. "
+        f"W-PATTERN: Double bottom, wait for breakout above bounce before LONG. "
+        f"SIDEWAYS or NOISE: Small choppy moves = DO NOT ENTER. "
+        f"EXTENDED: Price already far from the V turn = TOO LATE to enter. "
+        f"Small bounces during a decline are NOISE not real V bottoms. "
+        f"Volume spike at the turn confirms the reversal. "
+        f"Is there a confirmed V-{direction_word} pattern with 2+ follow-through candles "
+        f"supporting a {entry_word} entry RIGHT NOW? "
+        f'Respond ONLY with JSON: '
+        f'{{"verdict": "CONFIRMED|NOT_CONFIRMED|UNCLEAR", "reason": "describe V pattern structure"}}'
     )
 
     try:
