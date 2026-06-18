@@ -866,19 +866,28 @@ def settings():
 
 # ===================== AUTO TUNER PAGES =====================
 
+@app.route("/charts/<filename>")
+def serve_chart(filename):
+    import os
+    from flask import send_file
+    path = f"/home/MeirNiv/charts/{filename}"
+    if os.path.exists(path) and filename.endswith('.png'):
+        return send_file(path, mimetype='image/png')
+    return "Not found", 404
+
 @app.route("/auto_tuner")
 def auto_tuner_page():
     from db import get_db_connection
     try:
         conn, cursor = get_db_connection()
         cursor.execute("""
-            SELECT DISTINCT b.name FROM brokers b
+            SELECT DISTINCT b.id, b.name FROM brokers b
             JOIN broker_products bp ON bp.broker_id=b.id
             JOIN strategy_params sp ON sp.broker_product_id=bp.id
             WHERE sp.active=1
             ORDER BY b.name
         """)
-        brokers = [r["name"] for r in cursor.fetchall()]
+        brokers = cursor.fetchall()
         conn.close()
     except:
         brokers = ["Gemini", "Alpaca", "Alpaca-ETF"]
