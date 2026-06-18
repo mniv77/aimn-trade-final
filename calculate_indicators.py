@@ -69,9 +69,15 @@ def run_calculator():
                         try:
                             from alpaca_connector import AlpacaConnector
                             import io, sys
-                            _stdout = sys.stdout; sys.stdout = io.StringIO()
-                            _alp = AlpacaConnector()
-                            sys.stdout = _stdout
+                            _stdout = sys.stdout
+                            _stderr = sys.stderr
+                            sys.stdout = io.StringIO()
+                            sys.stderr = io.StringIO()
+                            try:
+                                _alp = AlpacaConnector()
+                            finally:
+                                sys.stdout = _stdout
+                                sys.stderr = _stderr
                             tf_map = {"5m":"5Min","30m":"30Min","1hr":"1Hour","1h":"1Hour"}
                             _tf = tf_map.get(candle_time, "5Min")
                             _df = _alp.get_bars(symbol, _tf, limit=max(rsi_len+10, 60))
