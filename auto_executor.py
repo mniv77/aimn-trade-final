@@ -391,18 +391,20 @@ def check_and_execute_signals():
                 # V-bottom gives extra confidence - can relax MACD requirement
                 if v_bottom and rsi_signal and bounce_signal and pullback_ok:
                     log(f"  🎯 V-BOTTOM: {symbol} {direction} rapid reversal detected!")
-                    # ── AI VISION SHADOW MODE ─────────────────────────────
+                    # ── AI VISION LIVE GATE ───────────────────────────────
+                    ai_verdict = "ERROR"
+                    ai_reason  = ""
                     try:
                         from chart_renderer import render_chart
                         from ai_vision_check import check_reversal
-                        import datetime as _dt
-                        chart_path = f"/tmp/chart_{symbol.replace('/','_')}_{candle_time}.png"
-                        render_chart(symbol, candle_time, n_candles=50, outpath=chart_path)
+                        import os as _os
+                        _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
+                        chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{candle_time}.png"
+                        render_chart(symbol, candle_time, n_candles=60, outpath=chart_path)
                         ai_result = check_reversal(chart_path, symbol, direction)
                         ai_verdict = ai_result.get("verdict", "ERROR")
                         ai_reason  = ai_result.get("reason", "")
                         log(f"  👁️ AI VISION [{ai_verdict}]: {ai_reason[:80]}")
-                        # Log to ai_vision_log table (shadow mode - does not block entry)
                         cursor.execute("""
                             INSERT INTO ai_vision_log
                             (symbol, direction, candle_time, rule_based_result,
@@ -411,8 +413,12 @@ def check_and_execute_signals():
                         """, (symbol, direction, candle_time, "V_BOTTOM_CONFIRMED",
                               ai_verdict, ai_reason, chart_path))
                     except Exception as _e:
-                        log(f"  👁️ AI VISION ERROR (non-blocking): {_e}")
-                    # ── END AI VISION SHADOW MODE ─────────────────────────
+                        log(f"  👁️ AI VISION ERROR (proceeding): {_e}")
+                    # Block entry if AI says NOT_CONFIRMED
+                    if ai_verdict == "NOT_CONFIRMED":
+                        log(f"  🚫 AI VISION BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
+                        continue
+                    # ── END AI VISION LIVE GATE ───────────────────────────
                 else:
                     if not pullback_ok:
                         log(f"  ⛔ PEAK BLOCK: {symbol} {direction} price at peak/low - skip")
