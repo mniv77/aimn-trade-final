@@ -873,7 +873,7 @@ def api_ai_vision_check():
         from chart_renderer import render_chart
         from ai_vision_check import check_reversal
         os.makedirs("/home/MeirNiv/charts", exist_ok=True)
-        symbols = ["BTC/USD", "ETH/USD", "SOL/USD"]
+        symbols = ["BTC/USD", "ETH/USD", "SOL/USD", "LINK/USD"]
         verdicts = []
         for symbol in symbols:
             chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_5m.png"
