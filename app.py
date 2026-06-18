@@ -866,6 +866,28 @@ def settings():
 
 # ===================== AUTO TUNER PAGES =====================
 
+@app.route("/api/ai_vision_check")
+def api_ai_vision_check():
+    try:
+        import os
+        from chart_renderer import render_chart
+        from ai_vision_check import check_reversal
+        os.makedirs("/home/MeirNiv/charts", exist_ok=True)
+        symbols = ["BTC/USD", "ETH/USD", "SOL/USD"]
+        verdicts = []
+        for symbol in symbols:
+            chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_5m.png"
+            render_chart(symbol, "5m", n_candles=60, outpath=chart_path)
+            result = check_reversal(chart_path, symbol, "LONG")
+            verdicts.append({
+                "symbol": symbol,
+                "verdict": result.get("verdict", "ERROR"),
+                "reason": result.get("reason", "")
+            })
+        return jsonify({"verdicts": verdicts})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/charts/<filename>")
 def serve_chart(filename):
     import os
