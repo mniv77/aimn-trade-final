@@ -617,8 +617,10 @@
           contentDiv.innerHTML = data.verdicts.map(v => {
             const color = v.verdict === 'CONFIRMED' ? 'text-green-400' :
                          v.verdict === 'NOT_CONFIRMED' ? 'text-red-400' : 'text-yellow-400';
+            const dirColor = v.direction === 'LONG' ? 'text-green-300' : 'text-red-300';
             return `<div class="mb-2">
               <span class="font-bold text-white">${v.symbol}</span>
+              <span class="${dirColor} ml-1">${v.direction}</span>
               <span class="${color} font-bold ml-2">${v.verdict}</span>
               <div class="text-gray-400 mt-0.5">${v.reason.substring(0,120)}...</div>
             </div>`;

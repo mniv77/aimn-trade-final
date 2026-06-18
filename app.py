@@ -878,12 +878,14 @@ def api_ai_vision_check():
         for symbol in symbols:
             chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_5m.png"
             render_chart(symbol, "5m", n_candles=60, outpath=chart_path)
-            result = check_reversal(chart_path, symbol, "LONG")
-            verdicts.append({
-                "symbol": symbol,
-                "verdict": result.get("verdict", "ERROR"),
-                "reason": result.get("reason", "")
-            })
+            for direction in ["LONG", "SHORT"]:
+                result = check_reversal(chart_path, symbol, direction)
+                verdicts.append({
+                    "symbol": symbol,
+                    "direction": direction,
+                    "verdict": result.get("verdict", "ERROR"),
+                    "reason": result.get("reason", "")
+                })
         return jsonify({"verdicts": verdicts})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
