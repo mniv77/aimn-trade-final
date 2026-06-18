@@ -389,7 +389,37 @@ def check_and_execute_signals():
                     v_bottom   = rapid_rise and reversing and true_top and state_ok
 
                 # V-bottom gives extra confidence - can relax MACD requirement
-                if v_bottom and rsi_signal and bounce_signal and pullback_ok:
+                # ── AI VISION FIRST PATH (RSI extreme, bypass v_bottom) ──
+                if rsi_extreme and pullback_ok and not v_bottom:
+                    try:
+                        from chart_renderer import render_chart
+                        from ai_vision_check import check_reversal
+                        import os as _os
+                        _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
+                        chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{candle_time}.png"
+                        render_chart(symbol, candle_time, n_candles=60, outpath=chart_path)
+                        ai_result = check_reversal(chart_path, symbol, direction)
+                        ai_verdict = ai_result.get("verdict", "ERROR")
+                        ai_reason  = ai_result.get("reason", "")
+                        log(f"  👁️ AI FIRST [{ai_verdict}]: {ai_reason[:80]}")
+                        cursor.execute("""
+                            INSERT INTO ai_vision_log
+                            (symbol, direction, candle_time, rule_based_result,
+                             ai_verdict, ai_reason, chart_image_path)
+                            VALUES (%s,%s,%s,%s,%s,%s,%s)
+                        """, (symbol, direction, candle_time, "AI_FIRST",
+                              ai_verdict, ai_reason, chart_path))
+                        if ai_verdict == "CONFIRMED":
+                            log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — rules bypassed!")
+                            # Fall through to entry below
+                        else:
+                            log(f"  🚫 AI FIRST BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
+                            continue
+                    except Exception as _e:
+                        log(f"  👁️ AI FIRST ERROR: {_e}")
+                        continue
+
+                if (v_bottom and rsi_signal and bounce_signal and pullback_ok) or                    (rsi_extreme and pullback_ok):
                     log(f"  🎯 V-BOTTOM: {symbol} {direction} rapid reversal detected!")
                     # ── AI VISION LIVE GATE ───────────────────────────────
                     ai_verdict = "ERROR"
