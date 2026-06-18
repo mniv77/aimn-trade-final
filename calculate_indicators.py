@@ -84,7 +84,7 @@ def run_calculator():
                     try:
                         volumes = []
                         if not is_crypto:
-                            pass  # stock candles already in DB
+                            raise Exception("skip_stocks")  # stock candles already in DB
                         elif is_crypto:
                             volumes = [float(c[5]) for c in candles]
                         n = len(closes)
