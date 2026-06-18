@@ -390,6 +390,7 @@ def check_and_execute_signals():
 
                 # V-bottom gives extra confidence - can relax MACD requirement
                 # ── AI VISION FIRST PATH (RSI extreme, bypass v_bottom) ──
+                candle_time = s.get("candle_time") or DEFAULT_PARAMS["candle_time"]
                 if rsi_extreme and pullback_ok and not v_bottom:
                     try:
                         from chart_renderer import render_chart
