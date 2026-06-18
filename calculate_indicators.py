@@ -65,21 +65,21 @@ def run_calculator():
                         lows    = [float(c[3]) for c in candles]
                         closes  = [float(c[4]) for c in candles]
                     else:
-                        # Stocks: fetch candles from DB
-                        cursor.execute("""
-                            SELECT open, high, low, close, volume, timestamp
-                            FROM candles
-                            WHERE symbol=%s AND timeframe=%s
-                            ORDER BY timestamp DESC LIMIT %s
-                        """, (symbol, candle_time, max(rsi_len + 5, 50)))
-                        rows = cursor.fetchall()
-                        if not rows or len(rows) < rsi_len:
+                        # Stocks: fetch candles from Alpaca API
+                        try:
+                            from alpaca_connector import AlpacaConnector
+                            _alp = AlpacaConnector()
+                            tf_map = {"5m":"5Min","30m":"30Min","1hr":"1Hour","1h":"1Hour"}
+                            _tf = tf_map.get(candle_time, "5Min")
+                            _df = _alp.get_bars(symbol, _tf, limit=max(rsi_len+10, 60))
+                            if _df is None or len(_df) < rsi_len:
+                                continue
+                            highs  = list(_df['high'].astype(float))
+                            lows   = list(_df['low'].astype(float))
+                            closes = list(_df['close'].astype(float))
+                            candles = _df.to_dict('records')
+                        except Exception as _ae:
                             continue
-                        rows = rows[::-1]  # chronological
-                        candles = rows
-                        highs  = [float(r['high'])  for r in rows]
-                        lows   = [float(r['low'])   for r in rows]
-                        closes = [float(r['close']) for r in rows]
                     # ── Save candles to DB for volume history (crypto only) ──
                     try:
                         volumes = []
