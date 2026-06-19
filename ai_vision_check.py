@@ -105,6 +105,12 @@ def check_reversal(image_path, symbol, direction):
             if text.startswith("json"):
                 text = text[4:].strip()
         text = text.strip()
+        # Extract just the JSON object if embedded in text
+        if "{" in text:
+            start = text.find("{")
+            end = text.rfind("}") + 1
+            if end > start:
+                text = text[start:end]
 
         result = json.loads(text)
         if "verdict" not in result:

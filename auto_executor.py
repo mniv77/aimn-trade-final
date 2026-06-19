@@ -400,6 +400,7 @@ def check_and_execute_signals():
                         import os as _os
                         _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
                         chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{candle_time}.png"
+                        log(f"  📊 Chart path: {chart_path}")
                         render_chart(symbol, candle_time, n_candles=60, outpath=chart_path)
                         ai_result = check_reversal(chart_path, symbol, direction)
                         ai_verdict = ai_result.get("verdict", "ERROR")
