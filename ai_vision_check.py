@@ -100,10 +100,11 @@ def check_reversal(image_path, symbol, direction):
         text = data["content"][0]["text"].strip()
 
         # Strip markdown code fences if present
-        if text.startswith("```"):
-            text = text.strip("`")
+        if "```" in text:
+            text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:].strip()
+        text = text.strip()
 
         result = json.loads(text)
         if "verdict" not in result:
