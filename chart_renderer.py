@@ -34,7 +34,20 @@ def render_chart(symbol, timeframe, n_candles=50, outpath="/tmp/chart.png", titl
         conn.close()
 
     if not rows:
-        return None
+        # Try fetching from Alpaca API for stock symbols
+        try:
+            from engine.tuning.candle_fetcher import fetch_candles
+            candles = fetch_candles(symbol, timeframe=timeframe, limit=n_candles, broker='Alpaca')
+            if candles:
+                candles.sort(key=lambda x: x['timestamp'])
+                rows = [{'timestamp': c['timestamp'], 'open': c['open'],
+                         'high': c['high'], 'low': c['low'],
+                         'close': c['close'], 'volume': c['volume']}
+                        for c in candles]
+            else:
+                return None
+        except Exception as e:
+            return None
 
     rows = rows[::-1]
 
