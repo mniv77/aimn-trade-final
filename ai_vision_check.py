@@ -112,7 +112,19 @@ def check_reversal(image_path, symbol, direction):
             if end > start:
                 text = text[start:end]
 
-        result = json.loads(text)
+        try:
+            result = json.loads(text)
+        except json.JSONDecodeError:
+            # Try to extract verdict directly from malformed JSON
+            import re
+            verdict_match = re.search(r'"verdict"\s*:\s*"([^"]+)"', text)
+            reason_match  = re.search(r'"reason"\s*:\s*"([^"]+)"', text)
+            if verdict_match:
+                return {
+                    "verdict": verdict_match.group(1),
+                    "reason": reason_match.group(1) if reason_match else "Partial parse"
+                }
+            return {"verdict": "ERROR", "reason": f"JSON parse failed: {text[:50]}"}
         if "verdict" not in result:
             return {"verdict": "ERROR", "reason": f"Unexpected response: {text}"}
         return result
