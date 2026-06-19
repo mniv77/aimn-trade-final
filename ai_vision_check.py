@@ -55,6 +55,10 @@ def check_reversal(image_path, symbol, direction):
         f"CRYPTO CORRELATION: BTC/ETH/SOL often move together. Check if pattern matches market direction. "
         f"TOO LATE: If recovery already happened and price extended from bottom = do NOT enter LONG. "
         f"NOISE: Small choppy candles alternating red/green = DO NOT ENTER. "
+        f"VOLUME SPIKE DELAY: Volume spike is WARNING not immediate trigger — move comes 5-10 candles later. "
+        f"RED spike then sideways drift on low volume = DISTRIBUTION = SHORT coming. "
+        f"GREEN spike then sideways drift on low volume = ACCUMULATION = LONG coming. "
+        f"Wait for breakout AFTER the drift phase to confirm entry. "
         f"RSI/MACD are just alerts — YOU make the final decision based on chart structure. "
         f"Is there a confirmed {direction_word} pattern supporting a {entry_word} entry RIGHT NOW? "
         f'Respond ONLY with JSON: '
