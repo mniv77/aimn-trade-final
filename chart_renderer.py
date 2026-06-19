@@ -58,6 +58,11 @@ def render_chart(symbol, timeframe, n_candles=50, outpath="/tmp/chart.png", titl
 
     chart_title = title or f"{symbol}  {timeframe}"
 
+    # Always remove old chart to force fresh generation
+    import os as _os
+    if _os.path.exists(outpath):
+        _os.remove(outpath)
+
     mpf.plot(
         df,
         type="candle",
