@@ -71,7 +71,7 @@ def fetch_yahoo_candles(symbol, timeframe="1hr", limit=100):
         'timeframe': alpaca_tf,
         'limit'    : 10000,
         'feed'     : 'sip',
-        'start'    : '2020-01-01',
+        'start'    : (datetime.utcnow() - timedelta(days=30)).strftime('%Y-%m-%d'),
         'sort'     : 'asc',
     }
 
