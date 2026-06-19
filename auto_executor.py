@@ -89,7 +89,7 @@ def apply_exit_cooldown(symbol, direction, exit_reason):
                                    opposite direction freed immediately
     """
     opposite = 'SHORT' if direction == 'LONG' else 'LONG'
-    if 'STOP' in exit_reason or 'PANIC' in exit_reason:
+    if 'STOP' in exit_reason:
         lock_symbol(symbol, direction, STOP_COOLDOWN_MINUTES)
         lock_symbol(symbol, opposite,  STOP_COOLDOWN_MINUTES)
         log(f"  🔒 STOP cooldown: {symbol} BOTH directions locked {STOP_COOLDOWN_MINUTES}min")
@@ -468,6 +468,25 @@ def check_and_execute_signals():
                     log(f"  ⚠️ MAX TRADES: skipping {symbol}")
                     continue
                 log(f"  🚀 SIGNAL: {symbol} {direction} @ ${price:,.4f} | RSI={rsi_real:.1f}")
+
+                # ── AI VISION CHECK — block bad entries ──────────────
+                try:
+                    from chart_renderer import render_chart
+                    from ai_vision_check import check_reversal
+                    import os
+                    chart_dir = '/home/MeirNiv/charts'
+                    os.makedirs(chart_dir, exist_ok=True)
+                    chart_path = f'{chart_dir}/{symbol.replace("/","_")}_{direction}_now.png'
+                    render_chart(symbol, '30m', n_candles=80, outpath=chart_path)
+                    ai_result = check_reversal(chart_path, symbol, direction)
+                    verdict = ai_result.get('verdict', 'ERROR')
+                    reason  = ai_result.get('reason', '')[:100]
+                    log(f"  👁️ AI Vision: {symbol} {direction} → {verdict}")
+                    if verdict == 'NOT_CONFIRMED':
+                        log(f"  🚫 AI Vision BLOCKED entry: {symbol} {direction} — {reason}")
+                        continue
+                except Exception as e:
+                    log(f"  ⚠️ AI Vision error (allowing trade): {e}")
                 # ── NVDA Trade Logger ─────────────────────────
                 if symbol == "NVDA":
                     with open("/home/MeirNiv/aimn-trade-final/nvda_trades.log", "a") as f:
