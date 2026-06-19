@@ -89,7 +89,7 @@ def apply_exit_cooldown(symbol, direction, exit_reason):
                                    opposite direction freed immediately
     """
     opposite = 'SHORT' if direction == 'LONG' else 'LONG'
-    if 'STOP' in exit_reason:
+    if 'STOP' in exit_reason or 'PANIC' in exit_reason:
         lock_symbol(symbol, direction, STOP_COOLDOWN_MINUTES)
         lock_symbol(symbol, opposite,  STOP_COOLDOWN_MINUTES)
         log(f"  🔒 STOP cooldown: {symbol} BOTH directions locked {STOP_COOLDOWN_MINUTES}min")
