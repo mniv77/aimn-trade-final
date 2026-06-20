@@ -400,7 +400,7 @@ def check_and_execute_signals():
                         import os as _os
                         _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
                         # Use 30m chart for better pattern visibility
-                        chart_tf = candle_time  # use actual candle timeframe
+                        chart_tf = '5m'  # always use 5m for most recent price action
                         chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{chart_tf}.png"
                         log(f"  📊 Chart path: {chart_path}")
                         render_chart(symbol, chart_tf, n_candles=80, outpath=chart_path)
@@ -415,8 +415,8 @@ def check_and_execute_signals():
                             VALUES (%s,%s,%s,%s,%s,%s,%s)
                         """, (symbol, direction, candle_time, "AI_FIRST",
                               ai_verdict, ai_reason, chart_path))
-                        if ai_verdict == "CONFIRMED":
-                            log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — CONFIRMED")
+                        if ai_verdict == "CONFIRMED" or (ai_verdict == "UNCLEAR" and rsi_extreme):
+                            log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — {ai_verdict} (rsi_extreme={rsi_extreme})")
                             # Fall through to entry below
                         else:
                             log(f"  🚫 AI FIRST BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
@@ -435,7 +435,7 @@ def check_and_execute_signals():
                         from ai_vision_check import check_reversal
                         import os as _os
                         _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
-                        chart_tf2 = candle_time  # use actual candle timeframe
+                        chart_tf2 = '5m'  # always use 5m for most recent price action
                         chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{chart_tf2}.png"
                         render_chart(symbol, chart_tf2, n_candles=80, outpath=chart_path)
                         ai_result = check_reversal(chart_path, symbol, direction)
