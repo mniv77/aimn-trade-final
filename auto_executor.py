@@ -323,9 +323,9 @@ def check_and_execute_signals():
                     macd_signal   = macd_falling or rsi_extreme
                     bounce_signal = rsi_bouncing or rsi_extreme
                     trend_ok      = macd_val < 0 or rsi_extreme
-                if not trend_ok:
-                    log(f"  🚫 TREND BLOCK: {symbol} {direction} MACD={macd_val:.4f} — skip")
-                    continue
+                # trend_ok removed — AI Vision makes the decision
+                if False:  # disabled
+                    pass
                 # ── PULLBACK FILTER: never enter at peak ──────
                 price_prev1 = float(s.get("price_prev1") or price)
                 price_prev2 = float(s.get("price_prev2") or price)
