@@ -435,8 +435,9 @@ def check_and_execute_signals():
                         from ai_vision_check import check_reversal
                         import os as _os
                         _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
-                        chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{candle_time}.png"
-                        render_chart(symbol, candle_time, n_candles=60, outpath=chart_path)
+                        chart_tf2 = '30m' if candle_time in ('5m', '1hr') else candle_time
+                        chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{chart_tf2}.png"
+                        render_chart(symbol, chart_tf2, n_candles=80, outpath=chart_path)
                         ai_result = check_reversal(chart_path, symbol, direction)
                         ai_verdict = ai_result.get("verdict", "ERROR")
                         ai_reason  = ai_result.get("reason", "")
