@@ -60,7 +60,15 @@ def check_reversal(image_path, symbol, direction):
         f"GREEN spike then sideways drift on low volume = ACCUMULATION = LONG coming. "
         f"Wait for breakout AFTER the drift phase to confirm entry. "
         f"RSI/MACD are just alerts — YOU make the final decision based on chart structure. "
-        f"Is there a confirmed {direction_word} pattern supporting a {entry_word} entry RIGHT NOW? "
+        f"CRITICAL ANALYSIS RULES: "
+        f"1. Find the MOST RECENT V-bottom or V-top anywhere on the chart (not just right edge). "
+        f"2. If a V-bottom formed recently (last 20-40 candles) AND price is now recovering = LONG CONFIRMED. "
+        f"3. If a V-top formed recently (last 20-40 candles) AND price is now declining = SHORT CONFIRMED. "
+        f"4. The V needs: sharp move + volume spike + 2+ candles in new direction. "
+        f"5. If price is still recovering from recent V-bottom = CONFIRMED LONG (not too late if within 20 candles). "
+        f"6. RIGHT EDGE noise/chop after a clear V = still CONFIRMED if the V was recent and strong. "
+        f"7. Only say NOT_CONFIRMED if NO clear V pattern exists anywhere in the recent chart. "
+        f"Is there a recent {direction_word} pattern supporting a {entry_word} entry? "
         f'Respond ONLY with JSON: '
         f'{{"verdict": "CONFIRMED|NOT_CONFIRMED|UNCLEAR", "reason": "describe V pattern structure"}}'
     )
