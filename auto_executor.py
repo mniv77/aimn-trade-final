@@ -422,6 +422,10 @@ def check_and_execute_signals():
                         continue
 
                 if rsi_signal:
+                    # Lock immediately to prevent duplicate entries
+                    if is_locked(symbol, direction):
+                        continue
+                    lock_symbol(symbol, direction, 5)  # 5 min lock while processing
                     log(f"  🎯 RSI SIGNAL: {symbol} {direction} RSI={rsi_real:.1f} — AI Vision deciding...")
                     # ── AI VISION LIVE GATE ───────────────────────────────
                     ai_verdict = "ERROR"
