@@ -392,7 +392,7 @@ def check_and_execute_signals():
                 # ── AI VISION FIRST PATH (RSI extreme, bypass v_bottom) ──
                 candle_time = s.get("candle_time") or DEFAULT_PARAMS["candle_time"]
                 # At RSI extreme, bypass pullback_ok (we WANT to enter at the bottom)
-                ai_first_ok = rsi_extreme and (pullback_ok or rsi_extreme) and not v_bottom
+                ai_first_ok = rsi_signal and not v_bottom
                 if ai_first_ok:
                     try:
                         from chart_renderer import render_chart
