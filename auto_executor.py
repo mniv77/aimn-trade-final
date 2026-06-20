@@ -292,12 +292,8 @@ def check_and_execute_signals():
                             _open, _close = float(_last[1]), float(_last[4])
 
                             rsi_check = float(s.get("rsi_real") or 50.0)
-                            if direction == "LONG" and _close <= _open and rsi_check > 20:
-                                log(f"  HTF BLOCK: {symbol} 1hr bearish - skip LONG")
-                                continue
-                            if direction == "SHORT" and _close >= _open and rsi_check < 75:
-                                log(f"  HTF BLOCK: {symbol} 1hr bullish - skip SHORT")
-                                continue
+                            # HTF block removed — AI Vision makes this decision
+                            pass
 
                 except Exception:
                     pass
