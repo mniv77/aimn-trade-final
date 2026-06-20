@@ -456,10 +456,15 @@ def check_and_execute_signals():
                 else:
                     log(f"  ⏳ RSI not ready: {symbol} {direction} RSI={rsi_real:.1f}")
                     continue
+                # Use INSERT IGNORE with unique constraint to prevent race condition
                 cursor.execute("SELECT id, direction FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
                 existing = cursor.fetchone()
                 if existing:
                     log(f"  ⚠️ DUPLICATE GUARD: {symbol} already has {existing['direction']} open")
+                    continue
+                # Also check locked_symbols to prevent same-cycle duplicates
+                if f"{symbol}_{direction}" in locked_symbols:
+                    log(f"  ⚠️ CYCLE LOCK: {symbol} {direction} already entered this cycle")
                     continue
                 cursor.execute("SELECT COUNT(*) as cnt FROM active_trades WHERE status='OPEN'")
                 if cursor.fetchone()["cnt"] >= 3:
