@@ -423,8 +423,8 @@ def check_and_execute_signals():
                         log(f"  👁️ AI FIRST ERROR: {_e}")
                         continue
 
-                if (v_bottom and rsi_signal and bounce_signal and pullback_ok) or                    (rsi_extreme and pullback_ok):
-                    log(f"  🎯 V-BOTTOM: {symbol} {direction} rapid reversal detected!")
+                if rsi_signal:
+                    log(f"  🎯 RSI SIGNAL: {symbol} {direction} RSI={rsi_real:.1f} — AI Vision deciding...")
                     # ── AI VISION LIVE GATE ───────────────────────────────
                     ai_verdict = "ERROR"
                     ai_reason  = ""
