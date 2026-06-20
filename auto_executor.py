@@ -454,10 +454,7 @@ def check_and_execute_signals():
                         continue
                     # ── END AI VISION LIVE GATE ───────────────────────────
                 else:
-                    if not pullback_ok:
-                        log(f"  ⛔ PEAK BLOCK: {symbol} {direction} price at peak/low - skip")
-                    elif not v_bottom:
-                        log(f"  ⏳ NO CONFIRMATION: {symbol} {direction} v_bottom not confirmed - skip")
+                    log(f"  ⏳ RSI not ready: {symbol} {direction} RSI={rsi_real:.1f}")
                     continue
                 cursor.execute("SELECT id, direction FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
                 existing = cursor.fetchone()
