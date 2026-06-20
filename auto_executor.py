@@ -415,8 +415,8 @@ def check_and_execute_signals():
                             VALUES (%s,%s,%s,%s,%s,%s,%s)
                         """, (symbol, direction, candle_time, "AI_FIRST",
                               ai_verdict, ai_reason, chart_path))
-                        if ai_verdict in ("CONFIRMED", "UNCLEAR"):
-                            log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — verdict={ai_verdict}")
+                        if ai_verdict == "CONFIRMED":
+                            log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — CONFIRMED")
                             # Fall through to entry below
                         else:
                             log(f"  🚫 AI FIRST BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
