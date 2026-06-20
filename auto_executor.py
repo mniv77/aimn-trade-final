@@ -415,8 +415,8 @@ def check_and_execute_signals():
                             VALUES (%s,%s,%s,%s,%s,%s,%s)
                         """, (symbol, direction, candle_time, "AI_FIRST",
                               ai_verdict, ai_reason, chart_path))
-                        if ai_verdict == "CONFIRMED":
-                            log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — rules bypassed!")
+                        if ai_verdict in ("CONFIRMED", "UNCLEAR"):
+                            log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — verdict={ai_verdict}")
                             # Fall through to entry below
                         else:
                             log(f"  🚫 AI FIRST BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
@@ -455,6 +455,7 @@ def check_and_execute_signals():
                     if ai_verdict == "NOT_CONFIRMED":
                         log(f"  🚫 AI VISION BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
                         continue
+                    # UNCLEAR = allow entry (small profit better than no trade)
                     # ── END AI VISION LIVE GATE ───────────────────────────
                 else:
                     log(f"  ⏳ RSI not ready: {symbol} {direction} RSI={rsi_real:.1f}")
