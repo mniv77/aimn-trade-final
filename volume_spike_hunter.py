@@ -223,10 +223,8 @@ def check_volume_spikes():
                     log(f"  Protecting {ex_symbol} PnL={current_pnl:+.2f}% — skip spike")
                     continue
 
-                log(f"  Closing {ex_symbol} PnL={current_pnl:+.2f}% — making room for spike")
-                success = auto_exit_trade(cursor, existing_trade, live_price)
-                if not success:
-                    continue
+                log(f"  Skipping spike — {ex_symbol} trade already open (PnL={current_pnl:+.2f}%)")
+                continue
 
             # Duplicate guard
             cursor.execute("""
