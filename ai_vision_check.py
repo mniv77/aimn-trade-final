@@ -37,7 +37,12 @@ def check_reversal(image_path, symbol, direction):
     direction_word = "bottom" if direction == "LONG" else "top"
     entry_word = "LONG (buy)" if direction == "LONG" else "SHORT (sell)"
     prompt = (
-        f"You are an expert trader analyzing a {symbol} candlestick chart using V-pattern strategy. "
+        f"You are an expert trader analyzing a {symbol} candlestick chart. "
+        f"IMPORTANT: First identify what pattern the chart ACTUALLY shows, then decide if it supports a {direction} entry. "
+        f"Do NOT try to find reasons to confirm {direction} — be objective and honest. "
+        f"If the chart shows a V-LONG pattern, say CONFIRMED for LONG and NOT_CONFIRMED for SHORT. "
+        f"If the chart shows a V-SHORT pattern, say NOT_CONFIRMED for LONG and CONFIRMED for SHORT. "
+        f"Never confirm BOTH directions — they are mutually exclusive. "
         f"PATTERN RULES — study ALL of these: "
         f"V-LONG: Sharp decline, big GREEN volume spike at bottom, 2+ green candles recovering. "
         f"U-LONG: Gradual curved decline, volume spike at bottom, steady recovery. Same as V but slower. "
