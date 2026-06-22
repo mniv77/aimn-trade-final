@@ -416,6 +416,7 @@ def check_and_execute_signals():
                             # Fall through to entry below
                         else:
                             log(f"  🚫 AI FIRST BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
+                            lock_symbol(symbol, direction, 15)  # 15 min cooldown after AI block
                             continue
                     except Exception as _e:
                         log(f"  👁️ AI FIRST ERROR: {_e}")
@@ -454,6 +455,7 @@ def check_and_execute_signals():
                     # Block entry if AI says NOT_CONFIRMED
                     if ai_verdict == "NOT_CONFIRMED":
                         log(f"  🚫 AI VISION BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
+                        lock_symbol(symbol, direction, 15)  # 15 min cooldown after AI block
                         continue
                     # UNCLEAR = allow entry (small profit better than no trade)
                     # ── END AI VISION LIVE GATE ───────────────────────────
