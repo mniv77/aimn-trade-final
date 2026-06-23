@@ -499,6 +499,12 @@ def check_and_execute_signals():
                 if f"{symbol}_{direction}" in locked_symbols:
                     log(f"  ⚠️ CYCLE LOCK: {symbol} {direction} already entered this cycle")
                     continue
+                # Broker-level lock — only 1 trade per broker at a time
+                cursor.execute("SELECT COUNT(*) as cnt FROM active_trades WHERE status='OPEN' AND broker_name=%s", (broker,))
+                if cursor.fetchone()["cnt"] >= 1:
+                    log(f"  ⚠️ BROKER LOCKED: {broker} already has open trade - skipping {symbol}")
+                    continue
+
                 cursor.execute("SELECT COUNT(*) as cnt FROM active_trades WHERE status='OPEN'")
                 if cursor.fetchone()["cnt"] >= 3:
                     log(f"  ⚠️ MAX TRADES: skipping {symbol}")
