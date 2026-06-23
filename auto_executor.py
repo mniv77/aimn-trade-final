@@ -67,18 +67,42 @@ def get_db():
 
 # ── Lock helpers ─────────────────────────────────────────────
 def is_locked(symbol, direction):
-    """Check if symbol+direction is currently locked"""
+    """Check if symbol+direction is currently locked - uses DB for persistence"""
     key = f"{symbol}_{direction}"
+    # Check memory first (fast)
     expires = locked_symbols.get(key)
     if expires and datetime.now() < expires:
         return True
+    # Check DB (survives restarts)
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("SELECT expires_at FROM symbol_locks WHERE symbol_direction=%s", (key,))
+        row = cursor.fetchone()
+        conn.close()
+        if row and datetime.now() < row['expires_at']:
+            locked_symbols[key] = row['expires_at']  # cache in memory
+            return True
+    except Exception:
+        pass
     if key in locked_symbols:
-        del locked_symbols[key]  # expired, clean up
+        del locked_symbols[key]
     return False
 
 def lock_symbol(symbol, direction, minutes):
     key = f"{symbol}_{direction}"
-    locked_symbols[key] = datetime.now() + timedelta(minutes=minutes)
+    expires = datetime.now() + timedelta(minutes=minutes)
+    locked_symbols[key] = expires
+    # Also save to DB for persistence across restarts
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            INSERT INTO symbol_locks (symbol_direction, expires_at)
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE expires_at=%s
+        """, (key, expires, expires))
+        conn.close()
+    except Exception:
+        pass
     log(f"  🔒 Locked {key} for {minutes} min")
 
 def apply_exit_cooldown(symbol, direction, exit_reason):
