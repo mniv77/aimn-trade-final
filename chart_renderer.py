@@ -52,7 +52,9 @@ def render_chart(symbol, timeframe, n_candles=50, outpath="/tmp/chart.png", titl
     if not rows:
         return None
 
-    rows = rows[::-1]
+    # Only reverse if from DB (DESC order). Gemini already sorted ASC.
+    if not ('/' in symbol and rows and rows[0].get('timestamp', 0) < rows[-1].get('timestamp', 0)):
+        rows = rows[::-1]
     df = pd.DataFrame(rows)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df = df.set_index("timestamp")
