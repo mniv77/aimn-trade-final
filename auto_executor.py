@@ -510,6 +510,23 @@ def check_and_execute_signals():
                     log(f"  ⚠️ MAX TRADES: skipping {symbol}")
                     continue
                 log(f"  🚀 SIGNAL: {symbol} {direction} @ ${price:,.4f} | RSI={rsi_real:.1f}")
+                # ── BTC MASTER TREND FILTER (crypto only) ────────────
+                if '/' in symbol and symbol != 'BTC/USD':
+                    try:
+                        from chart_renderer import render_chart as _rc
+                        from ai_vision_check import check_reversal as _cr
+                        btc_path = '/home/MeirNiv/charts/BTC_USD_master.png'
+                        _rc('BTC/USD', '1hr', n_candles=48, outpath=btc_path)
+                        btc_result = _cr(btc_path, 'BTC/USD', direction)
+                        btc_verdict = btc_result.get('verdict', 'ERROR')
+                        log(f"  🪙 BTC MASTER [{btc_verdict}]: {btc_result.get('reason','')[:60]}")
+                        if btc_verdict == 'NOT_CONFIRMED':
+                            log(f"  🚫 BTC MASTER BLOCKED: {symbol} {direction}")
+                            lock_symbol(symbol, direction, 15)
+                            continue
+                    except Exception as _e:
+                        log(f"  🪙 BTC MASTER ERROR: {_e}")
+
 
                 # ── AI VISION CHECK — block bad entries ──────────────
                 try:
