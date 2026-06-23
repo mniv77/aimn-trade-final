@@ -391,6 +391,7 @@ def check_and_execute_signals():
                 ai_first_ok = rsi_signal and not v_bottom
                 if ai_first_ok:
                     if is_locked(symbol, direction):
+                        log(f"  ⏳ AI cooldown active: {symbol} {direction} - skipping")
                         continue  # Skip if in cooldown after AI block
                     try:
                         from chart_renderer import render_chart
