@@ -423,7 +423,7 @@ def check_and_execute_signals():
                         import os as _os
                         _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
                         # Use 30m chart for better pattern visibility
-                        chart_tf = '5m'  # Use 5m for both LONG and SHORT - shows recent move clearly
+                        chart_tf = '30m'  # Use 30m for better trend visibility
                         chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{chart_tf}.png"
                         log(f"  📊 Chart path: {chart_path}")
                         render_chart(symbol, chart_tf, n_candles=80, outpath=chart_path)
@@ -463,7 +463,7 @@ def check_and_execute_signals():
                         from ai_vision_check import check_reversal
                         import os as _os
                         _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
-                        chart_tf2 = '5m'  # Use 5m for both LONG and SHORT - shows recent move clearly
+                        chart_tf2 = '30m'  # Use 30m for better trend visibility
                         chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{chart_tf2}.png"
                         render_chart(symbol, chart_tf2, n_candles=80, outpath=chart_path)
                         ai_result = check_reversal(chart_path, symbol, direction)
