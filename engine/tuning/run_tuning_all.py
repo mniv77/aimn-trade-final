@@ -200,12 +200,23 @@ def run_all():
     total = success = failed = 0
     results = []
 
+    # Symbols to skip
+    SKIP_SYMBOLS = ['SLV', 'USO', 'GLD', 'GDX', 'UNG', 'GC-GOLD', 'CL-OIL']
+
     for sym in symbols:
+        # Skip ETF and disabled symbols
+        if sym['symbol'] in SKIP_SYMBOLS:
+            log(f"  ⏭️ Skipping disabled symbol: {sym['symbol']}")
+            continue
+
         broker_upper = sym['broker_name'].upper()
         timeframes = BROKER_TFS.get(broker_upper, STOCK_TFS)
 
         for direction in DIRECTIONS:
             for tf in timeframes:
+                # Skip 5m timeframe
+                if tf['tf'] == '5m':
+                    continue
                 total += 1
                 label = f"{sym['symbol']} {direction} [{tf['tf']}]"
                 log(f"\n{'─'*50}")
