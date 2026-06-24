@@ -873,7 +873,15 @@ def api_ai_vision_check():
         from chart_renderer import render_chart
         from ai_vision_check import check_reversal
         os.makedirs("/home/MeirNiv/charts", exist_ok=True)
+        # Crypto symbols always
         symbols = ["BTC/USD", "ETH/USD", "SOL/USD", "LINK/USD"]
+        # Add Alpaca stocks during NYSE hours
+        from datetime import datetime
+        import pytz
+        et = pytz.timezone('US/Eastern')
+        now_et = datetime.now(et)
+        market_open = now_et.weekday() < 5 and 570 <= now_et.hour * 60 + now_et.minute < 960
+        alpaca_symbols = ["TSLA", "NVDA", "MSFT", "AAPL", "QQQ"] if market_open else []
         verdicts = []
         for symbol in symbols:
             chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_5m.png"
@@ -882,6 +890,20 @@ def api_ai_vision_check():
                 result = check_reversal(chart_path, symbol, direction)
                 verdicts.append({
                     "symbol": symbol,
+                    "broker": "Gemini",
+                    "direction": direction,
+                    "verdict": result.get("verdict", "ERROR"),
+                    "reason": result.get("reason", "")
+                })
+        # Alpaca stocks loop
+        for symbol in alpaca_symbols:
+            chart_path = f"/home/MeirNiv/charts/chart_{symbol}_5m.png"
+            render_chart(symbol, "5m", n_candles=60, outpath=chart_path)
+            for direction in ["LONG", "SHORT"]:
+                result = check_reversal(chart_path, symbol, direction)
+                verdicts.append({
+                    "symbol": symbol,
+                    "broker": "Alpaca",
                     "direction": direction,
                     "verdict": result.get("verdict", "ERROR"),
                     "reason": result.get("reason", "")

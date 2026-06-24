@@ -614,7 +614,9 @@
         const resp = await fetch('/api/ai_vision_check');
         const data = await resp.json();
         if (data.verdicts) {
-          contentDiv.innerHTML = data.verdicts.map(v => {
+          const crypto = data.verdicts.filter(v => v.broker === 'Gemini' || !v.broker);
+          const stocks = data.verdicts.filter(v => v.broker === 'Alpaca');
+          const renderVerdicts = (list) => list.map(v => {
             const color = v.verdict === 'CONFIRMED' ? 'text-green-400' :
                          v.verdict === 'NOT_CONFIRMED' ? 'text-red-400' : 'text-yellow-400';
             const dirColor = v.direction === 'LONG' ? 'text-green-300' : 'text-red-300';
@@ -625,6 +627,16 @@
               <div class="text-gray-400 mt-0.5">${v.reason.substring(0,120)}...</div>
             </div>`;
           }).join('');
+          contentDiv.innerHTML = `<div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="text-purple-400 font-bold mb-2">🪙 Crypto</div>
+              ${renderVerdicts(crypto)}
+            </div>
+            ${stocks.length ? `<div>
+              <div class="text-blue-400 font-bold mb-2">📈 Stocks (NYSE)</div>
+              ${renderVerdicts(stocks)}
+            </div>` : ''}
+          </div>`;
         } else {
           contentDiv.innerHTML = '<span class="text-red-400">Error: ' + (data.error || 'Unknown') + '</span>';
         }
