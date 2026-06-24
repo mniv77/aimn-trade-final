@@ -609,15 +609,7 @@
       btn.textContent = '⏳ Checking...';
       btn.disabled = true;
       panel.classList.remove('hidden');
-      contentDiv.innerHTML = `
-        <div class="flex items-center gap-2 text-purple-300">
-          <span class="animate-pulse text-lg">🤖</span>
-          <div>
-            <div class="font-bold">AI Vision is analyzing the charts...</div>
-            <div class="text-gray-400 text-xs mt-1">Generating candlestick charts → Sending to Claude AI → Evaluating V/M/W patterns</div>
-            <div class="text-gray-500 text-xs mt-1">This takes 15-30 seconds. Please wait ⏳</div>
-          </div>
-        </div>`;
+      // Keep existing data visible while loading - no loading message
       try {
         const resp = await fetch('/api/ai_vision_check');
         const data = await resp.json();
