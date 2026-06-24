@@ -672,6 +672,13 @@
       }, 5000);
       setInterval(refreshScanPrices, 60000);
       setInterval(refreshScanSnapshot, 600000);
+      // Auto-refresh AI Vision every 5 minutes
+      setInterval(() => {
+        console.log('Auto AI Vision check...');
+        runAIVisionCheck();
+      }, 300000);  // 5 minutes
+      // Run AI Vision check on page load after 5 seconds
+      setTimeout(runAIVisionCheck, 5000);
     }
 
     let _ordersCache = [];
