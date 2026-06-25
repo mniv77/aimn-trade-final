@@ -425,9 +425,11 @@ def check_and_execute_signals():
                         # Use 30m chart for better pattern visibility
                         chart_tf = '30m'  # Use 30m for better trend visibility
                         chart_path = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_{chart_tf}.png"
+                        chart_path_5m = f"/home/MeirNiv/charts/chart_{symbol.replace('/','_')}_5m.png"
                         log(f"  📊 Chart path: {chart_path}")
                         render_chart(symbol, chart_tf, n_candles=80, outpath=chart_path)
-                        ai_result = check_reversal(chart_path, symbol, direction)
+                        render_chart(symbol, '5m', n_candles=60, outpath=chart_path_5m)
+                        ai_result = check_reversal(chart_path, symbol, direction, image_path_5m=chart_path_5m)
                         ai_verdict = ai_result.get("verdict", "ERROR")
                         ai_reason  = ai_result.get("reason", "")
                         log(f"  👁️ AI FIRST [{ai_verdict}]: {ai_reason[:80]}")

@@ -16,10 +16,13 @@ ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 MODEL = "claude-sonnet-4-6"
 
 
-def check_reversal(image_path, symbol, direction):
+def check_reversal(image_path, symbol, direction, image_path_5m=None):
     """
-    Ask Claude to look at a chart image and judge whether a reversal
-    in `direction` is confirmed (2+ candles of follow-through) or not.
+    Ask Claude to look at chart image(s) and judge whether a reversal
+    in `direction` is confirmed or not.
+
+    image_path     = 30m chart (big picture trend)
+    image_path_5m  = 5m chart (right edge pattern) — optional
 
     Returns a dict: {"verdict": "CONFIRMED"|"NOT_CONFIRMED"|"UNCLEAR", "reason": "..."}
     On error, returns {"verdict": "ERROR", "reason": "..."}
@@ -34,11 +37,32 @@ def check_reversal(image_path, symbol, direction):
     except Exception as e:
         return {"verdict": "ERROR", "reason": f"Could not read image: {e}"}
 
+    # Load 5m chart if provided
+    img_5m_b64 = None
+    if image_path_5m:
+        try:
+            with open(image_path_5m, "rb") as f:
+                img_5m_b64 = base64.b64encode(f.read()).decode()
+        except Exception as e:
+            img_5m_b64 = None  # proceed with single chart
+
+    # Build prompt based on whether we have 1 or 2 charts
+    has_two_charts = img_5m_b64 is not None
+    chart_intro = (
+        "You are given TWO charts: Chart 1 is the 30-minute chart (big picture), "
+        "Chart 2 is the 5-minute chart (right edge detail). "
+        "Use Chart 1 to determine the OVERALL trend. Use Chart 2 to find the V-pattern at the RIGHT EDGE. "
+        "A moderate upslope on Chart 2 after a big drop on Chart 1 = valid LONG setup. "
+        "A moderate downslope on Chart 2 after a big rally on Chart 1 = valid SHORT setup. "
+    ) if has_two_charts else (
+        "You are given ONE 30-minute chart. Use it to determine both trend and right-edge pattern. "
+    )
+
     direction_word = "bottom" if direction == "LONG" else "top"
     entry_word = "LONG (buy)" if direction == "LONG" else "SHORT (sell)"
     opposite = "SHORT" if direction == "LONG" else "LONG"
     prompt = (
-        f"You are a strict trading judge analyzing a {symbol} candlestick chart. "
+        f"{chart_intro}You are a strict trading judge analyzing a {symbol} candlestick chart. "
         f"Your ONLY job: decide if {direction} entry is valid RIGHT NOW. "
         f"\n\n"
         f"STEP 1 - DETERMINE OVERALL TREND (MANDATORY FIRST STEP): "
@@ -95,6 +119,14 @@ def check_reversal(image_path, symbol, direction):
                                     "data": img_b64,
                                 },
                             },
+                        ] + ([{
+                                "type": "image",
+                                "source": {
+                                    "type": "base64",
+                                    "media_type": "image/png",
+                                    "data": img_5m_b64,
+                                },
+                            }] if img_5m_b64 else []) + [
                             {"type": "text", "text": prompt},
                         ],
                     }
