@@ -912,6 +912,38 @@ def api_ai_vision_check():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/ai_vision_check_stocks")
+def api_ai_vision_check_stocks():
+    try:
+        import os
+        from datetime import datetime
+        import pytz
+        from chart_renderer import render_chart
+        from ai_vision_check import check_reversal
+        os.makedirs("/home/MeirNiv/charts", exist_ok=True)
+        et = pytz.timezone('US/Eastern')
+        now_et = datetime.now(et)
+        market_open = now_et.weekday() < 5 and 570 <= now_et.hour * 60 + now_et.minute < 960
+        if not market_open:
+            return jsonify({"verdicts": [], "market_open": False})
+        alpaca_symbols = ["TSLA", "NVDA", "AAPL", "QQQ"]
+        verdicts = []
+        for symbol in alpaca_symbols:
+            chart_path = f"/home/MeirNiv/charts/chart_{symbol}_5m.png"
+            render_chart(symbol, "5m", n_candles=60, outpath=chart_path)
+            for direction in ["LONG", "SHORT"]:
+                result = check_reversal(chart_path, symbol, direction)
+                verdicts.append({
+                    "symbol": symbol,
+                    "broker": "Alpaca",
+                    "direction": direction,
+                    "verdict": result.get("verdict", "ERROR"),
+                    "reason": result.get("reason", "")
+                })
+        return jsonify({"verdicts": verdicts, "market_open": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/charts/<filename>")
 def serve_chart(filename):
     import os
