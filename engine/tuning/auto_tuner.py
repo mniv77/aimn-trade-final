@@ -558,6 +558,21 @@ def tune_strategy(strategy_id, symbol, direction, candle_time=None, cfg=None, br
     log(f"  🏆 TotalPnL={best_result['total_pnl']}% WR={best_result['winrate']}% trades={best_result['trades']}")
     save_best_params(strategy_id, best_params, best_result)
 
+    # ── AI VISION VALIDATION ─────────────────────────────
+    # Validate entry signals with Claude Vision API
+    try:
+        from ai_vision_tuner_validator import validate_strategy
+        timestamps = list(range(len(closes)))  # use bar index as timestamp
+        ai_score, ai_validated = validate_strategy(
+            strategy_id, symbol, direction,
+            highs, lows, closes, timestamps,
+            best_params, min_entries=3, required_score=0.60
+        )
+        if ai_score is not None:
+            log(f"  🤖 AI Validation: {ai_score:.0%} ({'PASS' if ai_validated else 'FAIL'})")
+    except Exception as e:
+        log(f"  ⚠️  AI validation skipped: {e}")
+
     return {
         'symbol'   : symbol,
         'direction': direction,
