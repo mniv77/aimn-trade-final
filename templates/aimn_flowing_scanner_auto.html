@@ -642,14 +642,14 @@
           <div>
             <div class="mb-2">
               <span class="text-purple-400 font-bold">🪙 Crypto</span>
-              <span class="text-gray-500 text-xs ml-2">🕐 ${cryptoTime}</span>
+              <span class="text-cyan-400 text-xs ml-2 font-bold">🕐 ${cryptoTime}</span>
             </div>
             ${renderVerdicts(cryptoVerdicts)}
           </div>
           <div>
             <div class="flex justify-between items-center mb-2">
               <span class="text-blue-400 font-bold">📈 Stocks (NYSE)</span>
-              <span class="text-gray-500 text-xs">🕐 ${stocksTime}</span>
+              <span class="text-cyan-400 text-xs font-bold">🕐 ${stocksTime}</span>
             </div>
             ${marketOpen && stockVerdicts.length
               ? renderVerdicts(stockVerdicts)

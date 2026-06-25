@@ -907,7 +907,7 @@ def api_ai_vision_check_stocks():
         market_open = now_et.weekday() < 5 and 570 <= now_et.hour * 60 + now_et.minute < 960
         if not market_open:
             return jsonify({"verdicts": [], "market_open": False})
-        alpaca_symbols = ["TSLA", "NVDA", "AAPL", "QQQ"]
+        alpaca_symbols = ["TSLA", "NVDA", "MSFT", "AAPL", "QQQ", "SPY"]
         verdicts = []
         for symbol in alpaca_symbols:
             chart_path = f"/home/MeirNiv/charts/chart_{symbol}_5m.png"
