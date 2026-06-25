@@ -803,6 +803,23 @@ def _close_trade(cursor, s, current_price, pnl, duration_seconds, exit_reason):
         except Exception as e:
             log(f'  ⚠️ active_trades update error: {e}')
 
+        # ── AI VISION FEEDBACK — record trade outcome ─────
+        try:
+            trade_result = 'WIN' if pnl > 0 else ('LOSS' if pnl < 0 else 'BREAKEVEN')
+            cursor.execute("""
+                UPDATE ai_vision_log
+                SET trade_result    = %s,
+                    trade_pnl       = %s,
+                    exit_reason     = %s,
+                    feedback_noted  = 1
+                WHERE trade_id = %s
+                  AND feedback_noted = 0
+            """, (trade_result, round(pnl, 4), exit_reason, s['active_order_id']))
+            if cursor.rowcount > 0:
+                log(f"  📝 AI feedback recorded: {trade_result} {pnl:+.2f}% for trade {s['active_order_id']}")
+        except Exception as _fe:
+            log(f"  ⚠️ AI feedback error: {_fe}")
+
         # Clear strategy_params active state
         cursor.execute("""
             UPDATE strategy_params
