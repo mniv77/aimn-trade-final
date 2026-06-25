@@ -100,7 +100,7 @@ def check_reversal(image_path, symbol, direction):
                     }
                 ],
             },
-            timeout=30,
+            timeout=60,
         )
         response.raise_for_status()
         data = response.json()
