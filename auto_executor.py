@@ -409,10 +409,34 @@ def check_and_execute_signals():
                     v_bottom   = rapid_rise and reversing and true_top and state_ok
 
                 # V-bottom gives extra confidence - can relax MACD requirement
-                # ── AI VISION FIRST PATH (RSI extreme, bypass v_bottom) ──
+                # ── MOMENTUM BREAKOUT DETECTION ──────────────────────
+                # Catch strong momentum moves BEFORE RSI gets extreme
+                # LONG momentum: 3+ consecutive rising candles with acceleration
+                # SHORT momentum: 3+ consecutive falling candles with acceleration
                 candle_time = s.get("candle_time") or DEFAULT_PARAMS["candle_time"]
+                momentum_ok = False
+                if direction == "LONG":
+                    # 3 consecutive green candles, each higher than previous
+                    c1_up = cp1 > cp2  # most recent rising
+                    c2_up = cp2 > cp3  # second rising
+                    c3_up = cp3 > cp4  # third rising
+                    momentum_pct = (price - cp3) / cp3 * 100 if cp3 > 0 else 0
+                    momentum_ok = c1_up and c2_up and c3_up and momentum_pct >= 0.8
+                    if momentum_ok:
+                        log(f"  🚀 MOMENTUM LONG: {symbol} +{momentum_pct:.2f}% in 3 candles")
+                elif direction == "SHORT":
+                    # 3 consecutive red candles, each lower than previous
+                    c1_dn = cp1 < cp2  # most recent falling
+                    c2_dn = cp2 < cp3  # second falling
+                    c3_dn = cp3 < cp4  # third falling
+                    momentum_pct = (cp3 - price) / cp3 * 100 if cp3 > 0 else 0
+                    momentum_ok = c1_dn and c2_dn and c3_dn and momentum_pct >= 0.8
+                    if momentum_ok:
+                        log(f"  🚀 MOMENTUM SHORT: {symbol} -{momentum_pct:.2f}% in 3 candles")
+
+                # ── AI VISION FIRST PATH (RSI extreme, bypass v_bottom) ──
                 # At RSI extreme, bypass pullback_ok (we WANT to enter at the bottom)
-                ai_first_ok = rsi_signal and not v_bottom
+                ai_first_ok = (rsi_signal and not v_bottom) or momentum_ok
                 if ai_first_ok:
                     if is_locked(symbol, direction):
                         log(f"  ⏳ AI cooldown active: {symbol} {direction} - skipping")
