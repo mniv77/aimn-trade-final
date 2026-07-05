@@ -443,7 +443,7 @@ def check_and_execute_signals():
                         continue  # Skip if in cooldown after AI block
                     try:
                         from chart_renderer import render_chart
-                        from ai_vision_check import check_reversal
+                        from code_vision import check_reversal
                         import os as _os
                         _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
                         # Use 30m chart for better pattern visibility
@@ -468,9 +468,9 @@ def check_and_execute_signals():
                             log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — {ai_verdict} (rsi_extreme={rsi_extreme})")
                             # Fall through to entry below
                         else:
-                            log(f"  🚫 AI FIRST BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
-                            lock_symbol(symbol, direction, 15)  # 15 min cooldown after AI block
-                            continue
+                            log(f"  👁️ AI FIRST OBSERVED: {symbol} {direction} - {ai_reason[:60]}")
+                            # lock removed - observer only
+                            pass
                     except Exception as _e:
                         log(f"  👁️ AI FIRST ERROR: {_e}")
                         continue
@@ -481,12 +481,11 @@ def check_and_execute_signals():
                         continue
                     lock_symbol(symbol, direction, 5)  # 5 min lock while processing
                     log(f"  🎯 RSI SIGNAL: {symbol} {direction} RSI={rsi_real:.1f} — AI Vision deciding...")
-                    # ── AI VISION LIVE GATE ───────────────────────────────
-                    ai_verdict = "ERROR"
+                    # ── AI VISION LIVE GATE ──────────────────────────────
                     ai_reason  = ""
                     try:
                         from chart_renderer import render_chart
-                        from ai_vision_check import check_reversal
+                        from code_vision import check_reversal
                         import os as _os
                         _os.makedirs("/home/MeirNiv/charts", exist_ok=True)
                         chart_tf2 = '30m'  # Use 30m for better trend visibility
@@ -507,14 +506,14 @@ def check_and_execute_signals():
                         log(f"  👁️ AI VISION ERROR (proceeding): {_e}")
                     # Block entry if AI says NOT_CONFIRMED or UNCLEAR
                     if ai_verdict in ("NOT_CONFIRMED", "UNCLEAR"):
-                        log(f"  🚫 AI VISION BLOCKED ({ai_verdict}): {symbol} {direction} - {ai_reason[:60]}")
-                        lock_symbol(symbol, direction, 15)  # 15 min cooldown after AI block
-                        continue
+                        log(f"  👁️ AI VISION OBSERVED ({ai_verdict}): {symbol} {direction} - {ai_reason[:60]}")
+                        # lock removed - observer only
+                        pass
                     # Only CONFIRMED allows entry
                     # ── END AI VISION LIVE GATE ───────────────────────────
                 else:
-                    log(f"  ⏳ RSI not ready: {symbol} {direction} RSI={rsi_real:.1f}")
-                    continue
+                    log(f"  👀 RSI OBSERVED (not veto): {symbol} {direction} RSI={rsi_real:.1f}")
+                    pass
                 # Use INSERT IGNORE with unique constraint to prevent race condition
                 cursor.execute("SELECT id, direction FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
                 existing = cursor.fetchone()
@@ -540,16 +539,16 @@ def check_and_execute_signals():
                 if '/' in symbol and symbol != 'BTC/USD':
                     try:
                         from chart_renderer import render_chart as _rc
-                        from ai_vision_check import check_reversal as _cr
+                        from code_vision import check_reversal as _cr
                         btc_path = '/home/MeirNiv/charts/BTC_USD_master.png'
                         _rc('BTC/USD', '1hr', n_candles=48, outpath=btc_path)
                         btc_result = _cr(btc_path, 'BTC/USD', direction)
                         btc_verdict = btc_result.get('verdict', 'ERROR')
                         log(f"  🪙 BTC MASTER [{btc_verdict}]: {btc_result.get('reason','')[:60]}")
                         if btc_verdict == 'NOT_CONFIRMED':
-                            log(f"  🚫 BTC MASTER BLOCKED: {symbol} {direction}")
-                            lock_symbol(symbol, direction, 15)
-                            continue
+                            log(f"  🪙 BTC MASTER OBSERVED: {symbol} {direction}")
+                            # BTC is advisor only
+                            pass
                     except Exception as _e:
                         log(f"  🪙 BTC MASTER ERROR: {_e}")
 
@@ -557,7 +556,7 @@ def check_and_execute_signals():
                 # ── AI VISION CHECK — block bad entries ──────────────
                 try:
                     from chart_renderer import render_chart
-                    from ai_vision_check import check_reversal
+                    from code_vision import check_reversal
                     import os
                     chart_dir = '/home/MeirNiv/charts'
                     os.makedirs(chart_dir, exist_ok=True)
@@ -568,8 +567,8 @@ def check_and_execute_signals():
                     reason  = ai_result.get('reason', '')[:100]
                     log(f"  👁️ AI Vision: {symbol} {direction} → {verdict}")
                     if verdict == 'NOT_CONFIRMED':
-                        log(f"  🚫 AI Vision BLOCKED entry: {symbol} {direction} — {reason}")
-                        continue
+                        log(f"  👁️ AI Vision OBSERVED entry: {symbol} {direction} — {reason}")
+                        pass
                 except Exception as e:
                     log(f"  ⚠️ AI Vision error (allowing trade): {e}")
                 # ── NVDA Trade Logger ─────────────────────────

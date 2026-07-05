@@ -871,7 +871,7 @@ def api_ai_vision_check():
     try:
         import os
         from chart_renderer import render_chart
-        from ai_vision_check import check_reversal
+        from code_vision import check_reversal
         os.makedirs("/home/MeirNiv/charts", exist_ok=True)
         # Crypto symbols always
         symbols = ["BTC/USD", "ETH/USD", "SOL/USD", "LINK/USD"]
@@ -900,7 +900,7 @@ def api_ai_vision_check_stocks():
         from datetime import datetime
         import pytz
         from chart_renderer import render_chart
-        from ai_vision_check import check_reversal
+        from code_vision import check_reversal
         os.makedirs("/home/MeirNiv/charts", exist_ok=True)
         et = pytz.timezone('US/Eastern')
         now_et = datetime.now(et)
