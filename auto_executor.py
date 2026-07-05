@@ -505,11 +505,9 @@ def check_and_execute_signals():
                     except Exception as _e:
                         log(f"  👁️ AI VISION ERROR (proceeding): {_e}")
                     # Block entry if AI says NOT_CONFIRMED or UNCLEAR
-                    if ai_verdict in ("NOT_CONFIRMED", "UNCLEAR"):
-                        log(f"  👁️ AI VISION OBSERVED ({ai_verdict}): {symbol} {direction} - {ai_reason[:60]}")
-                        # lock removed - observer only
-                        pass
-                    # Only CONFIRMED allows entry
+                    if ai_verdict in ("NOT_CONFIRMED", "UNCLEAR", "ERROR"):
+                        log(f"  🚫 AI VISION BLOCKED ({ai_verdict}): {symbol} {direction} - {ai_reason[:60]}")
+                        continue                    # Only CONFIRMED allows entry
                     # ── END AI VISION LIVE GATE ───────────────────────────
                 else:
                     log(f"  👀 RSI OBSERVED (not veto): {symbol} {direction} RSI={rsi_real:.1f}")
