@@ -726,6 +726,24 @@ def monitor_and_exit_trades():
 
                 exit_reason = None
 
+                # ── RULE 0B: AIV GUARDIAN REVERSAL EXIT 🛡️ ──
+                try:
+                    from scanner import AIMnScanner
+
+                    guardian = AIMnScanner({})
+
+                    if guardian.check_aiv_reversal_exit(s, {
+                        "direction": direction,
+                        "entry_price": entry_price
+                    }):
+                        exit_reason = "AIV-GUARDIAN (trend reversed after entry)"
+                        log(f"  🛡️ AIV GUARDIAN EXIT: {symbol} {direction} reversal detected")
+
+                except Exception as e:
+                    log(f"  ⚠️ AIV Guardian check error: {e}")
+
+                # ── RULE 1: STOP LOSS (only after 300s) ───
+
                 # ── RULE 1: STOP LOSS (only after 300s) ───
                 if pnl <= -stop_loss:
                     if duration_seconds >= MIN_TRADE_SECONDS:

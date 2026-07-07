@@ -1,161 +1,413 @@
-# scanner.py
 """
-AIMn Trading System - Multi-Symbol Scanner
-Scans all symbols and finds the best trading opportunity
+AIV Scanner v4 - CLEAN STABLE VERSION
+- Entry + Exit + Scaling + Trailing + Re-entry
+- Anti-chop protection
+- Position-aware logic
 """
-import pandas as pd
-import numpy as np
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime
-import logging
-from indicators import AIMnIndicators
 
-logger = logging.getLogger(__name__)
+import pandas as pd
+from typing import Dict, Optional
+
+from v_classifier import VClassifier
+from trade_memory import TradeMemory
+from position_manager import PositionManager
+from indicators import AIMnIndicators
 
 
 class AIMnScanner:
-    """Scanner to find the best trading opportunity across multiple symbols"""
 
     def __init__(self, symbol_params: Dict[str, Dict]):
         self.symbol_params = symbol_params
-        self.default_params = {
-            'rsi_period': 14,
-            'rsi_oversold': 30,
-            'rsi_overbought': 70,
-            'macd_fast': 12,
-            'macd_slow': 26,
-            'macd_signal': 9,
-            'volume_threshold': 1.2,
-            'atr_period': 14,
-            'atr_ma_period': 28,
-            'atr_multiplier': 1.3,
-            'obv_period': 20,
-        }
+        self.v_engine = VClassifier()
+        self.memory = TradeMemory()
+        self.position_manager = PositionManager()
 
-    def get_symbol_params(self, symbol: str) -> Dict:
-        params = self.default_params.copy()
-        if symbol in self.symbol_params:
-            params.update(self.symbol_params[symbol])
-        # Try without slash (BTC/USD -> BTCUSD)
-        symbol_no_slash = symbol.replace('/', '')
-        if symbol_no_slash in self.symbol_params:
-            params.update(self.symbol_params[symbol_no_slash])
-        return params
-
-    def calculate_opportunity_score(self, df: pd.DataFrame, params: Dict, direction: str) -> float:
-        """Score 0-100: higher = better opportunity"""
-        if len(df) < 2:
-            return 0.0
-        latest = df.iloc[-1]
-        score = 0.0
-
-        # RSI component (0-25 points)
-        rsi = latest.get('rsi_real', 50)
-        if direction == 'BUY':
-            if rsi <= params['rsi_oversold']:
-                score += (params['rsi_oversold'] - rsi) / params['rsi_oversold'] * 25
-        else:
-            if rsi >= params['rsi_overbought']:
-                score += (rsi - params['rsi_overbought']) / (100 - params['rsi_overbought']) * 25
-
-        # MACD histogram component (0-25 points)
-        hist = latest.get('macd_histogram', 0)
-        score += min(abs(hist) * 10, 25)
-
-        # Volume component (0-25 points)
-        vol_mean = df['volume'].rolling(20).mean().iloc[-1]
-        volume_ratio = latest['volume'] / vol_mean if vol_mean else 1
-        score += min((volume_ratio - 1) * 10, 25)
-
-        # ATR component (0-25 points)
-        atr_ma = latest.get('atr_ma', None)
-        atr = latest.get('atr', None)
-        if atr and atr_ma and atr_ma > 0:
-            atr_ratio = atr / atr_ma
-            score += min((atr_ratio - params['atr_multiplier']) * 10, 25)
-
-        return max(0.0, min(100.0, score))
-
-    def scan_symbol(self, symbol: str, df: pd.DataFrame) -> Optional[Dict]:
-        """Scan a single symbol; returns opportunity dict or None"""
+    # ---------------------------
+    # GLOBAL TREND
+    # ---------------------------
+    def get_global_trend(self, df: pd.DataFrame) -> str:
         if df is None or len(df) < 50:
-            logger.debug(f"Insufficient data for {symbol}")
+            return "UNKNOWN"
+
+        fast = df["close"].rolling(20).mean().iloc[-1]
+        slow = df["close"].rolling(50).mean().iloc[-1]
+
+        if fast > slow:
+            return "UP"
+        elif fast < slow:
+            return "DOWN"
+        return "SIDEWAYS"
+
+    # ---------------------------
+    # CHOP FILTER
+    # ---------------------------
+    def is_chop_market(self, df: pd.DataFrame) -> bool:
+        if df is None or len(df) < 50:
+            return True
+
+        ema_fast = df["close"].ewm(span=20).mean().iloc[-1]
+        ema_slow = df["close"].ewm(span=50).mean().iloc[-1]
+
+        trend_strength = abs(ema_fast - ema_slow) / ema_slow
+
+        recent = df.tail(30)
+        price_range = (recent["high"].max() - recent["low"].min()) / recent["close"].iloc[-1]
+
+        volatility = df["close"].pct_change().rolling(10).std().iloc[-1]
+
+        if trend_strength < 0.002 and price_range < 0.01:
+            return True
+
+        if volatility < 0.002:
+            return True
+
+        return False
+
+    # ---------------------------
+    # RE-ENTRY LOGIC
+    # ---------------------------
+    def detect_reentry(self, df: pd.DataFrame, trend: str) -> bool:
+        if df is None or len(df) < 30:
+            return False
+
+        recent = df.tail(10)
+        pullback = (recent["close"].iloc[-1] - recent["close"].iloc[0]) / recent["close"].iloc[0]
+
+        if trend == "UP":
+            return pullback < -0.002
+        if trend == "DOWN":
+            return pullback > 0.002
+
+        return False
+
+    # ---------------------------
+    # EXIT ENGINE
+    # ---------------------------
+    def get_exit_signal(self, df: pd.DataFrame, symbol: str):
+
+        pos = self.position_manager.get_position(symbol)
+        if not pos:
             return None
 
-        params = self.get_symbol_params(symbol)
-        df_ind = AIMnIndicators.calculate_all_indicators(df, params)
-        conditions = AIMnIndicators.check_entry_conditions(df_ind, params)
-        latest = df_ind.iloc[-1]
+        if df is None or len(df) < 50:
+            return None
+            
+        # ---------------------------
+        # EXHAUSTION EXIT (NEW)
+        # ---------------------------
+        if self.check_exhaustion_exit(df, pos):
+            self.position_manager.close_position(symbol)
+            return "EXHAUSTION_EXIT"            
 
-        for direction, cond_key in [('BUY', 'buy'), ('SELL', 'sell')]:
-            if conditions.get(cond_key):
-                score = self.calculate_opportunity_score(df_ind, params, direction)
-                return {
-                    'symbol': symbol,
-                    'direction': direction,
-                    'entry_price': latest['close'],
-                    'score': score,
-                    'indicators': {
-                        'rsi_real': latest.get('rsi_real'),
-                        'macd': latest.get('macd'),
-                        'signal': latest.get('signal'),
-                        'volume_ratio': latest['volume'] / df_ind['volume'].rolling(20).mean().iloc[-1],
-                        'atr_ratio': (latest.get('atr', 0) / latest.get('atr_ma', 1)) if latest.get('atr_ma') else None,
-                    },
-                    'conditions': conditions
-                }
+        trend = self.get_global_trend(df)
+        price = df["close"].iloc[-1]
+
+        entry = pos["entry_price"]
+        direction = pos["direction"]
+
+        move = (price - entry) / entry
+
+        # trend flip exit
+        if direction == "LONG" and trend == "DOWN":
+            self.position_manager.close_position(symbol)
+            return "TREND_EXIT"
+
+        if direction == "SHORT" and trend == "UP":
+            self.position_manager.close_position(symbol)
+            return "TREND_EXIT"
+
+        # profit take
+        if direction == "LONG" and move > 0.03:
+            self.position_manager.close_position(symbol)
+            return "TAKE_PROFIT"
+
+        if direction == "SHORT" and move < -0.03:
+            self.position_manager.close_position(symbol)
+            return "TAKE_PROFIT"
+
+        # stop loss
+        if direction == "LONG" and move < -0.015:
+            self.position_manager.close_position(symbol)
+            return "STOP_LOSS"
+
+        if direction == "SHORT" and move > 0.015:
+            self.position_manager.close_position(symbol)
+            return "STOP_LOSS"
+
         return None
 
-    def scan_all_symbols(self, market_data: Dict[str, pd.DataFrame]) -> Optional[Dict]:
-        """Scan all symbols; return highest-scoring opportunity or None"""
-        opportunities = []
-        for symbol, df in market_data.items():
-            try:
-                opp = self.scan_symbol(symbol, df)
-                if opp:
-                    opportunities.append(opp)
-                    logger.debug(f"Opportunity: {symbol} {opp['direction']} score={opp['score']:.1f}")
-            except Exception as e:
-                logger.error(f"Error scanning {symbol}: {e}")
+    # ---------------------------
+    # TRAILING STOP
+    # ---------------------------
+    def check_trailing_stop(self, symbol: str, df: pd.DataFrame):
 
-        if opportunities:
-            best = max(opportunities, key=lambda x: x['score'])
-            logger.info(f"Best: {best['symbol']} {best['direction']} score={best['score']:.1f}")
-            return best
+        pos = self.position_manager.get_position(symbol)
+        if not pos:
+            return False
+
+        price = df["close"].iloc[-1]
+        self.position_manager.update_price(symbol, price)
+
+        peak = pos["peak"]
+        trough = pos["trough"]
+        direction = pos["direction"]
+
+        if direction == "LONG":
+            if (peak - price) / peak > 0.012:
+                self.position_manager.close_position(symbol)
+                return True
+
+        if direction == "SHORT":
+            if (price - trough) / trough > 0.012:
+                self.position_manager.close_position(symbol)
+                return True
+
+        return False
+
+    # ---------------------------
+    # PROFIT SCALING
+    # ---------------------------
+    def check_profit_scaling(self, symbol: str, df: pd.DataFrame):
+
+        pos = self.position_manager.get_position(symbol)
+        if not pos:
+            return None
+
+        price = df["close"].iloc[-1]
+        entry = pos["entry_price"]
+        direction = pos["direction"]
+
+        move = (price - entry) / entry
+
+        if pos["partials"] == 0:
+            if direction == "LONG" and move > 0.015:
+                pos["partials"] += 1
+                return "PARTIAL_1"
+
+            if direction == "SHORT" and move < -0.015:
+                pos["partials"] += 1
+                return "PARTIAL_1"
+
+        if pos["partials"] == 1:
+            if direction == "LONG" and move > 0.03:
+                pos["partials"] += 1
+                return "PARTIAL_2"
+
+            if direction == "SHORT" and move < -0.03:
+                pos["partials"] += 1
+                return "PARTIAL_2"
+
         return None
 
-    def get_signal_summary(self, market_data: Dict[str, pd.DataFrame]) -> Dict[str, Dict]:
-        """Summary of all symbols for dashboard/monitoring"""
-        summary = {}
-        for symbol, df in market_data.items():
-            if df is None or len(df) < 50:
-                summary[symbol] = {'status': 'insufficient_data'}
-                continue
-            try:
-                params = self.get_symbol_params(symbol)
-                df_ind = AIMnIndicators.calculate_all_indicators(df, params)
-                latest = df_ind.iloc[-1]
-                conditions = AIMnIndicators.check_entry_conditions(df_ind, params)
-                vol_mean = df_ind['volume'].rolling(20).mean().iloc[-1]
+    # ---------------------------
+    # MAIN SCAN
+    # ---------------------------
+    def scan_symbol(self, symbol: str, df: pd.DataFrame):
 
-                missing_buy, missing_sell = [], []
-                if not conditions.get('rsi_buy'):   missing_buy.append('RSI')
-                if not conditions.get('macd_buy'):  missing_buy.append('MACD')
-                if not conditions.get('volume_buy'): missing_buy.append('Volume')
-                if not conditions.get('rsi_sell'):  missing_sell.append('RSI')
-                if not conditions.get('macd_sell'): missing_sell.append('MACD')
-                if not conditions.get('volume_sell'): missing_sell.append('Volume')
+        if df is None or len(df) < 60:
+            return None
 
-                summary[symbol] = {
-                    'status': 'ready',
-                    'price': latest['close'],
-                    'rsi': latest.get('rsi_real'),
-                    'volume_ratio': latest['volume'] / vol_mean if vol_mean else None,
-                    'buy_ready': conditions.get('buy', False),
-                    'sell_ready': conditions.get('sell', False),
-                    'missing_buy': missing_buy,
-                    'missing_sell': missing_sell,
-                }
-            except Exception as e:
-                summary[symbol] = {'status': 'error', 'error': str(e)}
-        return summary
+        if self.position_manager.has_position(symbol):
+            return None
+
+        df_ind = AIMnIndicators.calculate_all_indicators(df, self.symbol_params.get(symbol, {}))
+
+        if self.is_chop_market(df_ind):
+            return None
+            
+        # SPIKE FILTER (NEW)
+        if self.is_liquidity_spike(df_ind):
+            return None     
+
+        trend = self.get_global_trend(df_ind)
+        v_signal = VClassifier().classify_v(df_ind)
+
+        normal = v_signal.get("trade_allowed", False)
+        reentry = self.detect_reentry(df_ind, trend)
+
+  #  if not entry_quality:
+  #         return None
+            
+        if not normal and not reentry:
+            return None
+
+        price = df_ind["close"].iloc[-1]
+
+        if reentry:
+            direction = "LONG" if trend == "UP" else "SHORT"
+            entry_type = "REENTRY"
+        else:
+            direction = v_signal.get("direction")
+            entry_type = "NORMAL"
+
+        if direction is None:
+            return None
+
+        self.position_manager.open_position(symbol, direction, price, entry_type)
+
+        return {
+            "symbol": symbol,
+            "direction": direction,
+            "entry_price": price,
+            "entry_type": entry_type,
+            "trend": trend,
+            "v_type": v_signal.get("v_type", "UNKNOWN")
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    def check_exhaustion_exit(self, df: pd.DataFrame, position: dict) -> bool:
+        """
+        Exhaustion Exit v1:
+        detects late entries and momentum fade
+        """
+
+        if df is None or len(df) < 50:
+            return False
+
+        rsi = df["rsi_real"].iloc[-1] if "rsi_real" in df else None
+        if rsi is None:
+            return False
+
+        recent = df.tail(10)
+        price = df["close"].iloc[-1]
+
+        direction = position.get("direction")
+        entry = position.get("entry_price")
+
+        if entry is None:
+            return False
+
+        # ---------------------------
+        # LONG EXHAUSTION
+        # ---------------------------
+        if direction == "LONG":
+
+            # condition 1: overheated market
+            if rsi > 78:
+
+                # condition 2: momentum fading
+                rsi_prev = df["rsi_real"].iloc[-5] if "rsi_real" in df else rsi
+
+                if rsi < rsi_prev:
+                    return True
+
+                # condition 3: no new highs
+                if recent["high"].max() <= df["high"].iloc[-10]:
+                     return True
+
+        # ---------------------------
+        # SHORT EXHAUSTION
+        # ---------------------------
+        if direction == "SHORT":
+
+           if rsi < 22:
+
+              rsi_prev = df["rsi_real"].iloc[-5] if "rsi_real" in df else rsi
+
+              if rsi > rsi_prev:
+                    return True
+    
+              if recent["low"].min() >= df["low"].iloc[-10]:
+                    return True
+
+        return False
+         
+        
+        
+        
+        
+        
+        
+    def is_liquidity_spike(self, df: pd.DataFrame) -> bool:
+        """
+        Spike Filter v1:
+        detects stop hunts + fake breakouts
+        """
+
+        if df is None or len(df) < 50:
+            return False
+
+        recent = df.tail(5)
+
+        # candle size
+        last_candle = recent.iloc[-1]
+        body = abs(last_candle["close"] - last_candle["open"])
+        range_ = last_candle["high"] - last_candle["low"]
+
+        avg_range = (df["high"] - df["low"]).rolling(20).mean().iloc[-1]
+
+        # spike condition 1: abnormal candle size
+        if range_ > avg_range * 2.2:
+           return True
+
+        # spike condition 2: strong body move
+        if body > avg_range * 1.5:
+           return True
+
+        # spike condition 3: instant reversal after spike
+        prev = df["close"].iloc[-3]
+        curr = df["close"].iloc[-1]
+
+        spike_move = abs(curr - prev) / prev
+ 
+        if spike_move > 0.008:  # 0.8% fast move (1m/5m sensitive)
+          return True
+
+        return False
+
+
+
+
+    def check_aiv_reversal_exit(self, df, position):
+        """
+        AIV Guardian:
+        Exit when original trade idea is invalidated
+        """
+
+        direction = position.get("direction")
+
+        recent = df.tail(5)
+
+        # LONG trade protection
+        if direction == "LONG":
+
+            # red reversal after entry
+            red_candles = (
+                recent["close"] < recent["open"]
+            ).sum()
+
+            # lower highs forming
+            lower_high = (
+                recent["high"].iloc[-1]
+                < recent["high"].iloc[-3]
+            )
+
+            if red_candles >= 3 and lower_high:
+                return True
+
+        # SHORT trade protection
+        if direction == "SHORT":
+
+            green_candles = (
+                recent["close"] > recent["open"]
+            ).sum()
+
+            higher_low = (
+                recent["low"].iloc[-1]
+                > recent["low"].iloc[-3]
+            )
+
+            if green_candles >= 3 and higher_low:
+                return True
+
+        return False
