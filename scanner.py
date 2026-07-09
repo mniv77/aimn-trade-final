@@ -91,13 +91,13 @@ class AIMnScanner:
 
         if df is None or len(df) < 50:
             return None
-            
+
         # ---------------------------
         # EXHAUSTION EXIT (NEW)
         # ---------------------------
         if self.check_exhaustion_exit(df, pos):
             self.position_manager.close_position(symbol)
-            return "EXHAUSTION_EXIT"            
+            return "EXHAUSTION_EXIT"
 
         trend = self.get_global_trend(df)
         price = df["close"].iloc[-1]
@@ -214,10 +214,10 @@ class AIMnScanner:
 
         if self.is_chop_market(df_ind):
             return None
-            
+
         # SPIKE FILTER (NEW)
         if self.is_liquidity_spike(df_ind):
-            return None     
+            return None
 
         trend = self.get_global_trend(df_ind)
         v_signal = VClassifier().classify_v(df_ind)
@@ -227,7 +227,7 @@ class AIMnScanner:
 
   #  if not entry_quality:
   #         return None
-            
+
         if not normal and not reentry:
             return None
 
@@ -243,7 +243,20 @@ class AIMnScanner:
         if direction is None:
             return None
 
-        self.position_manager.open_position(symbol, direction, price, entry_type)
+        # ---------------------------
+        # AIV TREND PROFESSOR GATE
+        # Prevent late
+
+        if not self.check_trend_birth(df_ind, direction):
+            return None
+
+
+        self.position_manager.open_position(
+            symbol,
+            direction,
+            price,
+            entry_type
+        )
 
         return {
             "symbol": symbol,
@@ -253,18 +266,18 @@ class AIMnScanner:
             "trend": trend,
             "v_type": v_signal.get("v_type", "UNKNOWN")
         }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
     def check_exhaustion_exit(self, df: pd.DataFrame, position: dict) -> bool:
         """
         Exhaustion Exit v1:
@@ -316,18 +329,18 @@ class AIMnScanner:
 
               if rsi > rsi_prev:
                     return True
-    
+
               if recent["low"].min() >= df["low"].iloc[-10]:
                     return True
 
         return False
-         
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
     def is_liquidity_spike(self, df: pd.DataFrame) -> bool:
         """
         Spike Filter v1:
@@ -359,7 +372,7 @@ class AIMnScanner:
         curr = df["close"].iloc[-1]
 
         spike_move = abs(curr - prev) / prev
- 
+
         if spike_move > 0.008:  # 0.8% fast move (1m/5m sensitive)
           return True
 
@@ -409,5 +422,56 @@ class AIMnScanner:
 
             if green_candles >= 3 and higher_low:
                 return True
+
+        return False
+
+
+    # ---------------------------
+    # AIV TREND BIRTH PROFESSOR
+    # ---------------------------
+    def check_trend_birth(self, df, direction):
+
+        if df is None or len(df) < 30:
+            return False
+
+        recent = df.tail(12)
+
+        current = df["close"].iloc[-1]
+
+        high = recent["high"].max()
+        low = recent["low"].min()
+
+        move_from_high = (high - current) / high
+        move_from_low = (current - low) / low
+
+        # SHORT:
+        # Do not short after most of drop already happened
+        if direction == "SHORT":
+
+            if move_from_high > 0.012:
+                return False
+
+            red = (
+                recent.tail(5)["close"]
+                < recent.tail(5)["open"]
+            ).sum()
+
+            return red >= 2
+
+
+        # LONG:
+        # Do not buy after big move already happened
+        if direction == "LONG":
+
+            if move_from_low > 0.012:
+                return False
+
+            green = (
+                recent.tail(5)["close"]
+                > recent.tail(5)["open"]
+            ).sum()
+
+            return green >= 2
+
 
         return False
