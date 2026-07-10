@@ -427,51 +427,76 @@ class AIMnScanner:
 
 
     # ---------------------------
-    # AIV TREND BIRTH PROFESSOR
+    # AIV TREND BIRTH PROFESSOR v2
+    # Find NEW trend start, reject old trend
     # ---------------------------
     def check_trend_birth(self, df, direction):
 
-        if df is None or len(df) < 30:
+        if df is None or len(df) < 60:
             return False
-
-        recent = df.tail(12)
 
         current = df["close"].iloc[-1]
 
-        high = recent["high"].max()
-        low = recent["low"].min()
+        # Look farther back to find real V / U birth
+        window = df.tail(40)
 
-        move_from_high = (high - current) / high
-        move_from_low = (current - low) / low
+        highest = window["high"].max()
+        lowest = window["low"].min()
 
-        # SHORT:
-        # Do not short after most of drop already happened
-        if direction == "SHORT":
+        high_index = window["high"].idxmax()
+        low_index = window["low"].idxmin()
 
-            if move_from_high > 0.012:
-                return False
+        candles_after_high = len(window.loc[high_index:])
+        candles_after_low = len(window.loc[low_index:])
 
-            red = (
-                recent.tail(5)["close"]
-                < recent.tail(5)["open"]
-            ).sum()
-
-            return red >= 2
-
-
+        # --------------------------------
         # LONG:
-        # Do not buy after big move already happened
+        # We want shortly after bottom,
+        # not after full move already happened
+        # --------------------------------
         if direction == "LONG":
 
-            if move_from_low > 0.012:
+            move_from_bottom = (current - lowest) / lowest
+
+            # LINK problem:
+            # trend started 7.70, entered 7.98
+            # reject if too far from birth
+            if candles_after_low > 12:
                 return False
 
+            if move_from_bottom > 0.018:
+                return False
+
+            # require recovery candles
+            recent = df.tail(5)
             green = (
-                recent.tail(5)["close"]
-                > recent.tail(5)["open"]
+                recent["close"] > recent["open"]
             ).sum()
 
             return green >= 2
+
+
+        # --------------------------------
+        # SHORT:
+        # Same idea reversed
+        # --------------------------------
+        if direction == "SHORT":
+
+            move_from_top = (highest - current) / highest
+
+            # reject late shorts
+            if candles_after_high > 12:
+                return False
+
+            if move_from_top > 0.018:
+                return False
+
+            recent = df.tail(5)
+            red = (
+                recent["close"] < recent["open"]
+            ).sum()
+
+            return red >= 2
 
 
         return False
