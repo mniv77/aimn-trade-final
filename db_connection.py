@@ -3,16 +3,14 @@
 import pymysql
 
 
-def get_db():
-    """
-    Shared MySQL connection for the app.
-    Uses the same settings you tested in test_insert_trade.py.
-    """
+import pymysql
+
+def get_db(database="MeirNiv$default"):
     conn = pymysql.connect(
-        host="meirniv.mysql.pythonanywhere-services.com",
-        user="meirniv",
+        host="MeirNiv.mysql.pythonanywhere-services.com",
+        user="MeirNiv",
         password="mayyam28",
-        database="meirniv$default",
+        database=database,
         cursorclass=pymysql.cursors.DictCursor,
     )
     return conn

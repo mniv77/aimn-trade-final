@@ -1,0 +1,56 @@
+diff --git a/auto_executor.py b/auto_executor.py
+index a2fb1ae..f5ea6bd 100644
+--- a/auto_executor.py
++++ b/auto_executor.py
+@@ -469,8 +469,8 @@ def check_and_execute_signals():
+                             # Fall through to entry below
+                         else:
+                             log(f"  🚫 AI FIRST BLOCKED: {symbol} {direction} - {ai_reason[:60]}")
+-                            lock_symbol(symbol, direction, 15)  # 15 min cooldown after AI block
+-                            continue
++                            # lock removed - observer only
++                            pass
+                     except Exception as _e:
+                         log(f"  👁️ AI FIRST ERROR: {_e}")
+                         continue
+@@ -481,8 +481,7 @@ def check_and_execute_signals():
+                         continue
+                     lock_symbol(symbol, direction, 5)  # 5 min lock while processing
+                     log(f"  🎯 RSI SIGNAL: {symbol} {direction} RSI={rsi_real:.1f} — AI Vision deciding...")
+-                    # ── AI VISION LIVE GATE ───────────────────────────────
+-                    ai_verdict = "ERROR"
++                    # ── AI VISION LIVE GATE ──────────────────────────────
+                     ai_reason  = ""
+                     try:
+                         from chart_renderer import render_chart
+@@ -507,14 +506,14 @@ def check_and_execute_signals():
+                         log(f"  👁️ AI VISION ERROR (proceeding): {_e}")
+                     # Block entry if AI says NOT_CONFIRMED or UNCLEAR
+                     if ai_verdict in ("NOT_CONFIRMED", "UNCLEAR"):
+-                        log(f"  🚫 AI VISION BLOCKED ({ai_verdict}): {symbol} {direction} - {ai_reason[:60]}")
+-                        lock_symbol(symbol, direction, 15)  # 15 min cooldown after AI block
+-                        continue
++                        log(f"  👁️ AI VISION OBSERVED ({ai_verdict}): {symbol} {direction} - {ai_reason[:60]}")
++                        # lock removed - observer only
++                        pass
+                     # Only CONFIRMED allows entry
+                     # ── END AI VISION LIVE GATE ───────────────────────────
+                 else:
+-                    log(f"  ⏳ RSI not ready: {symbol} {direction} RSI={rsi_real:.1f}")
+-                    continue
++                    log(f"  👀 RSI OBSERVED (not veto): {symbol} {direction} RSI={rsi_real:.1f}")
++                    pass
+                 # Use INSERT IGNORE with unique constraint to prevent race condition
+                 cursor.execute("SELECT id, direction FROM active_trades WHERE symbol=%s AND status='OPEN' LIMIT 1", (symbol,))
+                 existing = cursor.fetchone()
+@@ -548,8 +547,8 @@ def check_and_execute_signals():
+                         log(f"  🪙 BTC MASTER [{btc_verdict}]: {btc_result.get('reason','')[:60]}")
+                         if btc_verdict == 'NOT_CONFIRMED':
+                             log(f"  🚫 BTC MASTER BLOCKED: {symbol} {direction}")
+-                            lock_symbol(symbol, direction, 15)
+-                            continue
++                            # BTC is advisor only
++                            pass
+                     except Exception as _e:
+                         log(f"  🪙 BTC MASTER ERROR: {_e}")
+ 

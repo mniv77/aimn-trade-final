@@ -1,0 +1,439 @@
+./ brokers/alpaca_client.py
+./.calculate_indicators.py.swp
+./.env
+./.env_example
+./.git/COMMIT_EDITMSG
+./.git/FETCH_HEAD
+./.git/HEAD
+./.git/ORIG_HEAD
+./.git/config
+./.git/description
+./.git/index
+./.git/packed-refs
+./.gitignore
+./.gitignore_check
+./0
+./=
+./=0.2.40
+./AATA_RULES.md
+./AI-Human-coporation/AiMN_AI_Vision_Proposal.docx
+./AI-Human-coporation/AiMN_AI_Vision_Proposal_2_Strategy.docx
+./AI-Human-coporation/AiMN_AI_Vision_Proposal_3_Technical.docx
+./AI-Human-coporation/a
+./AIMn_dashboard_new.py
+./AIMn_file_inventory.txt
+./AIV_one_professor_rule_patch.txt
+./AImn-Cl Looping Strategy - V4.0
+./AImnMLResearch/__init__.py
+./AImnMLResearch/aiml_dashboard.py
+./AImnMLResearch/aimn_strategy.py
+./AImnMLResearch/backtest_loop_skeleton.py
+./AImnMLResearch/backtest_with_db.py
+./AImnMLResearch/indicator_utils.py
+./AImnMLResearch/save_strategy_params.py
+./Calculate_indicators.py
+./Dockerfile
+./FETCH_HEAD
+./GIT_SETUP_GUIDE.md
+./LICENSE
+./MySql/.env
+./MySql/btc_ohlcv_for_db.csv
+./MySql/import_candles_to_db.py
+./PushSimple.cmd
+./README.md
+./Requirements.raw
+./SERVER/params_api_mysql.py
+./SERVER/params_api_table.py
+./TEMP SAVE
+./TRADINGVIEW/AImn-Cl Looping Strategy - V6.3 (Hourly Time-Decay No-Los)
+./TRADINGVIEW/AImn-Cl Looping Strategy - V7.1
+./TRADINGVIEW/AImn-Cl Looping Strategy - V7.2
+./TRADINGVIEW/AImn-Cl Looping Strategy - V7.txt
+./TRADINGVIEW/AImn_V6.3b_Ordered (1).pine
+./TRADINGVIEW/PARAMETER_ORDER_V6.3b.txt
+./TRADINGVIEW/TV
+./TRADINGVIEW/strategy( AImn-Cl Looping Strategy - V6.3b (Hourly No-Loss - ).txt
+./TRADINGVIEW/strategy(AImn-Cl Looping Strategy - V6.1 (Dual Trailing System)
+./Temp Save 2
+./__pycache__/ai_vision_check.cpython-310.pyc
+./__pycache__/ai_vision_tuner_validator.cpython-310.pyc
+./__pycache__/alpaca_connector.cpython-310.pyc
+./__pycache__/app.cpython-310.pyc
+./__pycache__/auto_executor.cpython-310.pyc
+./__pycache__/auto_executor.cpython-313.pyc
+./__pycache__/calculate_indicators.cpython-310.pyc
+./__pycache__/chart_renderer.cpython-310.pyc
+./__pycache__/code_vision.cpython-310.pyc
+./__pycache__/db.cpython-310.pyc
+./__pycache__/db.cpython-313.pyc
+./__pycache__/db_config.cpython-310.pyc
+./__pycache__/price_updater.cpython-310.pyc
+./__pycache__/scanner.cpython-310.pyc
+./__pycache__/shared_models.cpython-310.pyc
+./__pycache__/trade_memory.cpython-310.pyc
+./__pycache__/v_classifier.cpython-310.pyc
+./__pycache__/volume_spike_hunter.cpython-310.pyc
+./aata/README.md
+./aata/app.py
+./aata/config.py
+./aata/requirements.txt
+./ai_vision_check.py
+./ai_vision_tuner_validator.py
+./aimn_config.py
+./aimn_engine.py
+./aimn_trades.json
+./aimn_tuning_center_v52.html
+./aimn_working_dashboard.py
+./aiv_scoring_engine.py
+./alpaca_client.py
+./alpaca_connector.py
+./app.py
+./app.py.bak
+./app.py.bak.2025-11-03-1909
+./app.py.bak.20251030-082416
+./app.py.bak.20251030-163830
+./app.py.bak.20251030-185519
+./app.py.bak.20260422-2150
+./app.py.bak.20260422-2151
+./app.py.bak.scanner_fix
+./app/views.py
+./app_backup.py
+./app_backup2/APP.py-bak-9-17-5
+./app_backup2/O_BAK.HTML
+./app_backup2/Order_Bak.html
+./app_backup2/__init__.py
+./app_backup2/aiml_home_bak.htm
+./app_backup2/aimn_diagnostic_scanner-bak9-21-5
+./app_backup2/aimn_flowing_scanner-BAK-10-15-5.html
+./app_backup2/aimn_flowing_scanner_auto_bak.html
+./app_backup2/aimn_trade_popup_bak-10-15-5.html
+./app_backup2/aimn_trade_popup_bak.html
+./app_backup2/app-back_9-7-5.py
+./app_backup2/app-back_v2.py
+./app_backup2/app-back_v3 9-8.py
+./app_backup2/app_bak-10-14-5
+./app_backup2/app_bak-9-21-5.py
+./app_backup2/app_bak.py
+./app_backup2/app_bak_10-14-5.py
+./app_backup2/app_min-bak.py
+./app_backup2/arr-bak9-19
+./app_backup2/backup-aimn_tuning_center_v52.htm
+./app_backup2/dashboard_BAK.html
+./app_backup2/index_BAK.html
+./app_backup2/index_bak.html
+./app_backup2/logo_bak.html
+./app_backup2/manual_tune_bak.html
+./app_backup2/symbol_api_manager_bak.html
+./app_backup2/temp save url for app_min.h
+./app_backup2/tmp06r2al3s
+./app_backup2/tmp12_p6gui
+./app_backup2/tmpgwaugsri
+./app_backup2/tmpifwuwcu9
+./app_backup2/tmpmbf_zt2h
+./app_backup2/tmpnil3ynb6
+./app_backup2/tmpp4zeq_6l
+./app_backup2/tmpv6mt6_gw
+./app_backup2/trade-popup-fixed_bak.html
+./app_backup2/tuning_bak.html
+./app_backup_before_scanner_fix.py
+./app_min.py
+./app_min.py.backup-before-api-fix
+./app_min_cl.py
+./app_min_saved.py
+./app_root_conflict.py
+./app_sub/__init__.py
+./app_sub/api_credentials.py
+./app_sub/app_factory.py
+./app_sub/broker.py
+./app_sub/broker_alpaca.py
+./app_sub/broker_base.py
+./app_sub/broker_gemini.py
+./app_sub/broker_manager.py
+./app_sub/config.py
+./app_sub/db.py
+./app_sub/indicators.py
+./app_sub/market_data.py
+./app_sub/models.py
+./app_sub/orchestrator.py
+./app_sub/position_manager.py
+./app_sub/scanner.py
+./app_sub/security.py
+./app_sub/state.py
+./app_sub/test_users.py
+./app_sub/views.py
+./app_sub/views.py.bak
+./app_sub/worker.py
+./app_test.py
+./artifacts/auto_preopen.png
+./artifacts/auto_scanner_loaded.png
+./artifacts/manual_popup_ok.png
+./artifacts/manual_preopen.png
+./artifacts/manual_scanner_loaded.png
+./artifacts/reset_available.png
+./artifacts/reset_loaded.png
+./artifacts/reset_trading.png
+./artifacts/state_after_trigger.png
+./artifacts/state_scanner_loaded.png
+./async_except_star_example.py
+./async_taskgroup_with_match.py
+./auto tuning/CREATING FILE; AIMN_SCANNER_TROUBLESHOOTING_GUIDE.txt
+./auto tuning/Complete Handoff Report — April 10, 2026.odt
+./auto tuning/UAiMN V3.1 Auto Tuner — CRITICAL BUG REPORT Alpaca Symbol Tuning Failure — April 13, 2026ntitled 1.odt
+./auto tuning/iMN V3.1 — HaGolem Auto Trading Complete Handoff Report — April 13, 2026.odt
+./auto tuning/omplete Handoff Report — April 10, 2026
+./auto_executor.py
+./auto_executor.py.bak
+./auto_executor_AIV_professor_rule_working.py
+./auto_executor_backup_before_cleanup.py
+./auto_executor_before_aiv_guardian_exit.py
+./auto_executor_before_one_aiv_rule.py
+./auto_tuner.py
+./avg_volume
+./bin/arduino-cli
+./blueprints/__init__.py
+./blueprints/credentials_api.py
+./blueprints/trading_api.py
+./brokers/alpaca_client.py
+./build_master_db.py
+./builders/builder_config.py
+./builders/session_0001.py
+./calc.log
+./calculate_indicators.py
+./calculate_indicators_BROKEN.py
+./calculate_indicators_backup.py
+./candle_cache/GLD_1hr.json
+./chart/chart_BTC_USD_30m (1).png
+./chart/chart_BTC_USD_30m (2).png
+./chart/chart_BTC_USD_30m (3).png
+./chart/chart_BTC_USD_30m (4).png
+./chart/chart_BTC_USD_30m.png
+./chart/chart_BTC_USD_5m.png
+./chart/chart_ETH_USD_30m (1).png
+./chart/chart_ETH_USD_30m.png
+./chart/test chart
+./chart_renderer.py
+./chart_test_btc.png
+./check_balance.py
+./cleanup_project.bat
+./code_vision.py
+./config.py
+./config/__init__.py
+./config/db.py
+./connect-pc-laptop/connect
+./core.31
+./core.32
+./create_long_strategy.py
+./dashboard.py
+./database.py
+./database/Hagolem database schema · SQL.txt
+./database/Hagolem first entry · SQL.txt
+./database/Hagolem ideas routes. PY
+./database/dd
+./db.py
+./db/simple_dashboard.py
+./db/test_users.py
+./db_config.py
+./db_connection.py
+./db_test.py
+./deploy.sh
+./diagnose.py
+./doc/AIMn Multi-Professor_Scanner_Analysis.html
+./doc/AIMn Project Synchronization Guide ## Complete Guide to Keep PC, PythonAnywhere, and Git in Sync
+./doc/AIMn Scanner Debug Interface - Technical Report 9-7-5
+./doc/AIMn Scanner ⇄ Popup Integration (Official v1.0) Date_ 2025-09-03
+./doc/AIMn Scanner-Popup Integration Specification (Unified) 9-3-25 V2
+./doc/AImn Strategy Official Documentation (v2.0).txt
+./doc/AiMN V3.1 — Session Report (May 6, 2026).odt
+./doc/Architectural Analysis and Trading Philosophy
+./doc/Architectural Analysis and Trading Philosophy.html
+./doc/Popup ↔ Scanner Integration Specification (v1.0) 9-3-25
+./doc/Scanner-Popup Communication Specification
+./doc/Simple Explanation.html
+./doc/aimn_status_report.html
+./doc/cloudeAIAssit explain strategy.txt
+./engine.log
+./engine.log.bak
+./engine/__init__.py
+./execution_loop.py
+./executor.log
+./final_repair.py
+./fix_app_writer.py
+./for
+./gitignore_new.txt
+./indicators.py
+./install_pytest_fix.ps1
+./main
+./main_v2.py
+./main_v2_test.py
+./manage_db.py
+./market_data.py
+./models.py
+./nvda_trades.log
+./old/auto_tuning_old.py
+./popup.sqlite3
+./position_manager.py
+./price.log
+./price_updater.py
+./push_live_data.py
+./push_live_data_bak.py
+./py
+./pytest.ini
+./python test_env.py
+./repair_app.py
+./repair_db.py
+./requirements.txt
+./reserved/auto_executor_tuning_v1.py
+./reserved/dashboard _ver1.0.0.html
+./reserved/test_dashboard _ver1.0.0.html
+./restore_clean_strategies.py
+./routes/trade_routes.py
+./routes/ui.py
+./run_dashboard.py
+./run_worker.py
+./save_aata_session_0003.sh
+./saving files transfer/am
+./saving files transfer/app_MIN-SAVE.PY
+./scanner.py
+./scanner.py.bak
+./scanner.py.bak.2026-07-06-022634
+./scanner_backup_before_indent_fix_20260707_0226.py
+./scanner_before_aiv_guardian_exit.py
+./scanner_multi_exchange.py
+./scripts/__init__.py
+./scripts/bootstrap_seed.py
+./scripts/clean_blueprint_conflict.py
+./scripts/deploy_popup_ui.sh
+./scripts/fix_blueprint_inline.py
+./scripts/fix_future_imports.py
+./scripts/install_trading_api.py
+./scripts/make_missing_pages.py
+./scripts/migrate_strategy_params.py
+./scripts/migrate_ui_events.py
+./scripts/test_ui.sh
+./security/__init__.py
+./security/secret_box.py
+./server/params_api_table.py
+./services/__init__.py
+./services/broker_registry.py
+./services/price_feed.py
+./services/quote_provider.py
+./session_notes_tracker.py
+./setup_broker_db.py
+./setup_db.py
+./setup_mysql.py
+./setup_symbols.py
+./setup_tuning.py
+./setup_tuning_db.py
+./shared_models.py
+./smoke_firefox.py
+./sql/create_tuning_runs.sql
+./static/apple-touch-icon.png
+./static/favicon.png
+./static/price_trades_equity.png
+./strategy/aimn_tuning_center_v52.html
+./streamlit_btc_dashboard.py
+./streamlit_trade_viewer.py
+./symbol_strategy_selector.py
+./symbol_strategy_selector.py.bak
+./symbol_strategy_selector_OLD.py
+./temp_ app
+./templates/Architectural Analysis and Trading Philosophy.html
+./templates/Simple_Explanation.html
+./templates/TUNING_ORI.HTML
+./templates/add_broker.html
+./templates/add_broker_bak.html
+./templates/admin.html
+./templates/aiml.html
+./templates/aimn_diagnostic_scanner.html
+./templates/aimn_flowing_scanner.html
+./templates/aimn_flowing_scanner_auto.html
+./templates/aimn_flowing_scanner_auto_bak.html
+./templates/aimn_scanner_debug.html
+./templates/aimn_trade_popup.html
+./templates/aimn_trade_popup_OLD.html
+./templates/aimn_trade_popup_OLD_BACKUP.html
+./templates/aimn_unified.html
+./templates/architectural-analysis.html
+./templates/auto_tuner.html
+./templates/auto_tuner_backup.html
+./templates/backtest_vs_live.html
+./templates/backup-2-aimn_flowing_scanner.html
+./templates/backup-aimn_flowing_scanner.html
+./templates/base.html
+./templates/beginner-guide.html
+./templates/brokers.html
+./templates/chart.html
+./templates/dashboard-g.html
+./templates/dashboard.html
+./templates/dashboard_bak.html
+./templates/functional_scanner_diagnostics.html
+./templates/index-G.html
+./templates/index.html
+./templates/index_bak.html
+./templates/log.html
+./templates/logo.html
+./templates/logs.html
+./templates/manager_console.html
+./templates/mn-notes.html
+./templates/mobile-dash.html
+./templates/orders.html
+./templates/popup-test.html
+./templates/popup.html
+./templates/save_to_db.php
+./templates/scanner-analysis.html
+./templates/scanner-simulator.html
+./templates/scanner.html
+./templates/scanner_bak.html
+./templates/setting.html
+./templates/simple-explanation.html
+./templates/symbol_api_manager.html
+./templates/symbol_manager.html
+./templates/symbols.html
+./templates/system_msg.html
+./templates/test_dashboard.html
+./templates/trade-full.html
+./templates/trade-popup-fixed.html
+./templates/trade-tester.html
+./templates/trade_tester.html
+./templates/trading_philosophy.html
+./templates/tuning.html
+./templates/tuning_bak.html
+./templates/tuning_help-bak.html
+./templates/tuning_help.html
+./templates/tuning_ori.html
+./templates/tuning_runs.html
+./templates/tuning_runs_back.html
+./test_alpaca.py
+./test_alpaca_account.py
+./test_alpaca_keys.bat
+./test_backtest.py
+./test_env.py
+./test_insert_trade.py
+./test_scanner.py
+./test_scanner_flask_backup.py
+./tests/__init__.py
+./tests/_env.py
+./tests/conftest.py
+./tests/test_scanner_popup.py ___
+./tests/test_scanner_popup_auto.py
+./tests/test_scanner_popup_manual.py
+./tests/test_scanner_reset_ui_only.py
+./tests/test_scanner_state_no_popup.py
+./tests/utils.py
+./trade_exporter.py
+./trade_memory.py
+./trade_monitor.py
+./trade_monitor_bak.py
+./trade_snapshot.py
+./trading_connector.py
+./tuner.py
+./tuning.log
+./util/PushSimple.cmd
+./util/save modified trade teste
+./util/temp save code
+./v_classifier.py
+./venv/pyvenv.cfg
+./volume_spike_hunter.py
+./wsgi.py
+./youtube/q
+./youtube/youtube aimn personality.txt
