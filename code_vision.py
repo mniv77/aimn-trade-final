@@ -97,18 +97,28 @@ def _is_red(c):
 
 # ── STEP 1: Trend on 30m ─────────────────────────────────────────
 def _detect_trend(c30):
+    """Swing-structure trend (fast: flips the moment a swing level breaks).
+    Falls back to the old slow quartile-average method if trend_engine
+    is unavailable. Returns (trend, reason_text)."""
+    try:
+        from trend_engine import analyze_trend
+        t = analyze_trend(c30)
+        return t["trend"], t["reason"]
+    except Exception:
+        pass
+    # fallback: original quartile-average method
     closes = [c["c"] for c in c30]
     q = max(len(closes) // 4, 1)
     first_avg = _avg(closes[:q])
     last_avg  = _avg(closes[-q:])
     if not first_avg:
-        return "SIDEWAYS", 0.0
+        return "SIDEWAYS", "no data"
     change_pct = (last_avg - first_avg) / first_avg * 100.0
     if change_pct >= TREND_MIN_PCT:
-        return "UP", change_pct
+        return "UP", f"quartile {change_pct:+.2f}%"
     if change_pct <= -TREND_MIN_PCT:
-        return "DOWN", change_pct
-    return "SIDEWAYS", change_pct
+        return "DOWN", f"quartile {change_pct:+.2f}%"
+    return "SIDEWAYS", f"quartile {change_pct:+.2f}%"
 
 
 # ── STEP 3: Right-edge patterns on 5m ────────────────────────────
@@ -181,22 +191,22 @@ def check_reversal(image_path, symbol, direction, image_path_5m=None):
             c5 = c30  # fall back to 30m for edge pattern (single-chart mode)
 
         # STEP 1 + 2: trend filter (no exceptions)
-        trend, chg = _detect_trend(c30)
+        trend, why = _detect_trend(c30)
         if trend == "SIDEWAYS":
             return {"verdict": "NOT_CONFIRMED",
-                    "reason": f"TREND=SIDEWAYS ({chg:+.2f}%). Sideways = no trade."}
+                    "reason": f"TREND=SIDEWAYS ({why}). Sideways = no trade."}
         if trend == "DOWN" and direction == "LONG":
             return {"verdict": "NOT_CONFIRMED",
-                    "reason": f"TREND=DOWN ({chg:+.2f}%). Trend does not support LONG."}
+                    "reason": f"TREND=DOWN ({why}). Trend does not support LONG."}
         if trend == "UP" and direction == "SHORT":
             return {"verdict": "NOT_CONFIRMED",
-                    "reason": f"TREND=UP ({chg:+.2f}%). Trend does not support SHORT."}
+                    "reason": f"TREND=UP ({why}). Trend does not support SHORT."}
 
         # Low volume at right edge = market undecided
         vol_ok, vol_ratio = _edge_volume_ok(c5)
         if not vol_ok:
             return {"verdict": "NOT_CONFIRMED",
-                    "reason": (f"TREND={trend} ({chg:+.2f}%). LOW VOLUME at right "
+                    "reason": (f"TREND={trend} ({why}). LOW VOLUME at right "
                                f"edge ({vol_ratio:.2f}x avg) = undecided.")}
 
         # STEP 3: right-edge pattern (V-pattern OR momentum breakout)
@@ -204,13 +214,13 @@ def check_reversal(image_path, symbol, direction, image_path_5m=None):
         v_ok, v_msg = _v_pattern(c5, direction, atr)
         if v_ok:
             return {"verdict": "CONFIRMED",
-                    "reason": f"TREND={trend} ({chg:+.2f}%). Pattern: {v_msg}"}
+                    "reason": f"TREND={trend} ({why}). Pattern: {v_msg}"}
         m_ok, m_msg = _momentum(c5, direction)
         if m_ok:
             return {"verdict": "CONFIRMED",
-                    "reason": f"TREND={trend} ({chg:+.2f}%). Pattern: {m_msg}"}
+                    "reason": f"TREND={trend} ({why}). Pattern: {m_msg}"}
         return {"verdict": "NOT_CONFIRMED",
-                "reason": f"TREND={trend} ({chg:+.2f}%). Pattern: {v_msg}; {m_msg}"}
+                "reason": f"TREND={trend} ({why}). Pattern: {v_msg}; {m_msg}"}
 
     except Exception as e:
         # SAFETY: never return ERROR — a failure must never open a trade
