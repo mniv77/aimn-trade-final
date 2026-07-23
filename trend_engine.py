@@ -128,6 +128,30 @@ def analyze_trend(candles, n=FRACTAL_N):
     lsl = next((s["price"] for s in reversed(swings) if s["type"] == "L"), None)
     close = candles[-1]["c"]
 
+    # TIEBREAKER: sharp stair-step moves confirm few swing points, leaving
+    # structure "mixed" while the eye clearly sees a trend. Resolve with
+    # (1) breakout/breakdown vs known swing levels, then (2) window slope.
+    if trend == "SIDEWAYS":
+        highs = [s["price"] for s in swings if s["type"] == "H"][-2:]
+        lows  = [s["price"] for s in swings if s["type"] == "L"][-2:]
+        closes = [c["c"] for c in candles]
+        q = max(len(closes) // 4, 1)
+        first_avg = sum(closes[:q]) / q
+        last_avg  = sum(closes[-q:]) / q
+        slope_pct = (last_avg - first_avg) / first_avg * 100.0 if first_avg else 0.0
+        if lows and close < min(lows):
+            trend = "DOWN"
+            reason = f"breakdown: close {close:.2f} below swing lows {min(lows):.2f}"
+        elif highs and close > max(highs):
+            trend = "UP"
+            reason = f"breakout: close {close:.2f} above swing highs {max(highs):.2f}"
+        elif slope_pct <= -1.0:
+            trend = "DOWN"
+            reason = f"{reason}; slope {slope_pct:+.2f}%"
+        elif slope_pct >= 1.0:
+            trend = "UP"
+            reason = f"{reason}; slope {slope_pct:+.2f}%"
+
     # FLIP detection: current close breaking the last confirmed swing level
     flip, flip_price = "NONE", None
     if trend == "UP" and lsl is not None and close < lsl:
