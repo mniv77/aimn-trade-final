@@ -97,20 +97,30 @@ def find_swings(candles, n=FRACTAL_N):
 
 
 # ── Trend from swing structure ───────────────────────────────────
-def _structure_trend(swings):
-    """Classify trend from the last two swing highs + last two swing lows."""
+MIN_STRUCT_SIGNIF = 0.15   # swing progression must be >= 15% of window range
+
+def _structure_trend(swings, window_range=None):
+    """Classify trend from last two swing highs + lows. The structure verdict
+    must be SIGNIFICANT: swing progression >= MIN_STRUCT_SIGNIF of the window
+    price range, so a tiny right-edge bounce inside a big decline cannot
+    masquerade as UP (and vice versa)."""
     highs = [s for s in swings if s["type"] == "H"][-2:]
     lows  = [s for s in swings if s["type"] == "L"][-2:]
     if len(highs) < 2 or len(lows) < 2:
         return "SIDEWAYS", "not enough swing points"
-    hh = highs[1]["price"] > highs[0]["price"]
-    hl = lows[1]["price"]  > lows[0]["price"]
-    lh = highs[1]["price"] < highs[0]["price"]
-    ll = lows[1]["price"]  < lows[0]["price"]
-    if hh and hl:
-        return "UP", f"HH {highs[1]['price']:.2f} + HL {lows[1]['price']:.2f}"
-    if lh and ll:
-        return "DOWN", f"LH {highs[1]['price']:.2f} + LL {lows[1]['price']:.2f}"
+    dh = highs[1]["price"] - highs[0]["price"]
+    dl = lows[1]["price"]  - lows[0]["price"]
+    signif = True
+    if window_range:
+        signif = (abs(dh) + abs(dl)) / window_range >= MIN_STRUCT_SIGNIF
+    if dh > 0 and dl > 0:
+        if signif:
+            return "UP", f"HH {highs[1]['price']:.2f} + HL {lows[1]['price']:.2f}"
+        return "SIDEWAYS", "up-structure too small vs range"
+    if dh < 0 and dl < 0:
+        if signif:
+            return "DOWN", f"LH {highs[1]['price']:.2f} + LL {lows[1]['price']:.2f}"
+        return "SIDEWAYS", "down-structure too small vs range"
     return "SIDEWAYS", "mixed structure"
 
 
@@ -123,7 +133,8 @@ def analyze_trend(candles, n=FRACTAL_N):
                 "flip": "NONE", "flip_price": None,
                 "last_swing_high": None, "last_swing_low": None, "swings": [], "age": None}
     swings = find_swings(candles, n)
-    trend, reason = _structure_trend(swings)
+    _rng = max(c["h"] for c in candles) - min(c["l"] for c in candles)
+    trend, reason = _structure_trend(swings, _rng)
     lsh = next((s["price"] for s in reversed(swings) if s["type"] == "H"), None)
     lsl = next((s["price"] for s in reversed(swings) if s["type"] == "L"), None)
     close = candles[-1]["c"]
