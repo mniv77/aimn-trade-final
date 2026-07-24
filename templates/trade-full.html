@@ -166,13 +166,11 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     let tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
     // Crypto trades on Gemini -> use TradingView's GEMINI feed (same candles the engine trades).
     // Any other crypto-style exchange falls back to BINANCE. Stocks -> NASDAQ.
-    let exchangePrefix;
-    if (symbol.includes('/')) {
-      const ex = (tradeData.exchange || '').toUpperCase();
-      exchangePrefix = (ex === 'GEMINI') ? 'GEMINI' : (ex === 'CRYPTO' || ex === 'BINANCE') ? 'BINANCE' : 'GEMINI';
-    } else {
-      exchangePrefix = 'NASDAQ';
-    }
+    // NOTE: the TradingView EMBED widget carries fewer exchanges than
+    // tradingview.com — GEMINI: doesn't resolve here (falls back to a stuck
+    // CRYPTOCAP 1D chart). COINBASE has real USD pairs for BTC/ETH/SOL/LINK
+    // and tracks Gemini within pennies, so we chart Coinbase for crypto.
+    let exchangePrefix = symbol.includes('/') ? 'COINBASE' : 'NASDAQ';
     const container=document.getElementById('tradingview-widget');
     container.innerHTML='';
     setTimeout(()=>{ try{
