@@ -31,7 +31,7 @@ MAX_PRICE_AGE_SECONDS  = 60      # skip stale prices older than this
 MIN_TRADE_SECONDS      = 300     # STOP/TRAIL cannot fire in first 5 minutes
 STOP_COOLDOWN_MINUTES  = 120     # after STOP: both directions locked 2 hours
 TRAIL_COOLDOWN_MINUTES = 30      # after TRAIL/RSI/DECAY: only same direction locked
-TIME_STOP_HOURS        = 3.0     # exit trade if stagnant/losing after this many hours
+TIME_STOP_HOURS        = 2.0     # exit trade if stagnant/losing after this many hours
 TIME_STOP_MIN_PNL      = 0.00   # TIME-STOP only fires if P&L below this threshold
 SANITY_MAX_PNL         = 20.0    # skip if abs(pnl) > 20% — phantom loss guard
 
