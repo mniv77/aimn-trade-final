@@ -468,9 +468,9 @@ def check_and_execute_signals():
                             log(f"  🤖 AI FIRST ENTRY: {symbol} {direction} — {ai_verdict} (rsi_extreme={rsi_extreme})")
                             # Fall through to entry below
                         else:
-                            log(f"  👁️ AI FIRST OBSERVED: {symbol} {direction} - {ai_reason[:60]}")
-                            # lock removed - observer only
-                            pass
+                            log(f"  🚫 AI FIRST BLOCKED ({ai_verdict}): {symbol} {direction} - {ai_reason[:60]}")
+                            lock_symbol(symbol, direction, 15)
+                            continue
                     except Exception as _e:
                         log(f"  👁️ AI FIRST ERROR: {_e}")
                         continue
@@ -544,9 +544,8 @@ def check_and_execute_signals():
                         btc_verdict = btc_result.get('verdict', 'ERROR')
                         log(f"  🪙 BTC MASTER [{btc_verdict}]: {btc_result.get('reason','')[:60]}")
                         if btc_verdict == 'NOT_CONFIRMED':
-                            log(f"  🪙 BTC MASTER OBSERVED: {symbol} {direction}")
-                            # BTC is advisor only
-                            pass
+                            log(f"  🚫 BTC MASTER BLOCKED: {symbol} {direction} - BTC does not support this direction")
+                            continue
                     except Exception as _e:
                         log(f"  🪙 BTC MASTER ERROR: {_e}")
 
@@ -564,11 +563,12 @@ def check_and_execute_signals():
                     verdict = ai_result.get('verdict', 'ERROR')
                     reason  = ai_result.get('reason', '')[:100]
                     log(f"  👁️ AI Vision: {symbol} {direction} → {verdict}")
-                    if verdict == 'NOT_CONFIRMED':
-                        log(f"  👁️ AI Vision OBSERVED entry: {symbol} {direction} — {reason}")
-                        pass
+                    if verdict != 'CONFIRMED':
+                        log(f"  🚫 AI Vision BLOCKED entry ({verdict}): {symbol} {direction} — {reason}")
+                        continue
                 except Exception as e:
-                    log(f"  ⚠️ AI Vision error (allowing trade): {e}")
+                    log(f"  🚫 AI Vision error (FAIL CLOSED, blocking): {e}")
+                    continue
                 # ── NVDA Trade Logger ─────────────────────────
                 if symbol == "NVDA":
                     with open("/home/MeirNiv/aimn-trade-final/nvda_trades.log", "a") as f:
