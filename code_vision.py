@@ -28,6 +28,7 @@ LOW_VOL_MULT       = 0.6   # right-edge avg vol below 0.6x chart avg = undecided
 ATR_LEN            = 14
 DROP_ATR_MULT      = 2.5   # sharp drop/rally = 2.5x ATR
 MOMENTUM_MOVE_PCT  = 0.8   # momentum breakout total move (matches engine rule)
+RANGE_GUARD_FRAC   = 0.20  # block LONG in top 20% of range, SHORT in bottom 20%
 
 
 # ── Candle fetching (same sources as chart_renderer) ─────────────
@@ -201,6 +202,22 @@ def check_reversal(image_path, symbol, direction, image_path_5m=None):
         if trend == "UP" and direction == "SHORT":
             return {"verdict": "NOT_CONFIRMED",
                     "reason": f"TREND=UP ({why}). Trend does not support SHORT."}
+
+        # RANGE-POSITION GUARD: don't buy the top / don't sell the bottom.
+        # Entering WITH the trend near the range extreme = chasing an old,
+        # extended move (e.g. shorting the bottom of a 40h decline).
+        rng_hi = max(c["h"] for c in c30)
+        rng_lo = min(c["l"] for c in c30)
+        if rng_hi > rng_lo:
+            pos_in_range = (c30[-1]["c"] - rng_lo) / (rng_hi - rng_lo)
+            if direction == "LONG" and pos_in_range >= 1.0 - RANGE_GUARD_FRAC:
+                return {"verdict": "NOT_CONFIRMED",
+                        "reason": (f"TREND={trend} ({why}). Price at TOP of range "
+                                   f"({pos_in_range*100:.0f}%) = too late to buy.")}
+            if direction == "SHORT" and pos_in_range <= RANGE_GUARD_FRAC:
+                return {"verdict": "NOT_CONFIRMED",
+                        "reason": (f"TREND={trend} ({why}). Price at BOTTOM of range "
+                                   f"({pos_in_range*100:.0f}%) = too late to sell.")}
 
         # Low volume at right edge = market undecided
         vol_ok, vol_ratio = _edge_volume_ok(c5)
