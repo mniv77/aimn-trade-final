@@ -35,15 +35,15 @@ RANGE_GUARD_FRAC   = 0.20  # block LONG in top 20% of range, SHORT in bottom 20%
 def _fetch(symbol, timeframe, n):
     """Return candles ascending by time: list of dicts with o/h/l/c/v."""
     rows = []
-    if "/" in symbol:
-        try:
-            from engine.tuning.candle_fetcher import fetch_candles
-            candles = fetch_candles(symbol, timeframe=timeframe, limit=n, broker="Gemini")
-            if candles:
-                candles.sort(key=lambda x: x["timestamp"])
-                rows = candles[-n:]
-        except Exception:
-            rows = []
+    try:
+        from engine.tuning.candle_fetcher import fetch_candles
+        _broker = "Gemini" if "/" in symbol else "ALPACA"
+        candles = fetch_candles(symbol, timeframe=timeframe, limit=n, broker=_broker)
+        if candles:
+            candles.sort(key=lambda x: x["timestamp"])
+            rows = candles[-n:]
+    except Exception:
+        rows = []
     if not rows:
         try:
             from db import get_db_connection
