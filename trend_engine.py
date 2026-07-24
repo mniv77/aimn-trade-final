@@ -32,15 +32,15 @@ MAX_SWINGS_KEPT = 12   # how many recent swing points to keep/report
 # ── Candle fetching (same source as code_vision) ─────────────────
 def _fetch(symbol, timeframe, n):
     rows = []
-    if "/" in symbol:
-        try:
-            from engine.tuning.candle_fetcher import fetch_candles
-            candles = fetch_candles(symbol, timeframe=timeframe, limit=n, broker="Gemini")
-            if candles:
-                candles.sort(key=lambda x: x["timestamp"])
-                rows = candles[-n:]
-        except Exception:
-            rows = []
+    try:
+        from engine.tuning.candle_fetcher import fetch_candles
+        _broker = "Gemini" if "/" in symbol else "ALPACA"
+        candles = fetch_candles(symbol, timeframe=timeframe, limit=n, broker=_broker)
+        if candles:
+            candles.sort(key=lambda x: x["timestamp"])
+            rows = candles[-n:]
+    except Exception:
+        rows = []
     if not rows:
         try:
             from db import get_db_connection
