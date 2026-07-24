@@ -162,28 +162,22 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
   }
 
   function loadTradingViewChart(){
+    // Direct TradingView iframe embed: symbol + interval live in the URL,
+    // so the chart CANNOT ignore them (the tv.js widget was falling back to
+    // a stuck CRYPTOCAP 1D chart when symbol resolution misbehaved).
     const symbol=tradeData.symbol;
-    let tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
-    // Crypto trades on Gemini -> use TradingView's GEMINI feed (same candles the engine trades).
-    // Any other crypto-style exchange falls back to BINANCE. Stocks -> NASDAQ.
-    // NOTE: the TradingView EMBED widget carries fewer exchanges than
-    // tradingview.com — GEMINI: doesn't resolve here (falls back to a stuck
-    // CRYPTOCAP 1D chart). COINBASE has real USD pairs for BTC/ETH/SOL/LINK
-    // and tracks Gemini within pennies, so we chart Coinbase for crypto.
-    let exchangePrefix = symbol.includes('/') ? 'COINBASE' : 'NASDAQ';
+    const tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
+    const exchangePrefix = symbol.includes('/') ? 'COINBASE' : 'NASDAQ';
+    const fullSymbol = encodeURIComponent(exchangePrefix + ':' + tvSymbol);
+    const studies = chartRSIType==='traditional' ? '&studies=' + encodeURIComponent('RSI@tv-basicstudies') : '';
+    const url = 'https://s.tradingview.com/widgetembed/?symbol=' + fullSymbol +
+                '&interval=' + encodeURIComponent(chartInterval) +
+                '&theme=dark&style=1&timezone=America%2FNew_York' +
+                '&hidesidetoolbar=1&hidetoptoolbar=0&saveimage=0&withdateranges=0' +
+                '&locale=en' + studies;
     const container=document.getElementById('tradingview-widget');
-    container.innerHTML='';
-    setTimeout(()=>{ try{
-      const studies = chartRSIType==='traditional'?[{"id":"RSI@tv-basicstudies","inputs":{"length":14}}]:[];
-      new TradingView.widget({
-        width:"100%",height:500,symbol:`${exchangePrefix}:${tvSymbol}`,interval:chartInterval,
-        timezone:"America/New_York",theme:"dark",style:"1",locale:"en",
-        toolbar_bg:"#1e293b",enable_publishing:false,allow_symbol_change:false,
-        container_id:"tradingview-widget",studies,
-        disabled_features:["left_toolbar"],overrides:{"volumePaneSize":"tiny"}
-      });
-      document.getElementById('rsi-real-chart').classList.toggle('hidden', chartRSIType!=='real');
-    }catch(e){console.error('Chart error:',e)} },200);
+    container.innerHTML = '<iframe src="' + url + '" style="width:100%;height:500px;border:0;border-radius:0.5rem;" allowtransparency="true" scrolling="no"></iframe>';
+    document.getElementById('rsi-real-chart').classList.toggle('hidden', chartRSIType!=='real');
   }
 
   async function startPriceUpdates(){
