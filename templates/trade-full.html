@@ -113,7 +113,7 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
 
     <div class="bg-slate-800 rounded-lg p-4 mt-4">
       <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="text-gray-400 text-sm">Live Chart</div><span id="feed-heartbeat" class="text-xs text-yellow-400">⏳ waiting for feed...</span></div>
+        <div class="flex items-center gap-3"><div class="text-gray-400 text-sm">Live Chart</div><span id="feed-heartbeat" class="text-xs text-yellow-400">⏳ waiting for feed...</span><span id="chart-tz-badge" class="text-xs bg-slate-700 text-gray-300 px-2 py-0.5 rounded-full">🕐 Chart times: --</span></div>
         <div class="flex gap-2">
           <select id="chart-interval" onchange="changeChartInterval()" class="bg-slate-700 text-white text-sm px-3 py-2 rounded">
             <option value="1">1m</option>
@@ -141,6 +141,7 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
   let entryPrice=0, currentPrice=0, quantity=10, topPeak=0, trailStop=0, stopLoss=0;
   let priceHistory=[], rsiHistory=[];
   let params={stop_loss_pct:2.0, early_trail_start:1.0, early_trail_minus:1.5, peak_trail_start:5.0, peak_trail_minus:0.5, min_profit:1.0, exit_min_profit:0.5, rsi_overbought:70, rsi_oversold:30, rsi_lookback:14};
+  const CHART_TZ = { id: 'Etc/UTC', label: 'UTC' };  // chart clock — change here, label follows
   let rsiType='real', chartRSIType='traditional', chartInterval='30', priceInterval=null;
 
   let autoTradeMode=false;
@@ -172,7 +173,7 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     const studies = chartRSIType==='traditional' ? '&studies=' + encodeURIComponent('RSI@tv-basicstudies') : '';
     const url = 'https://s.tradingview.com/widgetembed/?symbol=' + fullSymbol +
                 '&interval=' + encodeURIComponent(chartInterval) +
-                '&theme=dark&style=1&timezone=America%2FNew_York' +
+                '&theme=dark&style=1&timezone=' + encodeURIComponent(CHART_TZ.id) +
                 '&hidesidetoolbar=1&hidetoptoolbar=0&saveimage=0&withdateranges=0' +
                 '&locale=en' + studies;
     const container=document.getElementById('tradingview-widget');
@@ -356,7 +357,7 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     }
   });
 
-  window.onload=loadTradeData;
+  window.onload=function(){ loadTradeData(); const b=document.getElementById('chart-tz-badge'); if(b) b.textContent='🕐 Chart times: '+CHART_TZ.label; };
 </script>
 </body>
 </html>
