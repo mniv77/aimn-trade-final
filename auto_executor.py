@@ -113,7 +113,7 @@ def apply_exit_cooldown(symbol, direction, exit_reason):
                                    opposite direction freed immediately
     """
     opposite = 'SHORT' if direction == 'LONG' else 'LONG'
-    if 'STOP' in exit_reason:
+    if 'STOP' in exit_reason and 'TIME-STOP' not in exit_reason:
         lock_symbol(symbol, direction, STOP_COOLDOWN_MINUTES)
         lock_symbol(symbol, opposite,  STOP_COOLDOWN_MINUTES)
         log(f"  🔒 STOP cooldown: {symbol} BOTH directions locked {STOP_COOLDOWN_MINUTES}min")
@@ -607,6 +607,24 @@ def check_and_execute_signals():
         cursor.close()
         conn.close()
 
+_TREND_CACHE = {}
+def _trend_now(symbol):
+    """30m structure trend with 60s cache (avoids hammering the candle API
+    from the 2-second monitor loop). Returns analyze_trend dict."""
+    import time as _time
+    _now = _time.time()
+    hit = _TREND_CACHE.get(symbol)
+    if hit and _now - hit[0] < 60:
+        return hit[1]
+    try:
+        from trend_engine import _fetch, analyze_trend
+        t = analyze_trend(_fetch(symbol, "30m", 100))
+    except Exception as e:
+        t = {"trend": "SIDEWAYS", "reason": f"trend unavailable: {e}"}
+    _TREND_CACHE[symbol] = (_now, t)
+    return t
+
+
 def monitor_and_exit_trades():
     """Monitor all open trades and execute exits."""
     conn   = get_db()
@@ -726,21 +744,20 @@ def monitor_and_exit_trades():
 
                 exit_reason = None
 
-                # ── RULE 0B: AIV GUARDIAN REVERSAL EXIT 🛡️ ──
+                # ── RULE 0B: TREND-FLIP GUARDIAN EXIT 🛡️ ──
+                # Exit when the 30m structure trend turns AGAINST the position
+                # (same trend brain as the entry gate — entries and exits agree).
                 try:
-                    from scanner import AIMnScanner
-
-                    guardian = AIMnScanner({})
-
-                    if guardian.check_aiv_reversal_exit(s, {
-                        "direction": direction,
-                        "entry_price": entry_price
-                    }):
-                        exit_reason = "AIV-GUARDIAN (trend reversed after entry)"
-                        log(f"  🛡️ AIV GUARDIAN EXIT: {symbol} {direction} reversal detected")
-
+                    if duration_seconds >= MIN_TRADE_SECONDS:
+                        _t = _trend_now(symbol)
+                        if direction == 'LONG' and _t["trend"] == "DOWN":
+                            exit_reason = f"TREND-FLIP ({_t['reason']})"
+                            log(f"  🛡️ TREND-FLIP EXIT: {symbol} LONG but 30m trend DOWN")
+                        elif direction == 'SHORT' and _t["trend"] == "UP":
+                            exit_reason = f"TREND-FLIP ({_t['reason']})"
+                            log(f"  🛡️ TREND-FLIP EXIT: {symbol} SHORT but 30m trend UP")
                 except Exception as e:
-                    log(f"  ⚠️ AIV Guardian check error: {e}")
+                    log(f"  ⚠️ Trend guardian error: {e}")
 
                 # ── RULE 1: STOP LOSS (only after 300s) ───
 
