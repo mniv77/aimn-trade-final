@@ -818,7 +818,7 @@
           ${!isClosed ? `
           <button onclick="panicExitTrade(${o.id},'${o.symbol}','${o.broker}','${o.direction}','${o.candle_time||'1h'}')"
             class="bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded font-bold">🚨</button>
-          <button onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}','_blank','width=1200,height=800')"
+          <button onclick="window.open('/trade-full?symbol=${encodeURIComponent(o.symbol)}&exchange=${encodeURIComponent(o.broker)}&price=${cur}&mode=view&trade_id=${o.id}&side=${o.direction}&entry=${o.entry_price}&ctime=${encodeURIComponent(o.candle_time||'1h')}&etime=${typeof o.entry_time==='number'?o.entry_time:new Date(o.entry_time).getTime()}','_blank','width=1200,height=800')"
             class="bg-blue-700 hover:bg-blue-600 text-white px-2 py-0.5 rounded font-bold">📊</button>
           ` : `
           <span class="text-gray-500 font-mono">Exit:$${parseFloat(o.exit_price||0).toFixed(2)}</span>
