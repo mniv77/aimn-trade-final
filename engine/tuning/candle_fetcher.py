@@ -72,7 +72,7 @@ def fetch_yahoo_candles(symbol, timeframe="1hr", limit=100):
         'limit'    : 10000,
         'feed'     : 'sip',
         'start'    : (datetime.utcnow() - timedelta(days=30)).strftime('%Y-%m-%d'),
-        'sort'     : 'asc',
+        'sort'     : 'desc',  # newest first (asc + page cap returned stale bars)
     }
 
     try:
@@ -101,6 +101,7 @@ def fetch_yahoo_candles(symbol, timeframe="1hr", limit=100):
             })
 
         print(f"[candle_fetcher] ✅ Alpaca: {len(candles)} candles for {symbol}/{timeframe}")
+        candles.sort(key=lambda x: x['timestamp'])
         return candles
 
     except Exception as e:
