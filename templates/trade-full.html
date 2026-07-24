@@ -113,13 +113,13 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
 
     <div class="bg-slate-800 rounded-lg p-4 mt-4">
       <div class="flex items-center justify-between mb-3">
-        <div class="text-gray-400 text-sm">Live Chart</div>
+        <div class="flex items-center gap-3"><div class="text-gray-400 text-sm">Live Chart</div><span id="feed-heartbeat" class="text-xs text-yellow-400">⏳ waiting for feed...</span></div>
         <div class="flex gap-2">
           <select id="chart-interval" onchange="changeChartInterval()" class="bg-slate-700 text-white text-sm px-3 py-2 rounded">
             <option value="1">1m</option>
-            <option value="5" selected>5m</option>
+            <option value="5">5m</option>
             <option value="15">15m</option>
-            <option value="30">30m</option>
+            <option value="30" selected>30m</option>
             <option value="60">1hr</option>
             <option value="240">4hr</option>
           </select>
@@ -141,7 +141,7 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
   let entryPrice=0, currentPrice=0, quantity=10, topPeak=0, trailStop=0, stopLoss=0;
   let priceHistory=[], rsiHistory=[];
   let params={stop_loss_pct:2.0, early_trail_start:1.0, early_trail_minus:1.5, peak_trail_start:5.0, peak_trail_minus:0.5, min_profit:1.0, exit_min_profit:0.5, rsi_overbought:70, rsi_oversold:30, rsi_lookback:14};
-  let rsiType='real', chartRSIType='traditional', chartInterval='5', priceInterval=null;
+  let rsiType='real', chartRSIType='traditional', chartInterval='30', priceInterval=null;
 
   let autoTradeMode=false;
   let activeTradeId=null;
@@ -164,7 +164,15 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
   function loadTradingViewChart(){
     const symbol=tradeData.symbol;
     let tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
-    let exchangePrefix = tradeData.exchange === 'CRYPTO' ? 'BINANCE' : 'NASDAQ';
+    // Crypto trades on Gemini -> use TradingView's GEMINI feed (same candles the engine trades).
+    // Any other crypto-style exchange falls back to BINANCE. Stocks -> NASDAQ.
+    let exchangePrefix;
+    if (symbol.includes('/')) {
+      const ex = (tradeData.exchange || '').toUpperCase();
+      exchangePrefix = (ex === 'GEMINI') ? 'GEMINI' : (ex === 'CRYPTO' || ex === 'BINANCE') ? 'BINANCE' : 'GEMINI';
+    } else {
+      exchangePrefix = 'NASDAQ';
+    }
     const container=document.getElementById('tradingview-widget');
     container.innerHTML='';
     setTimeout(()=>{ try{
@@ -195,20 +203,30 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     el.classList.remove('price-update'); void el.offsetWidth; el.classList.add('price-update');
   }
 
-  let lastFetchedPrice=0, samepriceCount=0;
+  let lastFetchedPrice=0, lastPriceUpdateTs=0;
   async function fetchRealPrice(){
+    // REAL prices only. If the feed repeats or fails, we HOLD the last real
+    // price — we never invent movement (fake prices could trigger fake exits).
     try{
       const r=await fetch(`/api/live_price?symbol=${encodeURIComponent(tradeData.symbol)}&exchange=${encodeURIComponent(tradeData.exchange)}`);
       const data=await r.json();
       if(data.price){
-        const newPrice=parseFloat(data.price);
-        if(newPrice===lastFetchedPrice && lastFetchedPrice!==0){
-          samepriceCount++; const changePercent=(Math.random()-0.5)*0.006; currentPrice += currentPrice*changePercent;
-        }else{ currentPrice=newPrice; lastFetchedPrice=newPrice; samepriceCount=0; }
+        currentPrice=parseFloat(data.price);
+        lastFetchedPrice=currentPrice;
+        lastPriceUpdateTs=Date.now();
       }
-    }catch(e){
-      const changePercent=(Math.random()-0.5)*0.006; currentPrice += currentPrice*changePercent;
-    }
+    }catch(e){ /* hold last real price */ }
+    updateFeedHeartbeat();
+  }
+
+  function updateFeedHeartbeat(){
+    const el=document.getElementById('feed-heartbeat');
+    if(!el) return;
+    if(!lastPriceUpdateTs){ el.textContent='⏳ waiting for feed...'; el.className='text-xs text-yellow-400'; return; }
+    const age=Math.round((Date.now()-lastPriceUpdateTs)/1000);
+    if(age<=10){ el.textContent=`🟢 live (${age}s ago)`; el.className='text-xs text-green-400'; }
+    else if(age<=60){ el.textContent=`🟡 last update ${age}s ago`; el.className='text-xs text-yellow-400'; }
+    else { el.textContent=`🔴 STALE — last update ${Math.round(age/60)}m ago`; el.className='text-xs text-red-400'; }
   }
 
   function setDirection(dir){
