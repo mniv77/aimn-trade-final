@@ -219,9 +219,15 @@ def check_reversal(image_path, symbol, direction, image_path_5m=None):
                         "reason": (f"TREND={trend} ({why}). Price at BOTTOM of range "
                                    f"({pos_in_range*100:.0f}%) = too late to sell.")}
 
-        # Low volume at right edge = market undecided
+        # Low volume at right edge = market undecided.
+        # DATA (1286 examples, ml_dataset): trend-ALIGNED entries in low volume
+        # were the BEST performers (+0.19%/6h, 32.6% win, least pain) - the
+        # quiet grind pays. So the standalone volume veto applies only when
+        # volume conviction is genuinely needed; V-pattern keeps its own
+        # spike requirement inside _v_pattern regardless.
         vol_ok, vol_ratio = _edge_volume_ok(c5)
-        if not vol_ok:
+        trend_aligned = (trend == 'UP' and direction == 'LONG') or (trend == 'DOWN' and direction == 'SHORT')
+        if not vol_ok and not trend_aligned:
             return {"verdict": "NOT_CONFIRMED",
                     "reason": (f"TREND={trend} ({why}). LOW VOLUME at right "
                                f"edge ({vol_ratio:.2f}x avg) = undecided.")}
