@@ -750,10 +750,16 @@ def monitor_and_exit_trades():
                 try:
                     if duration_seconds >= MIN_TRADE_SECONDS:
                         _t = _trend_now(symbol)
-                        if direction == 'LONG' and _t["trend"] == "DOWN":
+                        _r = str(_t.get('reason', ''))
+                        # Exit only on STRUCTURAL evidence (broken level), never on
+                        # the slope tiebreaker: the 40h slope lags fresh structure and
+                        # killed healthy trade #641 on a 'mixed structure; slope' shrug.
+                        _structural = ('FLIP' in _r or 'breakdown' in _r or 'breakout' in _r
+                                       or ('LH' in _r and 'LL' in _r) or ('HH' in _r and 'HL' in _r))
+                        if direction == 'LONG' and _t["trend"] == "DOWN" and _structural:
                             exit_reason = f"TREND-FLIP ({_t['reason']})"
                             log(f"  🛡️ TREND-FLIP EXIT: {symbol} LONG but 30m trend DOWN")
-                        elif direction == 'SHORT' and _t["trend"] == "UP":
+                        elif direction == 'SHORT' and _t["trend"] == "UP" and _structural:
                             exit_reason = f"TREND-FLIP ({_t['reason']})"
                             log(f"  🛡️ TREND-FLIP EXIT: {symbol} SHORT but 30m trend UP")
                 except Exception as e:
