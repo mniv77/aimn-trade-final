@@ -113,13 +113,13 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
 
     <div class="bg-slate-800 rounded-lg p-4 mt-4">
       <div class="flex items-center justify-between mb-3">
-        <div class="text-gray-400 text-sm">Live Chart</div>
+        <div class="flex items-center gap-3"><div class="text-gray-400 text-sm">Live Chart</div><span id="feed-heartbeat" class="text-xs text-yellow-400">⏳ waiting for feed...</span><span id="chart-tz-badge" class="text-xs bg-slate-700 text-gray-300 px-2 py-0.5 rounded-full">🕐 Chart times: --</span></div>
         <div class="flex gap-2">
           <select id="chart-interval" onchange="changeChartInterval()" class="bg-slate-700 text-white text-sm px-3 py-2 rounded">
             <option value="1">1m</option>
-            <option value="5" selected>5m</option>
+            <option value="5">5m</option>
             <option value="15">15m</option>
-            <option value="30">30m</option>
+            <option value="30" selected>30m</option>
             <option value="60">1hr</option>
             <option value="240">4hr</option>
           </select>
@@ -141,7 +141,8 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
   let entryPrice=0, currentPrice=0, quantity=10, topPeak=0, trailStop=0, stopLoss=0;
   let priceHistory=[], rsiHistory=[];
   let params={stop_loss_pct:2.0, early_trail_start:1.0, early_trail_minus:1.5, peak_trail_start:5.0, peak_trail_minus:0.5, min_profit:1.0, exit_min_profit:0.5, rsi_overbought:70, rsi_oversold:30, rsi_lookback:14};
-  let rsiType='real', chartRSIType='traditional', chartInterval='5', priceInterval=null;
+  const CHART_TZ = { id: 'Etc/UTC', label: 'UTC' };  // chart clock — change here, label follows
+  let rsiType='real', chartRSIType='traditional', chartInterval='30', priceInterval=null;
 
   let autoTradeMode=false, viewMode=false;
   let activeTradeId=null;
@@ -170,22 +171,22 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
   }
 
   function loadTradingViewChart(){
+    // Direct TradingView iframe embed: symbol + interval live in the URL,
+    // so the chart CANNOT ignore them (the tv.js widget was falling back to
+    // a stuck CRYPTOCAP 1D chart when symbol resolution misbehaved).
     const symbol=tradeData.symbol;
-    let tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
-    let exchangePrefix = tradeData.exchange === 'CRYPTO' ? 'BINANCE' : 'NASDAQ';
+    const tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
+    const exchangePrefix = symbol.includes('/') ? 'COINBASE' : 'NASDAQ';
+    const fullSymbol = encodeURIComponent(exchangePrefix + ':' + tvSymbol);
+    const studies = chartRSIType==='traditional' ? '&studies=' + encodeURIComponent('RSI@tv-basicstudies') : '';
+    const url = 'https://s.tradingview.com/widgetembed/?symbol=' + fullSymbol +
+                '&interval=' + encodeURIComponent(chartInterval) +
+                '&theme=dark&style=1&timezone=' + encodeURIComponent(CHART_TZ.id) +
+                '&hidesidetoolbar=1&hidetoptoolbar=0&saveimage=0&withdateranges=0' +
+                '&locale=en' + studies;
     const container=document.getElementById('tradingview-widget');
-    container.innerHTML='';
-    setTimeout(()=>{ try{
-      const studies = chartRSIType==='traditional'?[{"id":"RSI@tv-basicstudies","inputs":{"length":14}}]:[];
-      new TradingView.widget({
-        width:"100%",height:500,symbol:`${exchangePrefix}:${tvSymbol}`,interval:chartInterval,
-        timezone:"America/New_York",theme:"dark",style:"1",locale:"en",
-        toolbar_bg:"#1e293b",enable_publishing:false,allow_symbol_change:false,
-        container_id:"tradingview-widget",studies,
-        disabled_features:["left_toolbar"],overrides:{"volumePaneSize":"tiny"}
-      });
-      document.getElementById('rsi-real-chart').classList.toggle('hidden', chartRSIType!=='real');
-    }catch(e){console.error('Chart error:',e)} },200);
+    container.innerHTML = '<iframe src="' + url + '" style="width:100%;height:500px;border:0;border-radius:0.5rem;" allowtransparency="true" scrolling="no"></iframe>';
+    document.getElementById('rsi-real-chart').classList.toggle('hidden', chartRSIType!=='real');
   }
 
   async function startPriceUpdates(){
@@ -203,20 +204,30 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     el.classList.remove('price-update'); void el.offsetWidth; el.classList.add('price-update');
   }
 
-  let lastFetchedPrice=0, samepriceCount=0;
+  let lastFetchedPrice=0, lastPriceUpdateTs=0;
   async function fetchRealPrice(){
+    // REAL prices only. If the feed repeats or fails, we HOLD the last real
+    // price — we never invent movement (fake prices could trigger fake exits).
     try{
       const r=await fetch(`/api/live_price?symbol=${encodeURIComponent(tradeData.symbol)}&exchange=${encodeURIComponent(tradeData.exchange)}`);
       const data=await r.json();
       if(data.price){
-        const newPrice=parseFloat(data.price);
-        if(newPrice===lastFetchedPrice && lastFetchedPrice!==0){
-          samepriceCount++; const changePercent=(Math.random()-0.5)*0.006; currentPrice += currentPrice*changePercent;
-        }else{ currentPrice=newPrice; lastFetchedPrice=newPrice; samepriceCount=0; }
+        currentPrice=parseFloat(data.price);
+        lastFetchedPrice=currentPrice;
+        lastPriceUpdateTs=Date.now();
       }
-    }catch(e){
-      const changePercent=(Math.random()-0.5)*0.006; currentPrice += currentPrice*changePercent;
-    }
+    }catch(e){ /* hold last real price */ }
+    updateFeedHeartbeat();
+  }
+
+  function updateFeedHeartbeat(){
+    const el=document.getElementById('feed-heartbeat');
+    if(!el) return;
+    if(!lastPriceUpdateTs){ el.textContent='⏳ waiting for feed...'; el.className='text-xs text-yellow-400'; return; }
+    const age=Math.round((Date.now()-lastPriceUpdateTs)/1000);
+    if(age<=10){ el.textContent=`🟢 live (${age}s ago)`; el.className='text-xs text-green-400'; }
+    else if(age<=60){ el.textContent=`🟡 last update ${age}s ago`; el.className='text-xs text-yellow-400'; }
+    else { el.textContent=`🔴 STALE — last update ${Math.round(age/60)}m ago`; el.className='text-xs text-red-400'; }
   }
 
   function setDirection(dir){
@@ -226,8 +237,8 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
   }
 
   function mirrorEngineTrade(){
-    // VIEW MODE: this popup MIRRORS the engine's existing trade.
-    // It never enters its own position and never posts /api/trade/open.
+    // VIEW MODE: mirrors the engine's existing trade. Never enters its own
+    // position, never posts /api/trade/open.
     setDirection(tradeData.side==='LONG' ? 'BUY' : 'SELL');
     entryPrice = tradeData.entry || tradeData.price;
     topPeak = entryPrice; activeTradeId = tradeData.trade_id; inPosition = true;
@@ -240,6 +251,28 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     document.getElementById('btn-enter').className='flex-1 bg-gray-600 text-gray-400 py-2 rounded-lg font-bold text-sm cursor-not-allowed';
     document.getElementById('entry-price').textContent='$'+entryPrice.toFixed(2);
     showStatus('\uD83D\uDCE1 Mirroring engine trade #'+(activeTradeId||'?')+' \u2014 '+tradeData.side+' from $'+entryPrice.toFixed(2),'info');
+    engineStatusInterval = setInterval(checkEngineTradeStatus, 5000);
+  }
+
+  let engineStatusInterval = null;
+  async function checkEngineTradeStatus(){
+    if(!viewMode || !activeTradeId) return;
+    try{
+      const r = await fetch('/api/trades/active');
+      const trades = await r.json();
+      const t = (trades||[]).find(x => String(x.id) === String(activeTradeId));
+      if(t && t.status === 'OPEN') return;
+      clearInterval(engineStatusInterval);
+      inPosition = false;
+      const reason = t ? (t.exit_reason || 'closed') : 'closed';
+      const xp = t && t.exit_price ? parseFloat(t.exit_price) : currentPrice;
+      const pnl = tradeDirection==='BUY' ? (xp-entryPrice)/entryPrice*100 : (entryPrice-xp)/entryPrice*100;
+      document.getElementById('strategy-status').textContent='\uD83C\uDFC1 Engine closed: '+reason;
+      document.getElementById('btn-panic').disabled=true;
+      document.getElementById('btn-panic').className='bg-gray-600 text-gray-400 px-6 py-2 rounded-lg font-bold text-sm cursor-not-allowed';
+      showStatus('\uD83C\uDFC1 Engine trade #'+activeTradeId+' closed: '+reason+' | P&L '+(pnl>=0?'+':'')+pnl.toFixed(2)+'% \u2014 window closes in 6s', pnl>=0?'success':'error');
+      setTimeout(()=>{ window.close(); }, 6000);
+    }catch(e){ }
   }
 
   function enterOrder(){
@@ -383,7 +416,7 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     }
   });
 
-  window.onload=loadTradeData;
+  window.onload=function(){ loadTradeData(); const b=document.getElementById('chart-tz-badge'); if(b) b.textContent='🕐 Chart times: '+CHART_TZ.label; };
 </script>
 </body>
 </html>
