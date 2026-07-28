@@ -1458,3 +1458,25 @@ def api_crypto_active():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)
+
+# ── AiMN Backtest Lab ──
+@app.route('/backtest')
+def backtest_lab():
+    return render_template('backtest.html')
+
+@app.route('/api/backtest/run', methods=['POST'])
+def api_backtest_run():
+    try:
+        import importlib
+        import backtest_trend
+        importlib.reload(backtest_trend)
+        data = request.get_json(force=True) or {}
+        symbol = data.get('symbol', 'BTC/USD')
+        fee = float(data.get('fee', 0.18))
+        backtest_trend.FEE_PCT_PER_SIDE = fee
+        result = backtest_trend.backtest(symbol)
+        if not result:
+            return jsonify({'error': 'not enough data'})
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)})

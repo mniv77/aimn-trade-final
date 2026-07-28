@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AiMN Backtest Lab</title>
+<style>
+  body{background:#0b0f17;color:#d7dce5;font-family:Segoe UI,Arial,sans-serif;margin:0;padding:24px}
+  h1{color:#fff;font-size:22px;margin:0 0 4px}
+  .sub{color:#8b93a3;font-size:13px;margin-bottom:20px}
+  .panel{background:#121826;border:1px solid #232c40;border-radius:10px;padding:16px;margin-bottom:16px}
+  label{font-size:13px;color:#9aa3b5;margin-right:6px}
+  input[type=number]{background:#0b0f17;border:1px solid #2b3550;color:#fff;border-radius:6px;padding:6px 8px;width:90px}
+  .sym{margin-right:14px;font-size:14px}
+  button{background:#3b82f6;color:#fff;border:0;border-radius:8px;padding:8px 18px;font-weight:700;cursor:pointer;margin-right:8px}
+  button:disabled{background:#334;cursor:wait}
+  .preset{background:#232c40;font-weight:400;font-size:12px;padding:5px 10px}
+  .preset.active{background:#3b82f6}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+  th,td{border-bottom:1px solid #232c40;padding:6px 10px;text-align:right}
+  th{color:#8b93a3;font-weight:600}
+  td:first-child,th:first-child{text-align:left}
+  .pos{color:#34d399}.neg{color:#f87171}
+  .totrow td{font-weight:700;border-top:2px solid #2b3550}
+  #status{font-size:13px;color:#fbbf24;margin-left:10px}
+  .note{font-size:12px;color:#6b7386;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>🧪 AiMN Backtest Lab</h1>
+<div class="sub">Race the 5 strategies over real Gemini history at any fee assumption. A=micro, B=aligned micro, C=trend-ride, D=step-in/out (Meir), E=wide-trail.</div>
+
+<div class="panel">
+  <label>Fee per side %:</label>
+  <input type="number" id="fee" value="0.18" step="0.01" min="0">
+  <button class="preset" onclick="setFee(1.20,this)">Gemini taker 1.20</button>
+  <button class="preset" onclick="setFee(0.60,this)">Gemini maker 0.60</button>
+  <button class="preset active" onclick="setFee(0.18,this)">IBKR 0.18</button>
+  <button class="preset" onclick="setFee(0.12,this)">IBKR best 0.12</button>
+  <button class="preset" onclick="setFee(0.00,this)">Zero (raw edge)</button>
+  <span style="margin-left:20px">
+    <label class="sym"><input type="checkbox" class="symcb" value="BTC/USD" checked> BTC</label>
+    <label class="sym"><input type="checkbox" class="symcb" value="ETH/USD" checked> ETH</label>
+    <label class="sym"><input type="checkbox" class="symcb" value="SOL/USD" checked> SOL</label>
+    <label class="sym"><input type="checkbox" class="symcb" value="LINK/USD" checked> LINK</label>
+  </span>
+  <button id="runbtn" onclick="runAll()">▶ Run Backtest</button>
+  <span id="status"></span>
+</div>
+
+<div class="panel">
+  <table id="results">
+    <thead><tr>
+      <th>Symbol</th><th>Strategy</th><th>Trades</th><th>Win %</th><th>Total %</th><th>Per-day %</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="note">Data window = whatever Gemini returns (~7 days of 5m candles). Fees applied per side on every entry and exit. Raw edge = run at 0% to see pure timing skill.</div>
+</div>
+
+<script>
+function setFee(v, el){
+  document.getElementById('fee').value = v;
+  document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+function fmt(x){ return (x>=0?'+':'') + x.toFixed(2); }
+function cls(x){ return x>=0 ? 'pos' : 'neg'; }
+
+async function runAll(){
+  const fee = parseFloat(document.getElementById('fee').value) || 0;
+  const syms = [...document.querySelectorAll('.symcb:checked')].map(c=>c.value);
+  if(!syms.length){ alert('Pick at least one symbol'); return; }
+  const btn = document.getElementById('runbtn'), st = document.getElementById('status');
+  const tb = document.getElementById('tbody');
+  tb.innerHTML = ''; btn.disabled = true;
+  const totals = {};   // name -> {n,total}
+  for(const s of syms){
+    st.textContent = `⏳ running ${s} ...`;
+    try{
+      const r = await fetch('/api/backtest/run', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({symbol:s, fee:fee})
+      });
+      const d = await r.json();
+      if(d.error){ tb.insertAdjacentHTML('beforeend', `<tr><td>${s}</td><td colspan=5 class=neg>${d.error}</td></tr>`); continue; }
+      for(const row of d.stats){
+        const perday = d.days ? row.total/d.days : 0;
+        tb.insertAdjacentHTML('beforeend',
+          `<tr><td>${s}</td><td>${row.name}</td><td>${row.n}</td>`+
+          `<td>${row.win_rate.toFixed(1)}</td>`+
+          `<td class="${cls(row.total)}">${fmt(row.total)}</td>`+
+          `<td class="${cls(perday)}">${fmt(perday)}</td></tr>`);
+        totals[row.name] = totals[row.name] || {n:0,total:0};
+        totals[row.name].n += row.n; totals[row.name].total += row.total;
+      }
+    }catch(e){
+      tb.insertAdjacentHTML('beforeend', `<tr><td>${s}</td><td colspan=5 class=neg>request failed: ${e}</td></tr>`);
+    }
+  }
+  tb.insertAdjacentHTML('beforeend', `<tr class=totrow><td colspan=6>TOTALS ACROSS SYMBOLS (fee ${fee}%/side)</td></tr>`);
+  for(const [name,t] of Object.entries(totals)){
+    tb.insertAdjacentHTML('beforeend',
+      `<tr class=totrow><td></td><td>${name}</td><td>${t.n}</td><td></td>`+
+      `<td class="${cls(t.total)}">${fmt(t.total)}</td><td></td></tr>`);
+  }
+  st.textContent = '✅ done'; btn.disabled = false;
+}
+</script>
+</body>
+</html>
+

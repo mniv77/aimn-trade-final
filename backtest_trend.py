@@ -79,6 +79,7 @@ def backtest(symbol):
           f"30m={len(c30)}  1hr={len(c1h)}")
 
     A, B, C = Sim("A MICRO"), Sim("B ALIGNED-MICRO"), Sim("C TREND-RIDE")
+    D, E = Sim("D STEP-IN-OUT"), Sim("E WIDE-TRAIL")
     j30 = j1h = 0
 
     for i in range(WARMUP, len(c5)):
@@ -108,6 +109,29 @@ def backtest(symbol):
         elif B.pos is None and md == "DOWN" and macro["trend"] == "DOWN":
             B.open("SHORT", px, now)
 
+        # ---- D: MEIR'S RIDE (step-out/step-in): long while major UP;
+        #      exit on minor flip-down, RE-ENTER on minor flip-up, hard exit on major break
+        if D.pos:
+            if md == "DOWN":
+                D.close(px, now, "minor-flip-out")
+            elif major["flip"] == "TO_DOWN" or (major["last_swing_low"] and px < major["last_swing_low"]):
+                D.close(px, now, "major-break")
+        if D.pos is None and major["trend"] == "UP" and md == "UP":
+            D.open("LONG", px, now)
+
+        # ---- E: WIDE-TRAIL RIDE: enter once on major UP + minor turn,
+        #      HOLD through minor noise, exit only on major break or 1.5% trail from peak
+        if E.pos:
+            E.pos["peak"] = max(E.pos.get("peak", px), px)
+            trail_hit = px < E.pos["peak"] * (1 - 0.015)
+            major_broke = major["flip"] == "TO_DOWN" or (major["last_swing_low"] and px < major["last_swing_low"])
+            if major_broke:
+                E.close(px, now, "major-break")
+            elif trail_hit and (px - E.pos["entry"]) / E.pos["entry"] > 0.004:
+                E.close(px, now, "wide-trail")
+        if E.pos is None and major["trend"] == "UP" and md == "UP":
+            E.open("LONG", px, now)
+
         # ---- C: trend ride (macro-aligned entry, exit on 30m major flip)
         if C.pos:
             if C.pos["dir"] == "LONG" and (major["flip"] == "TO_DOWN" or
@@ -128,12 +152,12 @@ def backtest(symbol):
             C.open("SHORT", px, now)
 
     px = c5[-1]["c"]; now = c5[-1]["t"]
-    for s in (A, B, C):
+    for s in (A, B, C, D, E):
         if s.pos:
             s.close(px, now, "END")
 
-    stats = [s.report(days) for s in (A, B, C)]
-    return {"symbol": symbol, "stats": stats}
+    stats = [s.report(days) for s in (A, B, C, D, E)]
+    return {"symbol": symbol, "days": round(days, 2), "stats": stats}
 
 
 if __name__ == "__main__":
@@ -142,7 +166,7 @@ if __name__ == "__main__":
     all_r = [r for s in symbols if (r := backtest(s))]
     if len(all_r) > 1:
         print("\n===== TOTALS ACROSS SYMBOLS =====")
-        for k in range(3):
+        for k in range(5):
             name = all_r[0]["stats"][k]["name"]
             tot = sum(r["stats"][k]["total"] for r in all_r)
             n = sum(r["stats"][k]["n"] for r in all_r)
