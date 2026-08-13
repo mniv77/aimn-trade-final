@@ -164,9 +164,15 @@
                         return;
                     }
 
-                    const trade = data.trade || {};
-                    const pnlText = trade.pnl_pct !== null ? ` (PnL: ${trade.pnl_pct}%)` : '';
-                    document.getElementById("symbol-title").innerText = `${trade.symbol || 'BTCUSDT'} (${trade.direction || 'LONG'})${pnlText}`;
+                    const symbol = data.symbol || 'BTCUSDT';
+                    const direction = data.direction || 'LONG';
+                    const pnlPct = data.pnl_pct !== undefined ? data.pnl_pct : null;
+                    const pnlText = pnlPct !== null ? ` (PnL: ${pnlPct}%)` : '';
+                    document.getElementById("symbol-title").innerText = `${symbol} (${direction})${pnlText}`;
+                    
+                    if (candlestickSeries.setMarkers && data.markers) {
+                        candlestickSeries.setMarkers(data.markers);
+                    }
 
                     const candles = data.candles || [];
                     const formattedCandles = candles.map(c => ({
