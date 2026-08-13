@@ -1763,18 +1763,26 @@ def api_db_init_tuning():
 #==============================================================================
 
 @app.route('/api/symbol_trades/<symbol>', methods=['GET'])
+@app.route('/api/symbol_trades/<symbol>', methods=['GET'])
 def get_symbol_trades(symbol):
-    import sqlite3
+    from db import get_db_connection
     try:
-        conn = sqlite3.connect('popup.sqlite3')
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        cur.execute("SELECT id, symbol, side as direction, pnl_pct FROM trade_sessions WHERE symbol LIKE ? ORDER BY id DESC LIMIT 100", (f"%{symbol}%",))
-        rows = [dict(row) for row in cur.fetchall()]
+        conn, cursor = get_db_connection()
+        cursor.execute("SELECT id, symbol, direction, pnl_percent as pnl_pct FROM active_trades WHERE symbol LIKE %s ORDER BY id DESC LIMIT 100", (f"%{symbol}%",))
+        rows = cursor.fetchall()
         conn.close()
-        return jsonify({"status": "success", "trades": rows}), 200
+        for r in rows:
+            if 'pnl_pct' in r and r['pnl_pct'] is not None:
+                r['pnl_pct'] = float(r['pnl_pct'])
+        return jsonify({
+            "status": "success",
+            "trades": rows
+        }), 200
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 @app.route('/api/save_trade_feedback', methods=['POST'])
 def save_trade_feedback():
     data = request.json or {}
