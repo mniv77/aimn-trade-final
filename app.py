@@ -2124,7 +2124,7 @@ def trade_chart_data(trade_id):
     if not trade:
         # Fallback dummy trade if ID not found in database for previewing
         trade = {
-            'symbol': 'BTCUSDT',
+
             'entry_price': 60000.0,
             'exit_price': 61500.0,
             'entry_time': None,
