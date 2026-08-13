@@ -1764,25 +1764,17 @@ def api_db_init_tuning():
 
 @app.route('/api/symbol_trades/<symbol>', methods=['GET'])
 def get_symbol_trades(symbol):
+    import sqlite3
     try:
-        # Retrieve saved trades for this symbol from your database or backtest cache
-        # Example structure:
-        # trades = Database.get_trades_for_symbol(symbol)
-
-        trades = [] # Replace with your actual fetched trade records list
-
-        return jsonify({
-            "status": "success",
-            "trades": trades
-        }), 200
+        conn = sqlite3.connect('popup.sqlite3')
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("SELECT id, symbol, side as direction, pnl_pct FROM trade_sessions WHERE symbol LIKE ? ORDER BY id DESC LIMIT 100", (f"%{symbol}%",))
+        rows = [dict(row) for row in cur.fetchall()]
+        conn.close()
+        return jsonify({"status": "success", "trades": rows}), 200
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
-
-
-
+        return jsonify({"status": "error", "message": str(e)}), 500
 @app.route('/api/save_trade_feedback', methods=['POST'])
 def save_trade_feedback():
     data = request.json or {}
