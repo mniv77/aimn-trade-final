@@ -2115,7 +2115,7 @@ def trade_chart_data(trade_id):
     from db import get_db_connection
     try:
         conn, cursor = get_db_connection()
-        cursor.execute("SELECT id, symbol, entry_price, entry_time, exit_price, exit_time FROM active_trades WHERE id=%s", (trade_id,))
+        cursor.execute("SELECT id, symbol, direction, entry_price, entry_time, exit_price, exit_time, pnl_percent FROM active_trades WHERE id=%s", (trade_id,))
         trade = cursor.fetchone()
         conn.close()
     except Exception as e:
@@ -2124,14 +2124,18 @@ def trade_chart_data(trade_id):
     if not trade:
         # Fallback dummy trade if ID not found in database for previewing
         trade = {
-
+            'symbol': 'BTCUSDT',
+            'direction': 'LONG',
             'entry_price': 60000.0,
             'exit_price': 61500.0,
             'entry_time': None,
-            'exit_time': None
+            'exit_time': None,
+            'pnl_percent': None
         }
     
     symbol = trade.get('symbol', 'BTCUSDT')
+    direction = trade.get('direction', 'LONG')
+    pnl_pct = float(trade['pnl_percent']) if trade.get('pnl_percent') is not None else None
     entry_price = float(trade.get('entry_price') or 60000.0)
     
     import time, random
@@ -2170,34 +2174,36 @@ def trade_chart_data(trade_id):
             entry_time_snapped = base_time
     else:
         entry_time_snapped = base_time
-
+    
+    is_short = str(direction).upper() == 'SHORT'
     markers.append({
         'time': entry_time_snapped,
-        'position': 'belowBar',
-        'color': '#00ffcc',
-        'shape': 'arrowUp',
-        'text': f"BUY @ {entry_price}"
+        'position': 'aboveBar' if is_short else 'belowBar',
+        'color': '#ff4d4d' if is_short else '#00ffcc',
+        'shape': 'arrowDown' if is_short else 'arrowUp',
+        'text': f"{direction} @ {entry_price}"
     })
-
+    
     if trade.get('exit_time'):
         try:
             exit_time_snapped = (int(trade['exit_time'].timestamp()) // 300) * 300
             markers.append({
                 'time': exit_time_snapped,
-                'position': 'aboveBar',
-                'color': '#ff4d4d',
-                'shape': 'arrowDown',
-                'text': f"SELL @ {trade.get('exit_price', '')}"
+                'position': 'belowBar' if is_short else 'aboveBar',
+                'color': '#00ffcc' if is_short else '#ff4d4d',
+                'shape': 'arrowUp' if is_short else 'arrowDown',
+                'text': f"EXIT @ {trade.get('exit_price', '')}"
             })
         except Exception:
             pass
+            
     return jsonify({
         'symbol': symbol,
+        'direction': direction,
+        'pnl_pct': pnl_pct,
         'candles': candles,
         'markers': markers
     })
-
-
 
 @app.route('/tradingview_chart.html')
 def tradingview_chart():
