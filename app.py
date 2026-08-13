@@ -2088,14 +2088,16 @@ def trade_chart_view(trade_id):
 
 @app.route('/api/trades_list', methods=['GET'])
 def trades_list():
-    import sqlite3
+    from db import get_db_connection
     try:
-        conn = sqlite3.connect('popup.sqlite3')
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        cur.execute("SELECT id, symbol, side as direction, pnl_pct FROM trade_sessions ORDER BY id DESC LIMIT 500")
-        rows = [dict(row) for row in cur.fetchall()]
+        conn, cursor = get_db_connection()
+        cursor.execute("SELECT id, symbol, direction, pnl_percent as pnl_pct FROM active_trades ORDER BY id DESC LIMIT 500")
+        rows = cursor.fetchall()
         conn.close()
+        # Convert decimal/datetime fields if any for JSON
+        for r in rows:
+            if 'pnl_pct' in r and r['pnl_pct'] is not None:
+                r['pnl_pct'] = float(r['pnl_pct'])
         return {"trades": rows}
     except Exception as e:
         return {"trades": [], "error": str(e)}
