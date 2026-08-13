@@ -2147,7 +2147,14 @@ def trade_chart_data(trade_id):
     
     markers = []
     # Entry marker snapped to first candle interval if time missing
-    entry_time_snapped = ((int(trade['entry_time'].timestamp()) // 300) * 300) if trade.get('entry_time') else base_time
+    if trade.get('entry_time'):
+        try:
+            entry_time_snapped = (int(trade['entry_time'].timestamp()) // 300) * 300
+        except Exception:
+            entry_time_snapped = base_time
+    else:
+        entry_time_snapped = base_time
+
     markers.append({
         'time': entry_time_snapped,
         'position': 'belowBar',
@@ -2157,15 +2164,17 @@ def trade_chart_data(trade_id):
     })
 
     if trade.get('exit_time'):
-        exit_time_snapped = (int(trade['exit_time'].timestamp()) // 300) * 300
-        markers.append({
-            'time': exit_time_snapped,
-            'position': 'aboveBar',
-            'color': '#ff4d4d',
-            'shape': 'arrowDown',
-            'text': f"SELL @ {trade.get('exit_price', '')}"
-        })
-        
+        try:
+            exit_time_snapped = (int(trade['exit_time'].timestamp()) // 300) * 300
+            markers.append({
+                'time': exit_time_snapped,
+                'position': 'aboveBar',
+                'color': '#ff4d4d',
+                'shape': 'arrowDown',
+                'text': f"SELL @ {trade.get('exit_price', '')}"
+            })
+        except Exception:
+            pass
     return jsonify({
         'symbol': symbol,
         'candles': candles,
