@@ -15,6 +15,8 @@
         #chart-container { width: 100%; height: 600px; background: #131722; border-radius: 8px; border: 1px solid #2a2e39; position: relative; }
         .back-btn { background: #20242d; color: #fff; border: 1px solid #2a2e39; padding: 6px 12px; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 12px; }
         .back-btn:hover { background: #2a2e39; }
+        .filter-btn { background: #20242d; color: #d1d4dc; border: 1px solid #2a2e39; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .filter-btn:hover, .filter-btn.active { background: #00ffcc; color: #0b0e11; border-color: #00ffcc; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -24,6 +26,12 @@
             <div class="controls">
                 <label for="trade-select">Select Trade:</label>
                 <select id="trade-select"></select>
+                <div class="filter-btns" style="display:inline-flex; gap:5px; margin-left:10px;">
+                    <button class="filter-btn active" onclick="setFilter('all', event)">All</button>
+                    <button class="filter-btn" onclick="setFilter('losses', event)">Losses</button>
+                    <button class="filter-btn" onclick="setFilter('small_gainers', event)">Small Gainers</button>
+                    <button class="filter-btn" onclick="setFilter('winners', event)">Winners</button>
+                </div>
             </div>
         </div>
         <a href="/auto_tuner" class="back-btn">Back to Tuner</a>
@@ -69,29 +77,53 @@
             },
         });
 
+        let allTrades = [];
+        let currentFilter = 'all';
+
+        function setFilter(type, event) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            renderTradeDropdown(currentFilter);
+        }
+
+        function renderTradeDropdown(filterType = 'all') {
+            const select = document.getElementById("trade-select");
+            select.innerHTML = "";
+            
+            let filtered = allTrades;
+            if (filterType === 'losses') {
+                filtered = allTrades.filter(t => t.pnl_pct !== null && t.pnl_pct < 0);
+            } else if (filterType === 'small_gainers') {
+                filtered = allTrades.filter(t => t.pnl_pct !== null && t.pnl_pct >= 0 && t.pnl_pct <= 2.0);
+            } else if (filterType === 'winners') {
+                filtered = allTrades.filter(t => t.pnl_pct !== null && t.pnl_pct > 2.0);
+            }
+            
+            if (filtered.length === 0) {
+                filtered = allTrades; // Fallback
+            }
+
+            filtered.forEach(t => {
+                const opt = document.createElement("option");
+                opt.value = t.id;
+                const pnlStr = t.pnl_pct !== null ? `${t.pnl_pct}%` : 'N/A';
+                opt.text = `ID ${t.id} | ${t.symbol} (${t.direction || 'BUY'}) | PnL: ${pnlStr}`;
+                if(String(t.id) === String(currentTradeId)) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+        }
+
         function loadTradeList() {
             fetch("/api/trades_list")
                 .then(res => res.json())
                 .then(data => {
-                    const select = document.getElementById("trade-select");
-                    select.innerHTML = "";
-                    const trades = data.trades || [];
-                    if(trades && trades.length > 0) {
-                        trades.forEach(t => {
-                            const opt = document.createElement("option");
-                            opt.value = t.id;
-                            opt.text = `ID ${t.id}: ${t.symbol} (${t.direction}) PnL: ${t.pnl_pct}%`;
-                            if(String(t.id) === String(currentTradeId)) {
-                                opt.selected = true;
-                            }
-                            select.appendChild(opt);
-                        });
-                    } else {
-                        const opt = document.createElement("option");
-                        opt.value = currentTradeId;
-                        opt.text = `ID ${currentTradeId}`;
-                        select.appendChild(opt);
-                    }
+                    allTrades = data.trades || [];
+                    renderTradeDropdown('all');
                 })
                 .catch(err => console.error("Failed to load trades list:", err));
         }

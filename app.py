@@ -2098,10 +2098,10 @@ def trade_chart_view(trade_id):
 def trades_list():
     import sqlite3
     try:
-        conn = sqlite3.connect('trades.db')
+        conn = sqlite3.connect('popup.sqlite3')
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        cur.execute("SELECT id, symbol, direction, pnl_pct FROM trades ORDER BY id DESC LIMIT 100")
+        cur.execute("SELECT id, symbol, side as direction, pnl_pct FROM trade_sessions ORDER BY id DESC LIMIT 500")
         rows = [dict(row) for row in cur.fetchall()]
         conn.close()
         return {"trades": rows}
