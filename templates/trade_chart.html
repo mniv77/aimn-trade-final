@@ -136,7 +136,7 @@
             } else if (currentFilter === 'small_gainers') {
                 filtered = allTrades.filter(t => t.pnl_pct !== null && t.pnl_pct >= 0 && t.pnl_pct <= 2.0);
             } else if (currentFilter === 'winners') {
-                filtered = allTrades.filter(t => t.pnl_pct !== null && t.pnl_pct > 2.0);
+
             }
 
             if (filtered.length === 0) {
