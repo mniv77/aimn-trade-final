@@ -2088,7 +2088,7 @@ def api_backtest_run():
 from flask import render_template, jsonify, request
 import sqlite3
 
-@app.route('/trade_chart_view/<int:trade_id>')
+@app.route('/trade_chart_view/<trade_id>')
 def trade_chart_view(trade_id):
     """Renders the HTML page displaying the trade review chart."""
     return render_template('trade_chart.html', trade_id=trade_id)
