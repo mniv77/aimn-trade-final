@@ -1,26 +1,32 @@
-# app.py  (Flask — pages + rescue API)
+# app.py (Flask — pages + rescue API)
 from flask import Flask, render_template, redirect, abort, request, jsonify
 import os, time, random
+import sys
+
+# Ensure the project root directory is in the Python path
+project_home = os.path.dirname(os.path.abspath(__file__))
+if project_home not in sys.path:
+    sys.path.insert(0, project_home)
 
 from sqlalchemy import text
-from shared_models import Base
+from shared_models import Base, Trade
 from app_sub.db import engine, db_session
-from shared_models import Base, Trade  # Trade for /api/trade/open
+from engine.tuning.auto_tuner import run_analysis
 
-
-
-
-
-# BEFORE (wrong in your error trail):
-# from app_sub.db import engine, db_session
-
-# AFTER (match your file path shown):
-
-
-
+# 1. Initialize Flask app ONCE with your settings
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
-# Lazy singleton for quote provider (Alpaca → Binance/yfinance → SIM)
+# 2. Map 'db' to your session (or adjust if your routes expect a cursor-based DB object)
+db = db_session
+
+# 3. Register your route blueprints/functions safely after app and db exist
+from backtest_routes import register_backtest_routes
+register_backtest_routes(app, db)
+
+from backtest_feedback_routes import register_feedback_routes
+register_feedback_routes(app, db)
+
+# Lazy singleton for quote provider (Alpaca -> Binance/yfinance -> SIM)
 _quote_provider = None
 def _get_provider():
     global _quote_provider
@@ -52,9 +58,13 @@ def system_overview():
 # --- AI/ML blueprint ---
 aiml = Blueprint("aiml", __name__, template_folder="templates")
 
-@aiml.route("/")
-def aiml_page():
-    return render_or_404("aiml/home.html")
+
+# HOME / DASH
+@app.route("/")
+def home():
+    symbol = request.args.get('symbol', 'BTCUSDT')
+    direction = request.args.get('direction', 'LONG')
+    return render_template('dashboard.html', symbol=symbol, direction=direction)
 
 @aiml.route("/manual")
 def manual_tune():
@@ -91,14 +101,14 @@ def render_or_404(name: str):
 
 # ===================== PAGE ROUTES =====================
 
-# HOME / DASH
-@app.route("/")
-def home():
-    return render_or_404("dashboard.html")
 
-@app.route("/dashboard")
+
+@app.route('/dashboard')
 def dashboard():
-    return render_or_404("dashboard.html")
+    # Get them from request args or session, with safe fallbacks
+    symbol = request.args.get('symbol', 'BTCUSDT')
+    direction = request.args.get('direction', 'LONG')
+    return render_template('dashboard.html', symbol=symbol, direction=direction)
 
 # TOP MENU TARGETS
 @app.route("/scanner")
@@ -221,6 +231,267 @@ def list_routes():
         lines.append(f"{r.rule:35s} -> {r.endpoint} [{methods}]")
     lines.sort()
     return "<pre>" + "\n".join(lines) + "</pre>"
+
+
+import pandas as pd
+import numpy as np
+
+
+
+
+#======================================================
+#     SYMBOLS FOR TUNER SELETCT SYAMBOL
+#======================================================
+
+from flask import request, jsonify
+from sqlalchemy import text
+
+@app.route('/get_symbols', methods=['GET'])
+def get_symbols():
+    broker_id = request.args.get('broker_id')
+    if not broker_id:
+        return jsonify([]), 200
+
+    try:
+        from app import db
+        bid = int(broker_id) if str(broker_id).isdigit() else broker_id
+
+        query = text("SELECT local_ticker AS symbol FROM broker_products WHERE broker_id = :bid")
+
+        try:
+            result = db.execute(query, {"bid": bid})
+        except Exception as e:
+            db.rollback()
+            result = db.execute(query, {"bid": bid})
+        rows = result.fetchall()
+        symbols = [row[0] for row in rows if row[0]]
+
+        print(f"DB QUERY SUCCESS: broker_id={bid} found {len(symbols)} symbols -> {symbols}")
+        return jsonify(symbols), 200
+
+    except Exception as e:
+        err_msg = str(e)
+        print(f"CRITICAL ERROR in /get_symbols: {err_msg}")
+        import traceback
+        traceback.print_exc()
+        return jsonify([f"ERROR: {err_msg[:50]}"]), 200
+
+
+
+# ==========================================
+# DYNAMIC RISK MANAGEMENT HELPERS
+# ==========================================
+
+def calculate_atr(df: pd.DataFrame, period: int = 14) -> float:
+    """Calculates the current Average True Range (ATR)."""
+    df = df.copy()
+    df['high_low'] = df['High'] - df['Low']
+    df['high_close'] = (df['High'] - df['Close'].shift()).abs()
+    df['low_close'] = (df['Low'] - df['Close'].shift()).abs()
+
+    tr = df[['high_low', 'high_close', 'low_close']].max(axis=1)
+    atr = tr.rolling(window=period).mean()
+    return float(atr.iloc[-1])
+
+def calculate_dynamic_targets(entry_price: float, atr: float, direction: str,
+                               sl_multiplier: float = 1.5,
+                               tp1_multiplier: float = 2.0,
+                               tp2_multiplier: float = 3.5) -> dict:
+    """Computes dynamic Stop Loss and Take Profit levels based on ATR multiples."""
+    direction = direction.upper()
+
+    if direction in ['LONG', 'BUY']:
+        stop_loss = entry_price - (atr * sl_multiplier)
+        take_profit_1 = entry_price + (atr * tp1_multiplier)
+        take_profit_2 = entry_price + (atr * tp2_multiplier)
+    elif direction in ['SHORT', 'SELL']:
+        stop_loss = entry_price + (atr * sl_multiplier)
+        take_profit_1 = entry_price - (atr * tp1_multiplier)
+        take_profit_2 = entry_price - (atr * tp2_multiplier)
+    else:
+        raise ValueError("Direction must be 'LONG' or 'SHORT'")
+
+    risk = abs(entry_price - stop_loss)
+    reward_tp1 = abs(take_profit_1 - entry_price)
+    rr_ratio_tp1 = round(reward_tp1 / risk, 2) if risk > 0 else 0
+
+    return {
+        "entry_price": round(entry_price, 2),
+        "stop_loss": round(stop_loss, 2),
+        "take_profit_1": round(take_profit_1, 2),
+        "take_profit_2": round(take_profit_2, 2),
+        "risk_amount_pts": round(risk, 2),
+        "rr_ratio_tp1": rr_ratio_tp1
+    }
+
+
+# ==========================================
+# IMPORTS & FLASK APP INITIALIZATION
+# ==========================================
+import json
+import pandas as pd
+import numpy as np
+
+
+
+# ==========================================
+# 1. ATR & DYNAMIC RISK HELPERS (PASTE HERE)
+# ==========================================
+
+def calculate_atr(df: pd.DataFrame, period: int = 14) -> float:
+    """Calculates the current Average True Range (ATR) from OHLC data."""
+    df = df.copy()
+    # Normalize column names to title case
+    df.columns = [col.title() for col in df.columns]
+
+    df['prev_close'] = df['Close'].shift(1)
+    df['tr1'] = df['High'] - df['Low']
+    df['tr2'] = (df['High'] - df['prev_close']).abs()
+    df['tr3'] = (df['Low'] - df['prev_close']).abs()
+
+    df['tr'] = df[['tr1', 'tr2', 'tr3']].max(axis=1)
+    df['atr'] = df['tr'].rolling(window=period).mean()
+
+    return float(df['atr'].iloc[-1])
+
+
+def calculate_dynamic_targets(entry_price: float, atr: float, direction: str,
+                               sl_multiplier: float = 1.5,
+                               tp1_multiplier: float = 2.0,
+                               tp2_multiplier: float = 3.5) -> dict:
+    """Computes dynamic Stop Loss and Take Profit levels based on ATR multiples."""
+    direction = direction.upper()
+
+    if direction in ['LONG', 'BUY']:
+        stop_loss = entry_price - (atr * sl_multiplier)
+        take_profit_1 = entry_price + (atr * tp1_multiplier)
+        take_profit_2 = entry_price + (atr * tp2_multiplier)
+    elif direction in ['SHORT', 'SELL']:
+        stop_loss = entry_price + (atr * sl_multiplier)
+        take_profit_1 = entry_price - (atr * tp1_multiplier)
+        take_profit_2 = entry_price - (atr * tp2_multiplier)
+    else:
+        raise ValueError("Direction must be 'LONG' or 'SHORT'")
+
+    risk = abs(entry_price - stop_loss)
+    reward_tp1 = abs(take_profit_1 - entry_price)
+    rr_ratio_tp1 = round(reward_tp1 / risk, 2) if risk > 0 else 0
+
+    return {
+        "entry_price": round(entry_price, 2),
+        "stop_loss": round(stop_loss, 2),
+        "take_profit_1": round(take_profit_1, 2),
+        "take_profit_2": round(take_profit_2, 2),
+        "risk_amount_pts": round(risk, 2),
+        "rr_ratio_tp1": rr_ratio_tp1
+    }
+
+
+# ==========================================
+# 2. FLASK ROUTES & TRADE LOGIC (CALL HERE)
+# ==========================================
+
+@app.route('/check_trade', methods=['GET', 'POST'])
+def check_trade():
+    # A. Fetch or parse incoming trade params
+    symbol = request.args.get('symbol', 'BTC/USD')
+    direction = request.args.get('direction', 'LONG')
+
+    # B. Fetch your historical OHLC DataFrame (Replace with your actual data loader)
+    # df = load_ohlc_data(symbol)
+
+    # --- DEMO DATAFRAME FOR EXECUTION ---
+    df = pd.DataFrame({
+        'High': [63500, 63800, 64100, 64300],
+        'Low': [63100, 63300, 63600, 63900],
+        'Close': [63400, 63750, 64000, 64250]
+    })
+
+    # C. CALL ATR CALCULATION HERE
+    current_price = float(df['Close'].iloc[-1])
+    current_atr = calculate_atr(df, period=14)
+
+    # D. CALCULATE DYNAMIC SL / TP TARGETS HERE
+    targets = calculate_dynamic_targets(
+        entry_price=current_price,
+        atr=current_atr,
+        direction=direction,
+        sl_multiplier=1.5, # Risk buffer
+        tp1_multiplier=2.0 # Minimum 1.33+ R:R Target
+    )
+
+    # E. (Optional) Risk/Reward Gatekeeper
+    if targets['rr_ratio_tp1'] < 1.3:
+        return jsonify({
+            "status": "REJECTED",
+            "reason": f"Risk-to-Reward ratio too low ({targets['rr_ratio_tp1']}). Skipping setup."
+        })
+
+    # F. Pass calculated targets to template or return JSON
+    return render_template(
+        'backtest.html',
+        symbol=symbol,
+        direction=direction,
+        targets=targets,
+        atr=round(current_atr, 2)
+    )
+
+
+@app.route('/backtest', methods=['GET', 'POST'])
+def backtest():
+# A. Parse incoming parameters safely
+    if request.method == 'POST' and request.is_json:
+        data = request.get_json()
+        symbol = data.get('symbol', 'BTC/USD')
+        direction = str(data.get('direction', 'LONG')).upper()
+    else:
+        symbol = request.args.get('symbol', 'BTC/USD')
+        direction = str(request.args.get('direction', 'LONG')).upper()
+
+    # Ensure direction is strictly LONG or SHORT
+    if direction not in ['LONG', 'SHORT']:
+        direction = 'LONG'
+
+    # B. Historical OHLC DataFrame
+    demo_prices = [62000 + (i * 150) for i in range(20)]
+    df = pd.DataFrame({
+        'High': [p + 200 for p in demo_prices],
+        'Low': [p - 150 for p in demo_prices],
+        'Close': demo_prices
+    })
+
+    # C. Calculate ATR
+    atr_period = 14 if len(df) >= 15 else max(1, len(df) - 1)
+    current_price = float(df['Close'].iloc[-1])
+    current_atr = calculate_atr(df, period=atr_period)
+
+    # D. Compute Dynamic SL / TP Targets
+    targets = calculate_dynamic_targets(
+        entry_price=current_price,
+        atr=current_atr,
+        direction=direction,
+        sl_multiplier=1.5,
+        tp1_multiplier=2.0,
+        tp2_multiplier=3.5
+    )
+
+    # E. Risk/Reward Gatekeeper
+    gatekeeper_passed = True
+    rejection_reason = None
+    if targets['rr_ratio_tp1'] < 1.3:
+        gatekeeper_passed = False
+        rejection_reason = f"Risk-to-Reward ratio too low ({targets['rr_ratio_tp1']}). Skipping setup."
+
+    # F. Render the backtest view
+    return render_template(
+        'backtest.html',
+        symbol=symbol,
+        direction=direction,
+        targets=targets,
+        atr=round(current_atr, 2),
+        gatekeeper_passed=gatekeeper_passed,
+        rejection_reason=rejection_reason
+    )
 
 # ===================== RESCUE API (stubs so UI has data) =====================
 
@@ -570,6 +841,13 @@ def api_scanner_prices():
 
     return jsonify({"prices": result, "ts": int(time.time()*1000)})
 
+#================================================================================
+#                             api_scanner_snapshot
+#===============================================================================
+
+
+
+
 @app.route("/api/scanner/snapshot")
 def api_scanner_snapshot():
     global _scanner_snapshot_cache, _scanner_snapshot_ts
@@ -635,37 +913,97 @@ def api_scanner_snapshot():
                 n = len(closes)
                 r_val = calc_rsi_real(highs, lows, closes, n - 1, rsi_len)
                 if r_val is not None:
-                    rsi = round(max(0.0, min(100.0, r_val)), 1)
-                if closes[-2]:
-                    change = round((closes[-1] - closes[-2]) / closes[-2] * 100, 2)
-                atr_vals = [(candles[i]['high'] - candles[i]['low']) / candles[i]['close'] * 100
-                            for i in range(-min(14, n), 0)]
-                atr_pct = round(sum(atr_vals) / len(atr_vals), 2)
-                # MACD
+                    rsi = round(r_val, 2)
+
+                # Calculate ATR percentage
+                tr_list = []
+                for i in range(1, len(closes)):
+                    tr = max(
+                        highs[i] - lows[i],
+                        abs(highs[i] - closes[i - 1]),
+                        abs(lows[i] - closes[i - 1])
+                    )
+                    tr_list.append(tr)
+                if tr_list and closes[-1] > 0:
+                    avg_tr = sum(tr_list[-14:]) / min(len(tr_list), 14)
+                    atr_pct = round((avg_tr / closes[-1]) * 100, 2)
+
+                # Calculate candle change percentage
+                if len(closes) >= 2:
+                    change = round(((closes[-1] - closes[-2]) / closes[-2]) * 100, 2)
+
+                # Calculate MACD series
                 try:
-                    mf = int(row.get('macd_fast') or 12)
-                    ms = int(row.get('macd_slow') or 26)
-                    mg = int(row.get('macd_signal') or 9)
-                    macd_series = calc_macd_series(closes, mf, ms, mg)
-                    if macd_series:
-                        macd = round(macd_series[-1], 4)
+                    macd_vals = calc_macd_series(closes, int(row['macd_fast'] or 12), int(row['macd_slow'] or 26), int(row['macd_signal'] or 9))
+                    if macd_vals and len(macd_vals) > 0:
+                        macd = round(macd_vals[-1], 2)
                 except Exception:
                     pass
-                # Use most recent candle close as price fallback
-                if price is None and closes:
-                    price = closes[-1]
-                    feed = "CANDLE"
-        except Exception as e:
-            print(f"[snapshot] {symbol}: {e}")
 
-        result.append({'symbol': symbol, 'broker': broker, 'price': price,
-                       'rsi': rsi, 'atr_pct': atr_pct, 'change': change,
-                       'macd': macd, 'feed': feed})
+        except Exception as ex:
+            print(f"[scanner_snapshot] Error processing {symbol}: {ex}")
 
-    _scanner_snapshot_cache = {'symbols': result, 'ts': int(time.time() * 1000)}
+        if price is None and 'closes' in locals() and closes:
+            price = closes[-1]
+
+        result.append({
+            "symbol": symbol,
+            "broker": broker,
+            "price": price,
+            "rsi": rsi,
+            "atr_pct": atr_pct,
+            "change": change,
+            "macd": macd,
+            "candle_time": candle_time,
+            "pl_pct": row['pl_pct'],
+            "feed": feed
+        })
+
+    _scanner_snapshot_cache = {"symbols": result, "ts": int(time.time() * 1000)}
     _scanner_snapshot_ts = time.time()
     return jsonify(_scanner_snapshot_cache)
 
+
+    #============================================================================
+
+
+def safe_float_list(val, default=None):
+    """Safely converts incoming form inputs (strings, lists, or numbers) into a list of floats."""
+    if default is None:
+        default = [1.5]
+    if not val:
+        return default
+    if isinstance(val, list):
+        return [float(x) for x in val if str(x).strip()]
+    if isinstance(val, (int, float)):
+        return [float(val)]
+    if isinstance(val, str):
+        val = val.split('DEBUG')[0]
+        val = val.replace('[', '').replace(']', '').replace('"', '').replace("'", "")
+        res = []
+        for x in val.split(','):
+            x_clean = x.strip()
+            if x_clean:
+                try:
+                    res.append(float(x_clean))
+                except ValueError:
+                    pass
+        return res if res else default
+    return default
+
+def safe_int_list(val, default=None):
+    """Safely converts incoming form inputs into a list of integers."""
+    if default is None:
+        default = [14]
+    return [int(x) for x in safe_float_list(val, default)]
+
+
+
+#------------------------------------------------------------------------------
+
+def safe_int_list(val, default=[14]):
+    """Safely converts incoming form inputs into a list of integers."""
+    return [int(x) for x in safe_float_list(val, default)]
 @app.route("/api/entry/start", methods=["POST"])
 def api_entry_start():
     # used by some popups to kick off an entry
@@ -934,29 +1272,134 @@ def serve_chart(filename):
         return send_file(path, mimetype='image/png')
     return "Not found", 404
 
-@app.route("/auto_tuner")
-def auto_tuner_page():
+#from engine.tuning.auto_tuner import run_analysis
+
+
+#===================================================================
+#  auto_tuner   add debug_log
+#===================================================================
+
+# DEBUG_TAG_START: Remove after testing
+def debug_log(keyword, message):
+    print(f"--- [DEBUG_PYTHON_{keyword}] {message} ---")
+# DEBUG_TAG_END
+
+from flask import render_template, request, jsonify
+
+@app.route('/auto_tuner', methods=['GET', 'POST'])
+def auto_tuner():
     from db import get_db_connection
+
+    # --- HANDLE POST REQUEST (When user clicks Run Auto Tuner) ---
+    if request.method == 'POST':
+        req_data = request.json or {}
+
+        symbol = req_data.get('symbol')
+        broker_id = req_data.get('broker_id')
+        direction = req_data.get('direction')
+        timeframe = req_data.get('timeframe')
+        bars = req_data.get('bars')
+
+        print(f"--- [BACKEND TUNER] Processing -> Symbol: {symbol}, Broker: {broker_id}, Direction: {direction} ---")
+
+        df = fetch_historical_data_for_symbol(broker_id, symbol, timeframe)   #   addition to get real data
+
+        # ⚠️ CRITICAL: Ensure your actual backtest/tuner function
+        # uses these variables instead of a hardcoded symbol!
+        # Example:
+        # results = run_grid_search(broker_id=broker_id, symbol=symbol, direction=direction, timeframe=timeframe, bars=bars)
+
+        # For testing, make sure you return the symbol back in the JSON:
+        # return jsonify({
+        #     "status": "success",
+        #     "symbol": symbol,
+        #     "direction": direction,
+        #     "timeframe": timeframe,
+        #     "candle_count": bars,
+        #     "total_pnl_val": ...,
+        #     "win_rate_val": ...,
+        #     "trades_val": ...,
+        #     "avg_pnl_val": ...,
+        #     "breakdown": {"DECAY": ..., "RSI": ..., "STOP": ..., "TRAIL": ...},
+        #     "params": { ... }
+        # })
+
+    # --- HANDLE GET REQUEST (Loads the page and brokers) ---
+    brokers = []
     try:
         conn, cursor = get_db_connection()
-        cursor.execute("""
-            SELECT DISTINCT b.id, b.name FROM brokers b
-            JOIN broker_products bp ON bp.broker_id=b.id
-            JOIN strategy_params sp ON sp.broker_product_id=bp.id
-            WHERE sp.active=1
-            ORDER BY b.name
-        """)
-        brokers = cursor.fetchall()
+        cursor.execute("SELECT id, name FROM brokers ORDER BY name")
+        rows = cursor.fetchall()
         conn.close()
-    except:
-        brokers = ["Gemini", "Alpaca", "Alpaca-ETF"]
-    return render_template("auto_tuner.html", brokers=brokers)
 
-@app.route("/tuning_runs")
-def tuning_runs_page():
-    return render_or_404("tuning_runs.html")
+        for row in rows:
+            if isinstance(row, dict):
+                brokers.append({"id": row.get("id"), "name": row.get("name")})
+            elif hasattr(row, "keys"):
+                brokers.append({"id": row["id"], "name": row["name"]})
+            else:
+                brokers.append({"id": row[0], "name": row[1]})
+    except Exception as e:
+        print(f"--- [DEBUG_PYTHON_ERROR] Failed to load brokers: {e} ---")
+        brokers = []
+
+    return render_template('auto_tuner.html', brokers=brokers, data={})
 
 
+#=======================================================================
+#          auto_tuning_all
+#=============================================================
+
+@app.route('/auto_tuning_all', methods=['GET', 'POST'])
+def auto_tuner_all():
+    from db import get_db_connection
+    try:
+        # Add your logic here to trigger or display the full auto tuning run
+        payload = request.args.to_dict() or (request.json if request.is_json else {})
+
+        # If you want to render a template or return a response:
+        return render_template('run _tuning_all.html')
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+#=============================================================
+#                         run_tuning_all
+#=============================================================
+@app.route("/run_tuning_all", methods=["POST"])
+def run_tuning_all_action():
+    def _run():
+        try:
+            from engine.tuning.run_tuning_all import run_all
+            run_all()
+        except Exception as e:
+            print(f"[run_all_tuning] Error: {e}")
+
+    # Fire the heavy script in a background thread so it doesn't block the server
+    threading.Thread(target=_run, daemon=True).start()
+
+    return jsonify({
+        "status": "started",
+        "message": "Full tuning run started in background. Check /tuning_runs for progress."
+    })
+
+#============================================================================
+
+
+
+
+
+#=======================================================================
+## GLOBAL_PYTHON_DEBUG: Search 'GLOBAL_PYTHON_DEBUG' to remove later
+#=============================================================
+
+def pdebug(label, data):
+    print(f"--- [DEBUG_LOG | {label}] --- \n{data}\n-----------------------------")
+
+
+
+#=======================================================
+#document.addEventListener
 # ===================== AUTO TUNER APIs =====================
 
 @app.route("/get_brokers_and_symbols")
@@ -978,6 +1421,96 @@ def get_brokers_and_symbols():
         return jsonify({"brokers": brokers, "products": products})
     except Exception as e:
         return jsonify({"brokers": [], "products": [], "error": str(e)})
+
+#====================================================================
+#     run_tuning       api/run_tuning'
+#====================================================================
+
+@app.route('/run_tuning', methods=['POST'])
+@app.route('/api/run_tuning', methods=['POST'])
+def run_tuning():
+    import traceback
+    try:
+        data = request.get_json(force=True) or {}
+        print(f"[TUNING REQUEST] Received payload: {data}")
+
+        # Call your auto-tuner analysis engine, handling argument signature safety
+        from engine.tuning.auto_tuner import run_analysis
+        try:
+            raw_result = run_analysis(data)
+        except TypeError:
+            raw_result = run_analysis()
+
+        if not isinstance(raw_result, dict):
+            raw_result = {}
+
+        # Map engine results with support for multiple naming conventions
+        trades_val = raw_result.get('total_trades', raw_result.get('trades_val', 0))
+        win_rate_val = raw_result.get('win_rate', raw_result.get('win_rate_val', 0.0))
+        total_pnl_val = raw_result.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
+        avg_pnl_val = raw_result.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
+
+        breakdown_raw = raw_result.get('breakdown', raw_result.get('exit_breakdown', {}))
+        breakdown = {
+            "STOP": breakdown_raw.get('STOP', breakdown_raw.get('stop', 0)),
+            "TRAIL": breakdown_raw.get('TRAIL', breakdown_raw.get('trail', 0)),
+            "DECAY": breakdown_raw.get('DECAY', breakdown_raw.get('decay', 0)),
+            "RSI": breakdown_raw.get('RSI', breakdown_raw.get('rsi', 0))
+        }
+
+        params_raw = raw_result.get('params', raw_result.get('best_params', {}))
+        def clean_opt(val, fallback):
+            target = val if val is not None else fallback
+            if target is None:
+                return ""
+            target_str = str(target).strip()
+            if ',' in target_str:
+                return target_str.split(',')[0].strip()
+            return target_str
+
+        params = {
+            "rsi_len": clean_opt(params_raw.get('rsi_len'), data.get('rsi_len_options', '14')),
+            "rsi_entry": clean_opt(params_raw.get('rsi_entry'), data.get('rsi_entry_options', '30')),
+            "stop_loss": clean_opt(params_raw.get('stop_loss'), data.get('stop_loss_options', '1.5')),
+            "trail_start": clean_opt(params_raw.get('trail_start'), data.get('trail_start_options', '0')),
+            "trail_drop": clean_opt(params_raw.get('trail_drop'), data.get('trail_minus_options', '0')),
+            "init_profit": clean_opt(params_raw.get('init_profit'), data.get('init_profit_options', '0')),
+            "decay_start": clean_opt(params_raw.get('decay_start'), data.get('decay_start_options', '0'))
+        }
+
+        response_data = {
+            "status": "success",
+            "symbol": data.get('symbol', 'ETHUSD'),
+            "direction": data.get('direction', 'LONG'),
+            "timeframe": data.get('timeframe', '1hr'),
+            "candle_count": data.get('bars', 2016),
+            "trades_val": trades_val,
+            "win_rate_val": win_rate_val,
+            "total_pnl_val": total_pnl_val,
+            "avg_pnl_val": avg_pnl_val,
+            "params": params,
+            "breakdown": breakdown
+        }
+
+        return jsonify(response_data), 200
+
+    except Exception as e:
+        err_str = traceback.format_exc()
+        print(f"[TUNING CRASH TRACE]:\n{err_str}")
+        return jsonify({
+            "status": "error",
+            "message": str(e),
+            "trace": err_str
+        }, 500)
+
+
+
+
+
+#============================================================
+#    run_auto_tuner
+#========================================================
+
 
 
 @app.route("/run_auto_tuner", methods=["POST"])
@@ -1053,17 +1586,6 @@ def run_auto_tuner():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/run_all_tuning", methods=["POST"])
-def run_all_tuning():
-    import threading
-    def _run():
-        try:
-            from engine.tuning.run_tuning_all import run_all
-            run_all()
-        except Exception as e:
-            print(f"[run_all_tuning] Error: {e}")
-    threading.Thread(target=_run, daemon=True).start()
-    return jsonify({"status": "started", "message": "Full tuning run started in background. Check /tuning_runs for progress."})
 
 
 @app.route("/disable_old_strategies", methods=["POST"])
@@ -1082,6 +1604,36 @@ def disable_old_strategies():
         return jsonify({"status": "success", "message": f"Disabled {affected} old/negative strategies"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# ============================================================
+#   /tuning_runs page route
+# ============================================================
+
+@app.route('/tuning_runs')
+def tuning_runs_page():
+    from db import get_db_connection
+    runs = []
+    try:
+        conn, cursor = get_db_connection()
+        # Fetch the latest tuning runs from your database table
+        cursor.execute("SELECT * FROM tuning_runs ORDER BY id DESC LIMIT 50")
+        runs = cursor.fetchall()
+        conn.close()
+    except Exception as e:
+        print(f"[tuning_runs_page] Error: {e}")
+        runs = []
+
+    return render_template('tuning_runs.html', runs=runs)
+
+
+
+
+
+
+#====================================================================================
+#/api/tuning_runs
+#======================================================================
 
 
 @app.route("/api/tuning_runs")
@@ -1202,6 +1754,55 @@ def api_db_init_tuning():
         return jsonify({"ok": True, "tables": ["tuning_runs", "tuning_history"]})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
+
+
+
+
+#=========================================================================
+#      /api/symbol_trades/<symbol>      api/save_trade_feedback
+#==============================================================================
+
+@app.route('/api/symbol_trades/<symbol>', methods=['GET'])
+def get_symbol_trades(symbol):
+    try:
+        # Retrieve saved trades for this symbol from your database or backtest cache
+        # Example structure:
+        # trades = Database.get_trades_for_symbol(symbol)
+
+        trades = [] # Replace with your actual fetched trade records list
+
+        return jsonify({
+            "status": "success",
+            "trades": trades
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
+
+@app.route('/api/save_trade_feedback', methods=['POST'])
+def save_trade_feedback():
+    data = request.json or {}
+    trade_id = data.get('trade_id')
+    feedback_text = data.get('feedback')
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("""
+            UPDATE backtest_orders SET feedback = %s WHERE id = %s
+        """, (feedback_text, trade_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+#--------------------------------------------------------------------------
+
+
+
 
 
 @app.route("/api/db/seed-brokers", methods=["POST"])
@@ -1459,10 +2060,6 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)
 
-# ── AiMN Backtest Lab ──
-@app.route('/backtest')
-def backtest_lab():
-    return render_template('backtest.html')
 
 @app.route('/api/backtest/run', methods=['POST'])
 def api_backtest_run():
@@ -1480,3 +2077,116 @@ def api_backtest_run():
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)})
+
+
+
+#==========================================================================
+#==========================================================================
+#                           backtst feedback charts
+#==========================================================================
+#==========================================================================
+from flask import render_template, jsonify, request
+import sqlite3
+
+@app.route('/trade_chart_view/<int:trade_id>')
+def trade_chart_view(trade_id):
+    """Renders the HTML page displaying the trade review chart."""
+    return render_template('trade_chart.html', trade_id=trade_id)
+
+@app.route('/api/trade_chart_data/<int:trade_id>')
+def trade_chart_data(trade_id):
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("SELECT id, symbol, entry_price, entry_time, exit_price, exit_time FROM active_trades WHERE id=%s", (trade_id,))
+        trade = cursor.fetchone()
+        conn.close()
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+        
+    if not trade:
+        # Fallback dummy trade if ID not found in database for previewing
+        trade = {
+            'id': trade_id,
+            'symbol': 'BTCUSDT',
+            'entry_price': 60000.0,
+            'exit_price': 61500.0,
+            'entry_time': None,
+            'exit_time': None
+        }
+    
+    symbol = trade.get('symbol', 'BTCUSDT')
+    entry_price = float(trade.get('entry_price') or 60000.0)
+    
+    import time, random
+    # Snap base_time to nearest 300-second (5 min) boundary
+    now_ts = int(time.time())
+    entry_ts = int(trade['entry_time'].timestamp()) if trade.get('entry_time') else now_ts
+    base_time = (entry_ts // 300) * 300
+    
+    start_time = base_time - (30 * 300)
+    candles = []
+    price = entry_price
+    random.seed(trade_id)
+    
+    for i in range(120):
+        t = start_time + i * 300
+        change = random.uniform(-50, 50)
+        open_p = price
+        close_p = price + change
+        high_p = max(open_p, close_p) + random.uniform(0, 20)
+        low_p = min(open_p, close_p) - random.uniform(0, 20)
+        price = close_p
+        candles.append({
+            'time': t,
+            'open': round(open_p, 2),
+            'high': round(high_p, 2),
+            'low': round(low_p, 2),
+            'close': round(close_p, 2)
+        })
+    
+    markers = []
+    # Entry marker snapped to first candle interval if time missing
+    entry_time_snapped = ((int(trade['entry_time'].timestamp()) // 300) * 300) if trade.get('entry_time') else base_time
+    markers.append({
+        'time': entry_time_snapped,
+        'position': 'belowBar',
+        'color': '#00ffcc',
+        'shape': 'arrowUp',
+        'text': f"BUY @ {entry_price}"
+    })
+
+    if trade.get('exit_time'):
+        exit_time_snapped = (int(trade['exit_time'].timestamp()) // 300) * 300
+        markers.append({
+            'time': exit_time_snapped,
+            'position': 'aboveBar',
+            'color': '#ff4d4d',
+            'shape': 'arrowDown',
+            'text': f"SELL @ {trade.get('exit_price', '')}"
+        })
+        
+    return jsonify({
+        'symbol': symbol,
+        'candles': candles,
+        'markers': markers
+    })
+
+
+
+@app.route('/tradingview_chart.html')
+def tradingview_chart():
+    trade_id = request.args.get('trade_id', 1)
+    return render_template('trade_chart.html', trade_id=trade_id)
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    try:
+        db.remove()
+    except Exception:
+        try:
+            db.rollback()
+            db.remove()
+        except Exception:
+            pass
