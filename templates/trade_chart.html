@@ -72,9 +72,10 @@
         function loadTradeList() {
             fetch("/api/trades_list")
                 .then(res => res.json())
-                .then(trades => {
+                .then(data => {
                     const select = document.getElementById("trade-select");
                     select.innerHTML = "";
+                    const trades = data.trades || [];
                     if(trades && trades.length > 0) {
                         trades.forEach(t => {
                             const opt = document.createElement("option");
