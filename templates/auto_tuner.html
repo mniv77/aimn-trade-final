@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>HaGolem Auto Trading by AiMN — Tuner</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -54,6 +55,7 @@
         #reset_default_btn { padding: 8px 18px; background: #1a1500; border: 1px solid var(--gold); border-radius: 4px; color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
         #reset_default_btn:hover { background: #2a2000; }
         #result_box { font-family: 'Share Tech Mono', monospace; font-size: 13px; line-height: 1.8; white-space: pre-wrap; min-height: 140px; }
+        #chart_container { width: 100%; height: 350px; margin-top: 14px; border-radius: 4px; overflow: hidden; display: none; border: 1px solid var(--border); }
         .log-ok   { color: var(--green); }
         .log-err  { color: var(--red); }
         .log-info { color: var(--accent2); }
@@ -63,8 +65,6 @@
         .status-blue  { background: #1e3a5f; border-color: var(--accent2); color: var(--accent2); }
         .status-green { background: #052e16; border-color: var(--green);   color: var(--green); }
         .status-red   { background: #450a0a; border-color: var(--red);     color: var(--red); }
-        .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
         .mode-tabs { display: flex; gap: 0; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
         .mode-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 1px; transition: all 0.2s; color: var(--muted); background: var(--panel); border: none; }
         .mode-tab:hover { color: var(--text); }
@@ -73,13 +73,18 @@
     </style>
 </head>
 <body>
+<div style='padding: 15px 20px; background: #0d1526; border-bottom: 1px solid #1a3050; display: flex; justify-content: flex-end;'>
+    <a id="open_chart_link" href="/trade_chart_view/1" target="_blank" style="background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #3b82f6; transition: background 0.2s;">
+        📊 Open Chart & Feedback
+    </a>
+</div>
     <div class="header">
         <div class="header-logo">AiMN</div>
         <div class="header-title">Auto Tuner</div>
         <div class="header-right">
             <span id="default_indicator">✅ Custom Default Loaded</span>
             <button id="reset_default_btn" onclick="resetDefaults()">↺ Reset</button>
-            <div class="header-badge">V3.1</div>
+            <div class="header-badge">V3.3</div>
             <a href="/" style="padding: 8px 18px; background: #0d1526; border: 1px solid #1a3050; border-radius: 4px; color: #7aa0c8; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; text-decoration: none;">← Dashboard</a>
         </div>
     </div>
@@ -88,29 +93,27 @@
         <button class="mode-tab active-etf" id="tab-etf" onclick="switchMode('etf')">📈 ETF / STOCKS</button>
         <button class="mode-tab" id="tab-crypto" onclick="switchMode('crypto')">🪙 CRYPTO</button>
     </div>
+
     <div class="panel" style="margin-bottom:16px;">
-        <div class="panel-title">⚡ Quick Actions</div>
+        <div class="panel-title">⚡ Quick Actions &amp; Data Sync</div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <button id="fetch_candles_btn" onclick="fetchCandles()"
+                style="padding:10px 24px; background:#047857; border:none; border-radius:4px; color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
+                📥 Fetch Historical Candles
+            </button>
             <button id="run_all_btn" onclick="runAllTuning()"
-                style="padding:10px 24px; background:#1d4ed8; border:none; border-radius:4px;
-                       color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700;
-                       font-size:15px; letter-spacing:1px; cursor:pointer;">
+                style="padding:10px 24px; background:#1d4ed8; border:none; border-radius:4px; color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
                 ▶ Run All Tuning
             </button>
             <button id="disable_old_btn" onclick="disableOldStrategies()"
-                style="padding:10px 24px; background:#1a0a0a; border:1px solid #ef4444;
-                       border-radius:4px; color:#ef4444; font-family:'Barlow Condensed',sans-serif;
-                       font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
+                style="padding:10px 24px; background:#1a0a0a; border:1px solid #ef4444; border-radius:4px; color:#ef4444; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
                 🧹 Disable Old Strategies
             </button>
             <a href="/tuning_runs"
-                style="padding:10px 24px; background:#1a2a4a; border:1px solid #0ea5e9;
-                       border-radius:4px; color:#0ea5e9; font-family:'Barlow Condensed',sans-serif;
-                       font-weight:700; font-size:15px; letter-spacing:1px; text-decoration:none;">
+                style="padding:10px 24px; background:#1a2a4a; border:1px solid #0ea5e9; border-radius:4px; color:#0ea5e9; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; text-decoration:none;">
                 📋 View Tuning Runs
             </a>
-            <span id="action_status" style="font-family:'Share Tech Mono',monospace;
-                  font-size:12px; color:#f59e0b; display:none;"></span>
+            <span id="action_status" style="font-family:'Share Tech Mono',monospace; font-size:12px; color:#f59e0b; display:none;"></span>
         </div>
     </div>
 
@@ -119,7 +122,7 @@
         <div class="grid-4">
             <div>
                 <label class="field-label">Broker</label>
-                <select id="broker_select" onchange="handleBrokerChange(this.value)">
+                <select id="broker_select" name="broker_id">
                     <option value="">-- Choose --</option>
                     {% for b in brokers %}
                         <option value="{{ b.id }}">{{ b.name }}</option>
@@ -129,13 +132,13 @@
             <div>
                 <label class="field-label">Symbol</label>
                 <select id="symbol_select" disabled>
-                    <option value="">-- Choose --</option>
+                    <option value="">-- Choose Broker First --</option>
                 </select>
             </div>
             <div>
                 <label class="field-label">Direction</label>
                 <div class="dir-group">
-                    <div class="dir-btn" id="btn_long"  onclick="setDirection('LONG')">LONG</div>
+                    <div class="dir-btn" id="btn_long" onclick="setDirection('LONG')">LONG</div>
                     <div class="dir-btn" id="btn_short" onclick="setDirection('SHORT')">SHORT</div>
                 </div>
             </div>
@@ -179,7 +182,6 @@
                 <input type="text" id="volume_spike" value="2.0" style="text-align:center;">
                 <div class="field-hint">Ratio vs 20-bar avg (2.0 = 2x spike)</div>
             </div>
-
         </div>
     </div>
 
@@ -247,8 +249,8 @@
                 <label class="field-label">Primary Scoring Metric</label>
                 <div class="score-group">
                     <div class="score-btn active" id="score_total_pnl" onclick="setScore('total_pnl', this)">Total P&amp;L%</div>
-                    <div class="score-btn" id="score_winrate"   onclick="setScore('winrate', this)">Win Rate</div>
-                    <div class="score-btn" id="score_avg_pnl"  onclick="setScore('avg_pnl', this)">Avg PnL</div>
+                    <div class="score-btn" id="score_winrate"     onclick="setScore('winrate', this)">Win Rate</div>
+                    <div class="score-btn" id="score_avg_pnl"     onclick="setScore('avg_pnl', this)">Avg PnL</div>
                 </div>
                 <input type="hidden" id="score_metric" value="total_pnl">
             </div>
@@ -267,405 +269,431 @@
         <button id="run_btn" disabled>▶ RUN AUTO TUNER</button>
     </div>
 
-    <div class="panel">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-            <div class="panel-title" style="margin-bottom:0; flex:1;">📊 Results</div>
-            <button id="set_default_btn" onclick="setAsDefault()">⭐ Set as Default</button>
+    <!-- Floating Trade Review & Feedback Panel -->
+    <div id="trade_stepper_panel" style="display:none; position:fixed; bottom:20px; right:20px; width:400px; background:var(--panel); border:1px solid var(--accent2); border-radius:8px; padding:16px; z-index:10000; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-family:'Barlow Condensed',sans-serif; font-weight:700; color:var(--accent2); font-size:16px;">Trade Stepper & Feedback</span>
+            <span id="trade_counter" class="mono" style="font-size:12px; color:var(--gold);">Trade 0 of 0</span>
         </div>
-        <div id="result_box" class="log-info">Configure parameters above and click Run Auto Tuner...</div>
+        <div id="trade_details" class="mono" style="font-size:12px; margin-bottom:10px; line-height:1.5; background:#060c18; padding:8px; border-radius:4px;">
+            <!-- Filled dynamically -->
+        </div>
+        <textarea id="trade_feedback_input" placeholder="Type your feedback for this trade setup..." style="width:100%; height:60px; background:#060c18; border:1px solid var(--border); color:var(--text); padding:6px; font-size:12px; border-radius:4px; margin-bottom:8px;"></textarea>
+        <div style="display:flex; gap:8px;">
+            <button onclick="prevTrade()" style="flex:1; padding:6px; background:#1e3a5f; color:white; border:none; border-radius:4px; cursor:pointer;">← Prev</button>
+            <button onclick="saveAndNextTrade()" style="flex:1; padding:6px; background:var(--accent); color:white; border:none; border-radius:4px; cursor:pointer;">Save & Next →</button>
+        </div>
     </div>
 
-<script>
-let allProducts = [];
-let direction   = null;
-let scoreMetric = 'total_pnl';
-let lastResult  = null;
+    <!-- DEBUG_BOX_START -->
+    <div id="debug_display_box" style="position: fixed; bottom: 10px; right: 10px; width: 450px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.9); color: #00ffcc; padding: 10px; font-family: monospace; font-size: 11px; z-index: 99999; border: 1px solid #00ffcc; border-radius: 5px;">
+        <div style="font-weight: bold; border-bottom: 1px solid #00ffcc; margin-bottom: 5px; padding-bottom: 2px;">DEBUG_LOG_PANEL</div>
+        <div id="debug_messages_content">Script initializing...</div>
+    </div>
+    <!-- DEBUG_BOX_END -->
 
-const STORAGE_KEY = 'aimn_tuner_defaults_v3';
+    <script>
+        const symbolSelect = document.getElementById("symbol_select");
+        const runBtn           = document.getElementById("run_btn");
+        const brokerSelect     = document.getElementById("broker_select");
+        
+        let feedbackTrades = [];
+        let feedbackIndex = 0;
 
-const BASELINE = {
-    timeframe          : '1hr',
-    rsi_len_options    : '50,100,168',
-    rsi_entry_options  : '25,35,40',
-    macd_fast          : '12',
-    macd_slow          : '26',
-    macd_sig           : '9',
-    volume_spike       : '2.0',
-    stop_loss_options  : '1.5,2.0,3.0',
-    trail_start_options: '1.0,1.5,2.0',
-    trail_minus_options: '0.3,0.5,0.7',
-    rsi_exit_options   : '65,70',
-    init_profit_options: '0.5,1.0,1.5',
-    decay_start_options: '2.0,3.0,4.0',
-    decay_rate         : '0.5',
-    bars               : '2016',
-    min_trades         : '3',
-    score_metric       : 'total_pnl',
-};
-const brokerSelect    = document.getElementById("broker_select");
-const symbolSelect    = document.getElementById("symbol_select");
-const timeframeSelect = document.getElementById("timeframe_select");
-const runBtn          = document.getElementById("run_btn");
-const resultBox       = document.getElementById("result_box");
-const statusBadge     = document.getElementById("status_badge");
-const comboCount      = document.getElementById("combo_count");
-const comboEst        = document.getElementById("combo_est");
-const setDefaultBtn   = document.getElementById("set_default_btn");
-const defaultIndicator= document.getElementById("default_indicator");
-
-function applyConfig(cfg) {
-    const v = (id, key) => {
-        const el = document.getElementById(id);
-        if (el) el.value = cfg[key] || BASELINE[key] || '';
-    };
-    v("timeframe_select",    "timeframe");
-    v("rsi_len_options",     "rsi_len_options");
-    v("rsi_entry_options",   "rsi_entry_options");
-    v("macd_fast",           "macd_fast");
-    v("macd_slow",           "macd_slow");
-    v("macd_sig",            "macd_sig");
-    v("volume_spike",        "volume_spike");
-    v("stop_loss_options",   "stop_loss_options");
-    v("trail_start_options", "trail_start_options");
-    v("trail_minus_options", "trail_minus_options");
-    v("rsi_exit_options",    "rsi_exit_options");
-    v("init_profit_options", "init_profit_options");
-    v("decay_start_options", "decay_start_options");
-    v("decay_rate",          "decay_rate");
-    v("bars",                "bars");
-    v("min_trades",          "min_trades");
-
-    scoreMetric = cfg.score_metric || BASELINE.score_metric;
-    document.getElementById("score_metric").value = scoreMetric;
-    document.querySelectorAll(".score-btn").forEach(b => b.classList.remove("active"));
-    const activeScore = document.getElementById("score_" + scoreMetric);
-    if (activeScore) activeScore.classList.add("active");
-    updateComboCount();
-}
-
-function loadSavedDefaults() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            applyConfig(JSON.parse(saved));
-            defaultIndicator.style.display = "inline";
+        function loadTradesForSymbol(symbol) {
+            fetch(`/api/symbol_trades/${symbol}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success' && data.trades.length > 0) {
+                    feedbackTrades = data.trades;
+                    feedbackIndex = 0;
+                    document.getElementById('trade_stepper_panel').style.display = 'block';
+                    renderCurrentTrade();
+                } else {
+                    alert("No saved backtest orders found for this symbol. Run a tuning backtest first!");
+                }
+            });
         }
-    } catch(e) { console.log("No saved defaults"); }
-}
 
-function setAsDefault() {
-    const cfg = {
-        timeframe          : document.getElementById("timeframe_select").value,
-        rsi_len_options    : document.getElementById("rsi_len_options").value,
-        rsi_entry_options  : document.getElementById("rsi_entry_options").value,
-        macd_fast          : document.getElementById("macd_fast").value,
-        macd_slow          : document.getElementById("macd_slow").value,
-        macd_sig           : document.getElementById("macd_sig").value,
-        stop_loss_options  : document.getElementById("stop_loss_options").value,
-        trail_start_options: document.getElementById("trail_start_options").value,
-        trail_minus_options: document.getElementById("trail_minus_options").value,
-        rsi_exit_options   : document.getElementById("rsi_exit_options").value,
-        init_profit_options: document.getElementById("init_profit_options").value,
-        decay_start_options: document.getElementById("decay_start_options").value,
-        decay_rate         : document.getElementById("decay_rate").value,
-        bars               : document.getElementById("bars").value,
-        min_trades         : document.getElementById("min_trades").value,
-        score_metric       : scoreMetric,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
-    defaultIndicator.style.display = "inline";
-    setDefaultBtn.textContent = "✅ Saved!";
-    setTimeout(() => { setDefaultBtn.textContent = "⭐ Set as Default"; }, 2000);
-}
-
-function resetDefaults() {
-    localStorage.removeItem(STORAGE_KEY);
-    applyConfig(BASELINE);
-    defaultIndicator.style.display = "none";
-    const btn = document.getElementById("reset_default_btn");
-    btn.textContent = "✓ Reset!";
-    setTimeout(() => { btn.textContent = "↺ Reset"; }, 2000);
-}
-
-function setDirection(dir) {
-    direction = dir;
-    document.getElementById("btn_long").className  = "dir-btn" + (dir === "LONG"  ? " active-long"  : "");
-    document.getElementById("btn_short").className = "dir-btn" + (dir === "SHORT" ? " active-short" : "");
-    validateForm();
-}
-
-function setScore(metric, el) {
-    scoreMetric = metric;
-    document.getElementById("score_metric").value = metric;
-    document.querySelectorAll(".score-btn").forEach(b => b.classList.remove("active"));
-    if (el) el.classList.add("active");
-}
-
-function parseList(id) {
-    return document.getElementById(id).value
-        .split(",").map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-}
-
-function updateComboCount() {
-    const total = parseList("rsi_len_options").length *
-                  parseList("rsi_entry_options").length *
-                  parseList("stop_loss_options").length *
-                  parseList("trail_start_options").length *
-                  parseList("trail_minus_options").length *
-                  parseList("rsi_exit_options").length *
-                  parseList("init_profit_options").length *
-                  parseList("decay_start_options").length;
-    comboCount.textContent = total.toLocaleString();
-    comboEst.textContent   = total > 0 ? `(~${Math.ceil(total * 0.03)}s estimated)` : "";
-}
-
-function validateForm() {
-    runBtn.disabled = !(brokerSelect.value && symbolSelect.value && direction);
-}
-
-function setStatus(text, type) {
-    statusBadge.textContent   = text;
-    statusBadge.className     = `status-badge status-${type}`;
-    statusBadge.style.display = "inline-block";
-}
-
-function formatResult(data) {
-    if (data.error) return `<span class="log-err">❌ Error: ${data.error}</span>`;
-    const r = data.result || data || {};
-    const p = data.params || {};
-    if (!r || !p) return `<span class="log-err">❌ Invalid result structure</span>`;
-    const sep = `<span class="log-sep">${"─".repeat(52)}</span>`;
-    const pnlColor = Number(String(r.total_pnl).replace('%','')) >= 0 ? "log-ok" : "log-err";
-    const avgColor = Number(String(r.avg_pnl).replace('%',''))   >= 0 ? "log-ok" : "log-err";
-    const wrColor  = Number(String(r.winrate).replace('%',''))   >= 50 ? "log-ok" : "log-err";
-    return [
-        sep,
-        `<span class="log-best">  🏆  BEST PARAMETERS FOUND</span>`,
-        sep,
-        `<span class="log-info">Symbol     :</span> ${data.symbol}`,
-        `<span class="log-info">Direction  :</span> ${data.direction}`,
-        `<span class="log-info">Timeframe  :</span> ${data.timeframe}`,
-        sep,
-        `<span class="log-info">RSI Lookbk :</span> ${p.rsi_len} bars`,
-        `<span class="log-info">RSI Entry  :</span> ${p.rsi_entry}`,
-        `<span class="log-info">Stop Loss  :</span> ${p.stop_loss}%`,
-        `<span class="log-info">Trail Start:</span> ${p.trail_start}%`,
-        `<span class="log-info">Trail Drop :</span> ${p.trail_minus}%`,
-        `<span class="log-info">Init Profit:</span> ${p.init_profit}%`,
-        `<span class="log-info">Decay Start:</span> ${p.decay_start}h`,
-        sep,
-        `<span class="log-info">Win Rate   :</span> <span class="${wrColor}">${r.winrate}%</span>`,
-        `<span class="log-info">Avg PnL    :</span> <span class="${avgColor}">${r.avg_pnl}%</span>`,
-        `<span class="log-info">Trades     :</span> ${r.trades}`,
-        `<span class="log-info">Total PnL  :</span> <span class="${pnlColor}">${r.total_pnl}%</span>`,
-        sep,
-        ...(r.exit_breakdown ? [
-            `<span class="log-best">📊 EXIT BREAKDOWN</span>`,
-            `<span class="log-info">STOP Loss  :</span> ${r.exit_breakdown.STOP} trades (${(r.exit_breakdown.STOP/r.trades*100).toFixed(1)}%)`,
-            `<span class="log-info">TRAIL Exit :</span> ${r.exit_breakdown['TRAIL']} trades (${(r.exit_breakdown['TRAIL']/r.trades*100).toFixed(1)}%)`,
-            `<span class="log-info">DECAY Exit :</span> ${r.exit_breakdown['DECAY']} trades (${(r.exit_breakdown['DECAY']/r.trades*100).toFixed(1)}%)`,
-            `<span class="log-info">RSI Exit   :</span> ${r.exit_breakdown['RSI']} trades (${(r.exit_breakdown['RSI']/r.trades*100).toFixed(1)}%)`,
-            sep,
-        ] : []),
-        `<span class="log-ok">✅ Saved to strategy_params</span>`,
-        sep,
-    ].join("\n");
-}
-
-(async () => {
-    try {
-        const resp = await fetch("/get_brokers_and_symbols");
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
-        allProducts = data.products || [];
-        if (brokerSelect.options.length <= 1) {
-            (data.brokers || []).forEach(b => brokerSelect.add(new Option(b.name, b.id)));
+        function renderCurrentTrade() {
+            if (feedbackTrades.length === 0) return;
+            const t = feedbackTrades[feedbackIndex];
+            document.getElementById('trade_counter').innerText = `Trade ${feedbackIndex + 1} of ${feedbackTrades.length}`;
+            document.getElementById('trade_details').innerHTML = `
+                <div><b>Entry:</b> ${t.entry_time} @ ${t.entry_price}</div>
+                <div><b>Exit:</b> ${t.exit_time} @ ${t.exit_price} (${t.exit_reason})</div>
+                <div><b>PnL:</b> <span style="color:${t.pnl_pct >= 0 ? 'var(--green)' : 'var(--red)'}">${t.pnl_pct}%</span></div>
+            `;
+            document.getElementById('trade_feedback_input').value = t.feedback || '';
         }
-    } catch(e) {
-        resultBox.innerHTML = `<span class="log-err">⚠ Could not load: ${e.message}</span>`;
-    }
-    loadSavedDefaults();
-})();
 
-async function handleBrokerChange(brokerId) {
-    symbolSelect.innerHTML = '<option value="">-- Choose --</option>';
-    symbolSelect.disabled = !brokerId;
-    if (!brokerId) { validateForm(); return; }
-    if (allProducts.length === 0) {
-        try {
-            const resp = await fetch("/get_brokers_and_symbols");
-            const data = await resp.json();
-            allProducts = data.products || [];
-        } catch(e) { console.error("Failed to load products:", e); }
-    }
-    allProducts
-        .filter(p => String(p.broker_id) === String(brokerId))
-        .forEach(p => symbolSelect.add(new Option(p.symbol, p.id)));
-    validateForm();
-}
-brokerSelect.addEventListener("change", async () => {
-    const brokerId = brokerSelect.value;
-    symbolSelect.innerHTML = '<option value="">-- Choose --</option>';
-    symbolSelect.disabled = !brokerId;
-    if (!brokerId) { validateForm(); return; }
-    // Reload products if not yet fetched
-    if (allProducts.length === 0) {
-        try {
-            const resp = await fetch("/get_brokers_and_symbols");
-            const data = await resp.json();
-            allProducts = data.products || [];
-        } catch(e) { console.error("Failed to load products:", e); }
-    }
-    allProducts
-        .filter(p => String(p.broker_id) === String(brokerId))
-        .forEach(p => symbolSelect.add(new Option(p.symbol, p.id)));
-    validateForm();
-});
-symbolSelect.addEventListener("change", validateForm);
+        function saveAndNextTrade() {
+            const t = feedbackTrades[feedbackIndex];
+            const feedback = document.getElementById('trade_feedback_input').value;
 
-["rsi_len_options","rsi_entry_options","stop_loss_options",
- "trail_start_options","trail_minus_options","rsi_exit_options",
- "init_profit_options","decay_start_options"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("input", updateComboCount);
-});
-updateComboCount();
-
-runBtn.addEventListener("click", async () => {
-    const payload = {
-        broker_id           : brokerSelect.value,
-        symbol_id           : symbolSelect.value,
-        direction           : direction,
-        timeframe           : timeframeSelect.value,
-        rsi_len_options     : parseList("rsi_len_options"),
-        rsi_entry_options   : parseList("rsi_entry_options"),
-        macd_fast           : parseInt(document.getElementById("macd_fast").value) || 12,
-        macd_slow           : parseInt(document.getElementById("macd_slow").value) || 26,
-        macd_sig            : parseInt(document.getElementById("macd_sig").value)  || 9,
-        volume_spike        : parseFloat(document.getElementById("volume_spike").value) || 2.0,
-        stop_loss_options   : parseList("stop_loss_options"),
-        trail_start_options : parseList("trail_start_options"),
-        trail_minus_options : parseList("trail_minus_options"),
-        rsi_exit_options    : parseList("rsi_exit_options"),
-        init_profit_options : parseList("init_profit_options"),
-        decay_start_options : parseList("decay_start_options"),
-        decay_rate          : parseFloat(document.getElementById("decay_rate").value)  || 0.5,
-        bars                : parseInt(document.getElementById("bars").value)       || 2016,
-        min_trades          : parseInt(document.getElementById("min_trades").value) || 5,
-        score_metric        : scoreMetric,
-    };
-
-    const symLabel = symbolSelect.options[symbolSelect.selectedIndex].text;
-    runBtn.disabled        = true;
-    setDefaultBtn.style.display = "none";
-    resultBox.innerHTML    = `<span class="spinner"></span><span class="log-info">Running tuner for ${symLabel} ${direction} on ${payload.timeframe}...</span>`;
-    setStatus("Running…", "blue");
-
-    try {
-        const resp = await fetch("/run_auto_tuner", {
-            method : "POST",
-            headers: { "Content-Type": "application/json" },
-            body   : JSON.stringify(payload),
-        });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        let result;
-        try { result = await resp.json(); }
-        catch(e) { result = JSON.parse(await resp.text()); }
-        lastResult = result;
-        resultBox.innerHTML = formatResult(result);
-        setStatus("Done ✓", "green");
-        if (result && !result.error) {
-            setDefaultBtn.style.display    = "inline-block";
-            setDefaultBtn.style.visibility = "visible";
+            fetch('/api/save_trade_feedback', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ trade_id: t.id, feedback: feedback })
+            }).then(() => {
+                t.feedback = feedback;
+                if (feedbackIndex < feedbackTrades.length - 1) {
+                    feedbackIndex++;
+                    renderCurrentTrade();
+                } else {
+                    alert("Reached the last trade for this symbol!");
+                }
+            });
         }
-    } catch(e) {
-        resultBox.innerHTML = `<span class="log-err">❌ Request failed: ${e.message}</span>`;
-        setStatus("Failed", "red");
-    } finally {
-        runBtn.disabled = false;
-    }
-});
 
-async function runAllTuning() {
-    const btn    = document.getElementById('run_all_btn');
-    const status = document.getElementById('action_status');
-    btn.disabled    = true;
-    btn.textContent = '⟳ Starting...';
-    status.style.display = 'inline';
-    status.textContent   = '⟳ Starting tuning run...';
-    try {
-        const resp = await fetch('/run_all_tuning', { method: 'POST' });
-        const data = await resp.json();
-        if (data.status === 'started') {
-            btn.textContent      = '✅ Running!';
-            status.textContent   = '✅ ' + data.message;
-            status.style.color   = '#10b981';
-            setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Run All Tuning'; }, 5000);
-        } else {
-            status.textContent = '❌ ' + data.message;
-            status.style.color = '#ef4444';
-            btn.disabled = false;
-            btn.textContent = '▶ Run All Tuning';
+        function prevTrade() {
+            if (feedbackIndex > 0) {
+                feedbackIndex--;
+                renderCurrentTrade();
+            }
         }
-    } catch(e) {
-        status.textContent = '❌ Error: ' + e.message;
-        status.style.color = '#ef4444';
-        btn.disabled = false;
-        btn.textContent = '▶ Run All Tuning';
-    }
-}
 
-async function disableOldStrategies() {
-    const btn    = document.getElementById('disable_old_btn');
-    const status = document.getElementById('action_status');
-    if (!confirm('Disable all strategies with negative PnL?')) return;
-    btn.disabled = true;
-    btn.textContent = '⟳ Processing...';
-    status.style.display = 'inline';
-    status.textContent   = '⟳ Disabling old strategies...';
-    try {
-        const resp = await fetch('/disable_old_strategies', { method: 'POST' });
-        const data = await resp.json();
-        if (data.status === 'success') {
-            status.textContent = '✅ ' + data.message;
-            status.style.color = '#10b981';
-        } else {
-            status.textContent = '❌ ' + data.message;
-            status.style.color = '#ef4444';
+        function showDebug(tag, message) {
+            const content = document.getElementById("debug_messages_content");
+            if (content) {
+                const time = new Date().toLocaleTimeString();
+                content.innerHTML += `<br>[${time}] <b>${tag}</b>: ${JSON.stringify(message)}`;
+                const box = document.getElementById("debug_display_box");
+                if (box) box.scrollTop = box.scrollHeight;
+            }
         }
-    } catch(e) {
-        status.textContent = '❌ Error: ' + e.message;
-        status.style.color = '#ef4444';
-    } finally {
-        btn.disabled = false;
-        btn.textContent = '🧹 Disable Old Strategies';
-    }
-}
 
-    const MODES = {
-        etf: { rsi_len:'50,100,168', rsi_entry:'25,35,40', macd_fast:'12', macd_slow:'26', macd_sig:'9', stop_loss:'0.5,1.0,1.5', trail_start:'0.5,1.0,1.5', trail_minus:'0.1,0.15,0.2', rsi_exit:'65,70,75', init_profit:'0.1,0.5,1.5', decay_start:'0.5,1.0,2.0' },
-        crypto: { rsi_len:'20,50,100', rsi_entry:'15,20,25', macd_fast:'12', macd_slow:'26', macd_sig:'7', stop_loss:'1.0,1.5,2.0', trail_start:'0.3,0.5,0.8', trail_minus:'0.05,0.08,0.10', rsi_exit:'60,65,70', init_profit:'0.3,0.5,1.0', decay_start:'1.0,1.5,2.0' }
-    };
-    function switchMode(mode) {
-        const m = MODES[mode];
-        document.getElementById('tab-etf').className = 'mode-tab' + (mode==='etf' ? ' active-etf' : '');
-        document.getElementById('tab-crypto').className = 'mode-tab' + (mode==='crypto' ? ' active-crypto' : '');
-        document.getElementById('rsi_len_options').value = m.rsi_len;
-        document.getElementById('rsi_entry_options').value = m.rsi_entry;
-        document.getElementById('macd_fast').value = m.macd_fast;
-        document.getElementById('macd_slow').value = m.macd_slow;
-        document.getElementById('macd_sig').value = m.macd_sig;
-        document.getElementById('stop_loss_options').value = m.stop_loss;
-        document.getElementById('trail_start_options').value = m.trail_start;
-        document.getElementById('trail_minus_options').value = m.trail_minus;
-        document.getElementById('rsi_exit_options').value = m.rsi_exit;
-        if(document.getElementById('init_profit_options')) document.getElementById('init_profit_options').value = m.init_profit;
-        if(document.getElementById('decay_start_options')) document.getElementById('decay_start_options').value = m.decay_start;
-        // Broker filtering removed - server-side already shows only active brokers
-    }
-    switchMode('etf');
+        let direction   = null;
+        let scoreMetric = 'total_pnl';
+        let lastResult  = null;
+        let chartInstance = null;
+        let candlestickSeries = null;
 
+       
+        const timeframeSelect  = document.getElementById("timeframe_select");
+
+        const statusBadge      = document.getElementById("status_badge");
+        const comboCount       = document.getElementById("combo_count");
+        const comboEst         = document.getElementById("combo_est");
+        const defaultIndicator = document.getElementById("default_indicator");
+        
+        
+        
+
+document.addEventListener("DOMContentLoaded", () => {
+    // --- ABSOLUTE UNBLOCK & OVERLAY KILLER ---
+
+    if (symbolSelect) {
+        // 1. Force enable and lift to top layer
+        symbolSelect.disabled = false;
+        symbolSelect.style.pointerEvents = "auto";
+        symbolSelect.style.opacity = "1";
+        symbolSelect.style.cursor = "pointer";
+        symbolSelect.style.zIndex = "999999";
+        symbolSelect.style.position = "relative";
+
+        // 2. Force unblock parent containers if a wrapper is blocking clicks
+        let parent = symbolSelect.parentElement;
+        while (parent && parent !== document.body) {
+            parent.style.pointerEvents = "auto";
+            parent = parent.parentElement;
+        }
+    }
+    // ------------------------------------------
     
+    
+            const count = brokerSelect ? brokerSelect.options.length : 0;
+            showDebug("CLIENT", "broker_select option count: " + count);
+
+if (brokerSelect) {
+    brokerSelect.addEventListener("change", function() {
+        const brokerId = this.value;
+        showDebug("BROKER_CHANGE_FIRED", "Selected value: " + brokerId);
+
+        if (!brokerId) {
+            symbolSelect.disabled = true;
+            symbolSelect.innerHTML = '<option value="">-- Choose Broker First --</option>';
+            validateForm();
+            return;
+        }
+
+        symbolSelect.innerHTML = '<option value="">-- Loading Symbols --</option>';
+        showDebug("FETCHING_SYMBOLS", "Requesting: /get_symbols?broker_id=" + brokerId);
+
+        fetch('/get_symbols?broker_id=' + brokerId)
+            .then(response => {
+                showDebug("FETCH_STATUS", "HTTP Status: " + response.status);
+                return response.text();
+            })
+            .then(text => {
+                showDebug("RAW_RESPONSE", text);
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    showDebug("PARSE_ERROR", "Response is not valid JSON");
+                    symbolSelect.innerHTML = '<option value="">-- Invalid JSON Response --</option>';
+                    return;
+                }
+
+                symbolSelect.innerHTML = '<option value="">-- Choose Symbol --</option>';
+                let symbolList = [];
+                if (Array.isArray(data)) {
+                    symbolList = data;
+                } else if (data && data.symbols) {
+                    symbolList = data.symbols;
+                } else if (data && data.data) {
+                    symbolList = data.data;
+                }
+
+                symbolList.forEach(sym => {
+                    const opt = document.createElement('option');
+                    const symValue = (typeof sym === 'object' && sym !== null) ? (sym.symbol || sym.name || sym.ticker) : sym;
+                    opt.value = symValue;
+                    opt.textContent = symValue;
+                    symbolSelect.appendChild(opt);
+                });
+
+                // ==========================================
+                // 👉 PASTE THE UNBLOCK CODE RIGHT HERE:
+                // ==========================================
+                symbolSelect.disabled = false;
+                symbolSelect.style.pointerEvents = "auto";
+                symbolSelect.style.opacity = "1";
+
+                const customWrapper = symbolSelect.closest('.custom-select') || symbolSelect.nextElementSibling;
+                if (customWrapper && (customWrapper.classList.contains('select-wrapper') || customWrapper.classList.contains('dropdown'))) {
+                    customWrapper.style.pointerEvents = "auto";
+                    customWrapper.style.opacity = "1";
+                    customWrapper.classList.remove('disabled', 'locked');
+                }
+                // ==========================================
+
+                showDebug("SYMBOLS_LOADED", "Successfully processed " + symbolList.length + " symbols.");
+                validateForm();
+            })
+            .catch(err => {
+                showDebug("FETCH_ERROR", "Failed to load symbols: " + err);
+                symbolSelect.innerHTML = '<option value="">-- Error Loading Symbols --</option>';
+            });
+    });
+}
+
+            // 2. Keep this change event listener exactly as you had it!
+            if (symbolSelect) {
+                symbolSelect.addEventListener("change", function() {
+                    showDebug("SYMBOL_CHANGE_FIRED", "Selected symbol: " + this.value);
+                    validateForm();
+                });
+            }
+        });
+
+  
+            if (runBtn) {
+                runBtn.addEventListener("click", function() {
+                    if (runBtn.disabled) return;
+
+                    showDebug("RUN_CLICKED", "Auto Tuner execution started...");
+                    runBtn.disabled = true;
+                    runBtn.textContent = "⏳ RUNNING TUNER...";
+
+                    const payload = {
+                        broker_id: brokerSelect.value,
+                        symbol: symbolSelect.value,
+                        direction: direction,
+                        timeframe: timeframeSelect.value,
+                        rsi_len_options: document.getElementById('rsi_len_options').value,
+                        rsi_entry_options: document.getElementById('rsi_entry_options').value,
+                        stop_loss_options: document.getElementById('stop_loss_options').value,
+                        trail_start_options: document.getElementById('trail_start_options').value,
+                        trail_minus_options: document.getElementById('trail_minus_options').value,
+                        score_metric: document.getElementById('score_metric').value,
+                        bars: document.getElementById('bars').value,
+                        min_trades: document.getElementById('min_trades').value
+                    };
+
+                    showDebug("TUNER_PAYLOAD", payload);
+
+                    fetch('/api/run_tuning', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(response => {
+                        showDebug("TUNER_HTTP_STATUS", "Status: " + response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        showDebug("TUNER_RESPONSE", data);
+                        runBtn.disabled = false;
+                        runBtn.textContent = "▶ RUN AUTO TUNER";
+if (data.status === 'success') {
+    showDebug("TUNER_SUCCESS", "Tuning completed successfully!");
+
+    // 1. Find or create the report box specifically
+    let resultBox = document.getElementById('report_box');
+    if (!resultBox) {
+        resultBox = document.createElement('div');
+        resultBox.id = 'report_box';
+    }
+
+    // 2. FORCE it to insert right after the Run Button
+    const runBtnElem = document.getElementById('run_btn') || document.getElementById('run') || document.querySelector('button');
+    if (runBtnElem && runBtnElem.parentNode) {
+        runBtnElem.parentNode.insertBefore(resultBox, runBtnElem.nextSibling);
+    }
+
+    // Grab the human-readable broker name from the dropdown
+    const brokerText = (typeof brokerSelect !== 'undefined' && brokerSelect && brokerSelect.options[brokerSelect.selectedIndex]) 
+        ? brokerSelect.options[brokerSelect.selectedIndex].text 
+        : (data.broker_id || 'N/A');
+
+    // Format Exit Reasons breakdown nicely
+    let exitReasonsHtml = '';
+    if (data.breakdown) {
+        const bd = data.breakdown;
+        exitReasonsHtml = `
+            <div style="background:#0f172a; padding:10px 12px; border-radius:6px; margin-bottom:12px; font-size:12px; color:#cbd5e1; border:1px solid #334155;">
+                <b style="color:#38bdf8; display:block; margin-bottom:6px; font-size:13px;">🚪 Exit Reasons Breakdown:</b>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+                    <div><b>Decay:</b> <span style="color:#facc15;">${bd.DECAY ?? 0}</span></div>
+                    <div><b>RSI Signal:</b> <span style="color:#facc15;">${bd.RSI ?? 0}</span></div>
+                    <div><b>Stop Loss:</b> <span style="color:#facc15;">${bd.STOP ?? 0}</span></div>
+                    <div><b>Trailing Stop:</b> <span style="color:#facc15;">${bd.TRAIL ?? 0}</span></div>
+                </div>
+            </div>
+        `;
+    }
+
+    resultBox.style.display = 'block';
+    resultBox.style.marginTop = '15px';
+    resultBox.innerHTML = `
+        <div style="background:#1e293b; color:#38bdf8; padding:15px; border-radius:8px; font-family:monospace; border:1px solid #334155;">
+            <h3 style="margin-top:0; color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:8px;">📊 Tuner Report</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 13px;">
+                <p style="margin:3px 0;"><b>Broker:</b> ${brokerText}</p>
+                <p style="margin:3px 0;"><b>Symbol:</b> ${data.symbol || 'N/A'}</p>
+                <p style="margin:3px 0;"><b>Direction:</b> <span style="color:${data.direction === 'LONG' ? '#4ade80' : '#f87171'};">${data.direction || 'N/A'}</span></p>
+                <p style="margin:3px 0;"><b>Candle Time:</b> ${data.timeframe || 'N/A'}</p>
+                <p style="margin:3px 0;"><b># of Candles:</b> ${data.candle_count || 'N/A'}</p>
+                <p style="margin:3px 0;"><b>Total Trades:</b> ${data.trades_val ?? 'N/A'}</p>
+                <p style="margin:3px 0;"><b>Total PnL:</b> <span style="color:#4ade80;">${data.total_pnl_val ?? 'N/A'}%</span></p>
+                <p style="margin:3px 0;"><b>Win Rate:</b> ${data.win_rate_val ?? 'N/A'}%</p>
+                <p style="margin:3px 0; grid-column: span 2;"><b>Avg PnL:</b> ${data.avg_pnl_val ?? 'N/A'}%</p>
+            </div>
+
+            ${exitReasonsHtml}
+
+            <hr style="border-color:#334155; margin:10px 0;">
+            <b style="font-size:12px; color:#94a3b8;">Optimized Parameters:</b>
+            <pre style="color:#e2e8f0; white-space: pre-wrap; font-size:12px; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px;">${JSON.stringify(data.params, null, 2)}</pre>
+        </div>
+    `;
+
+    showDebug("UI_UPDATED", "Report metrics processed and rendered right after the run button.");
+} else {
+                            showDebug("TUNER_NOTE", "Completed with response: " + JSON.stringify(data));
+                        }
+                    })
+                    .catch(err => {
+                        showDebug("TUNER_ERROR", "Failed to execute tuning: " + err);
+                        runBtn.disabled = false;
+                        runBtn.textContent = "▶ RUN AUTO TUNER";
+                    });
+                });
+            }
+
+        function setDirection(dir) {
+            direction = dir;
+            showDebug("DIRECTION_SET", "Direction chosen: " + dir);
+            document.getElementById('btn_long').className = 'dir-btn' + (dir === 'LONG' ? ' active-long' : '');
+            document.getElementById('btn_short').className = 'dir-btn' + (dir === 'SHORT' ? ' active-short' : '');
+            validateForm();
+        }
+
+        function setScore(metric, el) {
+            scoreMetric = metric;
+            document.getElementById('score_metric').value = metric;
+            document.querySelectorAll('.score-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function validateForm() {
+            const hasBroker = brokerSelect && brokerSelect.value;
+            const hasSymbol = symbolSelect && symbolSelect.value;
+            const hasDirection = direction !== null;
+
+            showDebug("VALIDATE", `Broker: ${hasBroker} (${brokerSelect.value}), Symbol: ${hasSymbol} (${symbolSelect.value}), Direction: ${hasDirection} (${direction})`);
+
+            if (runBtn) {
+                runBtn.disabled = !(hasBroker && hasSymbol && hasDirection);
+                showDebug("RUN_BTN_STATE", `Button disabled = ${runBtn.disabled}`);
+            }
+        }
+
+        function switchMode(mode) {
+            document.getElementById('tab-etf').className = 'mode-tab' + (mode === 'etf' ? ' active-etf' : '');
+            document.getElementById('tab-crypto').className = 'mode-tab' + (mode === 'crypto' ? ' active-crypto' : '');
+        }
+
+        function resetDefaults() {
+            location.reload();
+        }
+
+        function fetchCandles() {
+            alert("Fetch Historical Candles triggered.");
+        }
+
+        function runAllTuning() {
+            alert("Run All Tuning triggered.");
+        }
+
+        function disableOldStrategies() {
+            alert("Disable Old Strategies triggered.");
+        }
+        
+        
+        
+        
+// --- RUNS LAST: PERMANENTLY UNLOCKS SYMBOL SELECT FROM ANY FUNCTION ---
+window.addEventListener('load', () => {
+     // Universal element lookup to prevent null reference bugs
+    // Safely assign or find elements without redeclaring 'const' if they already exist
+    window.brokerSelect = window.brokerSelect || document.getElementById("broker_select") || document.getElementById("broker");
+    window.symbolSelect = window.symbolSelect || document.getElementById("symbol_select") || document.getElementById("symbol") || document.getElementById("symbols") || document.querySelector("select[name*='symbol']");
+    window.runBtn = window.runBtn || document.getElementById("run_btn") || document.getElementById("run");
+
+    // Force unblock the symbol dropdown immediately
+    if (window.symbolSelect) {
+        window.symbolSelect.disabled = false;
+        window.symbolSelect.removeAttribute("disabled");
+        window.symbolSelect.style.pointerEvents = "auto";
+        window.symbolSelect.style.opacity = "1";
+        window.symbolSelect.style.cursor = "pointer";
+    }
+    
+});  
+
+
+        </script>
+<script>
+    const symbolSelect = document.getElementById("symbol_select");
+    if (symbolSelect) {
+        symbolSelect.addEventListener("change", function() {
+            const sym = this.value;
+            // Fetch latest trade for this symbol to link directly to its review chart
+            fetch(`/api/symbol_trades/${sym}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success' && data.trades && data.trades.length > 0) {
+                        const latestTradeId = data.trades[0].id;
+                        document.getElementById('open_chart_link').href = `/trade_chart_view/${latestTradeId}`;
+                    }
+                })
+                .catch(err => console.error("Error updating chart link:", err));
+        });
+    }
 </script>
 </body>
 </html>
