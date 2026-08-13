@@ -56,7 +56,7 @@
                     candlestickSeries.setData(data.candles);
                 }
                 if (data.markers && data.markers.length > 0) {
-                    candlestickSeries.setMarkers(data.markers);
+                    LightweightCharts.createSeriesMarkers(candlestickSeries, data.markers);
                 }
                 chart.timeScale().fitContent();
             })
