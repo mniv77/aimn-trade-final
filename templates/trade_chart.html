@@ -37,48 +37,69 @@
         <a href="/auto_tuner" class="back-btn">Back to Tuner</a>
     </div>
     <div id="chart-container"></div>
-    <script>
-        let currentTradeId = "{{ trade_id }}";
-        const chartContainer = document.getElementById("chart-container");
-        
-        const chart = LightweightCharts.createChart(chartContainer, {
-            layout: {
-                background: { type: "solid", color: "#131722" },
-                textColor: "#d1d4dc",
-            },
-            grid: {
-                vertLines: { color: "#1f293d" },
-                horzLines: { color: "#1f293d" },
-            },
-            timeScale: {
-                timeVisible: true,
-                secondsVisible: false,
-            },
-        });
-        
-        const candlestickSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
-            upColor: "#00ffcc", downColor: "#ff4d4d",
-            borderUpColor: "#00ffcc", borderDownColor: "#ff4d4d",
-            wickUpColor: "#00ffcc", wickDownColor: "#ff4d4d",
-        });
-
-        const volumeSeries = chart.addSeries(LightweightCharts.HistogramSeries, {
-            color: '#26a69a',
-            priceFormat: {
-                type: 'volume',
-            },
-            priceScaleId: '', // set as overlay or separate scale
-        });
-
-        volumeSeries.priceScale().applyOptions({
-            scaleMargins: {
-                top: 0.8, // highest point of volume is at 80% down
-                bottom: 0,
-            },
-        });
-
+        <script>
+        let chart;
+        let candlestickSeries;
+        let volumeSeries;
         let allTrades = [];
         let currentFilter = 'all';
+        let currentTradeId = window.location.pathname.split('/').pop() || '1';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initChart();
+            loadTradeList();
+
+            const select = document.getElementById("trade-select");
+            select.addEventListener("change", (e) => {
+                const selectedId = e.target.value;
+                if (selectedId) {
+                    window.history.pushState({}, '', `/trade_chart_view/${selectedId}`);
+                    currentTradeId = selectedId;
+                    loadTradeData(selectedId);
+                }
+            });
+        });
+
+        function initChart() {
+            const container = document.getElementById("chart-container");
+            chart = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: container.clientHeight,
+                layout: {
+                    background: { type: 'solid', color: '#0b0e11' },
+                    textColor: '#d1d4dc',
+                },
+                grid: {
+                    vertLines: { color: '#1f293d' },
+                    horzLines: { color: '#1f293d' },
+                },
+                crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+                rightPriceScale: { borderColor: '#2a2e39' },
+                timeScale: { borderColor: '#2a2e39', timeVisible: true, secondsVisible: false },
+            });
+
+            candlestickSeries = chart.addCandlestickSeries({
+                upColor: '#00ffcc',
+                downColor: '#ff3366',
+                borderVisible: false,
+                wickUpColor: '#00ffcc',
+                wickDownColor: '#ff3366',
+            });
+
+            volumeSeries = chart.addHistogramSeries({
+                color: '#26a69a',
+                priceFormat: { type: 'volume' },
+                priceScaleId: '',
+            });
+
+            volumeSeries.priceScale().applyOptions({
+                scaleMargins: { top: 0.8, bottom: 0 },
+            });
+
+            window.addEventListener('resize', () => {
+                chart.resize(container.clientWidth, container.clientHeight);
+            });
+        }
 
         function setFilter(type, event) {
             currentFilter = type;
@@ -86,24 +107,40 @@
             if (event && event.target) {
                 event.target.classList.add('active');
             }
-            renderTradeDropdown(currentFilter);
+            renderTradeDropdown();
         }
 
-        function renderTradeDropdown(filterType = 'all') {
+        function loadTradeList() {
+            fetch("/api/trades_list")
+                .then(res => res.json())
+                .then(data => {
+                    allTrades = data.trades || [];
+                    renderTradeDropdown();
+                    if (allTrades.length > 0 && (!currentTradeId || currentTradeId === '1')) {
+                        // Default to the first trade in the list if ID is 1
+                        currentTradeId = allTrades[0].id;
+                        document.getElementById("trade-select").value = currentTradeId;
+                    }
+                    loadTradeData(currentTradeId);
+                })
+                .catch(err => console.error("Failed to load trades list:", err));
+        }
+
+        function renderTradeDropdown() {
             const select = document.getElementById("trade-select");
             select.innerHTML = "";
-            
+
             let filtered = allTrades;
-            if (filterType === 'losses') {
+            if (currentFilter === 'losses') {
                 filtered = allTrades.filter(t => t.pnl_pct !== null && t.pnl_pct < 0);
-            } else if (filterType === 'small_gainers') {
+            } else if (currentFilter === 'small_gainers') {
                 filtered = allTrades.filter(t => t.pnl_pct !== null && t.pnl_pct >= 0 && t.pnl_pct <= 2.0);
-            } else if (filterType === 'winners') {
+            } else if (currentFilter === 'winners') {
                 filtered = allTrades.filter(t => t.pnl_pct !== null && t.pnl_pct > 2.0);
             }
-            
+
             if (filtered.length === 0) {
-                filtered = allTrades; // Fallback
+                filtered = allTrades;
             }
 
             filtered.forEach(t => {
@@ -118,62 +155,41 @@
             });
         }
 
-        function loadTradeList() {
-            fetch("/api/trades_list")
+        function loadTradeData(tradeId) {
+            fetch(`/api/trade_chart_data/${tradeId}`)
                 .then(res => res.json())
                 .then(data => {
-                    allTrades = data.trades || [];
-                    renderTradeDropdown('all');
-                })
-                .catch(err => console.error("Failed to load trades list:", err));
-        }
-
-        function loadChartData(tId) {
-            currentTradeId = tId;
-            fetch("/api/trade_chart_data/" + tId)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.error) {
+                    if (data.error) {
                         document.getElementById("symbol-title").innerText = "Error: " + data.error;
                         return;
                     }
-                    const pnlText = data.pnl_pct !== undefined ? ` | PnL: ${data.pnl_pct}%` : '';
-                    document.getElementById("symbol-title").innerText = `${data.symbol} (${data.direction || 'TRADE'})${pnlText}`;
-                    
-                    if (data.candles && data.candles.length > 0) {
-                        candlestickSeries.setData(data.candles);
-                    }
-                    if (data.volumes && data.volumes.length > 0) {
-                        volumeSeries.setData(data.volumes);
-                    } else if (data.candles && data.candles.length > 0) {
-                        // Fallback synthetic volume if backend doesn't provide explicit volume array
-                        const dummyVol = data.candles.map(c => ({
-                            time: c.time,
-                            value: Math.random() * 1000 + 100,
-                            color: c.close >= c.open ? 'rgba(0, 255, 204, 0.5)' : 'rgba(255, 77, 77, 0.5)'
-                        }));
-                        volumeSeries.setData(dummyVol);
-                    }
-                    if (data.markers && data.markers.length > 0) {
-                        LightweightCharts.createSeriesMarkers(candlestickSeries, data.markers);
-                    }
+
+                    const trade = data.trade || {};
+                    const pnlText = trade.pnl_pct !== null ? ` (PnL: ${trade.pnl_pct}%)` : '';
+                    document.getElementById("symbol-title").innerText = `${trade.symbol || 'BTCUSDT'} (${trade.direction || 'LONG'})${pnlText}`;
+
+                    const candles = data.candles || [];
+                    const formattedCandles = candles.map(c => ({
+                        time: c.time,
+                        open: c.open,
+                        high: c.high,
+                        low: c.low,
+                        close: c.close
+                    }));
+                    candlestickSeries.setData(formattedCandles);
+
+                    const volumes = candles.map(c => ({
+                        time: c.time,
+                        value: c.volume || Math.random() * 1000 + 200,
+                        color: c.close >= c.open ? 'rgba(0, 255, 204, 0.5)' : 'rgba(255, 51, 102, 0.5)'
+                    }));
+                    volumeSeries.setData(volumes);
+
                     chart.timeScale().fitContent();
                 })
                 .catch(err => {
-                    document.getElementById("symbol-title").innerText = "Error: " + err.message;
+                    console.error("Failed to load trade chart data:", err);
+                    document.getElementById("symbol-title").innerText = "Error loading chart data";
                 });
         }
-
-        document.getElementById("trade-select").addEventListener("change", (e) => {
-            loadChartData(e.target.value);
-        });
-
-        loadTradeList();
-        loadChartData(currentTradeId);
-
-        window.addEventListener("resize", () => {
-            chart.applyOptions({ width: chartContainer.clientWidth, height: chartContainer.clientHeight });
-        });
     </script>
-</body>
-</html>
