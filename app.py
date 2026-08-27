@@ -11,7 +11,7 @@ if project_home not in sys.path:
 from sqlalchemy import text
 from shared_models import Base, Trade
 from app_sub.db import engine, db_session
-from engine.tuning.auto_tuner import run_analysis
+# from engine.tuning.auto_tuner import run_analysis # removed
 
 # 1. Initialize Flask app ONCE with your settings
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -1272,7 +1272,7 @@ def serve_chart(filename):
         return send_file(path, mimetype='image/png')
     return "Not found", 404
 
-#from engine.tuning.auto_tuner import run_analysis
+## from engine.tuning.auto_tuner import run_analysis # removed
 
 
 #===================================================================
@@ -1430,27 +1430,49 @@ def get_brokers_and_symbols():
 @app.route('/api/run_tuning', methods=['POST'])
 def run_tuning():
     import traceback
+    from engine.tuning.auto_tuner import tune_strategy
     try:
         data = request.get_json(force=True) or {}
         print(f"[TUNING REQUEST] Received payload: {data}")
-
-        # Call your auto-tuner analysis engine, handling argument signature safety
-        from engine.tuning.auto_tuner import run_analysis
+        sym = data.get('symbol','MSFT')
+        direction = data.get('direction','LONG')
+        # from engine.tuning.auto_tuner import run_analysis # removed
         try:
-            raw_result = run_analysis(data)
-        except TypeError:
-            raw_result = run_analysis()
+            tf=data.get('timeframe','30m')
+            bars=int(data.get('bars',2016))
+            broker=data.get('broker','Alpaca')
+            rsi_opts = [25,30,35] if direction=="LONG" else [65,70,75]
+            cfg={
+                "bars":bars, 
+                "timeframe":tf, 
+                "min_trades":5,
+                "rsi_len_options":[14,21,28],
+                "rsi_entry_options":rsi_opts,
+                "init_profit_options":[1.5,2.0,2.5,3.0],
+                "trail_start_options":[1.5,2.0,2.5],
+                "trail_minus_options":[0.3,0.5],
+                "stop_loss_options":[1.0,1.5],
+                "decay_start_options":[4,6,12],
+                "decay_rate":0.3,
+                "score_metric":"profit_per_day"
+            }
+            raw_result = tune_strategy(f"{sym}_{direction}", sym, direction, candle_time=tf, cfg=cfg, broker_name=broker)
+        except TypeError as te:
+            print(f"retry: {te}")
+            raw_result = tune_strategy(f"{sym}_{direction}", sym, direction)
 
         if not isinstance(raw_result, dict):
             raw_result = {}
 
         # Map engine results with support for multiple naming conventions
-        trades_val = raw_result.get('total_trades', raw_result.get('trades_val', 0))
-        win_rate_val = raw_result.get('win_rate', raw_result.get('win_rate_val', 0.0))
-        total_pnl_val = raw_result.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
-        avg_pnl_val = raw_result.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
-
-        breakdown_raw = raw_result.get('breakdown', raw_result.get('exit_breakdown', {}))
+        # raw_result may be {symbol, result:{}, params:{}} OR direct result
+        res = raw_result.get('result', raw_result) if isinstance(raw_result, dict) else {}
+        if not isinstance(res, dict): res = {}
+        trades_val = res.get('total_trades', res.get('trades', raw_result.get('trades_val', 0)))
+        win_rate_val = res.get('win_rate', res.get('winrate', raw_result.get('win_rate_val', 0.0)))
+        total_pnl_val = res.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
+        avg_pnl_val = res.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
+        breakdown_raw = res.get('breakdown', res.get('exit_breakdown', raw_result.get('breakdown', {})))
         breakdown = {
             "STOP": breakdown_raw.get('STOP', breakdown_raw.get('stop', 0)),
             "TRAIL": breakdown_raw.get('TRAIL', breakdown_raw.get('trail', 0)),
