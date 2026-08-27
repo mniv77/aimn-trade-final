@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Trade Review Chart</title>
+
+    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+
+    <style>
+
+        body {
+
+            margin: 0;
+
+            background-color: #0b0e11;
+
+            color: #d1d4dc;
+
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+            display: flex;
+
+            flex-direction: column;
+
+            height: 100vh;
+
+            overflow: hidden;
+
+        }
+
+        header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 10px 20px;
+
+            background-color: #12161c;
+
+            border-bottom: 1px solid #1f293d;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+        }
+
+        h1 {
+
+            font-size: 18px;
+
+            margin: 0;
+
+            color: #00ffcc;
+
+        }
+
+        .controls {
+
+            display: flex;
+
+            gap: 10px;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+        }
+
+        select, button {
+
+            background-color: #1f293d;
+
+            color: #d1d4dc;
+
+            border: 1px solid #2a2e39;
+
+            padding: 6px 12px;
+
+            border-radius: 4px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+        }
+
+        select:hover, button:hover {
+
+            border-color: #00ffcc;
+
+        }
+
+        button.active {
+
+            background-color: #00ffcc;
+
+            color: #0b0e11;
+
+            font-weight: bold;
+
+        }
+
+        #chart-container {
+
+            flex: 1;
+
+            width: 100%;
+
+        }
+
+        .back-btn {
+
+            background-color: #2a2e39;
+
+            text-decoration: none;
+
+            color: #d1d4dc;
+
+            padding: 6px 12px;
+
+            border-radius: 4px;
+
+            font-size: 14px;
+
+        }
+
+        .back-btn:hover {
+
+            background-color: #3a3f4c;
+
+        }
+
+        .filter-group {
+
+            display: flex;
+
+            gap: 4px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1 id="symbol-title">Trade Review: Loading...</h1>
+
+        <div class="controls">
+
+            <label for="symbol-select">Symbol:</label>
+
+            <select id="symbol-select"></select>
+
+
+
+            <label for="trade-select">Select Trade:</label>
+
+            <select id="trade-select"></select>
+
+
+
+            <div class="filter-group">
+
+                <button class="filter-btn active" onclick="setFilter('all', event)">All</button>
+
+                <button class="filter-btn" onclick="setFilter('losses', event)">Losses</button>
+
+                <button class="filter-btn" onclick="setFilter('small_gainers', event)">Small Gainers</button>
+
+                <button class="filter-btn" onclick="setFilter('winners', event)">Winners</button>
+
+            </div>
+
+
+
+            <a href="/auto_tuner" class="back-btn">← Back to Auto Tuner</a>
+
+        </div>
+
+    </header>
+
+
+
+    <div id="chart-container"></div>
+
+
+
+    <script>
+
+        let chart;
+
+        let candlestickSeries;
+
+        let volumeSeries;
+
+        let allTrades = [];
+
+        let currentSymbol = '';
+
+        let currentFilter = 'all';
+
+        let currentTradeId = null;
+
+
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const targetSymbol = urlParams.get('symbol');
+
+        let rawPathId = window.location.pathname.split('/').pop();
+
+        if (rawPathId && rawPathId !== 'latest' && !isNaN(rawPathId)) {
+
+            currentTradeId = rawPathId;
+
+        }
+
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+
+            initChart();
+
+            loadTradeList();
+
+
+
+            document.getElementById("symbol-select").addEventListener("change", (e) => {
+
+                currentSymbol = e.target.value;
+
+                onSymbolChanged();
+
+            });
+
+
+
+            document.getElementById("trade-select").addEventListener("change", (e) => {
+
+                const selectedId = e.target.value;
+
+                if (selectedId) {
+
+                    window.history.pushState({}, '', `/trade_chart_view/${selectedId}?symbol=${encodeURIComponent(currentSymbol)}`);
+
+                    currentTradeId = selectedId;
+
+                    loadTradeData(selectedId);
+
+                }
+
+            });
+
+        });
+
+
+
+        function initChart() {
+
+            const container = document.getElementById("chart-container");
+
+            chart = LightweightCharts.createChart(container, {
+
+                width: container.clientWidth,
+
+                height: container.clientHeight,
+
+                layout: {
+
+                    background: { type: 'solid', color: '#0b0e11' },
+
+                    textColor: '#d1d4dc',
+
+                },
+
+                grid: {
+
+                    vertLines: { color: '#1f293d' },
+
+                    horzLines: { color: '#1f293d' },
+
+                },
+
+                crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+
+                rightPriceScale: { borderColor: '#2a2e39' },
+
+                timeScale: { borderColor: '#2a2e39', timeVisible: true, secondsVisible: false },
+
+            });
+
+
+
+            candlestickSeries = chart.addCandlestickSeries({
+
+                upColor: '#00ffcc',
+
+                downColor: '#ff3366',
+
+                borderVisible: false,
+
+                wickUpColor: '#00ffcc',
+
+                wickDownColor: '#ff3366',
+
+            });
+
+
+
+            volumeSeries = chart.addHistogramSeries({
+
+                color: '#26a69a',
+
+                priceFormat: { type: 'volume' },
+
+                priceScaleId: '',
+
+            });
+
+
+
+            volumeSeries.priceScale().applyOptions({
+
+                scaleMargins: { top: 0.8, bottom: 0 },
+
+            });
+
+
+
+            window.addEventListener('resize', () => {
+
+                chart.resize(container.clientWidth, container.clientHeight);
+
+            });
+
+        }
+
+
+
+        function getRootSymbol(sym) {
+
+            if (!sym) return '';
+
+            let clean = sym.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+            clean = clean.replace(/(USDT|BUSD|USD|EUR|GBP|PERP)$/i, '');
+
+            return clean || sym.toUpperCase();
+
+        }
+
+
+
+        function isSymbolMatch(sym1, sym2) {
+
+            if (!sym1 || !sym2) return false;
+
+            const s1 = sym1.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+            const s2 = sym2.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+            if (s1 === s2 || s1.includes(s2) || s2.includes(s1)) return true;
+
+            const r1 = getRootSymbol(sym1);
+
+            const r2 = getRootSymbol(sym2);
+
+            return r1.length > 1 && r1 === r2;
+
+        }
+
+
+
+        function loadTradeList() {
+
+            fetch("/api/trades_list")
+
+                .then(res => res.json())
+
+                .then(data => {
+
+                    allTrades = data.trades || [];
+
+                    if (allTrades.length === 0) {
+
+                        document.getElementById("symbol-title").innerText = "No trades found";
+
+                        return;
+
+                    }
+
+
+
+                    const symbolsSet = new Set();
+
+                    allTrades.forEach(t => {
+
+                        if (t.symbol) symbolsSet.add(t.symbol.toUpperCase());
+
+                    });
+
+                    const availableSymbols = Array.from(symbolsSet);
+
+
+
+                    if (targetSymbol) {
+
+                        const matchedSym = availableSymbols.find(s => isSymbolMatch(s, targetSymbol));
+
+                        currentSymbol = matchedSym || targetSymbol;
+
+                        if (!availableSymbols.includes(currentSymbol)) {
+
+                            availableSymbols.unshift(currentSymbol);
+
+                        }
+
+                    } else {
+
+                        currentSymbol = availableSymbols[0] || 'BTCUSDT';
+
+                    }
+
+
+
+                    populateSymbolDropdown(availableSymbols);
+
+                    onSymbolChanged();
+
+                })
+
+                .catch(err => {
+
+                    console.error("Failed to load trades list:", err);
+
+                    document.getElementById("symbol-title").innerText = "Error loading trade list";
+
+                });
+
+        }
+
+
+
+        function populateSymbolDropdown(symbols) {
+
+            const symSelect = document.getElementById("symbol-select");
+
+            symSelect.innerHTML = "";
+
+            symbols.forEach(sym => {
+
+                const opt = document.createElement("option");
+
+                opt.value = sym;
+
+                opt.text = sym;
+
+                if (isSymbolMatch(sym, currentSymbol)) {
+
+                    opt.selected = true;
+
+                }
+
+                symSelect.appendChild(opt);
+
+            });
+
+        }
+
+
+
+        function onSymbolChanged() {
+
+            const symbolTrades = allTrades.filter(t => isSymbolMatch(t.symbol, currentSymbol));
+
+
+
+            renderTradeDropdown(symbolTrades);
+
+
+
+            if (symbolTrades.length > 0) {
+
+                const existingMatch = symbolTrades.find(t => String(t.id) === String(currentTradeId));
+
+                if (existingMatch) {
+
+                    loadTradeData(existingMatch.id);
+
+                } else {
+
+                    currentTradeId = symbolTrades[0].id;
+
+                    loadTradeData(symbolTrades[0].id);
+
+                }
+
+            } else {
+
+                document.getElementById("symbol-title").innerText = `${currentSymbol} | No Trades Found`;
+
+            }
+
+        }
+
+
+
+        function setFilter(type, event) {
+
+            currentFilter = type;
+
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (event && event.target) {
+
+                event.target.classList.add('active');
+
+            }
+
+
+
+            const symbolTrades = allTrades.filter(t => isSymbolMatch(t.symbol, currentSymbol));
+
+            renderTradeDropdown(symbolTrades);
+
+        }
+
+
+
+        function renderTradeDropdown(symbolTrades) {
+
+            const select = document.getElementById("trade-select");
+
+            select.innerHTML = "";
+
+
+
+            let filtered = symbolTrades;
+
+            if (currentFilter === 'losses') {
+
+                filtered = symbolTrades.filter(t => t.pnl_pct !== null && t.pnl_pct < 0);
+
+            } else if (currentFilter === 'small_gainers') {
+
+                filtered = symbolTrades.filter(t => t.pnl_pct !== null && t.pnl_pct >= 0 && t.pnl_pct <= 2.0);
+
+            } else if (currentFilter === 'winners') {
+
+                filtered = symbolTrades.filter(t => t.pnl_pct !== null && t.pnl_pct > 2.0);
+
+            }
+
+
+
+            if (filtered.length === 0) {
+
+                filtered = symbolTrades;
+
+            }
+
+
+
+            filtered.forEach(t => {
+
+                const opt = document.createElement("option");
+
+                opt.value = t.id;
+
+                const pnlStr = t.pnl_pct !== null ? `${t.pnl_pct > 0 ? '+' : ''}${t.pnl_pct}%` : 'N/A';
+
+                const tfStr = t.timeframe ? `[${t.timeframe}] ` : '';
+
+                opt.text = `ID ${t.id} | ${tfStr}${t.direction || 'BUY'} | PnL: ${pnlStr}`;
+
+                if (String(t.id) === String(currentTradeId)) {
+
+                    opt.selected = true;
+
+                }
+
+                select.appendChild(opt);
+
+            });
+
+        }
+
+
+
+        function loadTradeData(tradeId) {
+
+            fetch(`/api/trade_chart_data/${tradeId}`)
+
+                .then(res => res.json())
+
+                .then(data => {
+
+                    if (data.error) {
+
+                        document.getElementById("symbol-title").innerText = "Error: " + data.error;
+
+                        return;
+
+                    }
+
+
+
+                    const symbol = data.symbol || currentSymbol;
+
+                    const direction = data.direction || 'LONG';
+
+                    const timeframe = data.timeframe ? ` (${data.timeframe})` : '';
+
+                    const pnlPct = data.pnl_pct !== undefined && data.pnl_pct !== null ? data.pnl_pct : null;
+
+                    const pnlText = pnlPct !== null ? ` | PnL: ${pnlPct > 0 ? '+' : ''}${pnlPct}%` : '';
+
+                    document.getElementById("symbol-title").innerText = `${symbol} ${direction}${timeframe}${pnlText}`;
+
+
+
+                    if (candlestickSeries && data.markers) {
+
+                        candlestickSeries.setMarkers(data.markers);
+
+                    }
+
+
+
+                    const candles = data.candles || [];
+
+                    const formattedCandles = candles.map(c => ({
+
+                        time: c.time,
+
+                        open: c.open,
+
+                        high: c.high,
+
+                        low: c.low,
+
+                        close: c.close
+
+                    }));
+
+                    candlestickSeries.setData(formattedCandles);
+
+
+
+                    const volumes = candles.map(c => ({
+
+                        time: c.time,
+
+                        value: c.volume || Math.random() * 1000 + 200,
+
+                        color: c.close >= c.open ? 'rgba(0, 255, 204, 0.5)' : 'rgba(255, 51, 102, 0.5)'
+
+                    }));
+
+                    volumeSeries.setData(volumes);
+
+                    chart.timeScale().fitContent();
+
+                })
+
+                .catch(err => {
+
+                    console.error("Failed to load trade chart data:", err);
+
+                    document.getElementById("symbol-title").innerText = "Error loading chart data";
+
+                });
+
+        }
+
+    </script>
+
+</body>
+
+</html>

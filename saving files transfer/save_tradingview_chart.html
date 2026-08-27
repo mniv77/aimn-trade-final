@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>BTCUSDT - TradingView Strategy Chart</title>
+
+    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+
+    <style>
+
+        body {
+
+            background-color: #131722;
+
+            color: #d1d4dc;
+
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+            margin: 0;
+
+            padding: 15px;
+
+        }
+
+        .header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            max-width: 1400px;
+
+            margin: 0 auto 10px auto;
+
+            padding: 0 5px;
+
+        }
+
+        .title-area {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+        }
+
+        h2 {
+
+            color: #ffffff;
+
+            margin: 0;
+
+            font-size: 20px;
+
+        }
+
+        .tf-selector {
+
+            display: flex;
+
+            gap: 6px;
+
+            background: #1e222d;
+
+            padding: 6px;
+
+            border-radius: 6px;
+
+            border: 1px solid #2a2e39;
+
+        }
+
+        .tf-btn {
+
+            background: #2a2e39;
+
+            border: 1px solid #363c4e;
+
+            color: #ffffff;
+
+            padding: 6px 12px;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            border-radius: 4px;
+
+            transition: all 0.2s;
+
+        }
+
+        .tf-btn:hover {
+
+            background: #363c4e;
+
+            color: #ffffff;
+
+        }
+
+        .tf-btn.active {
+
+            color: #ffffff;
+
+            background: #2962FF;
+
+            border-color: #2962FF;
+
+        }
+
+        .params {
+
+            color: #848e9c;
+
+            font-size: 13px;
+
+        }
+
+        #container {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 6px;
+
+            max-width: 1400px;
+
+            margin: 0 auto;
+
+        }
+
+        #chartPane, #rsiPane {
+
+            width: 100%;
+
+            background: #1e222d;
+
+            border-radius: 6px;
+
+            overflow: hidden;
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+
+        }
+
+        #chartPane { height: 520px; }
+
+        #rsiPane { height: 220px; }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        <div class="title-area">
+
+            <h2 id="chartTitle">BTCUSDT &bull; 5M Strategy Chart</h2>
+
+            <div class="tf-selector" id="tfSelector">
+
+                <button class="tf-btn active" data-tf="5m">5m</button>
+
+                <button class="tf-btn" data-tf="15m">15m</button>
+
+                <button class="tf-btn" data-tf="30m">30m</button>
+
+                <button class="tf-btn" data-tf="1hr">1hr</button>
+
+                <button class="tf-btn" data-tf="4hr">4hr</button>
+
+            </div>
+
+        </div>
+
+        <div class="params">RSI (14) | Entry &le; 40.0 | Stop Loss: 0.3% | Trailing Stop: 1.5% start / 0.3% drop</div>
+
+    </div>
+
+
+
+    <div id="container">
+
+        <div id="chartPane"></div>
+
+        <div id="rsiPane"></div>
+
+    </div>
+
+
+
+    <script>
+
+        const allData = {"5m": {"candles": [{"time": 1785410100, "open": 64554.4, "high": 64581.0, "low": 64526.6, "close": 64554.4}, {"time": 1785410400, "open": 64510.0, "high": 64554.4, "low": 64496.3, "close": 64510.0}, {"time": 1785410700, "open": 64501.3, "high": 64526.0, "low": 64497.8, "close": 64501.3}, {"time": 1785411000, "open": 64482.0, "high": 64503.6, "low": 64473.3, "close": 64482.0}, {"time": 1785411300, "open": 64576.4, "high": 64630.9, "low": 64482.0, "close": 64576.4}, {"time": 1785411600, "open": 64584.4, "high": 64596.9, "low": 64576.4, "close": 64584.4}, {"time": 1785411900, "open": 64595.2, "high": 64595.2, "low": 64576.5, "close": 64595.2}, {"time": 1785412200, "open": 64777.9, "high": 64777.9, "low": 64595.2, "close": 64777.9}, {"time": 1785412500, "open": 64703.6, "high": 64796.2, "low": 64703.6, "close": 64703.6}, {"time": 1785412800, "open": 64783.7, "high": 64800.0, "low": 64703.6, "close": 64783.7}, {"time": 1785413100, "open": 64822.6, "high": 64824.7, "low": 64778.1, "close": 64822.6}, {"time": 1785413400, "open": 64944.7, "high": 64944.7, "low": 64822.6, "close": 64944.7}, {"time": 1785413700, "open": 64838.6, "high": 64944.7, "low": 64810.0, "close": 64838.6}, {"time": 1785414000, "open": 64876.6, "high": 64879.4, "low": 64790.3, "close": 64876.6}, {"time": 1785414300, "open": 64808.8, "high": 64889.5, "low": 64803.8, "close": 64808.8}, {"time": 1785414600, "open": 64829.1, "high": 64862.7, "low": 64788.1, "close": 64829.1}, {"time": 1785414900, "open": 64796.3, "high": 64848.4, "low": 64796.3, "close": 64796.3}, {"time": 1785415200, "open": 64766.1, "high": 64838.0, "low": 64766.1, "close": 64766.1}, {"time": 1785415500, "open": 64786.9, "high": 64808.1, "low": 64766.1, "close": 64786.9}, {"time": 1785415800, "open": 64838.2, "high": 64838.2, "low": 64786.9, "close": 64838.2}, {"time": 1785416100, "open": 64851.9, "high": 64861.2, "low": 64829.4, "close": 64851.9}, {"time": 1785416400, "open": 64798.6, "high": 64864.9, "low": 64770.8, "close": 64798.6}, {"time": 1785416700, "open": 64806.0, "high": 64862.8, "low": 64798.6, "close": 64806.0}, {"time": 1785417000, "open": 64771.2, "high": 64806.0, "low": 64756.3, "close": 64771.2}, {"time": 1785417300, "open": 64757.9, "high": 64784.5, "low": 64727.8, "close": 64757.9}, {"time": 1785417600, "open": 64771.8, "high": 64771.8, "low": 64732.0, "close": 64771.8}, {"time": 1785417900, "open": 64757.8, "high": 64800.9, "low": 64757.7, "close": 64757.8}, {"time": 1785418200, "open": 64660.9, "high": 64757.8, "low": 64641.0, "close": 64660.9}, {"time": 1785418500, "open": 64651.6, "high": 64681.3, "low": 64629.3, "close": 64651.6}, {"time": 1785418800, "open": 64934.9, "high": 64939.9, "low": 64617.8, "close": 64934.9}, {"time": 1785419100, "open": 65060.0, "high": 65060.0, "low": 64918.4, "close": 65060.0}, {"time": 1785419400, "open": 64936.8, "high": 65080.6, "low": 64936.8, "close": 64936.8}, {"time": 1785419700, "open": 64985.3, "high": 64994.1, "low": 64927.9, "close": 64985.3}, {"time": 1785420000, "open": 64857.6, "high": 64985.3, "low": 64840.9, "close": 64857.6}, {"time": 1785420300, "open": 64709.9, "high": 64857.6, "low": 64642.5, "close": 64709.9}, {"time": 1785420600, "open": 64664.6, "high": 64712.6, "low": 64455.3, "close": 64664.6}, {"time": 1785420900, "open": 64600.0, "high": 64709.7, "low": 64583.7, "close": 64600.0}, {"time": 1785421200, "open": 64681.9, "high": 64695.8, "low": 64553.4, "close": 64681.9}, {"time": 1785421500, "open": 64728.9, "high": 64795.4, "low": 64678.1, "close": 64728.9}, {"time": 1785421800, "open": 64746.4, "high": 64786.3, "low": 64691.7, "close": 64746.4}, {"time": 1785422100, "open": 64748.9, "high": 64775.7, "low": 64665.3, "close": 64748.9}, {"time": 1785422400, "open": 64740.2, "high": 64770.9, "low": 64738.9, "close": 64740.2}, {"time": 1785422700, "open": 64734.9, "high": 64740.2, "low": 64693.1, "close": 64734.9}, {"time": 1785423000, "open": 64693.0, "high": 64775.7, "low": 64693.0, "close": 64693.0}, {"time": 1785423300, "open": 64617.9, "high": 64693.0, "low": 64569.5, "close": 64617.9}, {"time": 1785423600, "open": 64662.3, "high": 64682.2, "low": 64543.9, "close": 64662.3}, {"time": 1785423900, "open": 64758.9, "high": 64760.2, "low": 64639.9, "close": 64758.9}, {"time": 1785424200, "open": 64664.9, "high": 64768.1, "low": 64616.0, "close": 64664.9}, {"time": 1785424500, "open": 64719.0, "high": 64720.4, "low": 64647.8, "close": 64719.0}, {"time": 1785424800, "open": 64736.0, "high": 64830.2, "low": 64719.0, "close": 64736.0}, {"time": 1785425100, "open": 64623.0, "high": 64752.9, "low": 64623.0, "close": 64623.0}, {"time": 1785425400, "open": 64598.8, "high": 64629.4, "low": 64578.1, "close": 64598.8}, {"time": 1785425700, "open": 64645.7, "high": 64668.2, "low": 64598.8, "close": 64645.7}, {"time": 1785426000, "open": 64704.5, "high": 64714.9, "low": 64645.7, "close": 64704.5}, {"time": 1785426300, "open": 64688.6, "high": 64740.7, "low": 64676.9, "close": 64688.6}, {"time": 1785426600, "open": 64660.9, "high": 64709.4, "low": 64636.0, "close": 64660.9}, {"time": 1785426900, "open": 64669.5, "high": 64672.0, "low": 64634.4, "close": 64669.5}, {"time": 1785427200, "open": 64750.0, "high": 64750.0, "low": 64669.5, "close": 64750.0}, {"time": 1785427500, "open": 64787.6, "high": 64814.0, "low": 64750.0, "close": 64787.6}, {"time": 1785427800, "open": 64856.2, "high": 64894.9, "low": 64779.9, "close": 64856.2}, {"time": 1785428100, "open": 64847.1, "high": 64890.7, "low": 64816.9, "close": 64847.1}, {"time": 1785428400, "open": 64791.4, "high": 64847.1, "low": 64785.1, "close": 64791.4}, {"time": 1785428700, "open": 64833.3, "high": 64862.0, "low": 64791.4, "close": 64833.3}, {"time": 1785429000, "open": 64820.0, "high": 64839.2, "low": 64778.8, "close": 64820.0}, {"time": 1785429300, "open": 64810.0, "high": 64842.1, "low": 64810.0, "close": 64810.0}, {"time": 1785429600, "open": 64725.2, "high": 64810.0, "low": 64708.9, "close": 64725.2}, {"time": 1785429900, "open": 64753.0, "high": 64758.2, "low": 64719.8, "close": 64753.0}, {"time": 1785430200, "open": 64784.1, "high": 64785.5, "low": 64736.7, "close": 64784.1}, {"time": 1785430500, "open": 64765.0, "high": 64798.5, "low": 64761.1, "close": 64765.0}, {"time": 1785430800, "open": 64781.8, "high": 64810.0, "low": 64765.0, "close": 64781.8}, {"time": 1785431100, "open": 64775.8, "high": 64808.0, "low": 64761.2, "close": 64775.8}, {"time": 1785431400, "open": 64749.0, "high": 64803.6, "low": 64710.6, "close": 64749.0}, {"time": 1785431700, "open": 64841.2, "high": 64841.2, "low": 64732.5, "close": 64841.2}, {"time": 1785432000, "open": 64889.4, "high": 64898.0, "low": 64841.2, "close": 64889.4}, {"time": 1785432300, "open": 64888.8, "high": 64898.0, "low": 64848.6, "close": 64888.8}, {"time": 1785432600, "open": 64797.2, "high": 64898.0, "low": 64790.2, "close": 64797.2}, {"time": 1785432900, "open": 64803.1, "high": 64871.7, "low": 64773.4, "close": 64803.1}, {"time": 1785433200, "open": 64893.7, "high": 64936.0, "low": 64803.1, "close": 64893.7}, {"time": 1785433500, "open": 64845.8, "high": 64898.5, "low": 64845.8, "close": 64845.8}, {"time": 1785433800, "open": 64811.3, "high": 64859.9, "low": 64811.3, "close": 64811.3}, {"time": 1785434100, "open": 64818.7, "high": 64821.8, "low": 64797.4, "close": 64818.7}, {"time": 1785434400, "open": 64807.9, "high": 64830.2, "low": 64793.7, "close": 64807.9}, {"time": 1785434700, "open": 64790.3, "high": 64848.3, "low": 64774.8, "close": 64790.3}, {"time": 1785435000, "open": 64762.5, "high": 64790.3, "low": 64762.5, "close": 64762.5}, {"time": 1785435300, "open": 64730.4, "high": 64763.6, "low": 64691.9, "close": 64730.4}, {"time": 1785435600, "open": 64740.2, "high": 64748.9, "low": 64713.0, "close": 64740.2}, {"time": 1785435900, "open": 64741.2, "high": 64761.3, "low": 64733.9, "close": 64741.2}, {"time": 1785436200, "open": 64709.1, "high": 64761.9, "low": 64709.1, "close": 64709.1}, {"time": 1785436500, "open": 64663.2, "high": 64710.9, "low": 64657.7, "close": 64663.2}, {"time": 1785436800, "open": 64680.5, "high": 64682.6, "low": 64661.1, "close": 64680.5}, {"time": 1785437100, "open": 64650.2, "high": 64680.5, "low": 64645.2, "close": 64650.2}, {"time": 1785437400, "open": 64632.0, "high": 64664.2, "low": 64630.2, "close": 64632.0}, {"time": 1785437700, "open": 64637.8, "high": 64647.7, "low": 64626.6, "close": 64637.8}, {"time": 1785438000, "open": 64710.9, "high": 64710.9, "low": 64637.8, "close": 64710.9}, {"time": 1785438300, "open": 64774.5, "high": 64782.7, "low": 64694.5, "close": 64774.5}, {"time": 1785438600, "open": 64770.7, "high": 64798.7, "low": 64767.5, "close": 64770.7}, {"time": 1785438900, "open": 64772.7, "high": 64800.0, "low": 64744.1, "close": 64772.7}, {"time": 1785439200, "open": 64784.8, "high": 64797.8, "low": 64764.5, "close": 64784.8}, {"time": 1785439500, "open": 64824.8, "high": 64846.0, "low": 64774.8, "close": 64824.8}, {"time": 1785439800, "open": 64808.3, "high": 64830.0, "low": 64758.0, "close": 64808.3}, {"time": 1785440100, "open": 64796.8, "high": 64822.5, "low": 64777.8, "close": 64796.8}, {"time": 1785440400, "open": 64774.7, "high": 64796.8, "low": 64761.9, "close": 64774.7}, {"time": 1785440700, "open": 64725.2, "high": 64780.1, "low": 64708.5, "close": 64725.2}, {"time": 1785441000, "open": 64763.0, "high": 64802.8, "low": 64713.8, "close": 64763.0}, {"time": 1785441300, "open": 64759.6, "high": 64763.0, "low": 64713.9, "close": 64759.6}, {"time": 1785441600, "open": 64841.7, "high": 64881.2, "low": 64734.6, "close": 64841.7}, {"time": 1785441900, "open": 64760.5, "high": 64854.4, "low": 64755.8, "close": 64760.5}, {"time": 1785442200, "open": 64731.6, "high": 64760.5, "low": 64718.6, "close": 64731.6}, {"time": 1785442500, "open": 64764.1, "high": 64764.1, "low": 64709.9, "close": 64764.1}, {"time": 1785442800, "open": 64800.6, "high": 64816.9, "low": 64764.1, "close": 64800.6}, {"time": 1785443100, "open": 64725.8, "high": 64800.6, "low": 64717.0, "close": 64725.8}, {"time": 1785443400, "open": 64747.4, "high": 64763.3, "low": 64698.7, "close": 64747.4}, {"time": 1785443700, "open": 64734.0, "high": 64749.9, "low": 64727.4, "close": 64734.0}, {"time": 1785444000, "open": 64807.0, "high": 64807.0, "low": 64734.0, "close": 64807.0}, {"time": 1785444300, "open": 64803.6, "high": 64824.1, "low": 64767.3, "close": 64803.6}, {"time": 1785444600, "open": 64775.6, "high": 64803.6, "low": 64772.5, "close": 64775.6}, {"time": 1785444900, "open": 64722.5, "high": 64775.6, "low": 64722.5, "close": 64722.5}, {"time": 1785445200, "open": 64744.0, "high": 64749.6, "low": 64721.2, "close": 64744.0}, {"time": 1785445500, "open": 64717.3, "high": 64744.1, "low": 64705.6, "close": 64717.3}, {"time": 1785445800, "open": 64680.1, "high": 64717.3, "low": 64670.9, "close": 64680.1}, {"time": 1785446100, "open": 64692.9, "high": 64692.9, "low": 64680.1, "close": 64692.9}, {"time": 1785446400, "open": 64688.8, "high": 64700.6, "low": 64684.8, "close": 64688.8}, {"time": 1785446700, "open": 64693.0, "high": 64693.4, "low": 64688.8, "close": 64693.0}, {"time": 1785447000, "open": 64696.2, "high": 64696.2, "low": 64693.0, "close": 64696.2}, {"time": 1785447300, "open": 64720.7, "high": 64720.7, "low": 64696.2, "close": 64720.7}, {"time": 1785447600, "open": 64702.3, "high": 64736.9, "low": 64687.5, "close": 64702.3}, {"time": 1785447900, "open": 64687.9, "high": 64718.3, "low": 64687.9, "close": 64687.9}, {"time": 1785448200, "open": 64672.3, "high": 64687.9, "low": 64672.3, "close": 64672.3}, {"time": 1785448500, "open": 64675.1, "high": 64694.0, "low": 64649.8, "close": 64675.1}, {"time": 1785448800, "open": 64740.7, "high": 64768.2, "low": 64607.7, "close": 64740.7}, {"time": 1785449100, "open": 64893.8, "high": 64905.9, "low": 64740.7, "close": 64893.8}, {"time": 1785449400, "open": 64870.1, "high": 64917.1, "low": 64853.9, "close": 64870.1}, {"time": 1785449700, "open": 64841.2, "high": 64887.9, "low": 64841.2, "close": 64841.2}, {"time": 1785450000, "open": 64856.2, "high": 64883.8, "low": 64841.2, "close": 64856.2}, {"time": 1785450300, "open": 64939.3, "high": 64945.9, "low": 64856.2, "close": 64939.3}, {"time": 1785450600, "open": 64891.6, "high": 64950.0, "low": 64869.2, "close": 64891.6}, {"time": 1785450900, "open": 64853.1, "high": 64894.1, "low": 64850.0, "close": 64853.1}, {"time": 1785451200, "open": 64856.1, "high": 64874.2, "low": 64825.7, "close": 64856.1}, {"time": 1785451500, "open": 64829.3, "high": 64870.5, "low": 64807.7, "close": 64829.3}, {"time": 1785451800, "open": 64822.6, "high": 64834.0, "low": 64811.9, "close": 64822.6}, {"time": 1785452100, "open": 64795.8, "high": 64822.6, "low": 64784.0, "close": 64795.8}, {"time": 1785452400, "open": 64814.2, "high": 64824.7, "low": 64774.3, "close": 64814.2}, {"time": 1785452700, "open": 64838.4, "high": 64870.6, "low": 64814.2, "close": 64838.4}, {"time": 1785453000, "open": 64888.1, "high": 64888.1, "low": 64837.2, "close": 64888.1}, {"time": 1785453300, "open": 64870.8, "high": 64898.1, "low": 64863.3, "close": 64870.8}, {"time": 1785453600, "open": 64863.3, "high": 64870.8, "low": 64848.1, "close": 64863.3}, {"time": 1785453900, "open": 64876.4, "high": 64879.6, "low": 64849.0, "close": 64876.4}, {"time": 1785454200, "open": 65014.2, "high": 65014.8, "low": 64876.1, "close": 65014.2}, {"time": 1785454500, "open": 65028.9, "high": 65040.0, "low": 64997.0, "close": 65028.9}, {"time": 1785454800, "open": 64761.9, "high": 65033.6, "low": 64750.1, "close": 64761.9}, {"time": 1785455100, "open": 64834.2, "high": 64834.2, "low": 64761.9, "close": 64834.2}, {"time": 1785455400, "open": 64725.1, "high": 64840.0, "low": 64692.4, "close": 64725.1}, {"time": 1785455700, "open": 64730.7, "high": 64745.3, "low": 64724.9, "close": 64730.7}, {"time": 1785456000, "open": 64822.8, "high": 64822.8, "low": 64730.7, "close": 64822.8}, {"time": 1785456300, "open": 64735.8, "high": 64847.2, "low": 64724.8, "close": 64735.8}, {"time": 1785456600, "open": 64771.0, "high": 64771.0, "low": 64713.1, "close": 64771.0}, {"time": 1785456900, "open": 64719.9, "high": 64774.4, "low": 64717.7, "close": 64719.9}, {"time": 1785457200, "open": 64708.7, "high": 64753.3, "low": 64708.7, "close": 64708.7}, {"time": 1785457500, "open": 64710.8, "high": 64724.3, "low": 64671.2, "close": 64710.8}, {"time": 1785457800, "open": 64729.1, "high": 64770.1, "low": 64682.5, "close": 64729.1}, {"time": 1785458100, "open": 64712.0, "high": 64760.2, "low": 64692.0, "close": 64712.0}, {"time": 1785458400, "open": 64729.5, "high": 64736.7, "low": 64692.1, "close": 64729.5}, {"time": 1785458700, "open": 64693.3, "high": 64750.7, "low": 64684.9, "close": 64693.3}, {"time": 1785459000, "open": 64641.5, "high": 64693.3, "low": 64641.5, "close": 64641.5}, {"time": 1785459300, "open": 64670.4, "high": 64673.7, "low": 64634.3, "close": 64670.4}, {"time": 1785459600, "open": 64887.6, "high": 64887.6, "low": 64670.4, "close": 64887.6}, {"time": 1785459900, "open": 65257.2, "high": 65257.2, "low": 64887.6, "close": 65257.2}, {"time": 1785460200, "open": 65137.2, "high": 65361.6, "low": 65129.7, "close": 65137.2}, {"time": 1785460500, "open": 65048.7, "high": 65137.2, "low": 65041.0, "close": 65048.7}, {"time": 1785460800, "open": 65030.0, "high": 65048.7, 
+

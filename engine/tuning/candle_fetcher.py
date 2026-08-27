@@ -24,6 +24,7 @@ def fetch_gemini_candles(symbol, timeframe="1hr", limit=100):
             "close"    : c[4],
             "volume"   : c[5]
         })
+    candles.sort(key=lambda x: x['timestamp'])
     return candles
 
 

@@ -1,0 +1,192 @@
+{
+  "LINKUSD": {
+    "LONG": {
+      "avg_diff": 52.666666666666664,
+      "avg_peak": 1.5082848244720095,
+      "avg_pnl": 1.0122582276171492,
+      "noise_avoided": 7,
+      "real_exits": 8,
+      "rsi_entry": 35,
+      "rsi_len": 14,
+      "score": 138.11476976343965,
+      "stop_loss": 1.5,
+      "total_pnl": 9.110324048554343,
+      "trades": 9,
+      "trail_drop": 0.5,
+      "trail_start": 1.2,
+      "win_rate": 88.88888888888889
+    },
+    "SHORT": {
+      "avg_diff": 63.7,
+      "avg_peak": 2.7285869052953386,
+      "avg_pnl": 2.312389674623023,
+      "noise_avoided": 9,
+      "real_exits": 10,
+      "rsi_entry": 65,
+      "rsi_len": 20,
+      "score": 205.07788367313833,
+      "stop_loss": 1.5,
+      "total_pnl": 23.12389674623023,
+      "trades": 10,
+      "trail_drop": 0.5,
+      "trail_start": 0.8,
+      "win_rate": 100.0
+    }
+  },
+  "BTCUSD": {
+    "LONG": null,
+    "SHORT": null
+  },
+  "ETHUSD": {
+    "LONG": {
+      "avg_diff": 107.0,
+      "avg_peak": 1.0391643499149774,
+      "avg_pnl": 0.42052417069286424,
+      "noise_avoided": 1,
+      "real_exits": 1,
+      "rsi_entry": 35,
+      "rsi_len": 14,
+      "score": 18.940106345650353,
+      "stop_loss": 1.5,
+      "total_pnl": 0.42052417069286424,
+      "trades": 1,
+      "trail_drop": 0.5,
+      "trail_start": 0.8,
+      "win_rate": 100.0
+    },
+    "SHORT": {
+      "avg_diff": 107.0,
+      "avg_peak": 1.2896310725113536,
+      "avg_pnl": -0.22095524471265038,
+      "noise_avoided": 2,
+      "real_exits": 1,
+      "rsi_entry": 65,
+      "rsi_len": 30,
+      "score": 28.84772058308605,
+      "stop_loss": 1.5,
+      "total_pnl": -0.44191048942530076,
+      "trades": 2,
+      "trail_drop": 0.8,
+      "trail_start": 0.8,
+      "win_rate": 50.0
+    }
+  },
+  "SOLUSD": {
+    "LONG": {
+      "avg_diff": 56.5,
+      "avg_peak": 0.8530059165450914,
+      "avg_pnl": -0.8566525284518192,
+      "noise_avoided": 2,
+      "real_exits": 1,
+      "rsi_entry": 30,
+      "rsi_len": 14,
+      "score": 27.13970085964145,
+      "stop_loss": 1.5,
+      "total_pnl": -1.7133050569036383,
+      "trades": 2,
+      "trail_drop": 0.5,
+      "trail_start": 0.8,
+      "win_rate": 0.0
+    },
+    "SHORT": {
+      "avg_diff": 211.0,
+      "avg_peak": 2.467894122153739,
+      "avg_pnl": 1.8628157861191657,
+      "noise_avoided": 3,
+      "real_exits": 3,
+      "rsi_entry": 65,
+      "rsi_len": 30,
+      "score": 63.29028854158811,
+      "stop_loss": 1.5,
+      "total_pnl": 5.588447358357497,
+      "trades": 3,
+      "trail_drop": 0.5,
+      "trail_start": 0.8,
+      "win_rate": 100.0
+    }
+  },
+  "AAPL": {
+    "LONG": null,
+    "SHORT": null
+  },
+  "NVDA": {
+    "LONG": null,
+    "SHORT": {
+      "avg_diff": 26.0,
+      "avg_peak": 0.848271483758176,
+      "avg_pnl": -1.383172606349751,
+      "noise_avoided": 1,
+      "real_exits": 0,
+      "rsi_entry": 65,
+      "rsi_len": 14,
+      "score": 9.040963135529337,
+      "stop_loss": 1.0,
+      "total_pnl": -1.383172606349751,
+      "trades": 1,
+      "trail_drop": 0.5,
+      "trail_start": 0.8,
+      "win_rate": 0.0
+    }
+  },
+  "TSLA": {
+    "LONG": {
+      "avg_diff": 132.0,
+      "avg_peak": 2.0372118517616244,
+      "avg_pnl": -1.0109930265842422,
+      "noise_avoided": 1,
+      "real_exits": 0,
+      "rsi_entry": 35,
+      "rsi_len": 14,
+      "score": 10.007612899296571,
+      "stop_loss": 1.0,
+      "total_pnl": -1.0109930265842422,
+      "trades": 1,
+      "trail_drop": 0.5,
+      "trail_start": 0.8,
+      "win_rate": 0.0
+    },
+    "SHORT": {
+      "avg_diff": 59.0,
+      "avg_peak": 1.4085460530401823,
+      "avg_pnl": -1.3166884044469318,
+      "noise_avoided": 1,
+      "real_exits": 0,
+      "rsi_entry": 65,
+      "rsi_len": 14,
+      "score": 9.38758462207316,
+      "stop_loss": 1.0,
+      "total_pnl": -1.3166884044469318,
+      "trades": 1,
+      "trail_drop": 0.5,
+      "trail_start": 0.8,
+      "win_rate": 0.0
+    }
+  },
+  "MSFT": {
+    "LONG": null,
+    "SHORT": null
+  },
+  "GOOGL": {
+    "LONG": {
+      "avg_diff": 193.0,
+      "avg_peak": 8.608333569385051,
+      "avg_pnl": 3.22068945981928,
+      "noise_avoided": 1,
+      "real_exits": 1,
+      "rsi_entry": 35,
+      "rsi_len": 14,
+      "score": 25.524856244511806,
+      "stop_loss": 1.0,
+      "total_pnl": 3.22068945981928,
+      "trades": 1,
+      "trail_drop": 0.5,
+      "trail_start": 0.8,
+      "win_rate": 100.0
+    },
+    "SHORT": null
+  },
+  "AMZN": {
+    "LONG": null,
+    "SHORT": null
+  }
+}

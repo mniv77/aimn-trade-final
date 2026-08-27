@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html><head><title>Tuner Feedback Chart</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>body{background:#0e1217;color:#c9d1d9;font-family:monospace;margin:0;padding:10px}#chart{width:100%;height:600px;border:1px solid #30363d}.controls{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}select,input,button{background:#161b22;color:#c9d1d9;border:1px solid #30363d;padding:6px 10px;border-radius:4px}button{background:#1f6feb;cursor:pointer}.stats{display:flex;gap:20px;margin:10px 0;font-size:13px}.trade-list{max-height:300px;overflow:auto;border:1px solid #30363d;padding:10px;font-size:12px}.win{color:#3fb950}.loss{color:#f85149}</style>
+</head><body>
+<h3>📈 Open Feedback Chart - See Every Entry/Exit</h3>
+<div class="controls">
+<select id="symbol"><option>BTCUSDT</option><option>LINKUSD</option><option>ETHUSDT</option><option>SOLUSD</option></select>
+<select id="direction"><option>LONG</option><option>SHORT</option></select>
+<select id="tf"><option>30m</option><option>1h</option><option>5m</option><option>1m</option></select>
+<button onclick="loadChart()">Load Chart</button><span id="loading"></span>
+</div><div class="stats" id="stats"></div><div id="chart"></div><div class="trade-list" id="trades"></div>
+<script>
+let chart,candleSeries;
+function initChart(){const el=document.getElementById('chart');chart=LightweightCharts.createChart(el,{width:el.clientWidth,height:600,layout:{background:{color:'#0e1217'},textColor:'#c9d1d9'},grid:{vertLines:{color:'#1f2428'},horzLines:{color:'#1f2428'}},timeScale:{timeVisible:false}});candleSeries=chart.addCandlestickSeries({upColor:'#3fb950',downColor:'#f85149',wickUpColor:'#3fb950',wickDownColor:'#f85149'});window.addEventListener('resize',()=>chart.resize(el.clientWidth,600));}
+async function loadChart(){const sym=document.getElementById('symbol').value;const dir=document.getElementById('direction').value;const tf=document.getElementById('tf').value;document.getElementById('loading').textContent='Loading...';const res=await fetch(`/api/tuner_chart/${sym}/${dir}/${tf}`);const data=await res.json();if(data.error){document.getElementById('loading').textContent='Error: '+data.error;return;}const candles=data.candles.map(c=>({time:c.time,open:c.open,high:c.high,low:c.low,close:c.close}));candleSeries.setData(candles);const markers=[];data.trades.forEach(t=>{const isWin=t.pnl>0.2;markers.push({time:t.exit_idx,position:'aboveBar',color:isWin?'#3fb950':'#f85149',shape:'arrowDown',text:`${isWin?'WIN':''} ${t.pnl.toFixed(2)}% ${t.reason}`});markers.push({time:t.entry_idx,position:'belowBar',color:'#1f6feb',shape:'arrowUp',text:`${t.direction} ${t.entry_price.toFixed(2)}`});});candleSeries.setMarkers(markers);document.getElementById('stats').innerHTML=`Total: ${data.stats.total_trades} | Win: ${data.stats.win_rate.toFixed(1)}% | Total: ${data.stats.total_pnl.toFixed(2)}% | Avg: ${data.stats.avg_pnl.toFixed(3)}% | Net: ${(data.stats.total_pnl - data.stats.total_trades*0.2).toFixed(2)}%`;let html='<b>Trades:</b><br>';data.trades.forEach((t,i)=>{const cls=t.pnl>0.2?'win':'loss';html+=`<span class="${cls}">#${i+1} ${t.direction} ${t.entry_price.toFixed(2)} -> ${t.exit_price.toFixed(2)} | ${t.pnl.toFixed(3)}% | ${t.reason} | held ${t.exit_idx-t.entry_idx} bars</span><br>`;});document.getElementById('trades').innerHTML=html;document.getElementById('loading').textContent='';chart.timeScale().fitContent();}
+initChart();loadChart();
+</script></body></html>

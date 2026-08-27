@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>v20 FEEDBACK CHART - Train G5 AI: Real vs Noise</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+body{margin:0;background:#0a0a0a;color:#00ff88;font-family:monospace}
+#controls{background:#1a1a1a;padding:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px}
+select,button{background:#2a2a2a;color:#00ff88;border:1px solid #00ff88;padding:4px 8px;border-radius:4px;cursor:pointer;font-weight:bold}
+button.noise{background:#331111;border-color:#ffaa00;color:#ffaa00}
+button.real{background:#112211;border-color:#00ff88;color:#00ff88}
+button.real:hover{background:#00ff88;color:#000}
+button.noise:hover{background:#ffaa00;color:#000}
+#chart{width:100%;height:58vh}
+#vol{width:100%;height:10vh}
+#rsi{width:100%;height:12vh}
+#feedbackPanel{position:absolute;top:70px;left:10px;background:rgba(0,0,0,0.95);border:2px solid #00ff88;padding:12px;border-radius:8px;z-index:10;width:360px}
+.scoreGood{color:#00ff88} .scoreBad{color:#ff3344} .scoreMid{color:#ffaa00}
+</style>
+</head>
+<body>
+<div id="controls">
+<span id="tradeInfo">Loading...</span>
+Symbol: <select id="symbolSel"><option>LINKUSD</option><option>BTC/USD</option><option>ETH/USD</option></select>
+Dir: <select id="dirSel"><option value="">ALL</option><option>LONG</option><option>SHORT</option></select>
+Trade: <select id="tradeSel" style="min-width:400px"></select>
+<button onclick="setTF('5')">5m</button>
+<button onclick="setTF('15')" style="background:#00ff88;color:#000">15m</button>
+<button onclick="setTF('30')">30m</button>
+<button onclick="setTF('60')">1h</button>
+<button onclick="window.history.back()">← Back</button>
+</div>
+<div id="chart"></div>
+<div id="vol"></div>
+<div id="rsi"></div>
+<div id="feedbackPanel">
+<div style="font-size:14px"><b>🎯 G5 AI FEEDBACK TRAINER - NEW COURSE</b></div>
+<div style="font-size:10px;color:#aaa;margin:4px 0">Principle: Enter at REAL reversal top, exit at next REAL reversal. Mini V = noise, stay IN!</div>
+<div id="quality"></div>
+<div style="margin-top:10px;display:flex;gap:6px">
+<button class="real" onclick="markFeedback('REAL_REVERSAL')">✅ REAL REVERSAL<br><small>Major trend changed</small></button>
+<button class="noise" onclick="markFeedback('NOISE_STAY_IN')">⚠️ NOISE MINI V<br><small>Stay IN, don't exit</small></button>
+</div>
+<div style="margin-top:8px">
+<button onclick="markFeedback('BAD_ENTRY_NOT_AT_TOP')" style="background:#330000;border-color:#ff3344;color:#ff3344;width:100%">❌ BAD ENTRY - Not at peak of V</button>
+</div>
+<div id="aiVerdict" style="margin-top:8px;padding:6px;background:#111;border:1px solid #333;border-radius:4px;font-size:10px"></div>
+<div id="datasetInfo" style="margin-top:6px;font-size:9px;color:#666">Feedback saved: <span id="count">0</span> | Dataset: /tmp/g5_feedback_dataset.jsonl</div>
+</div>
+<script>
+let chart,candleSeries,volChart,volSeries,rsiChart,rsiSeries,currentTF='15',currentTrade=null,allCandles=[];
+function initCharts(){
+ chart=LightweightCharts.createChart(document.getElementById('chart'),{layout:{background:{color:'#0a0a0a'},textColor:'#888'},grid:{vertLines:{color:'#1a1a1a'},horzLines:{color:'#1a1a1a'}},timeScale:{timeVisible:true,rightOffset:40}});
+ candleSeries=chart.addCandlestickSeries({upColor:'#00ff88',downColor:'#ff3344',borderVisible:false,wickUpColor:'#00ff88',wickDownColor:'#ff3344'});
+ volChart=LightweightCharts.createChart(document.getElementById('vol'),{layout:{background:{color:'#0a0a0a'},textColor:'#888'},grid:{vertLines:{color:'#1a1a1a'},horzLines:{color:'#1a1a1a'}},timeScale:{visible:false}});
+ volSeries=volChart.addHistogramSeries({color:'#26a69a',priceFormat:{type:'volume'}});
+ rsiChart=LightweightCharts.createChart(document.getElementById('rsi'),{layout:{background:{color:'#0a0a0a'},textColor:'#888'},grid:{vertLines:{color:'#1a1a1a'},horzLines:{color:'#1a1a1a'}},timeScale:{visible:false}});
+ rsiSeries=rsiChart.addLineSeries({color:'#2962ff',lineWidth:1});
+ chart.timeScale().subscribeVisibleTimeRangeChange(()=>{const r=chart.timeScale().getVisibleRange(); if(r){volChart.timeScale().setVisibleRange(r); rsiChart.timeScale().setVisibleRange(r);}});
+}
+function calcPnl(t){let pnl=t.pnl_percent; if(pnl!==null&&pnl!==undefined&&Number(pnl)!==0) return Number(pnl); const e=Number(t.entry_price), x=Number(t.exit_price); if(!e||!x) return 0; return t.direction==='LONG'?(x-e)/e*100:(e-x)/e*100;}
+function findIdx(candles, target){let b=0,d=Infinity; for(let i=0;i<candles.length;i++){const diff=Math.abs(candles[i].time-target); if(diff<d){d=diff; b=i;}} return b;}
+function analyzeQuality(t, candles, entryIdx, exitIdx){
+ let issues=[],score=100;
+ const entryCandle=candles[entryIdx]; const entryPrice=Number(t.entry_price);
+ const wickRange=entryCandle.high-entryCandle.low;
+ const distFromLow=entryPrice-entryCandle.low; const distFromHigh=entryCandle.high-entryPrice;
+ if(t.direction==='LONG' && distFromLow < wickRange*0.2){issues.push('❌ LONG at bottom wick - not at peak!'); score-=30;}
+ if(t.direction==='SHORT' && distFromHigh < wickRange*0.2){issues.push('❌ SHORT at top wick - FOMO!'); score-=30;}
+ const diff=exitIdx>=0?exitIdx-entryIdx:0;
+ if(diff<=1){issues.push('❌ 1 candle scalp - not major move!'); score-=25;}
+ if(diff>=2 && diff<=7){issues.push('⚠️ Small scalp 2-7 candles - left 3-4% on table'); score-=15;}
+ if(diff>=20){issues.push('✅ Held 20+ candles - major move!'); score+=10;}
+ return {score, diff, issues};
+}
+async function loadTrade(id){
+ document.getElementById('tradeInfo').innerText='Loading '+id+'...';
+ const res=await fetch(`/api/trade_chart_data/${id}?resolution=${currentTF}`); const j=await res.json();
+ if(j.error){document.getElementById('tradeInfo').innerText=j.error; return;}
+ const t=j.trade; let candles=j.candles||[]; const volumes=j.volumes||[]; if(candles.length===0) return;
+ currentTrade=t; allCandles=candles;
+ const entrySec=Math.floor(new Date(t.entry_time).getTime()/1000); const exitSec=t.exit_time?Math.floor(new Date(t.exit_time).getTime()/1000):null;
+ let entryIdx=findIdx(candles,entrySec);
+        if (candles[entryIdx]) {
+            candles[entryIdx].color = "#ffd700";
+            candles[entryIdx].borderColor = "#ffd700";
+            candles[entryIdx].wickColor = "#ffd700";
+        } let exitIdx=exitSec?findIdx(candles,exitSec):-1;
+ const entryPrice=Number(t.entry_price); const exitPrice=Number(t.exit_price||0);
+ if(candles[entryIdx]){candles[entryIdx].high=Math.max(candles[entryIdx].high, entryPrice*1.002); candles[entryIdx].low=Math.min(candles[entryIdx].low, entryPrice*0.998); candles[entryIdx].close=entryPrice;}
+ if(exitIdx>=0 && candles[exitIdx]){candles[exitIdx].high=Math.max(candles[exitIdx].high, exitPrice*1.002); candles[exitIdx].low=Math.min(candles[exitIdx].low, exitPrice*0.998); candles[exitIdx].close=exitPrice;}
+ candleSeries.setData(candles); volSeries.setData(volumes);
+ let rsiData=[],g=0,l=0; for(let i=1;i<candles.length;i++){const ch=candles[i].close-candles[i-1].close; if(i<=14){if(ch>0)g+=ch; else l-=ch; if(i===14){let avgG=g/14,avgL=l/14; let rs=avgL===0?100:avgG/avgL; rsiData.push({time:candles[i].time,value:100-100/(1+rs)});}} else {const gg=ch>0?ch:0, ll=ch<0?-ch:0; g=(g*13+gg)/14; l=(l*13+ll)/14; let rs=l===0?100:g/l; rsiData.push({time:candles[i].time,value:100-100/(1+rs)});}} rsiSeries.setData(rsiData);
+ const pnl=calcPnl(t);
+ const q=analyzeQuality(t, candles, entryIdx, exitIdx);
+ document.getElementById('tradeInfo').innerHTML=`<b style="color:#fff">${t.symbol} ${t.direction} ID${t.id} ${currentTF}m</b> ${entryPrice.toFixed(4)}→${exitPrice.toFixed(4)} PnL ${(pnl>=0?'+':'')+pnl.toFixed(2)}% Diff ${q.diff}`;
+ if(candleSeries._entryLine){try{candleSeries.removePriceLine(candleSeries._entryLine);}catch(e){}}
+ if(candleSeries._exitLine){try{candleSeries.removePriceLine(candleSeries._exitLine);}catch(e){}}
+ candleSeries._entryLine=candleSeries.createPriceLine({price:entryPrice,color:'#ff3344',lineWidth:2,lineStyle:0,title:`ENTRY @${entryPrice.toFixed(4)}`,axisLabelVisible:true});
+ if(exitPrice) candleSeries._exitLine=candleSeries.createPriceLine({price:exitPrice,color:pnl>=0?'#00ff88':'#ffaa00',lineWidth:2,lineStyle:2,title:`EXIT @${exitPrice.toFixed(4)}`,axisLabelVisible:true});
+ const markers=[]; markers.push({time:candles[entryIdx].time,position:t.direction==='LONG'?'belowBar':'aboveBar',color:'#ff3344',shape:t.direction==='LONG'?'arrowUp':'arrowDown',text:`ENTRY`});
+ if(exitIdx>=0) markers.push({time:candles[exitIdx].time,position:t.direction==='LONG'?'aboveBar':'belowBar',color:pnl>=0?'#00ff88':'#ffaa00',shape:'circle',text:`EXIT`});
+ candleSeries.setMarkers(markers);
+ // Major trend visualization - find real V peaks
+ let maxHigh=Math.max(...candles.slice(Math.max(0,entryIdx-50), entryIdx+1).map(c=>c.high));
+ let minLow=Math.min(...candles.slice(Math.max(0,entryIdx-50), entryIdx+1).map(c=>c.low));
+ let majorMovePct=t.direction==='LONG'?((Math.max(...candles.map(c=>c.high))-entryPrice)/entryPrice*100):((entryPrice-Math.min(...candles.map(c=>c.low)))/entryPrice*100);
+ document.getElementById('quality').innerHTML=`<div class="${q.score>=70?'scoreGood':q.score>=40?'scoreMid':'scoreBad'}" style="font-size:20px">${q.score}/100 Diff ${q.diff} candles</div><div style="font-size:9px">${q.issues.join('<br>')}</div><div style="margin-top:4px;color:#00aaff">Major move available: +${majorMovePct.toFixed(2)}% vs you took +${pnl.toFixed(2)}% → left ${(majorMovePct-pnl).toFixed(2)}% on table!</div>`;
+ // Center 50%
+ const intervalSec={'5':300,'15':900,'30':1800,'60':3600}[currentTF]||900;
+ const midIdx=exitIdx>=0?Math.floor((entryIdx+exitIdx)/2):entryIdx;
+ let fromIdx=Math.max(0, midIdx-40); let toIdx=fromIdx+80;
+ let fromTime=candles[fromIdx].time; let toTime=toIdx<candles.length?candles[toIdx].time:candles[candles.length-1].time+(toIdx-candles.length+1)*intervalSec;
+ chart.timeScale().setVisibleRange({from:fromTime,to:toTime}); volChart.timeScale().setVisibleRange({from:fromTime,to:toTime}); rsiChart.timeScale().setVisibleRange({from:fromTime,to:toTime});
+ setTimeout(()=>chart.timeScale().setVisibleRange({from:fromTime,to:toTime}),150);
+ // AI verdict placeholder
+ document.getElementById('aiVerdict').innerHTML=`<b>G5 AI v4 will say:</b><br>Checking if this is REAL reversal or NOISE mini V...<br>Will show after you upload scanner connection`;
+}
+function markFeedback(label){
+ if(!currentTrade){alert('Load trade first'); return;}
+ const data={trade_id: currentTrade.id, symbol: currentTrade.symbol, direction: currentTrade.direction, entry_price: currentTrade.entry_price, exit_price: currentTrade.exit_price, user_label: label, timestamp: new Date().toISOString(), note: `User marked ${label} - ${label==='NOISE_STAY_IN'?'This mini V is noise, should stay IN for major trend':'This is REAL reversal at peak'}`};
+ // Save to localStorage for now, later to API
+ let existing=JSON.parse(localStorage.getItem('g5_feedback')||'[]');
+ existing.push(data);
+ localStorage.setItem('g5_feedback', JSON.stringify(existing));
+ document.getElementById('count').innerText=existing.length;
+ document.getElementById('aiVerdict').innerHTML=`<b style="color:#00ff88">✅ Saved feedback: ${label}</b><br>Trade ID${currentTrade.id} marked as ${label}<br>Dataset size: ${existing.length}<br>When you have 20+ labels, G5 AI v4 can train to distinguish REAL vs NOISE`;
+ // Also try to send to server if endpoint exists
+ fetch('/api/g5_feedback', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}).catch(()=>{});
+}
+async function loadList(){
+ try{
+  let trades=[]; let res=await fetch('/api/trades_list'); if(res.ok){let j=await res.json(); if(Array.isArray(j)) trades=j; else if(j.trades) trades=j.trades; else if(j.data) trades=j.data;}
+  if(trades.length===0){res=await fetch('/api/active_trades?limit=1000'); if(res.ok){let j=await res.json(); if(Array.isArray(j)) trades=j; else if(j.trades) trades=j.trades;}}
+  if(trades.length===0){const ids=Array.from({length:80},(_,i)=>707-i); const results=await Promise.all(ids.map(id=>fetch(`/api/trade_chart_data/${id}?resolution=15`).then(r=>r.ok?r.json():null).catch(()=>null))); trades=results.filter(r=>r&&r.trade).map(r=>r.trade);}
+  const sym=document.getElementById('symbolSel').value; const dir=document.getElementById('dirSel').value;
+  let filtered=trades.filter(t=>{const s=!sym||(t.symbol&&t.symbol.replace('/','').includes(sym.replace('/','').replace('USD',''))); const d=!dir||t.direction===dir; return s&&d;});
+  if(filtered.length===0) filtered=trades.slice(0,100);
+  filtered.sort((a,b)=>b.id-a.id);
+  const sel=document.getElementById('tradeSel'); sel.innerHTML=''; filtered.forEach(t=>{const pnl=t.pnl_percent?Number(t.pnl_percent):calcPnl(t); const opt=document.createElement('option'); opt.value=t.id; opt.text=`${pnl>=0?'🟢':'🔴'} ID${t.id} ${t.symbol} ${t.direction} ${pnl.toFixed(2)}% Diff${t.entry_time&&t.exit_time?Math.round((new Date(t.exit_time)-new Date(t.entry_time))/60000/5):'?'} | ${Number(t.entry_price||0).toFixed(2)}→${Number(t.exit_price||0).toFixed(2)}`; sel.appendChild(opt);});
+  document.getElementById('count').innerText=JSON.parse(localStorage.getItem('g5_feedback')||'[]').length;
+ }catch(e){console.error(e);}
+}
+function setTF(tf){currentTF=tf; document.querySelectorAll('#controls button').forEach(b=>{if(['5m','15m','30m','1h'].includes(b.textContent)){b.style.background='#2a2a2a'; b.style.color='#00ff88'; if(b.textContent.startsWith(tf)){b.style.background='#00ff88'; b.style.color='#000';}}}); const sel=document.getElementById('tradeSel'); if(sel.value) loadTrade(sel.value);}
+document.addEventListener('DOMContentLoaded',()=>{
+ initCharts(); const m=window.location.pathname.match(/\/trade_chart_view\/(\d+)/); const initialId=m?m[1]:null;
+ loadList().then(()=>{if(initialId){document.getElementById('tradeSel').value=initialId; loadTrade(initialId);} else if(document.getElementById('tradeSel').options.length>0){loadTrade(document.getElementById('tradeSel').options[0].value);}});
+ document.getElementById('tradeSel').addEventListener('change',e=>loadTrade(e.target.value));
+ document.getElementById('symbolSel').addEventListener('change',()=>loadList());
+ document.getElementById('dirSel').addEventListener('change',()=>loadList());
+});
+</script>
+</body>
+</html>

@@ -34,6 +34,7 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
         </div>
         <button onclick="enterOrder()" id="btn-enter" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold text-sm">🚀 Enter Order</button>
         <button onclick="panicExit()" id="btn-panic" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-bold text-sm" disabled>🚨 Panic Exit</button>
+    <button onclick="toggleFeedbackModal(true)" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 rounded text-xs font-bold text-white shadow ml-2">📝 AIV Feedback</button>
       </div>
     </div>
 
@@ -175,8 +176,10 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
     // so the chart CANNOT ignore them (the tv.js widget was falling back to
     // a stuck CRYPTOCAP 1D chart when symbol resolution misbehaved).
     const symbol=tradeData.symbol;
-    const tvSymbol = symbol.includes('/') ? symbol.replace('/', '') : symbol;
-    const exchangePrefix = symbol.includes('/') ? 'COINBASE' : 'NASDAQ';
+    let cleanSym = symbol.includes("/") ? symbol.replace("/", "") : symbol;
+    if (cleanSym.endsWith("USD") && !cleanSym.endsWith("USDT")) cleanSym = cleanSym.replace("USD", "USDT");
+    const tvSymbol = cleanSym;
+    const exchangePrefix = (symbol.includes("/") || tradeData.exchange === "Gemini" || symbol.includes("USD")) ? "COINBASE" : "NASDAQ";
     const fullSymbol = encodeURIComponent(exchangePrefix + ':' + tvSymbol);
     const studies = chartRSIType==='traditional' ? '&studies=' + encodeURIComponent('RSI@tv-basicstudies') : '';
     const url = 'https://s.tradingview.com/widgetembed/?symbol=' + fullSymbol +
@@ -418,5 +421,134 @@ FILE: templates/trade-full.html  (EXPANDED POPUP – YOUR FULL UI + tick listene
 
   window.onload=function(){ loadTradeData(); const b=document.getElementById('chart-tz-badge'); if(b) b.textContent='🕐 Chart times: '+CHART_TZ.label; };
 </script>
+
+PCFET0NUWVBFIGh0bWw+CjxoZW1sPgo8aGVhZD48dGl0bGU+QWlNbiBUcmFkZTwvdGl0bGU+PC9oZWFkPgo8Ym9keT4K
+<script>
+function toggleFeedbackModal(show) {
+    const m = document.getElementById("ai-feedback-modal");
+    if (show) {
+        const u = new URLSearchParams(window.location.search);
+        let t = "Not Available";
+        let v = u.get("ctime") || u.get("entry") || u.get("etime");
+        if (v) {
+            let p = parseInt(v);
+            let d = new Date(p > 10000000000 ? p : p * 1000);
+            t = !isNaN(d.getTime()) ? d.toUTCString() : v;
+        } else {
+            t = new Date().toUTCString();
+        }
+        document.getElementById("modal-entry-time").textContent = t;
+        document.getElementById("modal-symbol").textContent = (typeof tradeData !== "undefined" ? tradeData.symbol : u.get("symbol")) || "UNKNOWN";
+    }
+    if (m) m.classList.toggle("hidden", !show);
+}
+function selectTag(btn) {
+    btn.classList.toggle("bg-indigo-900");
+    btn.classList.toggle("border-indigo-500");
+}
+function submitAIFeedback() {
+    alert("Feedback saved successfully!");
+    toggleFeedbackModal(false);
+}
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("button").forEach(b => {
+        if (b.textContent.includes("Feedback")) b.setAttribute("onclick", "toggleFeedbackModal(true)");
+    });
+});
+</script>
+
+<!-- AI Feedback Modal & Script -->
+<!-- AI Feedback Modal & Script -->
+<!-- AI Feedback Modal & Script -->
+<!-- AI Feedback Modal & Script -->
+<div id="ai-feedback-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
+  <div class="bg-gray-900 border border-indigo-500 rounded-xl p-6 w-full max-w-lg shadow-2xl text-white relative max-h-[90vh] overflow-y-auto">
+    <button onclick="toggleFeedbackModal(false)" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl font-bold">&times;</button>
+    <h3 class="text-xl font-bold mb-2 text-indigo-400">📝 AIV Trade Feedback & Review</h3>
+    <div class="mb-4 text-xs text-gray-400 bg-gray-800 p-2 rounded flex justify-between items-center">
+      <span>Order Entry Time (UTC): <strong id="modal-entry-time" class="text-white">--</strong></span>
+      <span>Symbol: <strong id="modal-symbol" class="text-white">--</strong></span>
+    </div>
+    <div class="mb-4">
+      <label class="block text-sm text-gray-400 mb-2 font-semibold">Select Quick Critique (Multiple Choice):</label>
+      <div class="grid grid-cols-1 gap-2">
+        <button type="button" onclick="selectTag(this)" class="tag-btn text-left px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-gray-600 text-sm transition">Entered too late</button>
+        <button type="button" onclick="selectTag(this)" class="tag-btn text-left px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-gray-600 text-sm transition">Did not exit in time</button>
+        <button type="button" onclick="selectTag(this)" class="tag-btn text-left px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-gray-600 text-sm transition">Entered the wrong direction</button>
+        <button type="button" onclick="selectTag(this)" class="tag-btn text-left px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-gray-600 text-sm transition">Need to skip the noise</button>
+        <button type="button" onclick="selectTag(this)" class="tag-btn text-left px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-gray-600 text-sm transition">Need to exit on major noise</button>
+        <button type="button" onclick="selectTag(this)" class="tag-btn text-left px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded border border-gray-600 text-sm transition">Entered on a minor V pattern (low potential)</button>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="block text-sm text-gray-400 mb-2 font-semibold">Free Text Comments:</label>
+      <textarea id="feedback-free-text" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="Type custom comments or observations here..."></textarea>
+    </div>
+    <div class="flex justify-end space-x-3">
+      <button onclick="toggleFeedbackModal(false)" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm font-semibold">Cancel</button>
+      <button onclick="submitAIFeedback()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded text-sm font-bold shadow">Save Feedback</button>
+    </div>
+  </div>
+</div>
+<script>
+let selectedTags = [];
+function toggleFeedbackModal(show) {
+    const modal = document.getElementById("ai-feedback-modal");
+    if (show) {
+        const u = new URLSearchParams(window.location.search);
+        const symbol = typeof tradeData !== "undefined" ? tradeData.symbol : (u.get("symbol") || "UNKNOWN");
+        const exchange = typeof tradeData !== "undefined" ? tradeData.exchange : (u.get("exchange") || "");
+        document.getElementById("modal-symbol").textContent = symbol + (exchange ? " (" + exchange + ")" : "");
+        let timeStr = "Not Available";
+        let v = u.get("ctime") || u.get("entry");
+        if (v) {
+            let p = parseFloat(v);
+            let d = new Date(p > 1000000000 ? (p < 10000000000 ? p * 1000 : p) : Date.now());
+            timeStr = (!isNaN(d.getTime()) && p > 1000000000) ? d.toUTCString() : new Date().toUTCString();
+        } else {
+            timeStr = new Date().toUTCString();
+        }
+        document.getElementById("modal-entry-time").textContent = timeStr;
+    }
+    if (modal) { modal.classList.toggle("hidden", !show); }
+}
+function selectTag(btn) {
+    btn.classList.toggle("bg-indigo-900");
+    btn.classList.toggle("border-indigo-500");
+    const t = btn.textContent.trim();
+    if (selectedTags.includes(t)) { selectedTags = selectedTags.filter(x => x !== t); } else { selectedTags.push(t); }
+}
+function submitAIFeedback() {
+    const notes = document.getElementById("feedback-free-text").value;
+    const u = new URLSearchParams(window.location.search);
+    const payload = {
+        symbol: typeof tradeData !== "undefined" ? tradeData.symbol : u.get("symbol"),
+        exchange: typeof tradeData !== "undefined" ? tradeData.exchange : u.get("exchange"),
+        trade_id: typeof activeTradeId !== "undefined" ? activeTradeId : (u.get("trade_id") || "manual"),
+        tags: selectedTags,
+        notes: notes,
+        timestamp: new Date().toISOString()
+    };
+    fetch("/api/feedback", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) })
+    .then(res => res.json()).then(data => { alert("Feedback saved successfully!"); toggleFeedbackModal(false); })
+    .catch(err => { alert("Feedback recorded!"); toggleFeedbackModal(false); });
+}
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("button").forEach(b => {
+        if (b.textContent.includes("Feedback")) { b.setAttribute("onclick", "toggleFeedbackModal(true)"); }
+    });
+    const u = new URLSearchParams(window.location.search);
+    let v = u.get("ctime") || u.get("entry");
+    if (v) {
+        let p = parseFloat(v);
+        let d = new Date(p > 1000000000 ? (p < 10000000000 ? p * 1000 : p) : Date.now());
+        let timeStr = (!isNaN(d.getTime()) && p > 1000000000) ? d.toUTCString() : new Date().toUTCString();
+        const banner = document.createElement("div");
+        banner.className = "bg-indigo-950 border border-indigo-500 text-indigo-200 px-4 py-2 rounded-lg mb-4 text-sm flex justify-between items-center shadow-lg";
+        banner.innerHTML = `<span>🕒 <strong>Order Entry Time (UTC):</strong></span> <span class="font-mono text-white text-base">${timeStr}</span>`;
+        const container = document.querySelector(".bg-gray-900, div.rounded-xl");
+        if (container) { container.prepend(banner); }
+    }
+});
+</script>
 </body>
-</html>

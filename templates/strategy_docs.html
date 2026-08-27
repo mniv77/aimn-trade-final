@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMn Trading Engine Reference Manual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header & Return -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold text-blue-400 flex items-center gap-3">
+                    <span>📖</span> AiMn Trading Engine Reference Manual
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">Comprehensive system architecture, RSI Real math, broker routing, DB tuning, and trend-change execution strategy.</p>
+            </div>
+            <a href="/dashboard" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition">Return to Dashboard</a>
+        </div>
+
+        <!-- Single Unified Chapter Container -->
+        <section class="bg-slate-950 p-8 rounded-2xl border border-blue-900 shadow-2xl mb-8 space-y-8">
+            
+            <!-- 1. RSI Real Mathematical Engine -->
+            <div>
+                <h2 class="text-xl font-bold text-blue-300 mb-3 flex items-center gap-2">
+                    <span>📊</span> 1. RSI Real Mathematical Engine & Rules
+                </h2>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    Unlike standard Wilder Relative Strength Index calculations which rely on smoothed moving averages of gains and losses, the <strong>RSI Real</strong> engine evaluates historical price boundaries directly over a strict lookback period (default: 14 intervals).
+                </p>
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 space-y-1 mb-3">
+                    <div>Lookback Window = 14</div>
+                    <div>Max Price Bounds = 100 Units | Min Price Bounds = 0 Units</div>
+                    <div>Normalization Formula: Maps current actual asset price relative to historical extremes within the active timeframe window.</div>
+                </div>
+                <p class="text-slate-400 text-xs">Purpose: Eliminates lagging indicator distortion during high-volatility cryptocurrency moves on BTC/USD, ETH/USD, and SOL/USD.</p>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <!-- 2. System Architecture & Scanners -->
+            <div>
+                <h2 class="text-xl font-bold text-blue-300 mb-3 flex items-center gap-2">
+                    <span>⚡</span> 2. Flowing Scanners & Test Mode Architecture
+                </h2>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    The platform coordinates multiple automated scanners (<code>test_scanner</code>, <code>aimn_flowing_scanner_auto</code>, and <code>scanner-simulator.html</code>) to evaluate multi-timeframe market conditions continuously.
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-sm text-slate-300">
+                    <li><strong>Test Mode Banner:</strong> Operates safely under strict test-mode parameters preventing accidental live broker lockouts while active across all timeframes.</li>
+                    <li><strong>Backtest vs Live Matrix:</strong> Compares automated grid-search parameter sets against real-time order fills stored in local SQLite databases.</li>
+                </ul>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <!-- 3. Broker Integration & Order Routing -->
+            <div>
+                <h2 class="text-xl font-bold text-blue-300 mb-3 flex items-center gap-2">
+                    <span>🔗</span> 3. Broker Integration & Order Routing
+                </h2>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    Managed via the <code>/broker</code> control panel and backend routes in <code>app.py</code>:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-sm text-slate-300">
+                    <li><strong>Database Schema:</strong> Connects to SQLite <code>brokers</code> table querying id, name, api_key.</li>
+                    <li><strong>External APIs:</strong> Interfaces seamlessly with Alpaca API endpoints and 3Commas webhooks for automated order dispatch, trailing stops, and position balancing.</li>
+                </ul>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <!-- 4. DB & Tuning Flow Architecture -->
+            <div>
+                <h2 class="text-xl font-bold text-blue-300 mb-3 flex items-center gap-2">
+                    <span>🗄️</span> 4. DB & Tuning Flow Architecture
+                </h2>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    Centralized data persistence supporting multi-strategy parameter optimization, live ticks, and audit trails.
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-sm text-slate-300">
+                    <li><strong>Tick Storage:</strong> Records High, Low, and Close points for live lookback evaluations.</li>
+                    <li><strong>Parameter Tuning:</strong> Adjust multipliers, risk gates, and trailing percentages dynamically without server downtime.</li>
+                </ul>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <!-- 5. Core Strategy: Pure Trend-Change & Reverse-Trailing Engine -->
+            <div>
+                <h2 class="text-xl font-bold text-blue-300 mb-4 flex items-center gap-2">
+                    <span>🎯</span> 5. The Strategy: Pure Trend-Change, Reverse-Trailing & Database State Engine
+                </h2>
+                <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                    The absolute heart of the AiMn trading system is <strong>structural alignment</strong>: We enter when the trend changes, and we exit when the trend changes. Under normal operations, trades never enter prolonged losing territory because exits are triggered immediately upon structural trend reversal.
+                </p>
+
+                <div class="space-y-4 text-sm text-slate-300">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <h3 class="font-bold text-blue-300 mb-1">A. Entry via Reverse-Trailing Lookback</h3>
+                        <p class="leading-relaxed text-slate-300 text-xs sm:text-sm">
+                            To eliminate lagging entries (such as catching a price drop 25 minutes too late), the engine performs a historical backward scan on every inspection loop. It scans 10 to 14 candles back, applies the trailing profit indicator backwards across those bars, and pinpoints the exact pivot point where the trailing "minus %" buffer was triggered—giving us an instant, lag-free entry timestamp (<code>ctime</code>).
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <h3 class="font-bold text-blue-300 mb-1">B. Database State Memory (Tracking Previous Trend & Time)</h3>
+                        <p class="leading-relaxed text-slate-300 text-xs sm:text-sm">
+                            To prevent redundant calculations, the database permanently logs key transition parameters: stored timestamp (<code>ctime</code>) for the last trend change and active trend state (LONG/SHORT bias). During each check, current momentum is compared against the database state to ignore noise and execute state flips instantly.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <h3 class="font-bold text-blue-300 mb-1">C. Exit via Trailing Peak Take-Profit</h3>
+                        <p class="leading-relaxed text-slate-300 text-xs sm:text-sm">
+                            Exits mirror our entry philosophy: the system locks in the absolute highest price peak achieved during the trade's lifecycle. When price retraces by the predefined negative offset percentage (<code>minus %</code>) from that peak, it signals a structural trend change and automatically exits the trade.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <h3 class="font-bold text-blue-300 mb-1">D. Noise Management & Danger Protection</h3>
+                        <p class="leading-relaxed text-slate-300 text-xs sm:text-sm">
+                            Multi-candle threshold filters prevent minor market noise from triggering false reversals. If a noise entry opens incorrectly and expands adversely, the <strong>RSI Real Circuit Breaker</strong> (forcing emergency market exits on extreme values like RSI Real &lt; 15 for longs or &gt; 85 for shorts) acts as our ultimate safety net.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <div class="text-center text-slate-500 text-xs mt-8 mb-6">
+            AiMn Trading Engine Reference Manual &copy; 2026. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

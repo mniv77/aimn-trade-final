@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html><head>
+<title>v32 SYNCED SAME AS TUNER</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>body{background:#0f1419;color:#0ff;font-family:monospace;margin:0}.top{padding:10px;background:#111}button{background:#00ff88;color:#000;padding:8px 18px;border:0;font-weight:bold;cursor:pointer}input,select{background:#222;color:#0f0;border:1px solid #333;padding:5px}</style>
+</head><body>
+<div class="top">v32 SYNCED Symbol: <input id="sym" value="linkusd" style="width:90px"> Dir: <select id="dir"><option>LONG</option></select> Bars: <input id="bars" value="2016" style="width:70px"> <button onclick="loadChart()">Load Chart</button> <span id="status"></span></div>
+<div id="chart" style="height:520px"></div><div id="trades" style="padding:10px;font-size:12px"></div>
+<script>
+const OPT={"rsi_entry":35,"rsi_len":50,"stop_loss":2,"trail_drop":0.3,"trail_start":1};
+async function loadChart(){
+ let sym=document.getElementById('sym').value; let bars=document.getElementById('bars').value;
+ document.getElementById('status').innerText='Loading...';
+ let r=await fetch(`/api/v32_candles?symbol=${sym}&tf=30m&limit=${bars}`);
+ let j=await r.json();
+ document.getElementById('status').innerText=`Loaded ${j.candles.length} REAL - ${j.trades.length} trades | ${j.total_pnl.toFixed(2)}%`;
+ let chart=LightweightCharts.createChart(document.getElementById('chart'),{layout:{background:{color:'#0f1419'},textColor:'#aaa'},grid:{vertLines:{color:'#222'},horzLines:{color:'#222'}}});
+ let s=chart.addCandlestickSeries(); s.setData(j.candles);
+ let h='<table width=100%><tr><th>ID</th><th>PnL%</th><th>Held</th><th>Reason</th></tr>';
+ j.trades.forEach(t=>{h+=`<tr><td>${t.id}</td><td>${t.pnl_pct.toFixed(2)}%</td><td>${t.held}</td><td>${t.exit_reason}</td></tr>`});
+ document.getElementById('trades').innerHTML=h+'</table>';
+}
+window.onload=loadChart;
+</script></body></html>

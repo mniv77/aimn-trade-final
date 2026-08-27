@@ -1,71 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>HaGolem Auto Trading by AiMN - Auto Tuner</title>
-    <style>
-        :root {
-            --bg: #0b0e14;
-            --panel: #121824;
-            --card: #182232;
-            --border: #233248;
-            --accent: #0ea5e9;
-            --accent-hover: #0284c7;
-            --green: #10b981;
-            --red: #ef4444;
-            --text: #f3f4f6;
-            --muted: #9ca3af;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        .mode-tab { padding: 10px 20px; cursor: pointer; transition: all 0.2s; color: var(--muted); background: var(--panel); border: none; }
-        .mode-tab:hover { color: var(--text); }
-        .mode-tab.active-etf { background: #1e3a5f; color: #0ea5e9; border-bottom: 2px solid #0ea5e9; }
-        .mode-tab.active-crypto { background: #1a1a3a; color: #f59e0b; border-bottom: 2px solid #f59e0b; }
-    </style>
+<meta charset="utf-8">
+<title>Trade Chart</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>body{margin:0;background:#0b0e14;color:#e5e7eb;font-family:sans-serif} #chart{width:100%;height:85vh} #info{padding:12px;display:flex;gap:16px;align-items:center} .badge{padding:4px 8px;border-radius:4px;background:#1f2937}</style>
 </head>
 <body>
-<div style='padding: 15px 20px; background: #0d1526; border-bottom: 1px solid #1a3050; display: flex; justify-content: flex-end;'>
-    <a id="open_chart_link" href="/trade_chart_view/latest?symbol=BTCUSDT" target="_blank" style="background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #3b82f6; transition: background 0.2s;">
-        📊 Open Chart & Feedback
-    </a>
+<div id="info">
+<span id="sym" class="badge">Loading...</span>
+<span id="pnl" class="badge"></span>
+<a href="/" style="color:#60a5fa">← Dashboard</a>
 </div>
-    <div class="header" style="padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border);">
-        <div class="header-logo" style="font-weight: bold; font-size: 20px; color: var(--accent);">AiMN</div>
-        <div class="header-title" style="font-size: 18px; font-weight: 600;">Auto Tuner</div>
-        <div class="header-right" style="display: flex; gap: 10px; align-items: center;">
-            <span id="default_indicator">✅ Custom Default Loaded</span>
-            <button id="reset_default_btn" onclick="resetDefaults()" style="background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 4px; cursor: pointer;">↺ Reset</button>
-            <div class="header-badge" style="background: var(--border); padding: 4px 8px; border-radius: 4px; font-size: 12px;">V3.3</div>
-            <a href="/" style="padding: 8px 18px; background: #0d1526; border: 1px solid #1a3050; color: var(--text); text-decoration: none; border-radius: 4px;">← Dashboard</a>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const symbolSelect = document.getElementById("symbol_select");
-            const chartLink = document.getElementById("open_chart_link");
-
-            function updateChartLink() {
-                if (!symbolSelect || !chartLink) return;
-                const sym = symbolSelect.value || "BTCUSDT";
-                chartLink.href = `/trade_chart_view/latest?symbol=${encodeURIComponent(sym)}`;
-            }
-
-            if (symbolSelect) {
-                symbolSelect.addEventListener("change", updateChartLink);
-                updateChartLink();
-            }
-        });
-
-        function resetDefaults() {
-            console.log("Resetting defaults...");
-        }
-    </script>
+<div id="chart"></div>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const tradeId = urlParams.get('trade_id') || '{{ trade_id|default(1) }}';
+const symbolParam = urlParams.get('symbol') || '{{ symbol|default("") }}';
+async function load(){
+  let tid = tradeId;
+  if(symbolParam && (!tid || tid==1)){
+    try{
+      const listRes = await fetch('/api/trades_list');
+      const list = await listRes.json();
+      const found = (list.trades||[]).find(t=> t.symbol && t.symbol.toUpperCase().includes(symbolParam.toUpperCase().replace('-','').replace('/','')));
+      if(found) tid = found.id;
+    }catch(e){}
+  }
+  const res = await fetch(`/api/trade_chart_data/${tid}`);
+  const data = await res.json();
+  if(data.error){ document.getElementById('sym').textContent = 'Error '+data.error; return; }
+  document.getElementById('sym').textContent = data.symbol + ' ' + data.direction + ' (CB:'+(data.cb_product||'')+')';
+  document.getElementById('pnl').textContent = 'PnL '+(data.pnl_pct||0)+'%';
+  const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+    layout:{background:{color:'#0b0e14'}, textColor:'#d1d5db'},
+    grid:{vertLines:{color:'#1f2937'}, horzLines:{color:'#1f2937'}},
+    width: window.innerWidth, height: window.innerHeight*0.85
+  });
+  const candleSeries = chart.addCandlestickSeries({upColor:'#10b981', downColor:'#ef4444', borderVisible:false, wickUpColor:'#10b981', wickDownColor:'#ef4444'});
+  candleSeries.setData(data.candles);
+  const markers = (data.markers||[]).map(m=>({time:m.time, position:m.position, color:m.color, shape:m.shape, text:m.text}));
+  if(markers.length) candleSeries.setMarkers(markers);
+  chart.timeScale().fitContent();
+  window.addEventListener('resize', ()=>{ chart.applyOptions({width: window.innerWidth}); });
+}
+load();
+</script>
 </body>
 </html>

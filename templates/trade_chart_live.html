@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Live Chart</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>body{margin:0;background:#0b0e14;color:#e5e7eb;font-family:sans-serif}#chart{width:100%;height:85vh}#info{padding:12px;display:flex;gap:16px;align-items:center}.badge{background:#1f2937;padding:4px 8px;border-radius:4px}</style>
+</head>
+<body>
+<div id="info"><span id="sym" class="badge">Loading...</span><a href="/" style="color:#60a5fa">← Dashboard</a></div>
+<div id="chart"></div>
+<script>
+const p=new URLSearchParams(location.search);
+const sym=p.get('symbol')||'BTCUSDT';
+document.getElementById('sym').textContent=sym+' live (Coinbase)';
+async function load(){
+  try{
+    const r=await fetch(`/api/live_candles?symbol=${encodeURIComponent(sym)}`);
+    const j=await r.json();
+    if(j.error){document.getElementById('sym').textContent=j.error;return;}
+    document.getElementById('sym').textContent=`${j.symbol} (${j.cb_product}) ${j.candles.length} candles`;
+    const chart=LightweightCharts.createChart(document.getElementById('chart'),{layout:{background:{color:'#0b0e14'},textColor:'#d1d5db'},grid:{vertLines:{color:'#1f2937'},horzLines:{color:'#1f2937'}},width:window.innerWidth,height:window.innerHeight*0.85});
+    const s=chart.addCandlestickSeries({upColor:'#10b981',downColor:'#ef4444',borderVisible:false,wickUpColor:'#10b981',wickDownColor:'#ef4444'});
+    s.setData(j.candles); chart.timeScale().fitContent();
+  }catch(e){document.getElementById('sym').textContent='ERR '+e;}
+}
+load();
+</script>
+</body>
+</html>

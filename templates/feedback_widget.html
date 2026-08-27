@@ -1,0 +1,102 @@
+<div id="floating-feedback" style="position: fixed; bottom: 30px; right: 30px; width: 380px; background: #181a20; border: 1px solid #2a2e39; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 99999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #fff; user-select: none;">
+    
+    <!-- Draggable Header -->
+    <div id="feedback-header" style="background: #20242d; padding: 10px 14px; border-top-left-radius: 10px; border-top-right-radius: 10px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2e39;">
+        <span style="font-size: 13px; font-weight: bold; color: #00ffcc;">🎯 Trade Setup Logger</span>
+        <span style="font-size: 11px; color: #666;">[ Drag to Move ]</span>
+    </div>
+
+    <!-- Panel Body -->
+    <div style="padding: 14px;">
+        <div style="margin-bottom: 10px;">
+            <select id="canned_choice" style="width: 100%; background: #111318; color: #fff; border: 1px solid #2a2e39; padding: 8px; border-radius: 6px; font-size: 12px; outline: none;">
+                <option value="perfect_v_top">✅ Perfect V-Top (Clean Short Entry)</option>
+                <option value="perfect_v_bottom">✅ Perfect V-Bottom (Clean Long Entry)</option>
+                <option value="too_noisy">⚠️ Too Much Noise / False Wicks</option>
+                <option value="missed_peak">❌ Entered Too Late / Missed Peak</option>
+                <option value="early_exit">❌ Exited Too Early</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <input type="text" id="text5" placeholder="Quick notes (e.g. strong volume on red candle)..." style="width: 100%; background: #111318; color: #fff; border: 1px solid #2a2e39; padding: 8px; border-radius: 6px; font-size: 12px; outline: none; box-sizing: border-box;" />
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="feedback_status" style="font-size: 11px; color: #888;">Ready</div>
+            <button onclick="submitFeedback()" style="background: #00ffcc; color: #000; font-weight: bold; border: none; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">Log Entry</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- Draggable Panel Logic ---
+const panel = document.getElementById('floating-feedback');
+const header = document.getElementById('feedback-header');
+
+let isDragging = false;
+let startX, startY, initialX, initialY;
+
+header.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    initialX = panel.offsetLeft;
+    initialY = panel.offsetTop;
+    
+    // Switch from bottom/right pinning to explicit pixel positioning
+    panel.style.bottom = 'auto';
+    panel.style.right = 'auto';
+    panel.style.left = initialX + 'px';
+    panel.style.top = initialY + 'px';
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+});
+
+function onMouseMove(e) {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    panel.style.left = (initialX + dx) + 'px';
+    panel.style.top = (initialY + dy) + 'px';
+}
+
+function onMouseUp() {
+    isDragging = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+}
+
+// --- Submission Logic ---
+function submitFeedback() {
+    const choice = document.getElementById("canned_choice").value;
+    const notes = document.getElementById("text5").value;
+    const status = document.getElementById("feedback_status");
+    
+    status.style.color = "#888";
+    status.innerText = "Saving...";
+
+    fetch('/save_feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ canned_choice: choice, text5: notes })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "success") {
+            status.style.color = "#00ffcc";
+            status.innerText = "Saved to DB!";
+            document.getElementById("text5").value = ""; 
+            setTimeout(() => { status.innerText = "Ready"; }, 2000);
+        } else {
+            status.style.color = "#ff4d4d";
+            status.innerText = "Save failed.";
+        }
+    })
+    .catch(err => {
+        status.style.color = "#ff4d4d";
+        status.innerText = "Network error.";
+    });
+}
+</script>

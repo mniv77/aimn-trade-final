@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trade Review {{ trade_id }}</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+html,body{margin:0;height:100%;background:#0b0e11;color:#d1d4dc;font-family:Arial;overflow:hidden}
+#topbar{background:#12161c;border-bottom:1px solid #222;padding:8px 10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#topbar h1{font-size:13px;color:#00ffcc;margin:0 8px 0 0}
+#topbar select,#topbar button{background:#1e293b;color:#fff;border:1px solid #333;padding:5px 8px;border-radius:5px;font-size:12px;cursor:pointer}
+#topbar button.active{background:#2962ff}
+#chartWrap{height:calc(100vh - 42px);display:flex;flex-direction:column}
+#mainChart{flex:1}
+#volChart{height:110px;border-top:1px solid #1a1a1a}
+#rsiChart{height:90px;border-top:1px solid #1a1a1a}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <h1 id="ttl">Loading...</h1>
+  <label>Symbol: <select id="symSel"></select></label>
+  <label>Trade: <select id="tradeSel"></select></label>
+  <span id="count" style="font-size:11px;color:#888"></span>
+  <button data-res="5" class="resBtn">5m</button>
+  <button data-res="15" class="resBtn active">15m</button>
+  <button data-res="30" class="resBtn">30m</button>
+  <button data-res="60" class="resBtn">1hr</button>
+  <button data-res="240" class="resBtn">4hr</button>
+  <label><input type="checkbox" id="rsiChk" checked> RSI</label>
+  <a href="/auto_tuner" style="margin-left:auto;background:#2a2e39;color:#fff;padding:5px 10px;border-radius:5px;text-decoration:none">← Back</a>
+</div>
+<div id="chartWrap">
+  <div id="mainChart"></div>
+  <div id="volChart"></div>
+  <div id="rsiChart"></div>
+</div>
+<script>
+const URL_TRADE_ID = "{{ trade_id }}" || location.pathname.split('/').pop() || "1";
+let curRes='15', curSymbol='BTCUSDT', curTradeId=URL_TRADE_ID;
+let mainChart,candleSeries,volChart,volSeries,rsiChart,rsiSeries;
+let allTrades=[], symbols=[];
+
+function initCharts(){
+  mainChart = LightweightCharts.createChart(document.getElementById('mainChart'),{layout:{background:{color:'#0b0e11'},textColor:'#d1d4dc'},grid:{vertLines:{color:'#111'},horzLines:{color:'#111'}},timeScale:{timeVisible:true,borderColor:'#333'}});
+  candleSeries = mainChart.addCandlestickSeries({upColor:'#00ff88',downColor:'#ff3344',wickUpColor:'#00ff88',wickDownColor:'#ff3344',borderUpColor:'#00ff88',borderDownColor:'#ff3344'});
+  volChart = LightweightCharts.createChart(document.getElementById('volChart'),{layout:{background:{color:'#0b0e11'},textColor:'#d1d4dc'},timeScale:{visible:false},grid:{vertLines:{color:'#111'},horzLines:{color:'#111'}}});
+  volSeries = volChart.addHistogramSeries({priceFormat:{type:'volume'}});
+  rsiChart = LightweightCharts.createChart(document.getElementById('rsiChart'),{layout:{background:{color:'#0b0e11'},textColor:'#d1d4dc'},grid:{vertLines:{color:'#111'},horzLines:{color:'#111'}}});
+  rsiSeries = rsiChart.addLineSeries({color:'#2962ff',lineWidth:1.5});
+}
+
+function calcRSI(candles,period=14){
+  if(candles.length<=period) return [];
+  let gains=0,losses=0;
+  for(let i=1;i<=period;i++){let d=candles[i].close-candles[i-1].close; if(d>=0) gains+=d; else losses-=d;}
+  let avgG=gains/period, avgL=losses/period;
+  let out=[];
+  for(let i=period;i<candles.length;i++){
+    if(i>period){let d=candles[i].close-candles[i-1].close; if(d>=0){avgG=(avgG*(period-1)+d)/period; avgL=(avgL*(period-1))/period;} else {avgG=(avgG*(period-1))/period; avgL=(avgL*(period-1)-d)/period;}}
+    let rs=avgL===0?100:avgG/avgL;
+    out.push({time:candles[i].time,value:100-(100/(1+rs))});
+  }
+  return out;
+}
+
+function populateSymbols(){
+  const symSel=document.getElementById('symSel');
+  symSel.innerHTML=symbols.map(s=>`<option value="${s}">${s}</option>`).join('');
+  // try to get last tuned symbol - check localStorage + try to fetch from tuning
+  let lastTuned = localStorage.getItem('last_symbol') || localStorage.getItem('last_tuned_symbol') || localStorage.getItem('selected_symbol') || '';
+  // also check if tuning page stored it under different key
+  try{
+    let tuningData = localStorage.getItem('auto_tuner_last_symbol');
+    if(tuningData) lastTuned = tuningData;
+  }catch(e){}
+  if(lastTuned && symbols.includes(lastTuned)){
+    symSel.value=lastTuned;
+    curSymbol=lastTuned;
+  } else if(symbols.length){
+    curSymbol=symbols[0];
+    symSel.value=curSymbol;
+  }
+}
+
+function filterTradesBySymbol(symbol){
+  const filtered = allTrades.filter(t=>{
+    let s=(t.symbol||t.Symbol||'').toUpperCase();
+    return s===symbol.toUpperCase() || s===symbol.replace('/','').toUpperCase() || s.replace('/','')===symbol.replace('/','').toUpperCase();
+  });
+  const tradeSel=document.getElementById('tradeSel');
+  // limit to 100 most recent to avoid huge list, but show count
+  let toShow = filtered.slice(0,100);
+  document.getElementById('count').textContent = `(${filtered.length} trades for ${symbol}, showing ${toShow.length})`;
+  if(toShow.length===0){
+    tradeSel.innerHTML='<option value="">-- No trades for this symbol --</option>';
+    return;
+  }
+  tradeSel.innerHTML=toShow.map(t=>{
+    let id=t.id||t.ID||'';
+    let dir=t.direction||t.Direction||'';
+    let pnl=t.pnl_percent||t.pnl||'';
+    if(pnl!=='') pnl=Number(pnl).toFixed(2)+'%';
+    let time=(t.entry_time||t.entryTime||'').toString().slice(0,16);
+    return `<option value="${id}" data-sym="${t.symbol||t.Symbol}">${dir} | ${pnl} | ${time} | ID ${id}</option>`;
+  }).join('');
+  // auto select first trade of that symbol if current trade id not in filtered
+  let stillValid = filtered.find(t=>String(t.id)===String(curTradeId));
+  if(!stillValid && toShow.length>0){
+    tradeSel.selectedIndex=0;
+    curTradeId=toShow[0].id||toShow[0].ID||URL_TRADE_ID;
+  }
+}
+
+async function loadTradesList(){
+  try{
+    let urls=['/api/trades','/api/active_trades','/api/all_trades'];
+    let data=null;
+    for(let u of urls){
+      try{let r=await fetch(u); if(r.ok){let j=await r.json(); if(j && (Array.isArray(j) && j.length>0 || j.trades || j.data)){data=j; break;}}}catch(e){}
+    }
+    if(!data){allTrades=[{id:URL_TRADE_ID,symbol:'BTCUSDT',direction:'LONG'}]; symbols=['BTCUSDT','ETHUSDT','SOLUSDT']; populateSymbols(); filterTradesBySymbol(curSymbol); return;}
+    if(Array.isArray(data)) allTrades=data;
+    else if(data.trades) allTrades=data.trades;
+    else if(data.data) allTrades=data.data;
+    else allTrades=[data];
+
+    symbols=[...new Set(allTrades.map(t=> (t.symbol||t.Symbol||'').toUpperCase().replace('/','')).filter(Boolean))].sort();
+    // normalize symbols to original format
+    let originalMap={};
+    allTrades.forEach(t=>{let s=(t.symbol||t.Symbol||''); if(s) originalMap[s.toUpperCase().replace('/','')]=s;});
+    symbols=symbols.map(s=>originalMap[s]||s);
+    if(symbols.length===0) symbols=['BTCUSDT'];
+
+    populateSymbols();
+    filterTradesBySymbol(curSymbol);
+  }catch(e){console.error(e);}
+}
+
+async function loadChart(tradeId,res){
+  curTradeId=tradeId; curRes=res;
+  document.querySelectorAll('.resBtn').forEach(b=>b.classList.toggle('active',b.dataset.res===res));
+  try{
+    const url=`/api/trade_chart_data/${tradeId}?resolution=${res}`;
+    console.log("Fetching",url);
+    const r=await fetch(url);
+    const d=await r.json();
+    if(d.error){document.getElementById('ttl').textContent=d.error; return;}
+    curSymbol=d.symbol;
+    document.getElementById('ttl').textContent=`Trade Review: ${d.symbol} | ${d.direction} | ID ${tradeId} | ${res}m`;
+    // update symbol dropdown if needed
+    if(!symbols.includes(d.symbol)){
+      symbols.push(d.symbol);
+      populateSymbols();
+    }
+    document.getElementById('symSel').value=d.symbol;
+    localStorage.setItem('last_symbol',d.symbol);
+
+    let candles=d.candles||[];
+    if(!candles.length) return;
+    candleSeries.setData(candles);
+    let vols=d.volumes||candles.map(c=>({time:c.time,value:c.volume||0,color:c.close>=c.open?'rgba(0,255,136,0.7)':'rgba(255,51,68,0.7)'}));
+    volSeries.setData(vols);
+    if(d.markers) candleSeries.setMarkers(d.markers);
+    let rsiData=d.rsi||calcRSI(candles);
+    rsiSeries.setData(rsiData);
+    mainChart.timeScale().fitContent();
+  }catch(e){console.error(e);}
+}
+
+document.addEventListener('DOMContentLoaded',async()=>{
+  initCharts();
+  await loadTradesList();
+  await loadChart(curTradeId,curRes);
+
+  document.querySelectorAll('.resBtn').forEach(btn=>{
+    btn.addEventListener('click',()=>{curRes=btn.dataset.res; loadChart(curTradeId,curRes);});
+  });
+
+  document.getElementById('symSel').addEventListener('change',e=>{
+    curSymbol=e.target.value;
+    localStorage.setItem('last_symbol',curSymbol);
+    localStorage.setItem('last_tuned_symbol',curSymbol);
+    filterTradesBySymbol(curSymbol);
+    // load first trade of this symbol
+    let filtered=allTrades.filter(t=>(t.symbol||t.Symbol||'').toUpperCase().replace('/','')===curSymbol.toUpperCase().replace('/',''));
+    if(filtered.length>0){
+      curTradeId=filtered[0].id||filtered[0].ID;
+      loadChart(curTradeId,curRes);
+    } else {
+      // no trade, try live Binance fallback
+      loadChart(curTradeId,curRes);
+    }
+  });
+
+  document.getElementById('tradeSel').addEventListener('change',e=>{
+    let id=e.target.value;
+    if(!id) return;
+    curTradeId=id;
+    loadChart(id,curRes);
+  });
+
+  document.getElementById('rsiChk').addEventListener('change',e=>{
+    document.getElementById('rsiChart').style.display=e.target.checked?'block':'none';
+  });
+});
+</script>
+</body>
+</html>

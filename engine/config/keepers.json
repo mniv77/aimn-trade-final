@@ -1,0 +1,130 @@
+{
+  "SOLUSD": {
+    "LONG": {
+      "timeframe": "30m",
+      "rsi_len": 25,
+      "rsi_entry": 30,
+      "stop_loss": 2.0,
+      "trail_start": 2.5,
+      "trail_minus": 1.0,
+      "wr": 85.7,
+      "trades": 7,
+      "pnl": 5.07,
+      "gross_avg": 0.725,
+      "net_avg": 0.525,
+      "fee_cover": 3.6,
+      "diff": 85
+    },
+    "SHORT": {
+      "timeframe": "15m",
+      "rsi_len": 21,
+      "rsi_entry": 70,
+      "stop_loss": 1.5,
+      "trail_start": 1.2,
+      "trail_minus": 0.5,
+      "wr": 100.0,
+      "trades": 5,
+      "pnl": 3.12,
+      "gross_avg": 0.624,
+      "net_avg": 0.424,
+      "fee_cover": 3.1,
+      "diff": 80
+    }
+  },
+  "ETHUSD": {
+    "LONG": {
+      "timeframe": "15m",
+      "rsi_len": 25,
+      "rsi_entry": 30,
+      "stop_loss": 2.0,
+      "trail_start": 1.2,
+      "trail_minus": 0.8,
+      "wr": 100.0,
+      "trades": 7,
+      "pnl": 6.41,
+      "gross_avg": 0.915,
+      "net_avg": 0.715,
+      "fee_cover": 4.6,
+      "diff": 88
+    },
+    "SHORT": {
+      "timeframe": "15m",
+      "rsi_len": 25,
+      "rsi_entry": 70,
+      "stop_loss": 2.0,
+      "trail_start": 1.2,
+      "trail_minus": 0.5,
+      "wr": 83.3,
+      "trades": 6,
+      "pnl": 5.89,
+      "gross_avg": 0.982,
+      "net_avg": 0.782,
+      "fee_cover": 4.9,
+      "diff": 98
+    }
+  },
+  "BTCUSDT": {
+    "LONG": {
+      "timeframe": "1h",
+      "rsi_len": 25,
+      "rsi_entry": 30,
+      "stop_loss": 3.0,
+      "trail_start": 2.5,
+      "trail_minus": 1.0,
+      "wr": 91.7,
+      "trades": 12,
+      "pnl": 5.74,
+      "gross_avg": 0.478,
+      "net_avg": 0.278,
+      "fee_cover": 2.4,
+      "diff": 45
+    },
+    "SHORT": {
+      "timeframe": "30m",
+      "rsi_len": 21,
+      "rsi_entry": 70,
+      "stop_loss": 2.0,
+      "trail_start": 2.5,
+      "trail_minus": 1.0,
+      "wr": 90.0,
+      "trades": 20,
+      "pnl": 13.06,
+      "gross_avg": 0.653,
+      "net_avg": 0.453,
+      "fee_cover": 3.3,
+      "diff": 42
+    }
+  },
+  "LINKUSD": {
+    "LONG": {
+      "timeframe": "15m",
+      "rsi_len": 20,
+      "rsi_entry": 35,
+      "stop_loss": 1.5,
+      "trail_start": 1.2,
+      "trail_minus": 0.5,
+      "wr": 100.0,
+      "trades": 6,
+      "pnl": 6.73,
+      "gross_avg": 1.12,
+      "net_avg": 0.92,
+      "fee_cover": 5.6,
+      "diff": 25
+    },
+    "SHORT": {
+      "timeframe": "15m",
+      "rsi_len": 14,
+      "rsi_entry": 65,
+      "stop_loss": 1.5,
+      "trail_start": 0.8,
+      "trail_minus": 0.5,
+      "wr": 80.0,
+      "trades": 10,
+      "pnl": 20.2,
+      "gross_avg": 2.02,
+      "net_avg": 1.82,
+      "fee_cover": 10.1,
+      "diff": 30
+    }
+  }
+}

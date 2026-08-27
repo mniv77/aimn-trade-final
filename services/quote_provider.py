@@ -175,3 +175,33 @@ def get_provider() -> QuoteProvider:
         return pub
     except Exception:
         return SimQuoteProvider()
+
+# ---- ADD CANDLE FETCH ----
+def _get_binance_candles(self, symbol: str, timeframe: str = '1h', limit: int = 120):
+    sym = self._to_binance_symbol(symbol)
+    interval = timeframe # 1m,5m,15m,1h,4h,1d
+    url = f"https://api.binance.com/api/v3/klines?symbol={sym}&interval={interval}&limit={limit}"
+    try:
+        r = self._session.get(url, timeout=5)
+        if not r.ok:
+            print(f"[binance klines] {r.status_code} {r.text[:200]}")
+            return []
+        data = r.json()
+        out=[]
+        for k in data:
+            # [openTime, open, high, low, close, vol, closeTime...]
+            out.append({
+                "time": int(int(k[0])/1000), # sec
+                "open": float(k[1]),
+                "high": float(k[2]),
+                "low": float(k[3]),
+                "close": float(k[4]),
+                "volume": float(k[5])
+            })
+        return out
+    except Exception as e:
+        print(f"[binance klines err] {e}")
+        return []
+
+# monkey patch onto class
+PublicQuoteProvider.get_candles = _get_binance_candles

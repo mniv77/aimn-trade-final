@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HaGolem Auto Trading by AiMN — Tuner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #080d18;
+            --panel:   #0d1526;
+            --border:  #1a3050;
+            --accent:  #2563eb;
+            --accent2: #0ea5e9;
+            --gold:    #f59e0b;
+            --green:   #10b981;
+            --red:     #ef4444;
+            --text:    #c8d8f0;
+            --muted:   #4a6a90;
+            --label:   #7aa0c8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 14px; min-height: 100vh; padding: 24px; }
+        .mono { font-family: 'Share Tech Mono', monospace; }
+        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+        .header-logo  { font-family: 'Share Tech Mono', monospace; color: var(--accent2); font-size: 22px; letter-spacing: 3px; }
+        .header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: white; letter-spacing: 1px; }
+        .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+        .header-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 3px; }
+        #default_indicator { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--green); display: none; }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
+        .panel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+        .field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--label); margin-bottom: 6px; }
+        .field-hint  { font-size: 10px; color: var(--muted); margin-top: 4px; }
+        select, input[type="text"] { width: 100%; padding: 9px 12px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 13px; outline: none; transition: border-color 0.2s; }
+        select:focus, input[type="text"]:focus { border-color: var(--accent); }
+        select:disabled { opacity: 0.35; cursor: not-allowed; }
+        .dir-group { display: flex; gap: 8px; }
+        .dir-btn { flex: 1; padding: 9px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-align: center; transition: all 0.2s; user-select: none; }
+        .dir-btn:hover { border-color: var(--accent); color: var(--text); }
+        .dir-btn.active-long  { background: #052e16; border-color: var(--green); color: var(--green); }
+        .dir-btn.active-short { background: #450a0a; border-color: var(--red);   color: var(--red); }
+        .score-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .score-btn { padding: 7px 14px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; user-select: none; }
+        .score-btn.active { background: #1e3a5f; border-color: var(--accent2); color: var(--accent2); }
+        #run_btn { width: 100%; padding: 13px; background: var(--accent); border: none; border-radius: 5px; color: white; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 2px; cursor: pointer; transition: background 0.2s, transform 0.1s; text-transform: uppercase; }
+        #run_btn:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); }
+        #run_btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        #set_default_btn { padding: 8px 18px; background: #1a3a1a; border: 1px solid var(--green); border-radius: 4px; color: var(--green); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; display: none; }
+        #set_default_btn:hover { background: #052e16; }
+        #reset_default_btn { padding: 8px 18px; background: #1a1500; border: 1px solid var(--gold); border-radius: 4px; color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
+        #reset_default_btn:hover { background: #2a2000; }
+        #result_box { font-family: 'Share Tech Mono', monospace; font-size: 13px; line-height: 1.8; white-space: pre-wrap; min-height: 140px; }
+        #chart_container { width: 100%; height: 350px; margin-top: 14px; border-radius: 4px; overflow: hidden; display: none; border: 1px solid var(--border); }
+        .log-ok   { color: var(--green); }
+        .log-err  { color: var(--red); }
+        .log-info { color: var(--accent2); }
+        .log-best { color: var(--gold); font-weight: bold; }
+        .log-sep  { color: var(--border); }
+        .status-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 3px 10px; border-radius: 3px; border: 1px solid; }
+        .status-blue  { background: #1e3a5f; border-color: var(--accent2); color: var(--accent2); }
+        .status-green { background: #052e16; border-color: var(--green);   color: var(--green); }
+        .status-red   { background: #450a0a; border-color: var(--red);     color: var(--red); }
+        .mode-tabs { display: flex; gap: 0; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+        .mode-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 1px; transition: all 0.2s; color: var(--muted); background: var(--panel); border: none; }
+        .mode-tab:hover { color: var(--text); }
+        .mode-tab.active-etf { background: #1e3a5f; color: #0ea5e9; border-bottom: 2px solid #0ea5e9; }
+        .mode-tab.active-crypto { background: #1a1a3a; color: #f59e0b; border-bottom: 2px solid #f59e0b; }
+    </style>
+</head>
+<body>
+<div style='padding: 15px 20px; background: #0d1526; border-bottom: 1px solid #1a3050; display: flex; justify-content: flex-end;'>
+    <a id="open_chart_link" href="/trade_chart_view/1" target="_blank" style="background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #3b82f6; transition: background 0.2s;">
+        📊 Open Chart & Feedback
+    </a>
+</div>
+    <div class="header">
+        <div class="header-logo">AiMN</div>
+        <div class="header-title">Auto Tuner</div>
+        <div class="header-right">
+            <span id="default_indicator">✅ Custom Default Loaded</span>
+            <button id="reset_default_btn" onclick="resetDefaults()">↺ Reset</button>
+            <div class="header-badge">V3.3</div>
+            <a href="/" style="padding: 8px 18px; background: #0d1526; border: 1px solid #1a3050; border-radius: 4px; color: #7aa0c8; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; text-decoration: none;">← Dashboard</a>
+        </div>
+    </div>
+
+    <div class="mode-tabs">
+        <button class="mode-tab active-etf" id="tab-etf" onclick="switchMode('etf')">📈 ETF / STOCKS</button>
+        <button class="mode-tab" id="tab-crypto" onclick="switchMode('crypto')">🪙 CRYPTO</button>
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-title">⚡ Quick Actions &amp; Data Sync</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <button id="fetch_candles_btn" onclick="fetchCandles()"
+                style="padding:10px 24px; background:#047857; border:none; border-radius:4px; color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
+                📥 Fetch Historical Candles
+            </button>
+            <button id="run_all_btn" onclick="runAllTuning()"
+                style="padding:10px 24px; background:#1d4ed8; border:none; border-radius:4px; color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
+                ▶ Run All Tuning
+            </button>
+            <button id="disable_old_btn" onclick="disableOldStrategies()"
+                style="padding:10px 24px; background:#1a0a0a; border:1px solid #ef4444; border-radius:4px; color:#ef4444; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
+                🧹 Disable Old Strategies
+            </button>
+            <a href="/tuning_runs"
+                style="padding:10px 24px; background:#1a2a4a; border:1px solid #0ea5e9; border-radius:4px; color:#0ea5e9; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; text-decoration:none;">
+                📋 View Tuning Runs
+            </a>
+            <span id="action_status" style="font-family:'Share Tech Mono',monospace; font-size:12px; color:#f59e0b; display:none;"></span>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">🎯 Target</div>
+        <div class="grid-4">
+            <div>
+                <label class="field-label">Broker</label>
+                <select id="broker_select" name="broker_id">
+                    <option value="">-- Choose --</option>
+                    {% for b in brokers %}
+                        <option value="{{ b.id }}">{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="field-label">Symbol</label>
+                <select id="symbol_select" disabled>
+                    <option value="">-- Choose Broker First --</option>
+                </select>
+            </div>
+            <div>
+                <label class="field-label">Direction</label>
+                <div class="dir-group">
+                    <div class="dir-btn" id="btn_long" onclick="setDirection('LONG')">LONG</div>
+                    <div class="dir-btn" id="btn_short" onclick="setDirection('SHORT')">SHORT</div>
+                </div>
+            </div>
+            <div>
+                <label class="field-label">Timeframe</label>
+                <select id="timeframe_select">
+                    <option value="5m">5m  — 7 days</option>
+                    <option value="15m">15m — 21 days</option>
+                    <option value="30m">30m — 42 days</option>
+                    <option value="1hr" selected>1hr — 84 days</option>
+                    <option value="6hr">6hr — 1 year</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">📈 Entry Parameters (Grid Search)</div>
+        <div class="grid-3">
+            <div>
+                <label class="field-label">RSI Lookback Options</label>
+                <input type="text" id="rsi_len_options" value="50,100,168">
+                <div class="field-hint">Comma-separated bar values</div>
+            </div>
+            <div>
+                <label class="field-label">RSI Entry Threshold Options</label>
+                <input type="text" id="rsi_entry_options" value="25,35,40">
+                <div class="field-hint">Lower = more selective entry</div>
+            </div>
+            <div>
+                <label class="field-label">MACD (Fast / Slow / Signal)</label>
+                <div style="display:flex; gap:6px;">
+                    <input type="text" id="macd_fast" value="12" style="text-align:center;">
+                    <input type="text" id="macd_slow" value="26" style="text-align:center;">
+                    <input type="text" id="macd_sig"  value="9"  style="text-align:center;">
+                </div>
+                <div class="field-hint">Fixed — not grid searched</div>
+            </div>
+            <div>
+                <label class="field-label">Volume Spike Threshold</label>
+                <input type="text" id="volume_spike" value="2.0" style="text-align:center;">
+                <div class="field-hint">Ratio vs 20-bar avg (2.0 = 2x spike)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">🛡️ Exit Parameters (Grid Search)</div>
+        <div class="grid-3">
+            <div>
+                <label class="field-label">Stop Loss % Options</label>
+                <input type="text" id="stop_loss_options" value="0.3,1.0,2.0">
+                <div class="field-hint">Max loss before exit</div>
+            </div>
+            <div>
+                <label class="field-label">Trail Start % Options</label>
+                <input type="text" id="trail_start_options" value="1.0,1.5,2.0">
+                <div class="field-hint">Peak profit to activate trail</div>
+            </div>
+            <div>
+                <label class="field-label">Trail Drop % Options</label>
+                <input type="text" id="trail_minus_options" value="0.3,0.5,0.7">
+                <div class="field-hint">Drop from peak to trigger exit</div>
+            </div>
+            <div>
+                <label class="field-label">RSI Exit Threshold Options</label>
+                <input type="text" id="rsi_exit_options" value="65,70">
+                <div class="field-hint">Exit when RSI reaches this level</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">⏱️ Profit Floor & Decay (Grid Search)</div>
+        <div class="grid-4">
+            <div>
+                <label class="field-label">Init Profit % Options</label>
+                <input type="text" id="init_profit_options" value="0.1,0.5">
+                <div class="field-hint">Minimum profit floor options</div>
+            </div>
+            <div>
+                <label class="field-label">Decay Start Options (hours)</label>
+                <input type="text" id="decay_start_options" value="2.0,3.0,4.0">
+                <div class="field-hint">Hours before floor decays</div>
+            </div>
+            <div>
+                <label class="field-label">Decay Rate (%/hour)</label>
+                <input type="text" id="decay_rate" value="0.5">
+                <div class="field-hint">How fast floor drops</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">⚙️ Backtest Settings</div>
+        <div class="grid-4">
+            <div>
+                <label class="field-label">Number of Bars</label>
+                <input type="text" id="bars" value="2016">
+                <div class="field-hint">Max from Gemini API</div>
+            </div>
+            <div>
+                <label class="field-label">Min Trades Required</label>
+                <input type="text" id="min_trades" value="3">
+                <div class="field-hint">Skip combos below this</div>
+            </div>
+            <div style="grid-column: span 2;">
+                <label class="field-label">Primary Scoring Metric</label>
+                <div class="score-group">
+                    <div class="score-btn active" id="score_total_pnl" onclick="setScore('total_pnl', this)">Total P&amp;L%</div>
+                    <div class="score-btn" id="score_winrate"     onclick="setScore('winrate', this)">Win Rate</div>
+                    <div class="score-btn" id="score_avg_pnl"     onclick="setScore('avg_pnl', this)">Avg PnL</div>
+                </div>
+                <input type="hidden" id="score_metric" value="total_pnl">
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
+            <div style="flex:1;">
+                <span class="field-label" style="display:inline;">Grid Combinations: </span>
+                <span class="mono" id="combo_count" style="color:var(--gold); font-size:16px;">—</span>
+                <span style="color:var(--muted); font-size:12px; margin-left:8px;" id="combo_est"></span>
+            </div>
+            <div id="status_badge" style="display:none;" class="status-badge status-blue"></div>
+        </div>
+        <button id="run_btn" disabled>▶ RUN AUTO TUNER</button>
+    </div>
+
+    <!-- Floating Trade Review & Feedback Panel -->
+    <div id="trade_stepper_panel" style="display:none; position:fixed; bottom:20px; right:20px; width:400px; background:var(--panel); border:1px solid var(--accent2); border-radius:8px; padding:16px; z-index:10000; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-family:'Barlow Condensed',sans-serif; font-weight:700; color:var(--accent2); font-size:16px;">Trade Stepper & Feedback</span>
+            <span id="trade_counter" class="mono" style="font-size:12px; color:var(--gold);">Trade 0 of 0</span>
+        </div>
+        <div id="trade_details" class="mono" style="font-size:12px; margin-bottom:10px; line-height:1.5; background:#060c18; padding:8px; border-radius:4px;">
+            <!-- Filled dynamically -->
+        </div>
+        <textarea id="trade_feedback_input" placeholder="Type your feedback for this trade setup..." style="width:100%; height:60px; background:#060c18; border:1px solid var(--border); color:var(--text); padding:6px; font-size:12px; border-radius:4px; margin-bottom:8px;"></textarea>
+        <div style="display:flex; gap:8px;">
+            <button onclick="prevTrade()" style="flex:1; padding:6px; background:#1e3a5f; color:white; border:none; border-radius:4px; cursor:pointer;">← Prev</button>
+            <button onclick="saveAndNextTrade()" style="flex:1; padding:6px; background:var(--accent); color:white; border:none; border-radius:4px; cursor:pointer;">Save & Next →</button>
+        </div>
+    </div>
+
+    <!-- DEBUG_BOX_START -->
+    <div id="debug_display_box" style="position: fixed; bottom: 10px; right: 10px; width: 450px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.9); color: #00ffcc; padding: 10px; font-family: monospace; font-size: 11px; z-index: 99999; border: 1px solid #00ffcc; border-radius: 5px;">
+        <div style="font-weight: bold; border-bottom: 1px solid #00ffcc; margin-bottom: 5px; padding-bottom: 2px;">DEBUG_LOG_PANEL</div>
+        <div id="debug_messages_content">Script initializing...</div>
+    </div>
+    <!-- DEBUG_BOX_END -->
+
+    
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    const symbolSelect = document.getElementById("symbol_select");
+    const chartLink = document.getElementById("open_chart_link");
+    let latestBySymbol = {};
+    try {
+        const r = await fetch('/api/trades_list');
+        const j = await r.json();
+        (j.trades||[]).forEach(t=>{
+            const s=(t.symbol||'').toUpperCase();
+            if(!latestBySymbol[s]) latestBySymbol[s]=t.id;
+        });
+    } catch(e){ console.log("trades_list fail", e); }
+    function updateChartLink(){
+        if(!symbolSelect ||!chartLink) return;
+        const sym = (symbolSelect.value || "BTCUSDT").toUpperCase();
+        const tid = latestBySymbol[sym] || latestBySymbol[sym.replace('USDT','USD')] || latestBySymbol[sym.replace('USD','USDT')] || '';
+        if(tid){
+            chartLink.href = `/trade_chart_view/${tid}`;
+            chartLink.textContent = `📊 Open Chart #${tid} & Feedback`;
+        } else {
+            chartLink.href = `/trade_chart_view/latest?symbol=${encodeURIComponent(sym)}`;
+            chartLink.textContent = `📊 Open Chart Live ${sym}`;
+        }
+    }
+    if(symbolSelect){
+        symbolSelect.addEventListener("change", updateChartLink);
+        updateChartLink();
+    }
+});
+</script>
+
+
+<div id="ai-feedback-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: sans-serif;">
+    <button id="feedback-toggle-btn" style="background: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">💬 AIV Feedback</button>
+    <div id="feedback-panel" style="display: none; position: absolute; bottom: 50px; right: 0; width: 300px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); padding: 16px;">
+        <h4 style="margin: 0 0 10px 0; font-size: 16px; color: #1f2937;">Model Training Feedback</h4>
+        <textarea id="feedback-comment" placeholder="Provide notes or expected behavior..." style="width: 100%; height: 80px; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical; box-sizing: border-box; margin-bottom: 10px;"></textarea>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <select id="feedback-rating" style="padding: 6px; border: 1px solid #d1d5db; border-radius: 4px;">
+                <option value="good">Good / Correct</option>
+                <option value="bad">Bad / Incorrect</option>
+            </select>
+            <button id="feedback-submit-btn" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Submit</button>
+        </div>
+        <div id="feedback-status" style="font-size: 12px; margin-top: 8px; color: #6b7280;"></div>
+    </div>
+</div>
+<script>
+document.getElementById('feedback-toggle-btn').addEventListener('click', function() {
+    const panel = document.getElementById('feedback-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('feedback-submit-btn').addEventListener('click', async function() {
+    const comment = document.getElementById('feedback-comment').value;
+    const rating = document.getElementById('feedback-rating').value;
+    const statusDiv = document.getElementById('feedback-status');
+    statusDiv.textContent = 'Submitting...';
+    try {
+        const response = await fetch('/api/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ comment, rating, context: window.location.href })
+        });
+        const result = await response.json();
+        if (response.ok) {
+            statusDiv.textContent = 'Saved successfully!';
+            document.getElementById('feedback-comment').value = '';
+            setTimeout(() => { document.getElementById('feedback-panel').style.display = 'none'; statusDiv.textContent = ''; }, 2000);
+        } else {
+            statusDiv.textContent = 'Error: ' + result.message;
+        }
+    } catch (err) {
+        statusDiv.textContent = 'Network error: ' + err.message;
+    }
+});
+</script>
+
+</body>
+</html>
