@@ -2081,38 +2081,6 @@ def api_crypto_active():
     return jsonify({"ok": True, "message": "Crypto ENABLED" if val else "Crypto PAUSED"})
 
 # --- KISS V3 DOC ROUTE - ONE STRATEGY ---
-@app.route("/docs/strategy")
-def docs_strategy():
-    try:
-        import pathlib
-        p = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3-full.md")
-        if not p.exists():
-            p = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3.md")
-        txt = p.read_text() if p.exists() else "Doc missing"
-        return f"""<html><head><title>KISS V3</title>
-        <style>body{{font-family:Arial;max-width:900px;margin:30px auto;padding:20px;line-height:1.6}}
-        .btn{{background:#0a84ff;color:white;padding:10px 16px;border-radius:6px;text-decoration:none}}
-        pre{{white-space:pre-wrap;background:#f5f5f5;padding:20px;border-radius:8px}}
-        </style></head><body>
-        <a class=btn href="/">← Back to Dashboard</a>
-        <h1>📘 AiMn KISS V3 Strategy</h1>
-        <a class=btn href="/doc/strategy/AiMn-KISS-Strategy-V3.md" target="_blank">Download MD</a>
-        <hr><pre>{txt}</pre></body></html>"""
-    except Exception as e:
-        return f"Error: {e} <a href='/'>back</a>"
-
-#@app.route("/doc/strategy/<path:filename>")
-#def serve_strategy_doc(filename):
-#    from flask import send_from_directory
-#    return send_from_directory("doc/strategy", filename)
-
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "5080"))
-    app.run(host="127.0.0.1", port=port, debug=True)
-
-
 @app.route('/api/backtest/run', methods=['POST'])
 def api_backtest_run():
     try:
@@ -2298,45 +2266,6 @@ def trade_chart_data(trade_id):
 
 #===========================================================
 
-@app.route("/docs/strategy")
-def docs_strategy():
-    import pathlib, markdown
-    md_file = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3-full.md")
-    if not md_file.exists():
-        md_file = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3.md")
-    if md_file.exists():
-        md_text = md_file.read_text(encoding="utf-8", errors="ignore")
-        html_body = markdown.markdown(md_text, extensions=["fenced_code","tables","toc","nl2br"])
-    else:
-        html_body = "<p>Doc missing</p>"
-    return f"""<!doctype html><html><head><meta charset='utf-8'><title>KISS V3</title>
-<style>
-body{{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:900px;margin:0 auto;padding:24px;line-height:1.7;background:#fff;color:#111}}
-.btn{{display:inline-block;background:#0a84ff;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;margin:5px;font-weight:600}}
-.btn-dark{{background:#111}}
-h1{{font-size:28px;border-bottom:2px solid #eee;padding-bottom:8px}}
-h2{{color:#0a84ff;margin-top:30px;border-bottom:1px solid #eee;padding-bottom:6px}}
-h3{{color:#333}}
-pre{{background:#f6f8fa;padding:16px;border-radius:8px;overflow:auto}}
-code{{background:#f0f0f0;padding:2px 6px;border-radius:4px}}
-table{{border-collapse:collapse;width:100%;margin:16px 0}} th,td{{border:1px solid #ddd;padding:8px;text-align:left}} th{{background:#f5f5f5}}
-.header{{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);padding:12px 0;border-bottom:1px solid #eee;margin-bottom:20px;z-index:10}}
-</style></head><body>
-<div class="header"><a class="btn" href="/">← Dashboard</a> <a class="btn btn-dark" href="/doc/strategy/AiMn-KISS-Strategy-V3-full.md" download>⬇ Download MD</a></div>
-<h1>📘 AiMn KISS V3 Strategy</h1>
-{html_body}
-</body></html>"""
-
-@app.route("/doc/strategy/<path:filename>")
-def serve_strategy_doc(filename):
-    from flask import send_from_directory
-    import pathlib
-    folder = pathlib.Path("doc/strategy").resolve()
-    return send_from_directory(str(folder), filename, as_attachment=False)
-#=================================================================
-
-
-
 @app.route('/tradingview_chart.html')
 def tradingview_chart():
     trade_id = request.args.get('trade_id', 1)
@@ -2353,3 +2282,34 @@ def shutdown_session(exception=None):
             db.remove()
         except Exception:
             pass
+# --- KISS V3 DOC ROUTE - FINAL CLEAN ---
+@app.route("/docs/strategy")
+def docs_strategy():
+    import pathlib, markdown
+    md_file = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3-full.md")
+    if not md_file.exists():
+        md_file = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3.md")
+    if md_file.exists():
+        md_text = md_file.read_text(encoding="utf-8", errors="ignore")
+        html_body = markdown.markdown(md_text, extensions=["fenced_code","tables","toc","nl2br"])
+    else:
+        html_body = "<p>Doc missing</p>"
+    return f"""<!doctype html><html><head><meta charset='utf-8'><title>KISS V3</title>
+<style>
+body{{font-family:system-ui,sans-serif;max-width:900px;margin:0 auto;padding:24px;line-height:1.7}}
+.btn{{display:inline-block;background:#0a84ff;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;margin:5px;font-weight:600}}
+.btn-dark{{background:#111}}
+h2{{color:#0a84ff;margin-top:30px}} pre{{background:#f6f8fa;padding:16px;border-radius:8px;overflow:auto}} code{{background:#f0f0f0;padding:2px 6px;border-radius:4px}}
+.header{{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid #eee;margin-bottom:20px}}
+</style></head><body>
+<div class="header"><a class="btn" href="/">Back to Dashboard</a> <a class="btn btn-dark" href="/doc/strategy/AiMn-KISS-Strategy-V3-full.md" download>Download MD</a></div>
+<h1>📘 AiMn KISS V3 Strategy</h1>
+{html_body}
+</body></html>"""
+
+@app.route("/doc/strategy/<path:filename>")
+def serve_strategy_doc(filename):
+    from flask import send_from_directory
+    import pathlib
+    folder = pathlib.Path("doc/strategy").resolve()
+    return send_from_directory(str(folder), filename, as_attachment=False)
