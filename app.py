@@ -11,7 +11,12 @@ if project_home not in sys.path:
 from sqlalchemy import text
 from shared_models import Base, Trade
 from app_sub.db import engine, db_session
-from engine.tuning.auto_tuner import run_analysis
+try:
+    from engine.tuning.auto_tuner import run_analysis
+except Exception as e:
+    print(f"Tuner import fallback: {e}")
+    def run_analysis(symbol="QQQ", timeframe="1hr"):
+        return {"symbol": symbol, "error": str(e)}
 
 # 1. Initialize Flask app ONCE with your settings
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -1272,7 +1277,12 @@ def serve_chart(filename):
         return send_file(path, mimetype='image/png')
     return "Not found", 404
 
-#from engine.tuning.auto_tuner import run_analysis
+#try:
+    from engine.tuning.auto_tuner import run_analysis
+except Exception as e:
+    print(f"Tuner import fallback: {e}")
+    def run_analysis(symbol="QQQ", timeframe="1hr"):
+        return {"symbol": symbol, "error": str(e)}
 
 
 #===================================================================
@@ -1435,7 +1445,12 @@ def run_tuning():
         print(f"[TUNING REQUEST] Received payload: {data}")
 
         # Call your auto-tuner analysis engine, handling argument signature safety
-        from engine.tuning.auto_tuner import run_analysis
+        try:
+    from engine.tuning.auto_tuner import run_analysis
+except Exception as e:
+    print(f"Tuner import fallback: {e}")
+    def run_analysis(symbol="QQQ", timeframe="1hr"):
+        return {"symbol": symbol, "error": str(e)}
         try:
             raw_result = run_analysis(data)
         except TypeError:
@@ -1458,7 +1473,12 @@ def run_tuning():
             "RSI": breakdown_raw.get('RSI', breakdown_raw.get('rsi', 0))
         }
 
-        # from engine.tuning.auto_tuner import run_analysis <- commented
+        # try:
+    from engine.tuning.auto_tuner import run_analysis
+except Exception as e:
+    print(f"Tuner import fallback: {e}")
+    def run_analysis(symbol="QQQ", timeframe="1hr"):
+        return {"symbol": symbol, "error": str(e)} <- commented
         raw_result = run_analysis(data) # <- NameError
 
         params_raw = raw_result.get('params', raw_result.get('best_params', {}))
@@ -1513,7 +1533,12 @@ def run_tuning():
 @app.route('/api/tuner_chart/<symbol>/<direction>/<timeframe>')
 def tuner_chart_data(symbol, direction, timeframe):
     try:
-        from engine.tuning.auto_tuner import run_analysis
+        try:
+    from engine.tuning.auto_tuner import run_analysis
+except Exception as e:
+    print(f"Tuner import fallback: {e}")
+    def run_analysis(symbol="QQQ", timeframe="1hr"):
+        return {"symbol": symbol, "error": str(e)}
         data = {"symbol": symbol, "direction": direction.upper(), "timeframe": timeframe, "bars": 300}
         result = run_analysis(data)
         candles = result.get("chart_candles", [])
