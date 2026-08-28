@@ -1,6 +1,8 @@
 class KISSV3Engine:
     TRAIL_PCT = 0.015
-    MIN_V_PCT = 0.003 # V must be at least 0.3% deep to be real
+    MIN_V_PCT = 0.002
+    SMA_PERIOD = 200
+
     def __init__(self, mode="live"):
         self.mode = mode
         self.state = "FLAT"
@@ -8,8 +10,11 @@ class KISSV3Engine:
         self.entry_price = None
         self.last_idx = 2
 
+    def sma(self, closes, period, idx):
+        if idx < period: return None
+        return sum(closes[idx-period:idx]) / period
+
     def is_v_long(self, w):
-        # w[0] > w[1] < w[2] and depth at least MIN_V_PCT
         if not (w[0] > w[1] < w[2]):
             return False
         depth = min(w[0], w[2]) - w[1]
@@ -25,11 +30,17 @@ class KISSV3Engine:
         start = from_idx if from_idx is not None else self.last_idx
         start = max(2, start)
         for i in range(start, len(closes)):
+            sma200 = self.sma(closes, self.SMA_PERIOD, i)
             w = [closes[i-2], closes[i-1], closes[i]]
-            if self.is_v_long(w):
+            is_long = self.is_v_long(w)
+            is_short = self.is_v_short(w)
+            if sma200 is not None:
+                if is_long and closes[i] < sma200: is_long=False
+                if is_short and closes[i] > sma200: is_short=False
+            if is_long:
                 self.last_idx = i+1
                 return "LONG", i
-            if self.is_v_short(w):
+            if is_short:
                 self.last_idx = i+1
                 return "SHORT", i
         return "FLAT", None
@@ -47,15 +58,14 @@ class KISSV3Engine:
 
     def next_state(self, new_signal, price):
         if self.state!= "FLAT":
-            trail_state = self.check_trail(price)
-            if trail_state == "FLAT":
-                self.state = "FLAT"
-                self.peak = None
+            if self.check_trail(price)=="FLAT":
+                self.state="FLAT"
+                self.peak=None
                 return "FLAT"
-        if new_signal == "FLAT":
+        if new_signal=="FLAT":
             return self.state
-        if self.state!= new_signal:
-            self.state = new_signal
-            self.peak = price
-            self.entry_price = price
+        if self.state!=new_signal:
+            self.state=new_signal
+            self.peak=price
+            self.entry_price=price
         return self.state
