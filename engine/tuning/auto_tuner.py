@@ -100,3 +100,7 @@ if __name__ == "__main__":
     parser.add_argument("--symbol", default="QQQ")
     args = parser.parse_args()
     tune_symbol(args.symbol)
+
+def run_analysis(symbol="QQQ", timeframe="1hr"):
+    # Backward compat for app.py dashboard
+    return tune_symbol(symbol)
