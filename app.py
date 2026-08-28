@@ -2134,8 +2134,6 @@ def tradingview_chart():
     return render_template('trade_chart.html', trade_id=trade_id)
 
 
-from app_sub.trades_comment_api import register_trades_comment_routes
-register_trades_comment_routes(app, db)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
