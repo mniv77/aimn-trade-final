@@ -11,158 +11,218 @@
     <div class="flex justify-between items-center mb-8 gap-4">
         <div>
             <h1 class="text-3xl font-extrabold text-blue-400">🎯 AiMn Trading Strategy</h1>
-            <p class="text-slate-400 text-sm mt-1">Document 2 — The Professional Explanation</p>
+            <p class="text-slate-400 text-sm mt-1">Document 2 — One Strategy, Explained at Three Levels</p>
         </div>
         <a href="/dashboard" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-semibold">Return to Dashboard</a>
     </div>
 
     <section class="bg-slate-950 p-8 rounded-2xl border border-blue-900 shadow-2xl mb-8 space-y-8">
-        <div>
-            <h2 class="text-2xl font-bold text-blue-300 mb-3">1. The Core Principle — KISS</h2>
-            <p class="text-slate-300 leading-relaxed">AiMn is intentionally moving away from the idea that a large collection of traditional indicators is required to trade successfully. The core philosophy is <strong>KISS — Keep It Simple</strong>.</p>
-            <p class="text-slate-300 leading-relaxed mt-3">The primary question is simple: <strong>Has the market changed trend?</strong> We do not need to predict every movement. We need to recognize meaningful transitions as close as possible to where they occur.</p>
-        </div>
 
-        <hr class="border-slate-800">
-
+        <!-- PART 1 -->
         <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">2. Three Market States</h2>
+            <div class="mb-6">
+                <div class="text-xs uppercase tracking-widest text-blue-400 font-bold mb-2">PART 1</div>
+                <h2 class="text-2xl font-bold text-blue-300">The Simple Explanation</h2>
+                <p class="text-slate-400 text-sm mt-2">For anyone who wants to understand the idea without knowing anything about trading software.</p>
+            </div>
+
+            <div class="bg-blue-950 p-6 rounded-xl border border-blue-800 mb-5">
+                <h3 class="text-xl font-bold text-blue-200 mb-3">KISS — Keep It Simple</h3>
+                <p class="text-slate-200 leading-relaxed">AiMn is intentionally moving away from the idea that a large collection of traditional indicators is required to trade successfully. The main question is very simple:</p>
+                <p class="text-xl font-bold text-white mt-4 text-center">“Has the market changed direction?”</p>
+                <p class="text-slate-300 leading-relaxed mt-4">We are not trying to predict every little movement. We want to recognize a real change of trend as close as reasonably possible to where it happens.</p>
+            </div>
+
+            <h3 class="text-xl font-bold text-blue-300 mb-3">Three basic market conditions</h3>
             <div class="grid sm:grid-cols-3 gap-4 text-center">
-                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="text-2xl font-bold text-green-400">LONG</div><p class="text-xs text-slate-400 mt-2">The market is generally moving upward.</p></div>
-                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="text-2xl font-bold text-red-400">SHORT</div><p class="text-xs text-slate-400 mt-2">The market is generally moving downward.</p></div>
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="text-2xl font-bold text-green-400">LONG</div><p class="text-xs text-slate-400 mt-2">The market is generally going up.</p></div>
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="text-2xl font-bold text-red-400">SHORT</div><p class="text-xs text-slate-400 mt-2">The market is generally going down.</p></div>
                 <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="text-2xl font-bold text-yellow-400">FLAT</div><p class="text-xs text-slate-400 mt-2">The market is moving sideways without a clear direction.</p></div>
             </div>
-        </div>
 
-        <hr class="border-slate-800">
-
-        <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">3. Entry Is a Trend Transition</h2>
-            <p class="text-slate-300 leading-relaxed mb-4">The strategy does not enter simply because an indicator reaches a particular number. An entry occurs when the market transitions into a tradable direction.</p>
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">When do we enter?</h3>
             <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 font-mono text-sm space-y-2">
                 <div>SHORT → <span class="text-green-400 font-bold">LONG</span> = ENTER LONG</div>
                 <div>LONG → <span class="text-red-400 font-bold">SHORT</span> = ENTER SHORT</div>
                 <div>FLAT → <span class="text-green-400 font-bold">LONG</span> = ENTER LONG</div>
                 <div>FLAT → <span class="text-red-400 font-bold">SHORT</span> = ENTER SHORT</div>
-                <div>LONG → FLAT = normally no new trade</div>
-                <div>SHORT → FLAT = normally no new trade</div>
+                <div>LONG → FLAT = normally do not enter</div>
+                <div>SHORT → FLAT = normally do not enter</div>
             </div>
-            <p class="text-slate-400 text-sm mt-4">FLAT is a waiting state. A transition from FLAT into LONG or SHORT can create an entry. A transition from LONG or SHORT into FLAT is not, by itself, a reason to open a trade.</p>
-        </div>
+            <p class="text-slate-400 text-sm mt-3">FLAT is mainly a waiting condition. We care about a change from FLAT into a clear LONG or SHORT direction. A change from LONG or SHORT into FLAT is not, by itself, a reason to open a trade.</p>
 
-        <hr class="border-slate-800">
-
-        <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">4. The Ideal Reversal — V-Long and V-Short</h2>
-            <p class="text-slate-300 leading-relaxed">The ideal trend reversal can look like a V. A V with the low point at the bottom represents a reversal toward LONG — <strong>V-Long</strong>. An upside-down V represents a reversal toward SHORT — <strong>V-Short</strong>.</p>
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">The ideal picture: V-Long and V-Short</h3>
+            <p class="text-slate-300 leading-relaxed">The perfect reversal can look like a V. When the bottom of the V marks a change from falling to rising, we call it a <strong>V-Long</strong>. An upside-down V represents a change from rising to falling, which we call a <strong>V-Short</strong>.</p>
             <div class="grid sm:grid-cols-2 gap-4 mt-4">
-                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 text-center"><div class="text-4xl font-bold">V</div><div class="text-green-400 font-bold mt-2">V-Long</div><p class="text-xs text-slate-400 mt-1">Downtrend changes to uptrend.</p></div>
-                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 text-center"><div class="text-4xl font-bold">∧</div><div class="text-red-400 font-bold mt-2">V-Short</div><p class="text-xs text-slate-400 mt-1">Uptrend changes to downtrend.</p></div>
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 text-center"><div class="text-5xl font-bold">V</div><div class="text-green-400 font-bold mt-2">V-Long</div><p class="text-xs text-slate-400 mt-1">Falling → Rising</p></div>
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 text-center"><div class="text-5xl font-bold">∧</div><div class="text-red-400 font-bold mt-2">V-Short</div><p class="text-xs text-slate-400 mt-1">Rising → Falling</p></div>
             </div>
-            <p class="text-slate-400 text-sm mt-4">Real markets are rarely this perfect. Reversals can look like M, W, U, inverted U, rounded turns, or irregular formations. The shape itself is not the strategy. <strong>The change from one trend state to another is the strategy.</strong></p>
-        </div>
+            <p class="text-slate-400 text-sm mt-3">Real charts are rarely perfect. The reversal may look like an M, W, U, an upside-down U, a rounded turn, or something much more complicated. <strong>The shape is not the strategy. The transition between trends is the strategy.</strong></p>
 
-        <hr class="border-slate-800">
-
-        <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">5. Detecting the Transition Efficiently</h2>
-            <p class="text-slate-300 leading-relaxed">A scanner may examine an asset only every few minutes. We do not want it to repeatedly travel far back through the entire candle history to rediscover the same trend.</p>
-            <p class="text-slate-300 leading-relaxed mt-3">Once a trend has been established, the system remembers its state and the relevant transition/candle time. When the scanner returns, it can concentrate on the candles that appeared since the previous inspection.</p>
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">Noise</h3>
+            <p class="text-slate-300 leading-relaxed">Markets do not move perfectly. A LONG trend can briefly turn toward SHORT and then immediately return to LONG. That small movement is noise. We do not want every little wiggle to make us buy, sell, exit, and re-enter.</p>
             <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-4">
-                <h3 class="font-bold text-blue-300 mb-2">Conceptual flow</h3>
-                <ol class="list-decimal list-inside text-sm text-slate-300 space-y-2">
-                    <li>Determine the latest established trend.</li>
-                    <li>Remember the trend and its relevant candle/time.</li>
-                    <li>Return later and inspect the new candles.</li>
-                    <li>If the new candles continue the same trend, update the remembered point.</li>
-                    <li>If a new trend develops and survives confirmation, recognize a genuine transition.</li>
-                </ol>
-            </div>
-        </div>
-
-        <hr class="border-slate-800">
-
-        <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">6. Minor Noise vs. Major Trend Change</h2>
-            <p class="text-slate-300 leading-relaxed">While riding a LONG trend, the market can briefly turn toward SHORT and then return to LONG. The same can happen while riding SHORT. These local reversals are <strong>noise</strong> unless they become persistent enough to represent a real transition.</p>
-            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-4">
-                <h3 class="font-bold text-blue-300 mb-2">Example while riding LONG</h3>
                 <div class="font-mono text-sm">LONG → possible SHORT → LONG</div>
-                <p class="text-xs text-slate-400 mt-2">If the change does not survive the confirmation zone, treat it as minor noise and continue riding the LONG trend.</p>
+                <p class="text-xs text-slate-400 mt-2">If the change does not survive confirmation, we treat it as minor noise and continue the trade.</p>
             </div>
-            <p class="text-slate-300 leading-relaxed mt-4">For a suspected transition, the system should allow approximately <strong>2–4 candles</strong> for confirmation. The purpose is to avoid exiting a good trade because of a small local fluctuation.</p>
-            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-4">
-                <h3 class="font-bold text-blue-300 mb-2">Major noise / confirmed reversal</h3>
-                <div class="font-mono text-sm">LONG → SHORT → SHORT → SHORT</div>
-                <p class="text-xs text-slate-400 mt-2">If the transition survives the safety zone, it may be a genuine trend change. The LONG position can be exited, and the system can wait for the next appropriate transition before re-entering.</p>
-            </div>
+            <p class="text-slate-300 leading-relaxed mt-4">A more important reversal that remains in the new direction can become a genuine trend change. The normal transition is allowed approximately <strong>2–4 candles</strong> for confirmation so that small noise does not control the trade.</p>
         </div>
 
         <hr class="border-slate-800">
 
+        <!-- PART 2 -->
         <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">7. Exiting a Trade</h2>
-            <p class="text-slate-300 leading-relaxed">The normal exit follows the same fundamental idea as the entry: <strong>the trade should end when the trend changes.</strong></p>
-            <p class="text-slate-300 leading-relaxed mt-3">A trailing take-profit is useful because it follows the favorable movement of the trade and can identify a meaningful retracement from the established peak. It should not be treated as a simple profit target that exits every time the market makes a small pullback.</p>
+            <div class="mb-6">
+                <div class="text-xs uppercase tracking-widest text-blue-400 font-bold mb-2">PART 2</div>
+                <h2 class="text-2xl font-bold text-blue-300">How AiMn Sees the Change</h2>
+                <p class="text-slate-400 text-sm mt-2">The same idea, now explained as if we are teaching the computer how to watch the chart.</p>
+            </div>
+
+            <div class="bg-blue-950 p-6 rounded-xl border border-blue-800 mb-5">
+                <h3 class="text-xl font-bold text-blue-200 mb-3">Think of AiMn as a person watching a chart</h3>
+                <p class="text-slate-300 leading-relaxed">Imagine a person looking at a chart every few minutes. They do not need to redraw the entire history every time they look. They remember what they were seeing last time and concentrate on what happened since then.</p>
+                <p class="text-slate-300 leading-relaxed mt-3">AiMn should work the same way.</p>
+            </div>
+
+            <h3 class="text-xl font-bold text-blue-300 mb-3">The old way: keep searching backward</h3>
+            <p class="text-slate-300 leading-relaxed">One possible method is to go backward through many candles, then move forward again until the computer finds where one trend ended and another began. That can work, but it repeats work that has already been done.</p>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">The AiMn memory method</h3>
+            <p class="text-slate-300 leading-relaxed">Instead, when AiMn discovers the latest established trend, it remembers two simple things:</p>
             <div class="grid sm:grid-cols-2 gap-4 mt-4">
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><div class="font-bold text-green-400">LONG</div><p class="text-sm text-slate-300 mt-1">Ride the upward trend. A confirmed reversal toward SHORT can end the LONG trade.</p></div>
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800"><div class="font-bold text-red-400">SHORT</div><p class="text-sm text-slate-300 mt-1">Ride the downward trend. A confirmed reversal toward LONG can end the SHORT trade.</p></div>
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="font-bold text-blue-300">WHAT?</div><p class="text-sm text-slate-300 mt-2">The latest known state: LONG, SHORT, or FLAT.</p></div>
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="font-bold text-blue-300">WHEN?</div><p class="text-sm text-slate-300 mt-2">The candle/time associated with that known state or transition.</p></div>
             </div>
-        </div>
 
-        <hr class="border-slate-800">
-
-        <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">8. Unexpected Market Shock — RSI as Emergency Protection</h2>
-            <p class="text-slate-300 leading-relaxed">Trend-change detection needs time to establish that a reversal is real. Markets can occasionally move so violently that waiting for normal confirmation would be dangerous.</p>
-            <p class="text-slate-300 leading-relaxed mt-3">This is where RSI has a very different role. <strong>RSI is not the engine of the strategy.</strong> It is an emergency protection mechanism for extraordinary situations.</p>
-            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-4 space-y-3 text-sm">
-                <div><strong class="text-green-400">LONG + sudden catastrophic drop:</strong> RSI can trigger an emergency exit before normal trend confirmation catches up.</div>
-                <div><strong class="text-red-400">SHORT + sudden explosive rise:</strong> RSI can trigger an emergency exit before normal trend confirmation catches up.</div>
+            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 mt-5">
+                <h3 class="font-bold text-blue-300 mb-4">Simple example</h3>
+                <div class="space-y-3 text-sm">
+                    <div><span class="text-slate-400">First visit:</span> AiMn determines that BTC is <strong class="text-green-400">LONG</strong>.</div>
+                    <div><span class="text-slate-400">Memory:</span> <code>Trend = LONG</code> and <code>Time = the latest established candle</code>.</div>
+                    <div><span class="text-slate-400">Next visit:</span> three new candles have appeared.</div>
+                    <div><span class="text-slate-400">AiMn:</span> checks those new candles instead of searching the whole history again.</div>
+                    <div><span class="text-slate-400">If they remain LONG:</span> move the remembered point forward.</div>
+                    <div><span class="text-slate-400">If they become SHORT and stay SHORT:</span> a new transition has been confirmed.</div>
+                </div>
             </div>
-            <p class="text-slate-400 text-sm mt-4">If the unexpected movement happens in our favor, the normal trend/trailing logic can continue to manage the profitable trade. The emergency RSI protection exists for the dangerous opposite case.</p>
-        </div>
 
-        <hr class="border-slate-800">
-
-        <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">9. Stop Loss — Final Protection</h2>
-            <p class="text-slate-300 leading-relaxed">A stop loss provides another layer of protection when the strategy is wrong or the market behaves in a way the normal trend logic cannot handle. It is a safety mechanism, not the reason for entering a trade.</p>
-            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-4 text-sm text-slate-300 space-y-2">
-                <div><strong>1. Trend transition</strong> — primary trading decision.</div>
-                <div><strong>2. Trailing take-profit</strong> — normal trade management and reversal protection.</div>
-                <div><strong>3. RSI emergency protection</strong> — fast response to extreme unexpected moves.</div>
-                <div><strong>4. Stop loss</strong> — final protection when the trade goes seriously wrong.</div>
+            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-5 font-mono text-sm text-center">
+                <div>OLD MEMORY: LONG @ 10:30</div>
+                <div class="my-2">↓ new candles arrive ↓</div>
+                <div>NEW MEMORY: LONG @ 10:45</div>
+                <div class="text-slate-400 mt-3">or, if a confirmed reversal occurs:</div>
+                <div class="text-red-400 font-bold mt-2">NEW TRANSITION: SHORT</div>
             </div>
-        </div>
 
-        <hr class="border-slate-800">
-
-        <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">10. One Strategy for Real-Time Trading and Backtesting</h2>
-            <p class="text-slate-300 leading-relaxed">The real-time scanner and the backtest system should use the <strong>same strategy logic</strong>. There should not be one set of rules for paper/live trading and another set for backtesting.</p>
-            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-4 font-mono text-sm">
-                <div>Market candles</div><div class="pl-4">↓</div><div>Shared trend / transition decision</div><div class="pl-4">↓</div>
-                <div class="grid sm:grid-cols-2 gap-4 mt-2 font-sans"><div class="border border-slate-700 rounded-lg p-3">Real-time paper/live execution</div><div class="border border-slate-700 rounded-lg p-3">Backtest / auto-tuner</div></div>
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">Minor noise versus a real transition</h3>
+            <p class="text-slate-300 leading-relaxed">A suspected reversal is not automatically accepted. AiMn gives the new direction a small confirmation window—approximately 2–4 candles—to determine whether the movement is continuing or was only a temporary wiggle.</p>
+            <div class="grid sm:grid-cols-2 gap-4 mt-4">
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="font-bold text-yellow-400">MINOR NOISE</div><p class="font-mono text-sm mt-2">LONG → SHORT → LONG</p><p class="text-xs text-slate-400 mt-2">New direction fails confirmation. Continue the existing trend.</p></div>
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="font-bold text-red-400">MEANINGFUL CHANGE</div><p class="font-mono text-sm mt-2">LONG → SHORT → SHORT → SHORT</p><p class="text-xs text-slate-400 mt-2">New direction survives confirmation. Treat it as a real transition.</p></div>
             </div>
-            <p class="text-slate-400 text-sm mt-4">This prevents the dangerous situation where a backtest says one thing while the real scanner follows different entry and exit rules.</p>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">The four important transition types</h3>
+            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 font-mono text-sm space-y-2">
+                <div>SHORT → LONG = LONG opportunity</div>
+                <div>LONG → SHORT = SHORT opportunity</div>
+                <div>FLAT → LONG = LONG opportunity</div>
+                <div>FLAT → SHORT = SHORT opportunity</div>
+            </div>
+            <p class="text-slate-400 text-sm mt-3">LONG → FLAT and SHORT → FLAT are not automatically entries. They mainly tell the system that the market has lost its clear direction.</p>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">Exiting is also a trend-change decision</h3>
+            <p class="text-slate-300 leading-relaxed">When riding LONG, we want to stay with the trend rather than panic over every small pullback. A trailing take-profit can follow the profitable movement and help identify a meaningful reversal. When riding SHORT, the same principle works in the opposite direction.</p>
+            <p class="text-slate-300 leading-relaxed mt-3">If a reversal is only minor noise, we continue. If the transition passes the confirmation zone and becomes meaningful, we exit the existing trade and wait for the next appropriate transition rather than immediately guessing.</p>
         </div>
 
         <hr class="border-slate-800">
 
+        <!-- PART 3 -->
         <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">11. The Future — AiMn AI Vision</h2>
-            <p class="text-slate-300 leading-relaxed">The long-term objective is for AiMn to learn to view a live chart in a way similar to an experienced human trader: recognize the current trend, recognize when a transition is developing, distinguish normal noise from a meaningful reversal, and identify the best practical entry or exit point.</p>
-            <p class="text-slate-300 leading-relaxed mt-3">The future AI should learn from many different reversal shapes — V, inverted V, M, W, U, rounded and irregular formations — rather than being taught that one particular shape is required.</p>
-            <p class="text-slate-300 leading-relaxed mt-3">Eventually, AI Vision may also help determine whether an apparent reversal is temporary noise worth riding out or a major change where exiting and waiting for the next global trend transition is wiser.</p>
-        </div>
+            <div class="mb-6">
+                <div class="text-xs uppercase tracking-widest text-blue-400 font-bold mb-2">PART 3</div>
+                <h2 class="text-2xl font-bold text-blue-300">Technical Implementation</h2>
+                <p class="text-slate-400 text-sm mt-2">The same strategy expressed clearly enough for the software, backtester, tuner, and future AI to follow.</p>
+            </div>
 
-        <hr class="border-slate-800">
+            <h3 class="text-xl font-bold text-blue-300 mb-3">1. One strategy — not several strategies</h3>
+            <p class="text-slate-300 leading-relaxed">The real-time scanner, paper/live trading system, backtester, and auto-tuner should use the <strong>same core trend-transition strategy</strong>. We should not create separate versions of the entry and exit logic for each application.</p>
+            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 mt-4">
+                <div class="text-center font-mono text-sm">CANDLE DATA</div>
+                <div class="text-center my-2">↓</div>
+                <div class="bg-blue-950 border border-blue-800 rounded-lg p-4 text-center font-bold">SHARED TREND / TRANSITION ENGINE</div>
+                <div class="text-center my-3">↓</div>
+                <div class="grid sm:grid-cols-3 gap-3 text-center text-sm">
+                    <div class="border border-slate-700 rounded-lg p-4">Real-Time Scanner</div>
+                    <div class="border border-slate-700 rounded-lg p-4">Backtester</div>
+                    <div class="border border-slate-700 rounded-lg p-4">Auto-Tuner</div>
+                </div>
+            </div>
 
-        <div>
-            <h2 class="text-xl font-bold text-blue-300 mb-3">12. The Strategy in One Sentence</h2>
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">2. One brain, separate memories</h3>
+            <p class="text-slate-300 leading-relaxed">Sharing the strategy does <strong>not</strong> mean that every application should share the same state record. Each application or independent run needs its own memory so that it cannot accidentally change the state being used by another application.</p>
+            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-4">
+                <div class="text-center font-bold text-blue-300 mb-4">SAME RULES</div>
+                <div class="grid sm:grid-cols-3 gap-3 text-sm">
+                    <div class="border border-slate-700 rounded-lg p-4"><strong>Live Trader</strong><p class="text-xs text-slate-400 mt-2">Own state/memory for its current market process.</p></div>
+                    <div class="border border-slate-700 rounded-lg p-4"><strong>Backtest</strong><p class="text-xs text-slate-400 mt-2">Own state/memory for the historical run.</p></div>
+                    <div class="border border-slate-700 rounded-lg p-4"><strong>Auto-Tuner</strong><p class="text-xs text-slate-400 mt-2">Own state/memory for each independent test/run.</p></div>
+                </div>
+            </div>
+            <p class="text-slate-400 text-sm mt-3"><strong>Think of it as one teacher and several students.</strong> The teacher gives everyone the same rules. Each student keeps their own notebook.</p>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">3. Entry rules</h3>
+            <ol class="list-decimal list-inside space-y-2 text-sm text-slate-300">
+                <li>Determine the current market state: LONG, SHORT, or FLAT.</li>
+                <li>Compare it with the previously remembered state.</li>
+                <li>Detect a transition into LONG or SHORT.</li>
+                <li>Allow the transition to pass the confirmation window, approximately 2–4 candles.</li>
+                <li>Ignore a short-lived reversal that returns to the previous trend.</li>
+                <li>Enter as close as practical to the confirmed transition rather than entering late after a large part of the move has already happened.</li>
+            </ol>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">4. Exit rules</h3>
+            <ol class="list-decimal list-inside space-y-2 text-sm text-slate-300">
+                <li>While LONG, follow the upward trend.</li>
+                <li>While SHORT, follow the downward trend.</li>
+                <li>Use the trailing take-profit to follow favorable movement and detect a meaningful retracement/reversal.</li>
+                <li>Do not exit merely because of minor local noise.</li>
+                <li>If a meaningful transition is confirmed, exit the current trade.</li>
+                <li>After an exit, wait for the next appropriate transition rather than guessing an immediate re-entry.</li>
+            </ol>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">5. Unexpected market shock — RSI emergency protection</h3>
+            <p class="text-slate-300 leading-relaxed">Normal trend-change detection needs confirmation. But sometimes the market moves like a bomb has gone off: terrible news can cause a LONG position to collapse suddenly, or extraordinary good news can cause a SHORT position to explode upward.</p>
+            <p class="text-slate-300 leading-relaxed mt-3">In those situations, waiting for several candles may be too slow. RSI therefore has a very specific secondary job:</p>
+            <div class="grid sm:grid-cols-2 gap-4 mt-4">
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="font-bold text-red-400">LONG + sudden extreme drop</div><p class="text-sm text-slate-300 mt-2">RSI emergency protection may force an early exit before normal trend confirmation finishes.</p></div>
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800"><div class="font-bold text-red-400">SHORT + sudden extreme rise</div><p class="text-sm text-slate-300 mt-2">RSI emergency protection may force an early exit before normal trend confirmation finishes.</p></div>
+            </div>
+            <p class="text-slate-400 text-sm mt-3"><strong>RSI is not the strategy.</strong> It is emergency protection against the unexpected.</p>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">6. Stop loss — final safety net</h3>
+            <p class="text-slate-300 leading-relaxed">The stop loss is another protection layer for a trade that goes seriously wrong. It is not the reason for entering the trade.</p>
+            <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mt-4 text-sm space-y-2">
+                <div><strong>Primary:</strong> trend transition.</div>
+                <div><strong>Normal trade management:</strong> trailing take-profit and meaningful reversal detection.</div>
+                <div><strong>Emergency:</strong> RSI protection against extreme unexpected movement.</div>
+                <div><strong>Final protection:</strong> stop loss.</div>
+            </div>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">7. Future AiMn AI Vision</h3>
+            <p class="text-slate-300 leading-relaxed">The long-term goal is for AiMn to learn to look at a live chart in a way that resembles an experienced human observer: recognize LONG, SHORT, and FLAT; recognize when a transition is developing; distinguish minor noise from a meaningful reversal; and identify an entry or exit close to the important transition.</p>
+            <p class="text-slate-300 leading-relaxed mt-3">The AI should not be limited to recognizing a V. It should learn from V-Long, V-Short, M, W, U, rounded turns, and irregular formations. The common feature is the <strong>change of trend</strong>, not the shape.</p>
+            <p class="text-slate-300 leading-relaxed mt-3">Eventually, AI can also help decide whether a developing reversal is only noise worth riding through or a major change where exiting and waiting for the next global trend is wiser.</p>
+
+            <h3 class="text-xl font-bold text-blue-300 mt-7 mb-3">8. The strategy in one paragraph</h3>
             <div class="bg-blue-950 p-6 rounded-xl border border-blue-800 text-center">
-                <p class="text-lg sm:text-xl font-bold text-blue-200 leading-relaxed">Follow the trend, enter as close as possible to a real trend transition, ignore minor noise, exit when a meaningful transition occurs, and use RSI and stop loss only to protect against the unexpected.</p>
+                <p class="text-lg font-bold text-blue-200 leading-relaxed">AiMn keeps the trading idea simple: identify whether the market is LONG, SHORT, or FLAT; enter when a meaningful transition creates a new tradable direction; confirm enough to avoid minor noise; stay with the trend while it remains valid; exit when a meaningful transition occurs; use RSI for sudden dangerous shocks and stop loss as final protection; and make the same core strategy available to real-time trading, backtesting, tuning, and eventually AI Vision.</p>
+            </div>
+
+            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 mt-6">
+                <h3 class="font-bold text-blue-300 mb-3">The most important rule</h3>
+                <p class="text-xl font-bold text-center text-white">ONE STRATEGY. ONE SET OF RULES. DIFFERENT APPLICATIONS, DIFFERENT MEMORIES.</p>
+                <p class="text-slate-400 text-sm text-center mt-3">The implementation should follow this document rather than reinventing the trading logic in each part of the system.</p>
             </div>
         </div>
     </section>
