@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Perfect Chart View - {{ symbol }} - All Trades + AI Loser Comments</h2>
+<div id="chart" style="height:600px"></div>
+<div id="trades-table"></div>
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+const symbol = "{{ symbol }}";
+const trades = {{ trades_json|safe }}; // [{entry_time, entry_price, exit_time, exit_price, pnl, gap, rsi, sma200, vol, avg_vol, reason}]
+const candles = {{ candles_json|safe }};
+
+function render(){
+  const chart = LightweightCharts.createChart(document.getElementById('chart'), {width:1200, height:500});
+  const candleSeries = chart.addCandlestickSeries();
+  candleSeries.setData(candles);
+
+  let html = "<table border=1><tr><th>Entry</th><th>Exit</th><th>PnL%</th><th>AI Comment (Loser Reason)</th><th>Gap</th><th>RSI</th><th>SMA200</th></tr>";
+  trades.forEach(t=>{
+    let ai_comment = "WINNER - Right trend giant profit!";
+    let color = "green";
+    if(t.pnl < 0){
+      color = "red";
+      if(t.gap > 4.5) ai_comment = "LOSER-GAP: thin giant skip up/down " + t.gap.toFixed(1) + "% - you saw this!";
+      else if(t.rsi > 80) ai_comment = "LOSER-RSI: RSI " + t.rsi.toFixed(0) + " saved us from wrong trend";
+      else if(t.price < t.sma200*0.94) ai_comment = "LOSER-WRONG-TREND: below SMA200";
+      else if(t.vol < t.avg_vol*0.05) ai_comment = "LOSER-THIN: thin volume " + (t.vol/t.avg_vol).toFixed(2)+"x";
+      else ai_comment = "LOSER-UNKNOWN: small loss, part of 67% WR game";
+      // Mark on chart
+      candleSeries.createPriceLine({price: t.entry_price, color: 'red', lineWidth:2, title: ai_comment});
+    } else {
+      candleSeries.createPriceLine({price: t.exit_price, color: 'green', lineWidth:1, title: "WIN "+t.pnl.toFixed(2)+"%"});
+    }
+    html += `<tr style="color:${color}"><td>${t.entry_time}</td><td>${t.exit_time}</td><td>${t.pnl.toFixed(2)}%</td><td><b>${ai_comment}</b></td><td>${t.gap.toFixed(2)}%</td><td>${t.rsi.toFixed(0)}</td><td>${t.sma200.toFixed(2)}</td></tr>`;
+    // Save for AI future tuning
+    t.ai_comment = ai_comment;
+  });
+  html += "</table><button onclick='saveAI()'>Save Loser Comments for AI Tuner</button>";
+  document.getElementById('trades-table').innerHTML = html;
+  window.allTradesWithAI = trades;
+}
+
+function saveAI(){
+  fetch('/api/trades/comment_losers', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({symbol: symbol, trades: window.allTradesWithAI})
+  }).then(r=>r.json()).then(d=>alert("Saved "+d.count+" AI comments for future tuner! "+d.message));
+}
+render();
+</script>
+{% endblock %}

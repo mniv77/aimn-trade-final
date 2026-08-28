@@ -28,6 +28,8 @@ register_feedback_routes(app, db)
 
 from app_sub.alerts_api import register_alerts_routes
 register_alerts_routes(app, db)
+from app_sub.trades_comment_api import register_trades_comment_routes
+register_trades_comment_routes(app, db)
 
 
 # Lazy singleton for quote provider (Alpaca -> Binance/yfinance -> SIM)
@@ -2141,4 +2143,4 @@ def shutdown_session(exception=None):
             db.rollback()
             db.remove()
         except Exception:
-            pass
+            pass# Added for perfect chart
