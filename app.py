@@ -2296,11 +2296,45 @@ def trade_chart_data(trade_id):
 
     return jsonify({"symbol": symbol, "direction": direction, "pnl_pct": round(pnl_pct,3), "candles": candles, "markers": markers, "cb_product": cb_symbol})
 
-
+#===========================================================
 
 @app.route("/docs/strategy")
-def strategy_document():
-    return render_or_404("strategy_docs.html")
+def docs_strategy():
+    import pathlib, markdown
+    md_file = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3-full.md")
+    if not md_file.exists():
+        md_file = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3.md")
+    if md_file.exists():
+        md_text = md_file.read_text(encoding="utf-8", errors="ignore")
+        html_body = markdown.markdown(md_text, extensions=["fenced_code","tables","toc","nl2br"])
+    else:
+        html_body = "<p>Doc missing</p>"
+    return f"""<!doctype html><html><head><meta charset='utf-8'><title>KISS V3</title>
+<style>
+body{{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:900px;margin:0 auto;padding:24px;line-height:1.7;background:#fff;color:#111}}
+.btn{{display:inline-block;background:#0a84ff;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;margin:5px;font-weight:600}}
+.btn-dark{{background:#111}}
+h1{{font-size:28px;border-bottom:2px solid #eee;padding-bottom:8px}}
+h2{{color:#0a84ff;margin-top:30px;border-bottom:1px solid #eee;padding-bottom:6px}}
+h3{{color:#333}}
+pre{{background:#f6f8fa;padding:16px;border-radius:8px;overflow:auto}}
+code{{background:#f0f0f0;padding:2px 6px;border-radius:4px}}
+table{{border-collapse:collapse;width:100%;margin:16px 0}} th,td{{border:1px solid #ddd;padding:8px;text-align:left}} th{{background:#f5f5f5}}
+.header{{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);padding:12px 0;border-bottom:1px solid #eee;margin-bottom:20px;z-index:10}}
+</style></head><body>
+<div class="header"><a class="btn" href="/">← Dashboard</a> <a class="btn btn-dark" href="/doc/strategy/AiMn-KISS-Strategy-V3-full.md" download>⬇ Download MD</a></div>
+<h1>📘 AiMn KISS V3 Strategy</h1>
+{html_body}
+</body></html>"""
+
+@app.route("/doc/strategy/<path:filename>")
+def serve_strategy_doc(filename):
+    from flask import send_from_directory
+    import pathlib
+    folder = pathlib.Path("doc/strategy").resolve()
+    return send_from_directory(str(folder), filename, as_attachment=False)
+#=================================================================
+
 
 
 @app.route('/tradingview_chart.html')
