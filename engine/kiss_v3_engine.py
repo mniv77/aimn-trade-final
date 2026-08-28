@@ -1,3 +1,4 @@
+from engine.safety_filter import is_safe_to_enter
 class KISSV3Engine:
     TRAIL_PCT = 0.015
     MIN_V_PCT = 0.002
