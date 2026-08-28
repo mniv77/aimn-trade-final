@@ -11,12 +11,7 @@ if project_home not in sys.path:
 from sqlalchemy import text
 from shared_models import Base, Trade
 from app_sub.db import engine, db_session
-try:
-    from engine.tuning.auto_tuner import run_analysis
-    from engine.tuning.auto_tuner import tune_symbol
-except:
-    def run_analysis(s='QQQ', t='1hr'): return None
-    def tune_symbol(s='QQQ'): return None
+from engine.tuning.auto_tuner import run_analysis, tune_symbol # KISS V3
 
 # 1. Initialize Flask app ONCE with your settings
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -861,9 +856,9 @@ def api_scanner_snapshot():
 
     from db import get_db_connection
     from engine.tuning.candle_fetcher import fetch_candles
-    # KISS V3: No RSI/MACD - using V-Trend only
-    def calc_rsi_real(x): return 50
-    def calc_macd_series(x): return 0
+    # KISS V3 removed RSI/MACD - dummy compat
+    calc_rsi_real = lambda x: 50
+    calc_macd_series = lambda x: 0
 
     try:
         conn, cursor = get_db_connection()
@@ -1279,12 +1274,7 @@ def serve_chart(filename):
         return send_file(path, mimetype='image/png')
     return "Not found", 404
 
-#try:
-    from engine.tuning.auto_tuner import run_analysis
-    from engine.tuning.auto_tuner import tune_symbol
-except:
-    def run_analysis(s='QQQ', t='1hr'): return None
-    def tune_symbol(s='QQQ'): return None
+#from engine.tuning.auto_tuner import run_analysis
 
 
 #===================================================================
@@ -1447,12 +1437,7 @@ def run_tuning():
         print(f"[TUNING REQUEST] Received payload: {data}")
 
         # Call your auto-tuner analysis engine, handling argument signature safety
-        try:
-    from engine.tuning.auto_tuner import run_analysis
-    from engine.tuning.auto_tuner import tune_symbol
-except:
-    def run_analysis(s='QQQ', t='1hr'): return None
-    def tune_symbol(s='QQQ'): return None
+        from engine.tuning.auto_tuner import run_analysis
         try:
             raw_result = run_analysis(data)
         except TypeError:
@@ -1475,12 +1460,7 @@ except:
             "RSI": breakdown_raw.get('RSI', breakdown_raw.get('rsi', 0))
         }
 
-        # try:
-    from engine.tuning.auto_tuner import run_analysis
-    from engine.tuning.auto_tuner import tune_symbol
-except:
-    def run_analysis(s='QQQ', t='1hr'): return None
-    def tune_symbol(s='QQQ'): return None <- commented
+        # from engine.tuning.auto_tuner import run_analysis <- commented
         raw_result = run_analysis(data) # <- NameError
 
         params_raw = raw_result.get('params', raw_result.get('best_params', {}))
@@ -1535,12 +1515,7 @@ except:
 @app.route('/api/tuner_chart/<symbol>/<direction>/<timeframe>')
 def tuner_chart_data(symbol, direction, timeframe):
     try:
-        try:
-    from engine.tuning.auto_tuner import run_analysis
-    from engine.tuning.auto_tuner import tune_symbol
-except:
-    def run_analysis(s='QQQ', t='1hr'): return None
-    def tune_symbol(s='QQQ'): return None
+        from engine.tuning.auto_tuner import run_analysis
         data = {"symbol": symbol, "direction": direction.upper(), "timeframe": timeframe, "bars": 300}
         result = run_analysis(data)
         candles = result.get("chart_candles", [])
