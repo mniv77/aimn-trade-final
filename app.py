@@ -2302,7 +2302,7 @@ body{{font-family:system-ui,sans-serif;max-width:900px;margin:0 auto;padding:24p
 h2{{color:#0a84ff;margin-top:30px}} pre{{background:#f6f8fa;padding:16px;border-radius:8px;overflow:auto}} code{{background:#f0f0f0;padding:2px 6px;border-radius:4px}}
 .header{{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid #eee;margin-bottom:20px}}
 </style></head><body>
-<div class="header"><a class="btn" href="/">Back to Dashboard</a> <a class="btn btn-dark" href="/doc/strategy/AiMn-KISS-Strategy-V3-full.md" download>Download MD</a></div>
+<div class="header"><a class="btn" href="/">Back to Dashboard</a> <a class="btn btn-dark" href="/doc/strategy/AiMn-KISS-Strategy-V3-full.md" download>Download MD</a> <a class="btn" style="background:#111;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;margin:5px;font-weight:600" href="/doc/strategy/AiMn_KISS_V3_Holy_Bible.pdf" download>📖 Holy Bible PDF</a> <a class="btn btn-dark" style="background:#111" href="/doc/strategy/AiMn_KISS_V3_Holy_Bible.pdf" download>📖 Holy Bible PDF</a></div>
 <h1>📘 AiMn KISS V3 Strategy</h1>
 {html_body}
 </body></html>"""
