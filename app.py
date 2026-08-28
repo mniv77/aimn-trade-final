@@ -11,7 +11,7 @@ if project_home not in sys.path:
 from sqlalchemy import text
 from shared_models import Base, Trade
 from app_sub.db import engine, db_session
-# from engine.tuning.auto_tuner import run_analysis # removed
+from engine.tuning.auto_tuner import run_analysis
 
 # 1. Initialize Flask app ONCE with your settings
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -1272,7 +1272,7 @@ def serve_chart(filename):
         return send_file(path, mimetype='image/png')
     return "Not found", 404
 
-## from engine.tuning.auto_tuner import run_analysis # removed
+#from engine.tuning.auto_tuner import run_analysis
 
 
 #===================================================================
@@ -1430,55 +1430,36 @@ def get_brokers_and_symbols():
 @app.route('/api/run_tuning', methods=['POST'])
 def run_tuning():
     import traceback
-    from engine.tuning.auto_tuner import tune_strategy
     try:
         data = request.get_json(force=True) or {}
         print(f"[TUNING REQUEST] Received payload: {data}")
-        sym = data.get('symbol','MSFT')
-        direction = data.get('direction','LONG')
-        # from engine.tuning.auto_tuner import run_analysis # removed
+
+        # Call your auto-tuner analysis engine, handling argument signature safety
+        from engine.tuning.auto_tuner import run_analysis
         try:
-            tf=data.get('timeframe','30m')
-            bars=int(data.get('bars',2016))
-            broker=data.get('broker','Alpaca')
-            rsi_opts = [25,30,35] if direction=="LONG" else [65,70,75]
-            cfg={
-                "bars":bars, 
-                "timeframe":tf, 
-                "min_trades":5,
-                "rsi_len_options":[14,21,28],
-                "rsi_entry_options":rsi_opts,
-                "init_profit_options":[1.5,2.0,2.5,3.0],
-                "trail_start_options":[1.5,2.0,2.5],
-                "trail_minus_options":[0.3,0.5],
-                "stop_loss_options":[1.0,1.5],
-                "decay_start_options":[4,6,12],
-                "decay_rate":0.3,
-                "score_metric":"profit_per_day"
-            }
-            raw_result = tune_strategy(f"{sym}_{direction}", sym, direction, candle_time=tf, cfg=cfg, broker_name=broker)
-        except TypeError as te:
-            print(f"retry: {te}")
-            raw_result = tune_strategy(f"{sym}_{direction}", sym, direction)
+            raw_result = run_analysis(data)
+        except TypeError:
+            raw_result = run_analysis()
 
         if not isinstance(raw_result, dict):
             raw_result = {}
 
         # Map engine results with support for multiple naming conventions
-        # raw_result may be {symbol, result:{}, params:{}} OR direct result
-        res = raw_result.get('result', raw_result) if isinstance(raw_result, dict) else {}
-        if not isinstance(res, dict): res = {}
-        trades_val = res.get('total_trades', res.get('trades', raw_result.get('trades_val', 0)))
-        win_rate_val = res.get('win_rate', res.get('winrate', raw_result.get('win_rate_val', 0.0)))
-        total_pnl_val = res.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
-        avg_pnl_val = res.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
-        breakdown_raw = res.get('breakdown', res.get('exit_breakdown', raw_result.get('breakdown', {})))
+        trades_val = raw_result.get('total_trades', raw_result.get('trades_val', 0))
+        win_rate_val = raw_result.get('win_rate', raw_result.get('win_rate_val', 0.0))
+        total_pnl_val = raw_result.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
+        avg_pnl_val = raw_result.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
+
+        breakdown_raw = raw_result.get('breakdown', raw_result.get('exit_breakdown', {}))
         breakdown = {
             "STOP": breakdown_raw.get('STOP', breakdown_raw.get('stop', 0)),
             "TRAIL": breakdown_raw.get('TRAIL', breakdown_raw.get('trail', 0)),
             "DECAY": breakdown_raw.get('DECAY', breakdown_raw.get('decay', 0)),
             "RSI": breakdown_raw.get('RSI', breakdown_raw.get('rsi', 0))
         }
+
+        # from engine.tuning.auto_tuner import run_analysis <- commented
+        raw_result = run_analysis(data) # <- NameError
 
         params_raw = raw_result.get('params', raw_result.get('best_params', {}))
         def clean_opt(val, fallback):
@@ -1526,7 +1507,28 @@ def run_tuning():
         }, 500)
 
 
+#============================================================================
+#  '/api/tuner_chart/
+#==============================================================================================
+@app.route('/api/tuner_chart/<symbol>/<direction>/<timeframe>')
+def tuner_chart_data(symbol, direction, timeframe):
+    try:
+        from engine.tuning.auto_tuner import run_analysis
+        data = {"symbol": symbol, "direction": direction.upper(), "timeframe": timeframe, "bars": 300}
+        result = run_analysis(data)
+        candles = result.get("chart_candles", [])
+        markers = result.get("markers", [])
+        chart_data = [{"time": i, "open": c["open"], "high": c["high"], "low": c["low"], "close": c["close"]} for i, c in enumerate(candles)]
+        return jsonify({"candles": chart_data, "trades": markers, "stats": {"total_trades": result.get("total_trades",0), "win_rate": result.get("win_rate",0), "total_pnl": result.get("total_pnl",0), "avg_pnl": result.get("avg_pnl",0)}})
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
+@app.route('/tuner_chart')
+def tuner_chart_page():
+    return render_template("tuner_chart.html")
+
+#===========================================================================
 
 
 #============================================================
@@ -1588,7 +1590,7 @@ def run_auto_tuner():
             'macd_sig'           : int(data.get('macd_sig',  9)),
             'stop_loss_options'  : data.get('stop_loss_options',   [0.3, 0.5, 0.7, 1.0]),
             'trail_start_options': data.get('trail_start_options', [1.0, 2.0, 3.0]),
-            'trail_minus_options': data.get('trail_minus_options', [0.3, 0.5, 0.7]),
+            'trail_minus_options': data.get('trail_minus_options', [0.5, 1.0, 1.5, 2.0]),
             'rsi_exit_options'   : data.get('rsi_exit_options',    [65, 70, 75, 80]),
             'init_profit_options': data.get('init_profit_options', [0.5, 1.0, 1.5, 2.0]),
             'decay_start_options': data.get('decay_start_options', [0.5, 1.0, 2.0]),
@@ -2078,6 +2080,34 @@ def api_crypto_active():
     conn.close()
     return jsonify({"ok": True, "message": "Crypto ENABLED" if val else "Crypto PAUSED"})
 
+# --- KISS V3 DOC ROUTE - ONE STRATEGY ---
+@app.route("/docs/strategy")
+def docs_strategy():
+    try:
+        import pathlib
+        p = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3-full.md")
+        if not p.exists():
+            p = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3.md")
+        txt = p.read_text() if p.exists() else "Doc missing"
+        return f"""<html><head><title>KISS V3</title>
+        <style>body{{font-family:Arial;max-width:900px;margin:30px auto;padding:20px;line-height:1.6}}
+        .btn{{background:#0a84ff;color:white;padding:10px 16px;border-radius:6px;text-decoration:none}}
+        pre{{white-space:pre-wrap;background:#f5f5f5;padding:20px;border-radius:8px}}
+        </style></head><body>
+        <a class=btn href="/">← Back to Dashboard</a>
+        <h1>📘 AiMn KISS V3 Strategy</h1>
+        <a class=btn href="/doc/strategy/AiMn-KISS-Strategy-V3.md" target="_blank">Download MD</a>
+        <hr><pre>{txt}</pre></body></html>"""
+    except Exception as e:
+        return f"Error: {e} <a href='/'>back</a>"
+
+#@app.route("/doc/strategy/<path:filename>")
+#def serve_strategy_doc(filename):
+#    from flask import send_from_directory
+#    return send_from_directory("doc/strategy", filename)
+
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5080"))
     app.run(host="127.0.0.1", port=port, debug=True)
@@ -2110,10 +2140,54 @@ def api_backtest_run():
 from flask import render_template, jsonify, request
 import sqlite3
 
-@app.route('/trade_chart_view/<trade_id>')
-def trade_chart_view(trade_id):
-    """Renders the HTML page displaying the trade review chart."""
-    return render_template('trade_chart.html', trade_id=trade_id)
+
+@app.route('/trade_chart_view/live')
+def trade_chart_view_live():
+    from flask import request, render_template
+    symbol = request.args.get('symbol','LINKUSD').upper()
+    return render_template('trade_chart.html', symbol=symbol, live_mode=True)
+
+@app.route('/api/trade_chart_data/live')
+def trade_chart_data_live():
+    import requests, json
+    from flask import request, jsonify
+    symbol = request.args.get('symbol','BTCUSD').upper()
+    cb = symbol.replace('/','').replace('USDT','USD')
+    if '-USD' not in cb and cb.endswith('USD'):
+        cb = cb[:-3]+'-USD'
+    try:
+        r = requests.get(f"https://api.exchange.coinbase.com/products/{cb}/candles?granularity=3600", timeout=10)
+        r.raise_for_status()
+        data = sorted(r.json(), key=lambda x: x[0])
+        candles = [{"time": k[0], "open": k[3], "high": k[2], "low": k[1], "close": k[4]} for k in data[-200:]]
+        return jsonify({"symbol": symbol, "candles": candles, "trades": []})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#(trade_id):
+#    """Renders the HTML page displaying the trade review chart."""
+#    return render_template('trade_chart.html', trade_id=trade_id)
+
+
+
+@app.route('/api/live_candles')
+def live_candles():
+    import requests
+    from flask import request, jsonify
+    symbol = request.args.get('symbol','BTCUSDT').upper()
+    cb = symbol.replace('/','').replace('USDT','USD')
+    if '-USD' not in cb:
+        if cb.endswith('USD'):
+            cb = cb[:-3]+'-USD'
+    try:
+        r = requests.get(f"https://api.exchange.coinbase.com/products/{cb}/candles?granularity=3600", timeout=15)
+        r.raise_for_status()
+        data = r.json()
+        data = sorted(data, key=lambda x: x[0])
+        candles = [{"time": k[0], "low": k[1], "high": k[2], "open": k[3], "close": k[4]} for k in data[-200:]]
+        return jsonify({"symbol": symbol, "cb_product": cb, "candles": candles})
+    except Exception as e:
+        return jsonify({"error": str(e), "symbol": symbol}), 500
 
 
 @app.route('/api/trades_list', methods=['GET'])
@@ -2132,100 +2206,102 @@ def trades_list():
     except Exception as e:
         return {"trades": [], "error": str(e)}
 
+
 @app.route('/api/trade_chart_data/<int:trade_id>')
 def trade_chart_data(trade_id):
+    from flask import jsonify
+    import requests, time, os
     from db import get_db_connection
+    # --- get trade ---
     try:
         conn, cursor = get_db_connection()
+        if conn is None:
+            raise Exception("DB connection None")
         cursor.execute("SELECT id, symbol, direction, entry_price, entry_time, exit_price, exit_time, pnl_percent FROM active_trades WHERE id=%s", (trade_id,))
         trade = cursor.fetchone()
         conn.close()
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-        
+        return jsonify({'error': f'db err {e}'}), 500
+
     if not trade:
-        # Fallback dummy trade if ID not found in database for previewing
-        trade = {
-            'symbol': 'BTCUSDT',
-            'direction': 'LONG',
-            'entry_price': 60000.0,
-            'exit_price': 61500.0,
-            'entry_time': None,
-            'exit_time': None,
-            'pnl_percent': None
-        }
-    
-    symbol = trade.get('symbol', 'BTCUSDT')
-    direction = trade.get('direction', 'LONG')
-    pnl_pct = float(trade['pnl_percent']) if trade.get('pnl_percent') is not None else None
-    entry_price = float(trade.get('entry_price') or 60000.0)
-    
-    import time, random
-    # Snap base_time to nearest 300-second (5 min) boundary
-    now_ts = int(time.time())
-    entry_ts = int(trade['entry_time'].timestamp()) if trade.get('entry_time') else now_ts
-    base_time = (entry_ts // 300) * 300
-    
-    start_time = base_time - (30 * 300)
-    candles = []
-    price = entry_price
-    random.seed(trade_id)
-    
-    for i in range(120):
-        t = start_time + i * 300
-        change = random.uniform(-50, 50)
-        open_p = price
-        close_p = price + change
-        high_p = max(open_p, close_p) + random.uniform(0, 20)
-        low_p = min(open_p, close_p) - random.uniform(0, 20)
-        price = close_p
-        candles.append({
-            'time': t,
-            'open': round(open_p, 2),
-            'high': round(high_p, 2),
-            'low': round(low_p, 2),
-            'close': round(close_p, 2)
-        })
-    
-    markers = []
-    # Entry marker snapped to first candle interval if time missing
-    if trade.get('entry_time'):
+        trade = {'symbol': 'BTCUSDT','direction': 'LONG','entry_price': 60000.0,'exit_price': None,'entry_time': None,'exit_time': None,'pnl_percent': None}
+
+    symbol = (trade.get('symbol') or 'BTCUSDT').replace('/', '').upper()
+    direction = (trade.get('direction') or 'LONG').upper()
+    entry_price = float(trade.get('entry_price') or 0)
+    exit_price = float(trade.get('exit_price') or 0) if trade.get('exit_price') else 0
+    pnl_pct = float(trade.get('pnl_percent') or 0) if trade.get('pnl_percent') is not None else 0
+    if not pnl_pct and entry_price and exit_price:
+        pnl_pct = ((exit_price-entry_price)/entry_price*100) * ( -1 if direction=='SHORT' else 1)
+
+    # --- map to Coinbase product BTC-USD ---
+    cb_symbol = symbol.upper().replace('/','').replace('USDT','USD')
+    # BTCUSD -> BTC-USD, SOLUSD -> SOL-USD, BTC-USD stays
+    if '-USD' not in cb_symbol:
+        if cb_symbol.endswith('USD'):
+            cb_symbol = cb_symbol[:-3] + '-USD'
+        elif cb_symbol.endswith('USDT'):
+            cb_symbol = cb_symbol[:-4] + '-USD'
+    cb_symbol = cb_symbol.replace('--','-')
+
+    candles=[]
+    try:
+        # Coinbase public candles: https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=3600
+        url = f"https://api.exchange.coinbase.com/products/{cb_symbol}/candles?granularity=3600"
+        headers = {"User-Agent":"aimn-trade/1.0"}
+        r = requests.get(url, headers=headers, timeout=8)
+        if r.ok:
+            data = r.json() # [time, low, high, open, close, volume]
+            data = sorted(data, key=lambda x: x[0])[-120:]
+            for k in data:
+                candles.append({"time": int(k[0]), "low": float(k[1]), "high": float(k[2]), "open": float(k[3]), "close": float(k[4])})
+        else:
+            print(f"[cb candles] {r.status_code} {r.text[:200]} for {cb_symbol}")
+    except Exception as e:
+        print(f"[cb candles err] {e}")
+
+    # fallback if coinbase fails: try binance
+    if not candles:
         try:
-            entry_time_snapped = (int(trade['entry_time'].timestamp()) // 300) * 300
-        except Exception:
-            entry_time_snapped = base_time
-    else:
-        entry_time_snapped = base_time
-    
-    is_short = str(direction).upper() == 'SHORT'
-    markers.append({
-        'time': entry_time_snapped,
-        'position': 'aboveBar' if is_short else 'belowBar',
-        'color': '#ff4d4d' if is_short else '#00ffcc',
-        'shape': 'arrowDown' if is_short else 'arrowUp',
-        'text': f"{direction} @ {entry_price}"
-    })
-    
-    if trade.get('exit_time'):
+            from services.quote_provider import PublicQuoteProvider
+            prov = PublicQuoteProvider()
+            if hasattr(prov, 'get_candles'):
+                raw = prov.get_candles(symbol, timeframe='1h', limit=120)
+                for c in raw:
+                    candles.append({"time": int(c['time']), "open": float(c['open']), "high": float(c['high']), "low": float(c['low']), "close": float(c['close'])})
+        except Exception as e:
+            print(f"[binance fallback err] {e}")
+
+    # last resort: generate flat line from entry_price (no negatives)
+    if not candles:
+        now = int(time.time())
+        for i in range(100):
+            t = now - 3600*(100-i)
+            o = entry_price or 100
+            candles.append({"time": t, "open": o, "high": o*1.005, "low": o*0.995, "close": o})
+
+    markers=[]
+    # entry marker time
+    try:
+        entry_t = int(trade['entry_time'].timestamp()) if trade.get('entry_time') else candles[len(candles)//2]['time']
+    except Exception:
+        entry_t = candles[len(candles)//2]['time'] if candles else int(time.time())
+    markers.append({"time": entry_t, "position": "belowBar" if direction=="LONG" else "aboveBar", "color": "#00ffcc" if direction=="LONG" else "#ff4d4d", "shape": "arrowUp" if direction=="LONG" else "arrowDown", "text": f"{direction} {symbol} @ {entry_price}"})
+    if trade.get('exit_time') and exit_price:
         try:
-            exit_time_snapped = (int(trade['exit_time'].timestamp()) // 300) * 300
-            markers.append({
-                'time': exit_time_snapped,
-                'position': 'belowBar' if is_short else 'aboveBar',
-                'color': '#00ffcc' if is_short else '#ff4d4d',
-                'shape': 'arrowUp' if is_short else 'arrowDown',
-                'text': f"EXIT @ {trade.get('exit_price', '')}"
-            })
+            exit_t = int(trade['exit_time'].timestamp())
         except Exception:
-            pass
-            
-    return jsonify({
-        'symbol': symbol,
-        'direction': direction,
-        'pnl_pct': pnl_pct,
-        'candles': candles,
-        'markers': markers
-    })
+            exit_t = candles[-1]['time'] if candles else int(time.time())
+        markers.append({"time": exit_t, "position": "aboveBar" if direction=="LONG" else "belowBar", "color": "#ff4d4d" if direction=="LONG" else "#00ffcc", "shape": "arrowDown" if direction=="LONG" else "arrowUp", "text": f"EXIT @ {exit_price}"})
+
+    return jsonify({"symbol": symbol, "direction": direction, "pnl_pct": round(pnl_pct,3), "candles": candles, "markers": markers, "cb_product": cb_symbol})
+
+
+
+@app.route("/docs/strategy")
+def strategy_document():
+    return render_or_404("strategy_docs.html")
+
 
 @app.route('/tradingview_chart.html')
 def tradingview_chart():
