@@ -1,31 +1,31 @@
-from flask import jsonify, request
-from datetime import datetime
-import sys
-sys.path.insert(0, "/home/MeirNiv/aimn-trade-final")
-from db import get_db_connection
+from flask import jsonify
+import os, sys
+project_home = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_home not in sys.path:
+    sys.path.insert(0, project_home)
+from app_sub.db import db_session
+from sqlalchemy import text
 
 def register_alerts_routes(app, db):
     @app.route("/api/alerts/latest")
     def alerts_latest():
-        conn = get_db_connection()
-        if isinstance(conn, tuple): conn, cur = conn
-        else: cur = conn.cursor()
-        cur.execute("SELECT symbol, side, trail_pct, min_v_pct, price, created_at FROM alerts ORDER BY created_at DESC LIMIT 20")
-        rows = cur.fetchall()
-        alerts = [{"symbol": r[0], "side": r[1], "trail_pct": r[2], "min_v_pct": r[3], "price": r[4], "time": str(r[5])} for r in rows]
-        return jsonify({"alerts": alerts, "count": len(alerts), "mode": "kiss_v3"})
+        try:
+            result = db_session.execute(text("SELECT symbol, side, trail_pct, min_v_pct, price, created_at FROM alerts ORDER BY created_at DESC LIMIT 20"))
+            rows = result.fetchall()
+            alerts = [{"symbol": r[0], "side": r[1], "trail_pct": float(r[2]) if r[2] else 0, "min_v_pct": float(r[3]) if r[3] else 0, "price": float(r[4]) if r[4] else 0, "time": str(r[5])} for r in rows]
+            return jsonify({"alerts": alerts, "count": len(alerts), "mode": "kiss_v3", "status": "live"})
+        except Exception as e:
+            return jsonify({"error": str(e), "alerts": []})
 
     @app.route("/api/alerts/generate/<symbol>")
     def generate_alert(symbol):
-        # Use best params from tuning_results
-        conn = get_db_connection()
-        if isinstance(conn, tuple): conn, cur = conn
-        else: cur = conn.cursor()
-        cur.execute("SELECT trail_pct, min_v_pct FROM tuning_results WHERE symbol=%s AND mode='kiss_v3'", (symbol,))
-        row = cur.fetchone()
-        if not row: return jsonify({"error": "Tune first"}), 404
-        # Generate OPEN alert
-        cur.execute("INSERT INTO alerts (symbol, side, trail_pct, min_v_pct, price) VALUES (%s,%s,%s,%s,%s)",
-                    (symbol, "BUY", row[0], row[1], 0))
-        conn.commit()
-        return jsonify({"symbol": symbol, "side": "BUY", "trail_pct": row[0], "min_v_pct": row[1], "status": "generated"})
+        try:
+            result = db_session.execute(text(f"SELECT trail_pct, min_v_pct FROM tuning_results WHERE symbol='{symbol}' AND mode='kiss_v3' ORDER BY created_at DESC LIMIT 1"))
+            row = result.fetchone()
+            if not row:
+                return jsonify({"error": f"Tune {symbol} first"}), 404
+            db_session.execute(text(f"INSERT INTO alerts (symbol, side, trail_pct, min_v_pct, price) VALUES ('{symbol}', 'BUY', {row[0]}, {row[1]}, 0)"))
+            db_session.commit()
+            return jsonify({"symbol": symbol, "side": "BUY", "trail_pct": float(row[0]), "min_v_pct": float(row[1]), "status": "generated"})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
