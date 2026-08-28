@@ -26,6 +26,10 @@ register_backtest_routes(app, db)
 from backtest_feedback_routes import register_feedback_routes
 register_feedback_routes(app, db)
 
+from app_sub.alerts_api import register_alerts_routes
+register_alerts_routes(app, db)
+
+
 # Lazy singleton for quote provider (Alpaca -> Binance/yfinance -> SIM)
 _quote_provider = None
 def _get_provider():
