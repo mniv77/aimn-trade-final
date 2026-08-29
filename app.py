@@ -1457,6 +1457,8 @@ def run_tuning():
         win_rate_val = raw_result.get('win_rate', raw_result.get('win_rate_val', 0.0))
         total_pnl_val = raw_result.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
         avg_pnl_val = raw_result.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
+        if avg_pnl_val == 0 and trades_val > 0:
+            avg_pnl_val = total_pnl_val / trades_val
 
         breakdown_raw = raw_result.get('breakdown', raw_result.get('exit_breakdown', {}))
         breakdown = {
