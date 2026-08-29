@@ -1453,7 +1453,7 @@ def run_tuning():
             raw_result = {}
 
         # Map engine results with support for multiple naming conventions
- trades_val = raw_result.get("total_trades_val", raw_result.get("total_trades", 0))
+        trades_val = raw_result.get("total_trades_val", raw_result.get("total_trades", 0))
         win_rate_val = raw_result.get('win_rate', raw_result.get('win_rate_val', 0.0))
         total_pnl_val = raw_result.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
         avg_pnl_val = raw_result.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
