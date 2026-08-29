@@ -1,15 +1,10 @@
 import json, pathlib, re
 def run_analysis(data=None):
-    """Fixed to use perfect cache - new good strategy - accepts app.py param"""
-    symbols=[]
     cache_dir=pathlib.Path("./tmp_cache")
-    # If specific symbol requested from UI
-    if data and isinstance(data, dict) and data.get('symbol'):
-        sym_filter=data.get('symbol')
-        files=[cache_dir/f"last_tune_{sym_filter}.json"] if (cache_dir/f"last_tune_{sym_filter}.json").exists() else sorted(cache_dir.glob("last_tune_*.json"))
-    else:
-        files=sorted(cache_dir.glob("last_tune_*.json"))
+    symbol = data.get('symbol','SPY') if isinstance(data, dict) else 'SPY'
+    files = [cache_dir/f"last_tune_{symbol}.json"] if (cache_dir/f"last_tune_{symbol}.json").exists() else sorted(cache_dir.glob("last_tune_*.json"))
 
+    symbols=[]
     for f in files:
         try:
             if not f.exists(): continue
@@ -19,25 +14,37 @@ def run_analysis(data=None):
             if m:
                 trail,min_v,wr,total,count=m.groups()
                 symbols.append({
-                    "symbol":sym, "trail":trail, "min_v":min_v,
+                    "symbol":sym, "trail":float(trail), "min_v":float(min_v),
                     "wr":float(wr), "total":float(total), "count":int(count),
-                    "summary":d['summary'], "trades":d.get('trades',[])[:20]
+                    "summary":d['summary'], "trades":d.get('trades',[])
                 })
-        except Exception as e:
-            print(f"Skip {f}: {e}")
+        except: pass
 
-    symbols=sorted(symbols, key=lambda x: x['total'], reverse=True)
-    total_trades=sum(s['count'] for s in symbols if s['total']>0)
+    if not symbols:
+        return {"status":"error","message":"No cache found, run perfect tuner"}
 
-    # Return format app.py expects
+    # Best = highest total
+    best = sorted(symbols, key=lambda x: x['total'], reverse=True)[0]
+    # Filter to requested symbol if any
+    if isinstance(data, dict) and data.get('symbol'):
+        req = data['symbol']
+        filtered = [s for s in symbols if s['symbol']==req]
+        if filtered: best = filtered[0]
+
+    # Return format frontend expects (total_pnl_val, win_rate_val, etc)
     return {
-        "symbols": symbols,
-        "total_trades": total_trades,
-        "best": symbols[0] if symbols else None,
-        "status": "success",
-        "message": f"{len(symbols)} symbols, {total_trades} trades - NEW perfect strategy",
+        "status":"success",
+        "symbol": best['symbol'],
+        "total_pnl_val": round(best['total'],2),
+        "win_rate_val": round(best['wr'],1),
+        "total_trades_val": best['count'],
+        "best_params": {"trail_pct": best['trail'], "min_v_pct": best['min_v']},
         "grid_combinations": len(symbols),
-        "results": symbols # for chart
+        "profit_per_day": round(best['total']/252,2),
+        "message": f"BEST {best['symbol']} trail={best['trail']} min_v={best['min_v']} WR={best['wr']}% total={best['total']}% count={best['count']} - NEW perfect strategy",
+        "trades": best['trades'][:50],
+        "symbols": symbols,
+        "results": symbols
     }
 
 def tune_symbol(symbol):
