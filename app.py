@@ -1467,7 +1467,6 @@ def run_tuning():
         }
 
         # from engine.tuning.auto_tuner import run_analysis <- commented
-        raw_result = run_analysis(data) # <- NameError
 
         params_raw = raw_result.get('params', raw_result.get('best_params', {}))
         def clean_opt(val, fallback):
