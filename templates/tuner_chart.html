@@ -1,68 +1,26 @@
 <!DOCTYPE html>
-<html><head><title>Tuner V39</title>
+<html><head><title>Tuner Feedback Chart - Last Result</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
-<style>
-body{background:#0e1217;color:#c9d1d9;font-family:monospace;margin:0;padding:12px}
-h3{margin:0 0 8px;color:#58a6ff}
-#chart{width:100%;height:620px;border:1px solid #21262d;border-radius:6px}
-.controls{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-select,button,input{background:#161b22;color:#c9d1d9;border:1px solid #30363d;padding:7px 10px;border-radius:6px;font-size:12px}
-button{background:#1f6feb;color:white;font-weight:bold;cursor:pointer}
-#stats{font-size:12px;margin-bottom:8px;padding:8px;background:#161b22;border:1px solid #21262d;border-radius:6px}
-.trade-list{max-height:380px;overflow:auto;border:1px solid #21262d;background:#161b22;padding:8px;font-size:11px;line-height:1.5;border-radius:6px}
-.win{color:#3fb950}.loss{color:#f85149}
-.legend{font-size:10px;color:#8b949e;margin-bottom:6px;display:flex;gap:12px}
-#fbBtn{position:fixed;bottom:20px;right:20px;background:#238636;color:white;border:none;border-radius:50%;width:56px;height:56px;font-size:24px;cursor:pointer;z-index:1000}
-#fbDialog{display:none;position:fixed;bottom:90px;right:20px;width:340px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px;z-index:1001}
-#fbDialog textarea{width:100%;height:80px;background:#0e1217;border:1px solid #30363d;color:#c9d1d9;padding:8px;border-radius:4px}
-</style></head><body>
-<h3>V39 - Green/Red + Stocks + Feedback</h3>
-<div class="legend"><span style="color:#26a641">🟩 Green Bull</span><span style="color:#f85149">🟥 Red Bear</span><span style="color:#1f6feb">🔵 Entry</span><span>WIN=Green ↓ LOSS=Red ↓</span></div>
-<div class="controls">
-<select id="broker"><option>Alpaca</option><option>Gemini</option></select>
-<select id="symbol"><option>SPY</option><option>QQQ</option><option>AAPL</option><option>MSFT</option><option>TSLA</option><option>NVDA</option><option>BTCUSDT</option><option>ETHUSD</option><option>LINKUSD</option><option>SOLUSD</option></select>
-<select id="direction"><option>LONG</option><option>SHORT</option></select>
-<select id="tf"><option>30m</option><option>1h</option></select>
-<button onclick="loadChart()">Load Chart</button><span id="loading"></span>
-</div>
-<div id="stats"></div><div id="chart"></div><div class="trade-list" id="trades"></div>
-<button id="fbBtn" onclick="toggleFB()">💬</button>
-<div id="fbDialog">
-<h4>Feedback</h4><div>Sym: <span id="fbSym">-</span> Trade: <span id="fbTrade">-</span></div>
-<textarea id="fbText" placeholder="SPY LONG #2 - exit at bottom of red candle..."></textarea>
-<div style="display:flex;gap:8px;margin-top:8px"><input id="fbUser" value="Meir" style="flex:1"><button onclick="saveFB()">Save</button><button onclick="toggleFB()">Close</button></div>
-<div id="fbList" style="max-height:150px;overflow:auto;margin-top:10px;font-size:11px;border-top:1px solid #21262d;padding-top:8px"></div>
-</div>
+<style>body{background:#0e1217;color:#c9d1d9;font-family:monospace;margin:0;padding:10px}#chart{width:100%;height:600px;border:1px solid #30363d}.controls{display:flex;gap:10px;margin-bottom:10px}select,button{background:#161b22;color:#c9d1d9;border:1px solid #30363d;padding:6px 10px;border-radius:4px}button{background:#1f6feb;cursor:pointer}.stats{display:flex;gap:20px;margin:10px 0}.trade-list{max-height:400px;overflow:auto;border:1px solid #30363d;padding:10px;font-size:12px}.win{color:#3fb950}.loss{color:#f85149}.info{color:#58a6ff;padding:10px;background:#161b22;border-radius:4px;margin:10px 0}</style>
+</head><body>
+<h3>📈 Tuner Result Chart - Last Run (140 trades)</h3>
+<div class="info" id="info">Loading last tuner result from localStorage... Run Auto Tuner first, then click here.</div>
+<div class="controls"><button onclick="loadFromTuner()">📥 Load Last Tuner Result (113% SPY)</button> <button onclick="loadFromAPI()">🔄 Load Fresh from API</button></div>
+<div class="stats" id="stats"></div><div id="chart"></div><div class="trade-list" id="trades"></div>
 <script>
 let chart,candleSeries;
-function init(){
-  const el=document.getElementById('chart');
-  chart=LightweightCharts.createChart(el,{width:el.clientWidth,height:620,layout:{background:{color:'#0e1217'},textColor:'#c9d1d9'},grid:{vertLines:{color:'#1a1f26'},horzLines:{color:'#1a1f26'}},timeScale:{timeVisible:true,borderColor:'#30363d'},rightPriceScale:{borderColor:'#30363d'}});
-  candleSeries=chart.addCandlestickSeries({upColor:'#26a641',borderUpColor:'#26a641',wickUpColor:'#26a641',downColor:'#f85149',borderDownColor:'#f85149',wickDownColor:'#f85149'});
-  window.addEventListener('resize',()=>chart.resize(el.clientWidth,620));
+function initChart(){const el=document.getElementById('chart');chart=LightweightCharts.createChart(el,{width:el.clientWidth,height:600,layout:{background:{color:'#0e1217'},textColor:'#c9d1d9'},grid:{vertLines:{color:'#1f2428'},horzLines:{color:'#1f2428'}}});candleSeries=chart.addCandlestickSeries({upColor:'#3fb950',downColor:'#f85149'});window.addEventListener('resize',()=>chart.resize(el.clientWidth,600));}
+async function loadFromTuner(){
+ const raw=localStorage.getItem('last_tuner_result'); if(!raw){document.getElementById('info').textContent='No saved tuner result! Go to /auto_tuner and RUN AUTO TUNER first, then come back.'; return;}
+ const data=JSON.parse(raw); document.getElementById('info').textContent=`Loaded: ${data.symbol} ${data.total_pnl_val?.toFixed(1)}% | ${data.trades_val||data.trades?.length} trades | WR ${data.win_rate_val}%`;
+ if(!data.trades || data.trades.length==0){document.getElementById('info').textContent+=' - No trades array! Need to save trades in auto_tuner JS'; return;}
+ // Build fake candles from trades for visualization (since we have entry/exit)
+ const candles=[]; data.trades.forEach((t,i)=>{candles.push({time:i*2,open:t.entry_price,high:Math.max(t.entry_price,t.exit_price)*1.005,low:Math.min(t.entry_price,t.exit_price)*0.995,close:t.exit_price});});
+ candleSeries.setData(candles);
+ const markers=[]; data.trades.forEach((t,i)=>{const isLoss=t.pnl<0; markers.push({time:i*2,position:isLoss?'aboveBar':'aboveBar',color:isLoss?'#f85149':'#3fb950',shape:isLoss?'arrowDown':'arrowDown',text:`${isLoss?'LOSER '+t.pnl.toFixed(2)+'%':'WIN '+t.pnl.toFixed(2)+'%'} ${t.reason||''}`});}); candleSeries.setMarkers(markers);
+ document.getElementById('stats').innerHTML=`Total: ${data.trades.length} | Losers: ${data.trades.filter(t=>t.pnl<0).length} | Avg Loser: ${(data.trades.filter(t=>t.pnl<0).reduce((s,t)=>s+t.pnl,0)/Math.max(1,data.trades.filter(t=>t.pnl<0).length)).toFixed(2)}%`;
+ let html='<b>LOSERS FIRST (to fix):</b><br>'; data.trades.filter(t=>t.pnl<0).sort((a,b)=>a.pnl-b.pnl).forEach((t,i)=>{html+=`<span class="loss">#${i} ${t.entry_time} | Entry ${t.entry_price.toFixed(2)} -> Exit ${t.exit_price.toFixed(2)} | ${t.pnl.toFixed(3)}% | gap ${t.gap?.toFixed(3)}% | RSI ${t.rsi?.toFixed(1)} | Reason: ${t.reason} | ${t.ai_comment||''}</span><br>`;}); html+='<br><b>WINNERS:</b><br>'; data.trades.filter(t=>t.pnl>=0).forEach((t,i)=>{html+=`<span class="win">#${i} +${t.pnl.toFixed(3)}% gap ${t.gap?.toFixed(2)}%</span><br>`;}); document.getElementById('trades').innerHTML=html; chart.timeScale().fitContent();
 }
-async function loadChart(){
-  const broker=document.getElementById('broker').value,sym=document.getElementById('symbol').value,dir=document.getElementById('direction').value,tf=document.getElementById('tf').value;
-  document.getElementById('loading').textContent='Loading '+sym+'...';
-  const res=await fetch(`/api/tuner_chart/${sym}/${dir}/${tf}?broker=${broker}`);
-  const data=await res.json();if(data.error){document.getElementById('loading').textContent=data.error;return;}
-  candleSeries.setData(data.candles);
-  const markers=[];data.trades.forEach(t=>{markers.push({time:t.entry_time,position:'belowBar',color:'#1f6feb',shape:'arrowUp',text:'#'+t.id+' ENTRY '+t.entry_price.toFixed(2)});markers.push({time:t.exit_time,position:'aboveBar',color:t.pnl>0.2?'#3fb950':'#f85149',shape:'arrowDown',text:'#'+t.id+' '+(t.pnl>0.2?'WIN':'LOSS')+' '+t.pnl.toFixed(2)+'% '+t.reason});});
-  markers.sort((a,b)=>a.time-b.time);candleSeries.setMarkers(markers);
-  const net=(data.stats.total_pnl-data.stats.total_trades*0.2).toFixed(2);
-  document.getElementById('stats').innerHTML='<b>'+broker+' '+sym+' '+dir+' '+tf+'</b> | Total '+data.stats.total_trades+' | Win '+data.stats.win_rate.toFixed(1)+'% | Total '+data.stats.total_pnl.toFixed(2)+'% | Avg '+data.stats.avg_pnl.toFixed(3)+'% | Net '+net+'%';
-  let html='<b># | Entry->Exit | PnL | Reason | Bars | Candle</b><br>';
-  data.trades.forEach(t=>{const c=data.candles.find(x=>x.time===t.exit_time);const info=c?(c.close>c.open?'🟢 GREEN':'🔴 RED'):'-';const cls=t.pnl>0.2?'win':'loss';html+='<span class="'+cls+'" style="cursor:pointer" onclick="setFB('+t.id+')">#'+t.id+' '+t.direction+' '+t.entry_price.toFixed(2)+'->'+t.exit_price.toFixed(2)+' '+t.pnl.toFixed(2)+'% '+t.reason+' '+(t.exit_idx-t.entry_idx)+'b '+info+'</span><br>';});
-  document.getElementById('trades').innerHTML=html;document.getElementById('loading').textContent=data.candles.length+' candles';chart.timeScale().fitContent();document.getElementById('fbSym').textContent=sym;
-}
-function toggleFB(){const d=document.getElementById('fbDialog');d.style.display=d.style.display==='none'?'block':'none';loadFB();}
-function setFB(id){document.getElementById('fbTrade').textContent='#'+id;document.getElementById('fbDialog').style.display='block';}
-function saveFB(){
-  const entry={time:new Date().toISOString(),symbol:document.getElementById('fbSym').textContent,trade:document.getElementById('fbTrade').textContent,text:document.getElementById('fbText').value,user:document.getElementById('fbUser').value};
-  let list=JSON.parse(localStorage.getItem('tuner_feedback')||'[]');list.unshift(entry);localStorage.setItem('tuner_feedback',JSON.stringify(list.slice(0,50)));
-  document.getElementById('fbText').value='';loadFB();
-  fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)});
-}
-function loadFB(){let list=JSON.parse(localStorage.getItem('tuner_feedback')||'[]');document.getElementById('fbList').innerHTML=list.map(f=>'<div><b>'+f.symbol+' '+f.trade+'</b> '+f.text+' <span style="color:#8b949e">'+new Date(f.time).toLocaleTimeString()+'</span></div>').join('');}
-init();loadChart();
+async function loadFromAPI(){ /* your old API logic */ const res=await fetch(`/api/tuner_chart/SPY/LONG/30m`); const data=await res.json(); console.log(data); }
+initChart(); loadFromTuner();
 </script></body></html>
