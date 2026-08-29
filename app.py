@@ -1452,8 +1452,8 @@ def run_tuning():
         if not isinstance(raw_result, dict):
             raw_result = {}
 
+        trades_val = raw_result.get('total_trades_val', raw_result.get('total_trades', 0))
         # Map engine results with support for multiple naming conventions
-        trades_val = raw_result.get("total_trades_val", raw_result.get("total_trades", 0))
         win_rate_val = raw_result.get('win_rate', raw_result.get('win_rate_val', 0.0))
         total_pnl_val = raw_result.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
         avg_pnl_val = raw_result.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
