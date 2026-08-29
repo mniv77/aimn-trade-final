@@ -11,7 +11,7 @@ if project_home not in sys.path:
 from sqlalchemy import text
 from shared_models import Base, Trade
 from app_sub.db import engine, db_session
-from engine.tuning.auto_tuner import run_analysis, tune_symbol # KISS V3
+from engine.tuning.auto_tuner import run_analysis
 
 # 1. Initialize Flask app ONCE with your settings
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -25,12 +25,6 @@ register_backtest_routes(app, db)
 
 from backtest_feedback_routes import register_feedback_routes
 register_feedback_routes(app, db)
-
-from app_sub.alerts_api import register_alerts_routes
-register_alerts_routes(app, db)
-from app_sub.trades_comment_api import register_trades_comment_routes
-register_trades_comment_routes(app, db)
-
 
 # Lazy singleton for quote provider (Alpaca -> Binance/yfinance -> SIM)
 _quote_provider = None
@@ -862,9 +856,7 @@ def api_scanner_snapshot():
 
     from db import get_db_connection
     from engine.tuning.candle_fetcher import fetch_candles
-    # KISS V3 removed RSI/MACD - dummy compat
-    calc_rsi_real = lambda x: 50
-    calc_macd_series = lambda x: 0
+    from engine.tuning.auto_tuner import calc_rsi_real, calc_macd_series
 
     try:
         conn, cursor = get_db_connection()
@@ -1452,13 +1444,11 @@ def run_tuning():
         if not isinstance(raw_result, dict):
             raw_result = {}
 
-        trades_val = raw_result.get('total_trades_val', raw_result.get('total_trades', 0))
         # Map engine results with support for multiple naming conventions
+        trades_val = raw_result.get('total_trades', raw_result.get('trades_val', 0))
         win_rate_val = raw_result.get('win_rate', raw_result.get('win_rate_val', 0.0))
         total_pnl_val = raw_result.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
         avg_pnl_val = raw_result.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
-        if avg_pnl_val == 0 and trades_val > 0:
-            avg_pnl_val = total_pnl_val / trades_val
 
         breakdown_raw = raw_result.get('breakdown', raw_result.get('exit_breakdown', {}))
         breakdown = {
@@ -1469,6 +1459,7 @@ def run_tuning():
         }
 
         # from engine.tuning.auto_tuner import run_analysis <- commented
+        raw_result = run_analysis(data) # <- NameError
 
         params_raw = raw_result.get('params', raw_result.get('best_params', {}))
         def clean_opt(val, fallback):
@@ -1613,11 +1604,33 @@ def run_auto_tuner():
 
         if not result:
             return jsonify({"error": "No valid combinations found — try fewer filters or more bars"})
+
+        # === FIX FOR CHART - ADD LOSERS VIEW ===
+        if isinstance(result, dict):
+            trades = result.get("trades", result.get("trade_details", result.get("markers", [])))
+            total = result.get("total_pnl_val", result.get("total_pnl", result.get("total", 0)))
+            win_rate = result.get("win_rate_val", result.get("win_rate", 0))
+            trades_count = result.get("trades_val", result.get("total_trades", len(trades) if isinstance(trades, list) else 0))
+            avg = result.get("avg_pnl_val", result.get("avg_pnl", 0))
+            if avg == 0 and trades_count > 0:
+                avg = total / trades_count
+
+            # Keep original + add normalized fields for frontend
+            result["total_pnl_val"] = total
+            result["win_rate_val"] = win_rate
+            result["trades_val"] = trades_count
+            result["avg_pnl_val"] = avg
+            result["trades"] = trades
+            result["symbol"] = symbol
+            result["status"] = "success"
+            result["broker"] = broker_name
+            result["strategy_id"] = strategy_id
+
         return jsonify(result)
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
 
 
@@ -2092,6 +2105,223 @@ def api_crypto_active():
 # --- KISS V3 DOC ROUTE - ONE STRATEGY ---
 @app.route("/docs/strategy")
 def docs_strategy():
+    try:
+        import pathlib
+        p = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3-full.md")
+        if not p.exists():
+            p = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3.md")
+        txt = p.read_text() if p.exists() else "Doc missing"
+        return f"""<html><head><title>KISS V3</title>
+        <style>body{{font-family:Arial;max-width:900px;margin:30px auto;padding:20px;line-height:1.6}}
+        .btn{{background:#0a84ff;color:white;padding:10px 16px;border-radius:6px;text-decoration:none}}
+        pre{{white-space:pre-wrap;background:#f5f5f5;padding:20px;border-radius:8px}}
+        </style></head><body>
+        <a class=btn href="/">← Back to Dashboard</a>
+        <h1>📘 AiMn KISS V3 Strategy</h1>
+        <a class=btn href="/doc/strategy/AiMn-KISS-Strategy-V3.md" target="_blank">Download MD</a>
+        <hr><pre>{txt}</pre></body></html>"""
+    except Exception as e:
+        return f"Error: {e} <a href='/'>back</a>"
+
+#@app.route("/doc/strategy/<path:filename>")
+#def serve_strategy_doc(filename):
+#    from flask import send_from_directory
+#    return send_from_directory("doc/strategy", filename)
+
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "5080"))
+    app.run(host="127.0.0.1", port=port, debug=True)
+
+
+@app.route('/api/backtest/run', methods=['POST'])
+def api_backtest_run():
+    try:
+        import importlib
+        import backtest_trend
+        importlib.reload(backtest_trend)
+        data = request.get_json(force=True) or {}
+        symbol = data.get('symbol', 'BTC/USD')
+        fee = float(data.get('fee', 0.18))
+        backtest_trend.FEE_PCT_PER_SIDE = fee
+        result = backtest_trend.backtest(symbol)
+        if not result:
+            return jsonify({'error': 'not enough data'})
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+
+
+#==========================================================================
+#==========================================================================
+#                           backtst feedback charts
+#==========================================================================
+#==========================================================================
+from flask import render_template, jsonify, request
+import sqlite3
+
+
+@app.route('/trade_chart_view/live')
+def trade_chart_view_live():
+    from flask import request, render_template
+    symbol = request.args.get('symbol','LINKUSD').upper()
+    return render_template('trade_chart.html', symbol=symbol, live_mode=True)
+
+@app.route('/api/trade_chart_data/live')
+def trade_chart_data_live():
+    import requests, json
+    from flask import request, jsonify
+    symbol = request.args.get('symbol','BTCUSD').upper()
+    cb = symbol.replace('/','').replace('USDT','USD')
+    if '-USD' not in cb and cb.endswith('USD'):
+        cb = cb[:-3]+'-USD'
+    try:
+        r = requests.get(f"https://api.exchange.coinbase.com/products/{cb}/candles?granularity=3600", timeout=10)
+        r.raise_for_status()
+        data = sorted(r.json(), key=lambda x: x[0])
+        candles = [{"time": k[0], "open": k[3], "high": k[2], "low": k[1], "close": k[4]} for k in data[-200:]]
+        return jsonify({"symbol": symbol, "candles": candles, "trades": []})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#(trade_id):
+#    """Renders the HTML page displaying the trade review chart."""
+#    return render_template('trade_chart.html', trade_id=trade_id)
+
+
+
+@app.route('/api/live_candles')
+def live_candles():
+    import requests
+    from flask import request, jsonify
+    symbol = request.args.get('symbol','BTCUSDT').upper()
+    cb = symbol.replace('/','').replace('USDT','USD')
+    if '-USD' not in cb:
+        if cb.endswith('USD'):
+            cb = cb[:-3]+'-USD'
+    try:
+        r = requests.get(f"https://api.exchange.coinbase.com/products/{cb}/candles?granularity=3600", timeout=15)
+        r.raise_for_status()
+        data = r.json()
+        data = sorted(data, key=lambda x: x[0])
+        candles = [{"time": k[0], "low": k[1], "high": k[2], "open": k[3], "close": k[4]} for k in data[-200:]]
+        return jsonify({"symbol": symbol, "cb_product": cb, "candles": candles})
+    except Exception as e:
+        return jsonify({"error": str(e), "symbol": symbol}), 500
+
+
+@app.route('/api/trades_list', methods=['GET'])
+def trades_list():
+    from db import get_db_connection
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute("SELECT id, symbol, direction, pnl_percent as pnl_pct FROM active_trades ORDER BY id DESC LIMIT 500")
+        rows = cursor.fetchall()
+        conn.close()
+        # Convert decimal/datetime fields if any for JSON
+        for r in rows:
+            if 'pnl_pct' in r and r['pnl_pct'] is not None:
+                r['pnl_pct'] = float(r['pnl_pct'])
+        return {"trades": rows}
+    except Exception as e:
+        return {"trades": [], "error": str(e)}
+
+
+@app.route('/api/trade_chart_data/<int:trade_id>')
+def trade_chart_data(trade_id):
+    from flask import jsonify
+    import requests, time, os
+    from db import get_db_connection
+    # --- get trade ---
+    try:
+        conn, cursor = get_db_connection()
+        if conn is None:
+            raise Exception("DB connection None")
+        cursor.execute("SELECT id, symbol, direction, entry_price, entry_time, exit_price, exit_time, pnl_percent FROM active_trades WHERE id=%s", (trade_id,))
+        trade = cursor.fetchone()
+        conn.close()
+    except Exception as e:
+        return jsonify({'error': f'db err {e}'}), 500
+
+    if not trade:
+        trade = {'symbol': 'BTCUSDT','direction': 'LONG','entry_price': 60000.0,'exit_price': None,'entry_time': None,'exit_time': None,'pnl_percent': None}
+
+    symbol = (trade.get('symbol') or 'BTCUSDT').replace('/', '').upper()
+    direction = (trade.get('direction') or 'LONG').upper()
+    entry_price = float(trade.get('entry_price') or 0)
+    exit_price = float(trade.get('exit_price') or 0) if trade.get('exit_price') else 0
+    pnl_pct = float(trade.get('pnl_percent') or 0) if trade.get('pnl_percent') is not None else 0
+    if not pnl_pct and entry_price and exit_price:
+        pnl_pct = ((exit_price-entry_price)/entry_price*100) * ( -1 if direction=='SHORT' else 1)
+
+    # --- map to Coinbase product BTC-USD ---
+    cb_symbol = symbol.upper().replace('/','').replace('USDT','USD')
+    # BTCUSD -> BTC-USD, SOLUSD -> SOL-USD, BTC-USD stays
+    if '-USD' not in cb_symbol:
+        if cb_symbol.endswith('USD'):
+            cb_symbol = cb_symbol[:-3] + '-USD'
+        elif cb_symbol.endswith('USDT'):
+            cb_symbol = cb_symbol[:-4] + '-USD'
+    cb_symbol = cb_symbol.replace('--','-')
+
+    candles=[]
+    try:
+        # Coinbase public candles: https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=3600
+        url = f"https://api.exchange.coinbase.com/products/{cb_symbol}/candles?granularity=3600"
+        headers = {"User-Agent":"aimn-trade/1.0"}
+        r = requests.get(url, headers=headers, timeout=8)
+        if r.ok:
+            data = r.json() # [time, low, high, open, close, volume]
+            data = sorted(data, key=lambda x: x[0])[-120:]
+            for k in data:
+                candles.append({"time": int(k[0]), "low": float(k[1]), "high": float(k[2]), "open": float(k[3]), "close": float(k[4])})
+        else:
+            print(f"[cb candles] {r.status_code} {r.text[:200]} for {cb_symbol}")
+    except Exception as e:
+        print(f"[cb candles err] {e}")
+
+    # fallback if coinbase fails: try binance
+    if not candles:
+        try:
+            from services.quote_provider import PublicQuoteProvider
+            prov = PublicQuoteProvider()
+            if hasattr(prov, 'get_candles'):
+                raw = prov.get_candles(symbol, timeframe='1h', limit=120)
+                for c in raw:
+                    candles.append({"time": int(c['time']), "open": float(c['open']), "high": float(c['high']), "low": float(c['low']), "close": float(c['close'])})
+        except Exception as e:
+            print(f"[binance fallback err] {e}")
+
+    # last resort: generate flat line from entry_price (no negatives)
+    if not candles:
+        now = int(time.time())
+        for i in range(100):
+            t = now - 3600*(100-i)
+            o = entry_price or 100
+            candles.append({"time": t, "open": o, "high": o*1.005, "low": o*0.995, "close": o})
+
+    markers=[]
+    # entry marker time
+    try:
+        entry_t = int(trade['entry_time'].timestamp()) if trade.get('entry_time') else candles[len(candles)//2]['time']
+    except Exception:
+        entry_t = candles[len(candles)//2]['time'] if candles else int(time.time())
+    markers.append({"time": entry_t, "position": "belowBar" if direction=="LONG" else "aboveBar", "color": "#00ffcc" if direction=="LONG" else "#ff4d4d", "shape": "arrowUp" if direction=="LONG" else "arrowDown", "text": f"{direction} {symbol} @ {entry_price}"})
+    if trade.get('exit_time') and exit_price:
+        try:
+            exit_t = int(trade['exit_time'].timestamp())
+        except Exception:
+            exit_t = candles[-1]['time'] if candles else int(time.time())
+        markers.append({"time": exit_t, "position": "aboveBar" if direction=="LONG" else "belowBar", "color": "#ff4d4d" if direction=="LONG" else "#00ffcc", "shape": "arrowDown" if direction=="LONG" else "arrowUp", "text": f"EXIT @ {exit_price}"})
+
+    return jsonify({"symbol": symbol, "direction": direction, "pnl_pct": round(pnl_pct,3), "candles": candles, "markers": markers, "cb_product": cb_symbol})
+
+#===========================================================
+
+@app.route("/docs/strategy")
+def docs_strategy():
     import pathlib, markdown
     md_file = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3-full.md")
     if not md_file.exists():
@@ -2135,7 +2365,6 @@ def tradingview_chart():
     return render_template('trade_chart.html', trade_id=trade_id)
 
 
-
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     try:
@@ -2146,33 +2375,3 @@ def shutdown_session(exception=None):
             db.remove()
         except Exception:
             pass
-# === PERFECT DASHBOARD - ONE ORGANIZED PAGE ===
-@app.route("/dashboard_perfect")
-@app.route("/perfect")
-@app.route("/")
-def dashboard_perfect():
-    import json, pathlib, re
-    symbols=[]
-    total_trades=0
-    for f in sorted(pathlib.Path("./tmp_cache").glob("last_tune_*.json")):
-        try:
-            sym=f.stem.replace("last_tune_","")
-            data=json.load(open(f))
-            m=re.search(r"trail=([\d.]+).*min_v=([\d.]+).*WR=([\d.]+).*total=([-\d.]+).*count=(\d+)", data['summary'])
-            if m:
-                trail,min_v,wr,total,count=m.groups()
-                symbols.append({"symbol":sym,"trail":trail,"min_v":min_v,"wr":wr,"total":float(total),"count":int(count),"summary":data['summary']})
-                if float(total)>0: total_trades+=int(count)
-        except: pass
-    symbols=sorted(symbols, key=lambda x: x['total'], reverse=True)
-    per_day=round(total_trades/252*2,1)  # 2 timeframes
-    goal="✅ ACHIEVED" if per_day>=10 else "⏳"
-    return render_template('dashboard_perfect.html', symbols=symbols, total_trades=total_trades, trades_per_day=per_day, goal_status=goal)
-
-@app.route("/run_perfect_all")
-def run_perfect_all():
-    import subprocess, threading
-    def run():
-        subprocess.run(["python3","engine/tuner_perfect_v3.py","--all"], cwd=".")
-    threading.Thread(target=run, daemon=True).start()
-    return f"Tuning ALL 10 started! Check <a href='/dashboard_perfect'>dashboard</a> in 15 min. Files: {len(list(pathlib.Path('./tmp_cache').glob('*.json')))}"
