@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🎯 AIMN Trade - Perfect Tuner Dashboard - 10/10 Symbols</h1>
+<div style="background:#f0f0f0;padding:15px;border-radius:10px;margin:20px 0;">
+<h2>📊 Live Results (20/20 files)</h2>
+<table border=1 cellpadding=8 style="border-collapse:collapse;width:100%">
+<tr style="background:#333;color:white"><th>Symbol</th><th>Trail</th><th>Min_V</th><th>WR%</th><th>Total%</th><th>Trades</th><th>Verdict</th><th>Chart</th></tr>
+{% for s in symbols %}
+<tr style="background:{% if s.total > 100 %}#d4edda{% elif s.total > 0 %}#fff3cd{% else %}#f8d7da{% endif %}">
+<td><b>{{ s.symbol }}</b></td><td>{{ s.trail }}</td><td>{{ s.min_v }}</td><td>{{ s.wr }}%</td><td><b>{{ s.total }}%</b></td><td>{{ s.count }}</td>
+<td>{% if s.total > 100 %}🏆 TOP{% elif s.total > 0 %}✅ WIN{% else %}❌ SKIP{% endif %}</td>
+<td><a href="/trade_chart_perfect/{{ s.symbol }}" style="background:#007bff;color:white;padding:5px 10px;text-decoration:none;border-radius:5px">VIEW CHART</a></td>
+</tr>
+{% endfor %}
+</table>
+<p><b>Total: {{ total_trades }} trades/year = {{ trades_per_day }}/day - GOAL: 10/day {{ goal_status }}</b></p>
+</div>
+
+<div style="padding:15px;">
+<h2>⚡ Actions - One Click</h2>
+<a href="/auto_tuner" style="background:green;color:white;padding:12px 20px;margin:5px;display:inline-block;text-decoration:none;border-radius:5px">🔧 Auto Tuner</a>
+<a href="/run_perfect_all" style="background:orange;color:white;padding:12px 20px;margin:5px;display:inline-block;text-decoration:none;border-radius:5px">🚀 Re-Tune ALL 10 (15 min)</a>
+<a href="/trade_chart_perfect/MSFT" style="background:#333;color:white;padding:12px 20px;margin:5px;display:inline-block;text-decoration:none;border-radius:5px">👑 BEST: MSFT 242%</a>
+</div>
+
+<div style="background:#e7f3ff;padding:15px;margin:20px 0;border-radius:10px">
+<h3>Your Organized Links - No More Memorizing!</h3>
+<ul>
+{% for s in symbols %}
+<li><a href="/trade_chart_perfect/{{ s.symbol }}">{{ s.symbol }} - {{ s.summary }} - Chart</a></li>
+{% endfor %}
+</ul>
+</div>
+{% endblock %}

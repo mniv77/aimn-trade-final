@@ -2145,3 +2145,33 @@ def shutdown_session(exception=None):
             db.remove()
         except Exception:
             pass
+# === PERFECT DASHBOARD - ONE ORGANIZED PAGE ===
+@app.route("/dashboard_perfect")
+@app.route("/perfect")
+@app.route("/")
+def dashboard_perfect():
+    import json, pathlib, re
+    symbols=[]
+    total_trades=0
+    for f in sorted(pathlib.Path("./tmp_cache").glob("last_tune_*.json")):
+        try:
+            sym=f.stem.replace("last_tune_","")
+            data=json.load(open(f))
+            m=re.search(r"trail=([\d.]+).*min_v=([\d.]+).*WR=([\d.]+).*total=([-\d.]+).*count=(\d+)", data['summary'])
+            if m:
+                trail,min_v,wr,total,count=m.groups()
+                symbols.append({"symbol":sym,"trail":trail,"min_v":min_v,"wr":wr,"total":float(total),"count":int(count),"summary":data['summary']})
+                if float(total)>0: total_trades+=int(count)
+        except: pass
+    symbols=sorted(symbols, key=lambda x: x['total'], reverse=True)
+    per_day=round(total_trades/252*2,1)  # 2 timeframes
+    goal="✅ ACHIEVED" if per_day>=10 else "⏳"
+    return render_template('dashboard_perfect.html', symbols=symbols, total_trades=total_trades, trades_per_day=per_day, goal_status=goal)
+
+@app.route("/run_perfect_all")
+def run_perfect_all():
+    import subprocess, threading
+    def run():
+        subprocess.run(["python3","engine/tuner_perfect_v3.py","--all"], cwd=".")
+    threading.Thread(target=run, daemon=True).start()
+    return f"Tuning ALL 10 started! Check <a href='/dashboard_perfect'>dashboard</a> in 15 min. Files: {len(list(pathlib.Path('./tmp_cache').glob('*.json')))}"
