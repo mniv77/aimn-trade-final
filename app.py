@@ -1604,7 +1604,7 @@ def run_auto_tuner():
 
         if not result:
             return jsonify({"error": "No valid combinations found — try fewer filters or more bars"})
-
+        
         # === FIX FOR CHART - ADD LOSERS VIEW ===
         if isinstance(result, dict):
             trades = result.get("trades", result.get("trade_details", result.get("markers", [])))
@@ -1614,8 +1614,7 @@ def run_auto_tuner():
             avg = result.get("avg_pnl_val", result.get("avg_pnl", 0))
             if avg == 0 and trades_count > 0:
                 avg = total / trades_count
-
-            # Keep original + add normalized fields for frontend
+            
             result["total_pnl_val"] = total
             result["win_rate_val"] = win_rate
             result["trades_val"] = trades_count
@@ -1625,121 +1624,13 @@ def run_auto_tuner():
             result["status"] = "success"
             result["broker"] = broker_name
             result["strategy_id"] = strategy_id
-
+        
         return jsonify(result)
 
     except Exception as e:
         import traceback
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
-
-
-@app.route("/disable_old_strategies", methods=["POST"])
-def disable_old_strategies():
-    from db import get_db_connection
-    try:
-        conn, cursor = get_db_connection()
-        cursor.execute("""
-            UPDATE strategy_params
-            SET active = 0
-            WHERE (last_tuned < DATE_SUB(NOW(), INTERVAL 7 DAY) OR last_tuned IS NULL OR pl_pct < 0)
-              AND active = 1
-        """)
-        affected = cursor.rowcount
-        conn.close()
-        return jsonify({"status": "success", "message": f"Disabled {affected} old/negative strategies"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-# ============================================================
-#   /tuning_runs page route
-# ============================================================
-
-@app.route('/tuning_runs')
-def tuning_runs_page():
-    from db import get_db_connection
-    runs = []
-    try:
-        conn, cursor = get_db_connection()
-        # Fetch the latest tuning runs from your database table
-        cursor.execute("SELECT * FROM tuning_runs ORDER BY id DESC LIMIT 50")
-        runs = cursor.fetchall()
-        conn.close()
-    except Exception as e:
-        print(f"[tuning_runs_page] Error: {e}")
-        runs = []
-
-    return render_template('tuning_runs.html', runs=runs)
-
-
-
-
-
-
-#====================================================================================
-#/api/tuning_runs
-#======================================================================
-
-
-@app.route("/api/tuning_runs")
-def api_tuning_runs():
-    from db import get_db_connection
-    try:
-        conn, cursor = get_db_connection()
-        cursor.execute("""
-            SELECT id, started_at, finished_at, status, summary
-            FROM tuning_runs ORDER BY id DESC LIMIT 50
-        """)
-        rows = cursor.fetchall()
-        conn.close()
-        for r in rows:
-            if r.get('started_at'):
-                r['started_at'] = str(r['started_at'])
-            if r.get('finished_at'):
-                r['finished_at'] = str(r['finished_at'])
-        return jsonify(rows)
-    except Exception as e:
-        return jsonify([])
-
-
-@app.route("/api/tuning_runs/cleanup", methods=["POST"])
-def api_tuning_runs_cleanup():
-    """Mark any run stuck in 'running' status for >2 hours as 'failed'."""
-    from db import get_db_connection
-    try:
-        conn, cursor = get_db_connection()
-        cursor.execute("""
-            UPDATE tuning_runs
-            SET status='failed', finished_at=NOW(),
-                summary=CONCAT(IFNULL(summary,''), ' [auto-cancelled: stuck]')
-            WHERE status='running'
-              AND started_at < DATE_SUB(NOW(), INTERVAL 2 HOUR)
-        """)
-        affected = cursor.rowcount
-        conn.close()
-        return jsonify({"ok": True, "cancelled": affected})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
-
-
-@app.route("/api/tuning_runs/<int:run_id>")
-def api_tuning_run_detail(run_id):
-    from db import get_db_connection
-    try:
-        conn, cursor = get_db_connection()
-        cursor.execute("SELECT * FROM tuning_runs WHERE id=%s", (run_id,))
-        row = cursor.fetchone()
-        conn.close()
-        if not row:
-            return jsonify({"error": "Not found"}), 404
-        if row.get('started_at'):
-            row['started_at'] = str(row['started_at'])
-        if row.get('finished_at'):
-            row['finished_at'] = str(row['finished_at'])
-        return jsonify(row)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/performance")
