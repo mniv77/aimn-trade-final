@@ -30,7 +30,7 @@ async function loadChart(){
   candleSeries.setData(candles);
   // Show only LOSERS as markers to avoid mass
   const losers=allTrades.filter(t=>t.pnl<0).slice(0,30);
-  const markers=losers.map((t,i)=>({time: Math.min(i*3, candles.length-1), position:'aboveBar', color:'#f85149', shape:'arrowDown', text:`LOSS ${t.pnl.toFixed(1)}% gap ${t.gap?.toFixed(2)}% RSI ${t.rsi?.toFixed(0)}`}));
+  const markers=losers.slice(0,15).map((t,i)=>({time: Math.min(i*10, candles.length-1), position:'aboveBar', color:'#f85149', shape:'arrowDown', text:`LOSS ${t.pnl.toFixed(1)}% gap ${t.gap?.toFixed(2)}% RSI ${t.rsi?.toFixed(0)}`}));
   candleSeries.setMarkers(markers);
   document.getElementById('info').textContent=`Loaded ${sym}: ${data.summary} | Showing ${losers.length} worst losers (of ${allTrades.length}) to keep chart clean`;
   document.getElementById('stats').innerHTML=`Total: ${allTrades.length} | Wins: ${allTrades.filter(t=>t.pnl>=0).length} | Losers: ${allTrades.filter(t=>t.pnl<0).length} | Avg: ${(allTrades.reduce((s,t)=>s+(t.pnl||0),0)/allTrades.length).toFixed(2)}% per trade`;

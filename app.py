@@ -1614,7 +1614,7 @@ def run_auto_tuner():
             win_rate = result.get("win_rate_val", result.get("win_rate", 0))
             trades_count = result.get("trades_val", result.get("total_trades", len(trades) if isinstance(trades, list) else 0))
             avg = result.get("avg_pnl_val", result.get("avg_pnl", 0))
-            if avg == 0 and trades_count > 0:
+            if (avg == 0 or avg_pnl_val == 0) and trades_count > 0:
                 avg = total / trades_count
 
             # Keep original + add normalized fields for frontend
