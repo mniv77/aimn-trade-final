@@ -11,7 +11,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence
 import math
 
-
 TRAIL_PCT = 0.015
 TREND_WINDOW = 20
 TREND_BAND = 0.002
@@ -20,8 +19,8 @@ MIN_CONFIRM = 2
 RSI_PERIOD = 14
 RSI_LONG_EMERGENCY = 20.0
 RSI_SHORT_EMERGENCY = 80.0
-# The strategy document specifies a stop-loss but not its percentage.
-# Keep it disabled for the first clean baseline rather than inventing a value.
+# Document 2 specifies a stop-loss but does not specify its percentage.
+# It is therefore disabled for the clean baseline rather than invented.
 STOP_LOSS_PCT = 0.0
 
 
@@ -33,24 +32,24 @@ def _num(v: Any) -> float:
 
 
 def rsi_wilder(closes: Sequence[float], period: int = RSI_PERIOD) -> List[Optional[float]]:
-    """Small self-contained Wilder RSI used ONLY as emergency protection."""
+    """Wilder RSI used ONLY as the emergency protection circuit."""
     n = len(closes)
     out: List[Optional[float]] = [None] * n
     if n <= period:
         return out
-    gains = []
-    losses = []
+    gains, losses = [], []
     for i in range(1, n):
         d = closes[i] - closes[i - 1]
         gains.append(max(d, 0.0))
         losses.append(max(-d, 0.0))
     avg_gain = sum(gains[:period]) / period
     avg_loss = sum(losses[:period]) / period
+
     def value(g: float, l: float) -> float:
         if l == 0:
             return 100.0
-        rs = g / l
-        return 100.0 - (100.0 / (1.0 + rs))
+        return 100.0 - (100.0 / (1.0 + g / l))
+
     out[period] = value(avg_gain, avg_loss)
     for i in range(period + 1, n):
         avg_gain = ((avg_gain * (period - 1)) + gains[i - 1]) / period
@@ -60,11 +59,10 @@ def rsi_wilder(closes: Sequence[float], period: int = RSI_PERIOD) -> List[Option
 
 
 def get_market_state(closes: Sequence[float], idx: int, window: int = TREND_WINDOW) -> str:
-    """Return LONG/SHORT/FLAT from price location versus its recent mean."""
+    """Simple LONG/SHORT/FLAT state from price versus its recent mean."""
     if idx < window or idx >= len(closes):
         return "FLAT"
-    segment = closes[idx - window:idx]
-    ma = sum(segment) / window
+    ma = sum(closes[idx - window:idx]) / window
     price = closes[idx]
     if price > ma * (1.0 + TREND_BAND):
         return "LONG"
@@ -82,7 +80,7 @@ def is_v_short(closes: Sequence[float], idx: int) -> bool:
 
 
 def find_transition(closes: Sequence[float], idx: int) -> Optional[Dict[str, Any]]:
-    """Find the latest state transition ending at idx without scanning beyond it."""
+    """Return a transition ending at idx; no future candles are inspected."""
     if idx < TREND_WINDOW + 1:
         return None
     new_state = get_market_state(closes, idx)
@@ -138,6 +136,13 @@ def _ts(v: Any) -> str:
     return str(v)
 
 
+def _confirmed_reverse(states: Sequence[str], start_i: int, new_state: str) -> bool:
+    """Require at least 2 of the next 3 completed candles in the new state."""
+    end = min(len(states), start_i + 1 + CONFIRM_BARS)
+    checked = states[start_i + 1:end]
+    return len(checked) >= CONFIRM_BARS and sum(s == new_state for s in checked) >= MIN_CONFIRM
+
+
 def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: str, timeframe: str) -> Dict[str, Any]:
     """Run the independent KISS strategy on chronological candle dictionaries."""
     rows = list(rows)
@@ -147,8 +152,10 @@ def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: st
     closes = [_num(r.get("close")) for r in rows]
     highs = [_num(r.get("high")) for r in rows]
     lows = [_num(r.get("low")) for r in rows]
-    if any(math.isnan(x) for x in closes):
-        raise ValueError("Candle data contains invalid close prices")
+    if any(math.isnan(x) for x in closes + highs + lows):
+        raise ValueError("Candle data contains invalid OHLC prices")
+
+    states = [get_market_state(closes, i) for i in range(len(rows))]
     rsis = rsi_wilder(closes)
     direction = direction.upper()
     if direction not in {"LONG", "SHORT"}:
@@ -157,45 +164,44 @@ def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: st
     trades: List[KISSTrade] = []
     transitions = 0
     position = None
-    transition_info = None
     peak = None
     trough = None
     max_fav = 0.0
     max_adv = 0.0
-    pending = None
+    pending_entry = None
+    pending_exit = None
 
-    for i in range(TREND_WINDOW + 1, len(rows)):
-        state = get_market_state(closes, i)
-        prev_state = get_market_state(closes, i - 1)
+    i = TREND_WINDOW + 1
+    while i < len(rows):
+        state = states[i]
+        prev_state = states[i - 1]
         if state != prev_state:
             transitions += 1
 
-        # Confirm a new directional state with 2 of the next 3 candles.
-        if pending is not None:
-            target = pending["to"]
-            if state == target:
-                pending["hits"] += 1
-            pending["checked"] += 1
-            if pending["checked"] >= CONFIRM_BARS:
-                confirmed = pending["hits"] >= MIN_CONFIRM
-                if confirmed and position is None and target == direction:
+        # ---------------- Entry ----------------
+        if pending_entry is not None:
+            if state == pending_entry["to"]:
+                pending_entry["hits"] += 1
+            pending_entry["checked"] += 1
+            if pending_entry["checked"] >= CONFIRM_BARS:
+                if pending_entry["hits"] >= MIN_CONFIRM and position is None and pending_entry["to"] == direction:
                     entry_i = i
-                    entry = closes[entry_i]
+                    entry = closes[i]
                     position = {
-                        "direction": target,
+                        "direction": direction,
                         "entry_i": entry_i,
                         "entry": entry,
-                        "entry_transition": f"{pending['from']}->{target}",
-                        "shape": pending.get("shape"),
+                        "entry_transition": f"{pending_entry['from']}->{direction}",
+                        "shape": pending_entry.get("shape"),
                     }
                     peak = entry
                     trough = entry
                     max_fav = 0.0
                     max_adv = 0.0
-                pending = None
+                pending_entry = None
 
-        if state != prev_state and state in {"LONG", "SHORT"}:
-            pending = {
+        if position is None and state != prev_state and state in {"LONG", "SHORT"}:
+            pending_entry = {
                 "from": prev_state,
                 "to": state,
                 "hits": 0,
@@ -203,48 +209,57 @@ def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: st
                 "shape": "V-LONG" if is_v_long(closes, i) else ("V-SHORT" if is_v_short(closes, i) else None),
             }
 
+        # ---------------- Open position ----------------
         if position is not None:
             entry = position["entry"]
             price = closes[i]
             if position["direction"] == "LONG":
                 peak = max(peak, highs[i])
                 trough = min(trough, lows[i])
-                fav = (peak / entry - 1.0) * 100.0
-                adv = (lows[i] / entry - 1.0) * 100.0
-                max_fav = max(max_fav, fav)
-                max_adv = min(max_adv, adv)
+                max_fav = max(max_fav, (peak / entry - 1.0) * 100.0)
+                max_adv = min(max_adv, (lows[i] / entry - 1.0) * 100.0)
                 trail_hit = price < peak * (1.0 - TRAIL_PCT)
                 emergency = rsis[i] is not None and rsis[i] < RSI_LONG_EMERGENCY
                 stop_hit = STOP_LOSS_PCT > 0 and price <= entry * (1.0 - STOP_LOSS_PCT)
+                opposite = "SHORT"
             else:
                 trough = min(trough, lows[i])
                 peak = max(peak, highs[i])
-                fav = (entry / trough - 1.0) * 100.0
-                adv = (entry / highs[i] - 1.0) * 100.0
-                max_fav = max(max_fav, fav)
-                max_adv = min(max_adv, adv)
+                max_fav = max(max_fav, (entry / trough - 1.0) * 100.0)
+                max_adv = min(max_adv, (entry / highs[i] - 1.0) * 100.0)
                 trail_hit = price > trough * (1.0 + TRAIL_PCT)
                 emergency = rsis[i] is not None and rsis[i] > RSI_SHORT_EMERGENCY
                 stop_hit = STOP_LOSS_PCT > 0 and price >= entry * (1.0 + STOP_LOSS_PCT)
+                opposite = "LONG"
 
-            meaningful_reverse = state in {"LONG", "SHORT"} and state != position["direction"]
+            # A trailing retracement is a warning, not an immediate exit.
+            # The exit must pass the same 2-of-3 confirmation zone.
+            if pending_exit is None and (trail_hit or state == opposite):
+                pending_exit = {
+                    "to": opposite,
+                    "started": i,
+                    "hits": 0,
+                    "checked": 0,
+                    "reason": "TRAILING_TREND_CHANGE" if trail_hit else "TREND_CHANGE",
+                }
+
+            if pending_exit is not None:
+                if state == pending_exit["to"]:
+                    pending_exit["hits"] += 1
+                pending_exit["checked"] += 1
+
             reason = None
             if emergency:
                 reason = "RSI_EMERGENCY"
             elif stop_hit:
                 reason = "STOP_LOSS"
-            elif trail_hit:
-                reason = "TRAILING_TREND_CHANGE"
-            elif meaningful_reverse:
-                reason = "TREND_CHANGE"
+            elif pending_exit is not None and pending_exit["checked"] >= CONFIRM_BARS and pending_exit["hits"] >= MIN_CONFIRM:
+                reason = pending_exit["reason"]
 
             if reason:
                 exit_price = price
-                if position["direction"] == "LONG":
-                    pnl = (exit_price / entry - 1.0) * 100.0
-                else:
-                    pnl = (entry / exit_price - 1.0) * 100.0
-                trade = KISSTrade(
+                pnl = ((exit_price / entry) - 1.0) * 100.0 if position["direction"] == "LONG" else ((entry / exit_price) - 1.0) * 100.0
+                trades.append(KISSTrade(
                     trade_id=f"KISS-{len(trades)+1:05d}",
                     symbol=symbol,
                     direction=position["direction"],
@@ -260,12 +275,14 @@ def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: st
                     max_adverse_pct=round(max_adv, 6),
                     entry_rsi=rsis[position["entry_i"]],
                     exit_rsi=rsis[i],
-                )
-                trades.append(trade)
+                ))
                 position = None
                 peak = trough = None
+                pending_exit = None
 
-    # Close an open position at the last candle for an honest finite backtest.
+        i += 1
+
+    # Close an open position at the final available candle.
     if position is not None:
         i = len(rows) - 1
         entry = position["entry"]
