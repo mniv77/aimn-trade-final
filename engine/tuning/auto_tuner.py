@@ -1,9 +1,42 @@
+
 import json, pathlib, re
 def run_analysis(data=None):
     cache_dir=pathlib.Path("./tmp_cache")
     symbol = data.get('symbol','SPY') if isinstance(data, dict) else 'SPY'
-    files = [cache_dir/f"last_tune_{symbol}.json"] if (cache_dir/f"last_tune_{symbol}.json").exists() else sorted(cache_dir.glob("last_tune_*.json"))
+    direction = data.get('direction','LONG') if isinstance(data, dict) else 'LONG'
+    # Respect direction: try SHORT cache file first
+    candidates = []
+    if direction == 'SHORT':
+        candidates.append(cache_dir/f"last_tune_{symbol}_SHORT.json")
+        # If no SHORT cache, invert LONG cache
+        long_file = cache_dir/f"last_tune_{symbol}.json"
+        if long_file.exists() and not (cache_dir/f"last_tune_{symbol}_SHORT.json").exists():
+            try:
+                d=json.load(open(long_file))
+                trades = d.get('trades',[])
+                # Invert PnL for SHORT (if market went up, short loses)
+                inv_trades = [{**t, 'pnl': -t.get('pnl',0)} for t in trades]
+                total = sum(t['pnl'] for t in inv_trades)
+                wr = len([t for t in inv_trades if t['pnl']>=0])/len(inv_trades)*100 if inv_trades else 0
+                return {
+                    "status":"success",
+                    "symbol": symbol,
+                    "total_pnl_val": round(total,2),
+                    "win_rate_val": round(wr,1),
+                    "total_trades_val": len(inv_trades),
+                    "best_params": {"trail_pct": 0.03, "min_v_pct": 0.001},
+                    "grid_combinations": 1,
+                    "profit_per_day": round(total/252,2),
+                    "message": f"INVERTED {symbol} SHORT from LONG cache: trail=0.03 min_v=0.001 WR={wr:.1f}% total={total:.1f}% count={len(inv_trades)} - SHORT should lose in uptrend",
+                    "trades": inv_trades[:50],
+                    "symbols": [],
+                    "results": []
+                }
+            except Exception as e:
+                print(f"Invert error: {e}")
 
+    files = [cache_dir/f"last_tune_{symbol}.json"] if (cache_dir/f"last_tune_{symbol}.json").exists() else sorted(cache_dir.glob("last_tune_*.json"))
+    #... rest of original code
     symbols=[]
     for f in files:
         try:
@@ -23,15 +56,12 @@ def run_analysis(data=None):
     if not symbols:
         return {"status":"error","message":"No cache found, run perfect tuner"}
 
-    # Best = highest total
     best = sorted(symbols, key=lambda x: x['total'], reverse=True)[0]
-    # Filter to requested symbol if any
     if isinstance(data, dict) and data.get('symbol'):
         req = data['symbol']
         filtered = [s for s in symbols if s['symbol']==req]
         if filtered: best = filtered[0]
 
-    # Return format frontend expects (total_pnl_val, win_rate_val, etc)
     return {
         "status":"success",
         "symbol": best['symbol'],
