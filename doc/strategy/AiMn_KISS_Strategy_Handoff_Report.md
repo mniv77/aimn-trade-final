@@ -306,3 +306,123 @@ A strategy should be simple enough that an ordinary person looking at a losing c
 
 **30m tells us WHAT the market is doing; 5m helps determine WHEN to act; the KISS trend transition remains the strategy.**
 
+
+
+
+\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+
+===============================================================================================================================================================================================================================
+
+
+AiMn TRADE — PROJECT HANDOFF
+
+We are developing the AiMn Trade system.
+
+IMPORTANT: Do NOT reinvent the existing broker / symbol / direction / candle selection. That part works. If it isn't broken, DO NOT TOUCH IT.
+
+MAIN STRATEGY — KISS Keep It Simple.
+
+We moved away from the indicator-heavy strategy.
+
+Market has only 3 important states: LONG SHORT FLAT
+
+The important thing is the TRANSITION between states.
+
+ENTER: FLAT → LONG FLAT → SHORT LONG → SHORT SHORT → LONG
+
+WAIT / DO NOT ENTER: LONG → FLAT SHORT → FLAT
+
+V shapes, inverted V, W, M, U, etc. are useful descriptions but are NOT the strategy. The transition is the strategy.
+
+During a trade: Small reversals are NOISE. Do not immediately exit because of one candle or a small local reversal.
+
+A real transition should be confirmed over roughly 2–4 candles. Trailing take profit is used to detect/protect against a meaningful reversal.
+
+RSI is NOT the strategy. RSI is emergency protection only — especially for a sudden event/news shock where waiting for normal trend detection would be too slow.
+
+Stop loss is the final protection.
+
+MAIN PROBLEM WE ARE SOLVING: Our entries and exits were often TOO LATE.
+
+This was especially obvious on NVDA, which has many rapid V-shaped transitions and sudden jumps. We can enter near the end of a move and then exit near the bottom — exactly backwards from what we want.
+
+IMPORTANT NEW EXPERIMENT: Use two timeframes:
+
+30 MINUTES = major/global trend decision 5 MINUTES = execution timing
+
+The idea: 30m tells us WHAT the market is doing. 5m tells us WHEN to actually enter or exit.
+
+We are deliberately making only one major change at a time so we can compare results.
+
+CURRENT EXPERIMENT FILE: engine/kiss\_execution\_5m.py
+
+It is intentionally independent from the old system.
+
+Recent Git commit: c14b81c
+
+The current experiment uses:
+
+- 30m trend
+
+- 5m execution
+
+- 2-of-3 confirmation
+
+- trailing protection
+
+- RSI emergency exit
+
+- Trade IDs
+
+- loser-focused charts
+
+We have a KISS backtest page: /kiss\_backtest
+
+The chart displays losing trades and gives each trade an ID so we can inspect individual bad trades.
+
+The user does NOT care about looking at winners right now. The losers teach us where the strategy is wrong.
+
+OBSERVATIONS:
+
+1. Some previous entries were clearly too late.
+
+2. Some exits were clearly too late.
+
+3. Despite many losers, the strategy can still make money.
+
+4. Therefore the goal is NOT simply "more trades."
+
+5. The goal is to substantially reduce bad/late trades while preserving the good transition logic.
+
+6. NVDA is an especially useful test because its transitions can happen very quickly.
+
+7. The user believes the core KISS strategy is correct and wants execution timing improved.
+
+CURRENT THINKING: The 30m timeframe should determine the major transition. The 5m timeframe should allow us to act much closer to the actual transition instead of waiting 30 minutes for the next large candle.
+
+DO NOT:
+
+- add a pile of indicators
+
+- modify broker selection
+
+- modify symbol selection
+
+- modify direction selection
+
+- redesign the whole application
+
+- mix this experiment into the old tuner unnecessarily
+
+- optimize blindly for one symbol
+
+TESTING PHILOSOPHY: One change at a time. Run real backtests. Look primarily at losers. Compare old KISS versus new KISS 30m/5m. Use the Trade ID and chart to understand WHY each loser happened.
+
+NEXT LIKELY IMPROVEMENT: The current 5m experiment waits for confirmation before execution. Because our main problem is "too late," investigate whether execution should happen on the SECOND confirming 5m candle rather than waiting for the full three-candle window.
+
+This keeps the safety idea (2-candle confirmation) but reduces execution delay.
+
+Do NOT change anything else until that comparison is tested.
+
+The user prefers complete files/code or very simple Bash commands rather than patches.
+
