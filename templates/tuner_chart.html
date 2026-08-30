@@ -33,7 +33,7 @@ async function loadChart(){
   const markers=losers.map((t,i)=>({time: Math.min(i*3, candles.length-1), position:'aboveBar', color:'#f85149', shape:'arrowDown', text:`LOSS ${t.pnl.toFixed(1)}% gap ${t.gap?.toFixed(2)}% RSI ${t.rsi?.toFixed(0)}`}));
   candleSeries.setMarkers(markers);
   document.getElementById('info').textContent=`Loaded ${sym}: ${data.summary} | Showing ${losers.length} worst losers (of ${allTrades.length}) to keep chart clean`;
-  document.getElementById('stats').innerHTML=`Total: ${allTrades.length} | Wins: ${allTrades.filter(t=>t.pnl>=0).length} | Losers: ${allTrades.filter(t=>t.pnl<0).length} | Avg: ${(data.summary.match(/total=([\\d.]+)%/)?.[1]/allTrades.length).toFixed(2)}% per trade`;
+  document.getElementById('stats').innerHTML=`Total: ${allTrades.length} | Wins: ${allTrades.filter(t=>t.pnl>=0).length} | Losers: ${allTrades.filter(t=>t.pnl<0).length} | Avg: ${(allTrades.reduce((s,t)=>s+(t.pnl||0),0)/allTrades.length).toFixed(2)}% per trade`;
   let html='<b>TOP 20 LOSERS TO FIX (gap filter kills these):</b><br>'; allTrades.filter(t=>t.pnl<0).sort((a,b)=>a.pnl-b.pnl).slice(0,20).forEach((t,i)=>{html+=`<span class="loss">#${i} ${t.entry_time?.slice(0,16)} | ${t.pnl.toFixed(2)}% | gap ${t.gap?.toFixed(3)}% | rsi ${t.rsi?.toFixed(0)} | ${t.reason||''} ${t.ai_comment||''}</span><br>`;}); document.getElementById('trades').innerHTML=html; chart.timeScale().fitContent();
  }catch(e){ document.getElementById('info').textContent='Error: '+e.message; console.error(e); }
 }

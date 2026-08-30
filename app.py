@@ -1445,10 +1445,12 @@ def run_tuning():
             raw_result = {}
 
         # Map engine results with support for multiple naming conventions
-        trades_val = raw_result.get('total_trades', raw_result.get('trades_val', 0))
+        trades_val = raw_result.get('total_trades', raw_result.get('total_trades_val', raw_result.get('trades_val', 0)))
         win_rate_val = raw_result.get('win_rate', raw_result.get('win_rate_val', 0.0))
         total_pnl_val = raw_result.get('total_pnl', raw_result.get('total_pnl_val', 0.0))
         avg_pnl_val = raw_result.get('avg_pnl', raw_result.get('avg_pnl_val', 0.0))
+ if avg_pnl_val == 0 and trades_val and total_pnl_val:
+ avg_pnl_val = total_pnl_val / trades_val
 
         breakdown_raw = raw_result.get('breakdown', raw_result.get('exit_breakdown', {}))
         breakdown = {
@@ -1519,7 +1521,7 @@ def tuner_chart_data(symbol, direction, timeframe):
         candles = result.get("chart_candles", [])
         markers = result.get("markers", [])
         chart_data = [{"time": i, "open": c["open"], "high": c["high"], "low": c["low"], "close": c["close"]} for i, c in enumerate(candles)]
-        return jsonify({"candles": chart_data, "trades": markers, "stats": {"total_trades": result.get("total_trades",0), "win_rate": result.get("win_rate",0), "total_pnl": result.get("total_pnl",0), "avg_pnl": result.get("avg_pnl",0)}})
+        return jsonify({"candles": chart_data, "trades": markers, "stats": {"total_trades": result.get("total_trades", result.get("total_trades_val", result.get("trades_val",0))), "win_rate": result.get("win_rate", result.get("win_rate_val",0)), "total_pnl": result.get("total_pnl", result.get("total_pnl_val",0)), "avg_pnl": result.get("avg_pnl", result.get("avg_pnl_val",0)) or (result.get("total_pnl_val",0)/max(1,result.get("total_trades_val",1)))}})
     except Exception as e:
         import traceback
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
