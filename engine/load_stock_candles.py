@@ -14,7 +14,7 @@ if isinstance(conn, tuple):
 for sym in stocks:
     try:
         print(f"\n=== Downloading {sym} 60d 30m ===")
-        df = yf.download(sym, period="60d", interval="30m", auto_adjust=False, progress=False)
+        df = yf.download(sym, period="155d", interval="30m", auto_adjust=False, progress=False)
         if len(df)==0:
             print(f"{sym} no data")
             continue
