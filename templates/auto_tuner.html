@@ -581,7 +581,7 @@ if (data.status === 'success') {
                 <p style="margin:3px 0;"><b>Total Trades:</b> ${(data.trades_val || (data.trades ? data.trades.length : 0)) ?? (data.trades ? data.trades.length : 'N/A')}</p>
                 <p style="margin:3px 0;"><b>Total PnL:</b> <span style="color:#4ade80;">${data.total_pnl_val ?? 'N/A'}%</span></p>
                 <p style="margin:3px 0;"><b>Win Rate:</b> ${data.win_rate_val ?? 'N/A'}%</p>
-                <p style="margin:3px 0; grid-column: span 2;"><b>Avg PnL:</b> ${(data.avg_pnl_val != null ? data.avg_pnl_val.toFixed(2) : (data.total_pnl_val && data.trades_val ? (data.total_pnl_val / data.trades_val).toFixed(2) : 'N/A'))}%</p>
+                <p style="margin:3px 0; grid-column: span 2;"><b>Avg PnL:</b> ${(data.avg_pnl_val ? data.avg_pnl_val.toFixed(2) : (data.total_pnl_val && (data.trades_val || data.total_trades_val) ? (data.total_pnl_val / (data.trades_val || data.total_trades_val)).toFixed(2) : (data.total_pnl_val && data.trades ? (data.total_pnl_val / data.trades.length).toFixed(2) : 'N/A')))}%</p>
             </div>
 
             ${exitReasonsHtml}
