@@ -2321,7 +2321,7 @@ def trade_chart_data(trade_id):
 #===========================================================
 
 @app.route("/docs/strategy")
-def docs_strategy():
+def docs_strategy_2():
     import pathlib, markdown
     md_file = pathlib.Path("doc/strategy/AiMn-KISS-Strategy-V3-full.md")
     if not md_file.exists():
