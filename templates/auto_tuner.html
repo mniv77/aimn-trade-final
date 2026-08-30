@@ -558,9 +558,9 @@ if (data.status === 'success') {
                 <b style="color:#38bdf8; display:block; margin-bottom:6px; font-size:13px;">🚪 Exit Reasons Breakdown:</b>
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
                     <div><b>Gap Filter:</b> <span style="color:#22c55e;">Active</span></div>
-                    <div><b>RSI Signal:</b> <span style="color:#facc15;">${bd.RSI ?? 0}</span></div>
-                    <div><b>Stop Loss:</b> <span style="color:#facc15;">${bd.STOP ?? 0}</span></div>
-                    <div><b>Trailing Stop:</b> <span style="color:#facc15;">${bd.TRAIL ?? 0}</span></div>
+                    <div><b>Gap Filter:</b> <span style="color:#22c55e;">0.10% Active</span></div>
+                    <div><b>Vol Filter:</b> <span style="color:#22c55e;">0.80x Active</span></div>
+                    <div><b>RSI Filter:</b> <span style="color:#22c55e;">28-68 Active</span></div>
                 </div>
             </div>
         `;
@@ -578,7 +578,7 @@ if (data.status === 'success') {
                 <p style="margin:3px 0;"><b>Direction:</b> <span style="color:${data.direction === 'LONG' ? '#4ade80' : '#f87171'};">${data.direction || 'N/A'}</span></p>
                 <p style="margin:3px 0;"><b>Candle Time:</b> ${data.timeframe || 'N/A'}</p>
                 <p style="margin:3px 0;"><b># of Candles:</b> ${data.candle_count || 'N/A'}</p>
-                <p style="margin:3px 0;"><b>Total Trades:</b> ${data.trades_val ?? (data.trades ? data.trades.length : 'N/A')}</p>
+                <p style="margin:3px 0;"><b>Total Trades:</b> ${(data.trades_val || (data.trades ? data.trades.length : 0)) ?? (data.trades ? data.trades.length : 'N/A')}</p>
                 <p style="margin:3px 0;"><b>Total PnL:</b> <span style="color:#4ade80;">${data.total_pnl_val ?? 'N/A'}%</span></p>
                 <p style="margin:3px 0;"><b>Win Rate:</b> ${data.win_rate_val ?? 'N/A'}%</p>
                 <p style="margin:3px 0; grid-column: span 2;"><b>Avg PnL:</b> ${(data.avg_pnl_val != null ? data.avg_pnl_val.toFixed(2) : (data.total_pnl_val && data.trades_val ? (data.total_pnl_val / data.trades_val).toFixed(2) : 'N/A'))}%</p>
