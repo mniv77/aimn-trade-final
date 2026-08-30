@@ -28,10 +28,33 @@ def _db_rows(symbol: str, timeframe: str, limit: int = 5000):
 
 
 def _row_dicts(rows):
-    return [
-        {"timestamp": r[0], "open": r[1], "high": r[2], "low": r[3], "close": r[4], "volume": r[5]}
-        for r in rows
-    ]
+    """Normalize MySQL dictionary-cursor rows to the engine's expected shape.
+
+    db.get_db_connection() uses cursor(dictionary=True), so rows are mappings,
+    not tuples. The previous tuple-only conversion tried r[0], which produced
+    KeyError: 0 and surfaced in the browser as ERROR: 0.
+    """
+    normalized = []
+    for r in rows:
+        if isinstance(r, dict):
+            normalized.append({
+                "timestamp": r.get("timestamp"),
+                "open": r.get("open"),
+                "high": r.get("high"),
+                "low": r.get("low"),
+                "close": r.get("close"),
+                "volume": r.get("volume"),
+            })
+        else:
+            normalized.append({
+                "timestamp": r[0],
+                "open": r[1],
+                "high": r[2],
+                "low": r[3],
+                "close": r[4],
+                "volume": r[5],
+            })
+    return normalized
 
 
 def _run_selected(symbol, direction, timeframe):
