@@ -28,22 +28,14 @@ def _db_rows(symbol: str, timeframe: str, limit: int = 5000):
 
 
 def _row_dicts(rows):
-    """Convert DB tuple rows to the dictionaries used by the KISS engines."""
     return [
-        {
-            "timestamp": r[0],
-            "open": r[1],
-            "high": r[2],
-            "low": r[3],
-            "close": r[4],
-            "volume": r[5],
-        }
+        {"timestamp": r[0], "open": r[1], "high": r[2], "low": r[3], "close": r[4], "volume": r[5]}
         for r in rows
     ]
 
 
 def _run_selected(symbol, direction, timeframe):
-    """Run the selected KISS experiment without touching broker/symbol selection."""
+    """Run KISS without changing broker/symbol/direction selection."""
     if timeframe == "30m":
         from engine.kiss_execution_5m import run_kiss_30m_5m
         trend_rows = _row_dicts(_db_rows(symbol, "30m"))
@@ -75,6 +67,8 @@ def register_kiss_backtest_routes(app):
             result["losers"] = [t for t in result["trades"] if t["pnl_pct"] <= 0]
             result["winners_hidden"] = True
             if timeframe == "30m":
+                result["timeframe"] = "30m trend → 5m execution"
+                result["candle_count"] = result["candle_count_5m"]
                 result["execution_experiment"] = "30m trend decision / 5m execution"
             return jsonify({"status": "success", **result})
         except Exception as exc:
@@ -112,17 +106,11 @@ def register_kiss_backtest_routes(app):
             candles = []
             for r in rows[start:end]:
                 candles.append({
-                    "time": str(r["timestamp"]),
-                    "open": float(r["open"]),
-                    "high": float(r["high"]),
-                    "low": float(r["low"]),
-                    "close": float(r["close"]),
-                    "volume": float(r["volume"] or 0),
+                    "time": str(r["timestamp"]), "open": float(r["open"]), "high": float(r["high"]),
+                    "low": float(r["low"]), "close": float(r["close"]), "volume": float(r["volume"] or 0),
                 })
             return jsonify({
-                "status": "success",
-                "trade": trade,
-                "candles": candles,
+                "status": "success", "trade": trade, "candles": candles,
                 "decision_timeframe": "30m" if timeframe == "30m" else timeframe,
                 "execution_timeframe": "5m" if timeframe == "30m" else timeframe,
             })
