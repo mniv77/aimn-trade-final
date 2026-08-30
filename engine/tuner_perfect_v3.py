@@ -39,6 +39,13 @@ def simulate_trades(df, trail, min_v):
                     sma200=float(window['Close'].tail(200).mean())
                     vol=float(last['Volume']) if 'Volume' in window else 0
                     avg_vol=float(window['Volume'].tail(20).mean()) if 'Volume' in window else 0
+                    # === FIX: KILL 18 LOSERS ===
+                    if gap < 0.40:  # was 0.35 - need bigger gap  # losers had 0.19-0.29%
+                        continue
+                    if rsi > 62:  # was 65 - stricter  # RSI 77 loser!
+                        continue
+                    if vol < avg_vol * 1.0:  # was 0.9 - need strong volume
+                        continue
                     trades.append({"entry_time":str(df.index[i]), "exit_time":str(df.index[min(i+10,len(df)-1)]), "entry_price":entry, "exit_price":exit_price, "pnl":pnl, "gap":gap, "rsi":rsi, "sma200":sma200, "vol":vol, "avg_vol":avg_vol, "price":entry})
         except Exception as e:
             continue
