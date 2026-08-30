@@ -2375,3 +2375,11 @@ def shutdown_session(exception=None):
             db.remove()
         except Exception:
             pass
+
+@app.route('/api/tuner_cache/<symbol>')
+def tuner_cache(symbol):
+    import json, pathlib
+    p = pathlib.Path(f"tmp_cache/last_tune_{symbol.upper()}.json")
+    if not p.exists():
+        return {"error":"not found "+str(p)},404
+    return json.loads(p.read_text())
