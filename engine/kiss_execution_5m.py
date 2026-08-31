@@ -1,14 +1,13 @@
-"""Independent KISS execution experiment.
+"""Independent KISS 30m-trend / 5m-execution experiment.
 
-V4 experiment:
+This version deliberately fixes EXIT timing first.
 - 30m candles decide the major/global trend.
-- 5m candles decide when to execute entries and exits.
-- Broker/symbol/direction selection is untouched.
-- No MACD, no entry-indicator grid, no new prediction logic.
+- 5m candles execute exits.
+- A known 30m reversal against an open trade exits on the first available 5m candle.
+- A 5m trailing reversal is confirmed by 2 of the next 3 candles and exits on the
+  second confirming candle, rather than waiting for the third.
 - RSI remains emergency protection only.
-
-This file is intentionally separate from the existing tuner and backtest engine
-so the experiment can be compared cleanly with the previous KISS result.
+- Entry logic is intentionally left conservative for the next experiment.
 """
 from __future__ import annotations
 
@@ -83,8 +82,27 @@ def _v_shape(closes: Sequence[float], idx: int) -> Optional[str]:
     return None
 
 
-def _confirm_5m(closes: Sequence[float], start: int, direction: str) -> bool:
-    """Confirm a move with 2 of the next 3 completed 5m candles."""
+def _exit_confirm_index(closes: Sequence[float], start: int, direction: str) -> Optional[int]:
+    """Return the earliest of the next 3 candles with 2 confirming moves.
+
+    LONG exits need two down moves; SHORT exits need two up moves.
+    This deliberately exits on the second confirmation instead of waiting for
+    all three candles, reducing the delay that produced the observed late exits.
+    """
+    hits = 0
+    end = min(len(closes), start + CONFIRM_BARS + 1)
+    for j in range(start + 1, end):
+        if direction == "LONG" and closes[j] < closes[j - 1]:
+            hits += 1
+        elif direction == "SHORT" and closes[j] > closes[j - 1]:
+            hits += 1
+        if hits >= MIN_CONFIRM:
+            return j
+    return None
+
+
+def _entry_confirmed(closes: Sequence[float], start: int, direction: str) -> bool:
+    """Keep the original conservative entry rule unchanged."""
     if start + CONFIRM_BARS >= len(closes):
         return False
     hits = 0
@@ -108,11 +126,42 @@ class KISS5Trade:
     pnl_pct: float
     entry_transition: str
     transition_shape: Optional[str]
+    exit_transition: Optional[str]
     exit_reason: str
     max_favorable_pct: float
     max_adverse_pct: float
     entry_rsi: Optional[float]
     exit_rsi: Optional[float]
+
+
+def _make_trade(
+    trades: List[KISS5Trade], symbol: str, direction: str,
+    execution_rows: Sequence[Dict[str, Any]], rsis: Sequence[Optional[float]],
+    position: Dict[str, Any], exit_i: int, exit_reason: str,
+    exit_transition: Optional[str], max_fav: float, max_adv: float,
+) -> KISS5Trade:
+    entry_i = position["entry_i"]
+    entry = position["entry"]
+    exit_price = _num(execution_rows[exit_i].get("close"))
+    pnl = ((exit_price / entry) - 1.0) * 100.0 if direction == "LONG" else ((entry / exit_price) - 1.0) * 100.0
+    return KISS5Trade(
+        trade_id=f"KISS5-{len(trades)+1:05d}",
+        symbol=symbol,
+        direction=direction,
+        entry_time=_ts(execution_rows[entry_i].get("timestamp")),
+        exit_time=_ts(execution_rows[exit_i].get("timestamp")),
+        entry_price=round(entry, 8),
+        exit_price=round(exit_price, 8),
+        pnl_pct=round(pnl, 6),
+        entry_transition=position["transition"],
+        transition_shape=position.get("shape"),
+        exit_transition=exit_transition,
+        exit_reason=exit_reason,
+        max_favorable_pct=round(max_fav, 6),
+        max_adverse_pct=round(max_adv, 6),
+        entry_rsi=rsis[entry_i],
+        exit_rsi=rsis[exit_i],
+    )
 
 
 def run_kiss_30m_5m(
@@ -121,7 +170,7 @@ def run_kiss_30m_5m(
     symbol: str,
     direction: str,
 ) -> Dict[str, Any]:
-    """30m trend decision + 5m execution backtest."""
+    """Run the KISS experiment with 30m trend decisions and 5m execution."""
     trend_rows = sorted(list(trend_rows), key=lambda r: r.get("timestamp"))
     execution_rows = sorted(list(execution_rows), key=lambda r: r.get("timestamp"))
     if not trend_rows or not execution_rows:
@@ -151,83 +200,73 @@ def run_kiss_30m_5m(
 
     rsis = rsi_wilder(ex_closes)
     trades: List[KISS5Trade] = []
-    position = None
+    position: Optional[Dict[str, Any]] = None
     peak = None
     trough = None
     max_fav = 0.0
     max_adv = 0.0
-    pending = None
+    pending_entry = None
+    pending_trail = None
     event_index = 0
-    transition_count = len(trend_events)
 
     for i, row in enumerate(execution_rows):
         ts = row.get("timestamp")
 
-        # Apply every 30m trend transition that has become known by this 5m bar.
-        current_event = None
+        # Every 30m transition is explicit: from -> to. While in a trade,
+        # ONLY a transition TO the opposite direction can close it. A move to
+        # FLAT is intentionally not an exit, per the KISS strategy document.
         while event_index < len(trend_events) and trend_events[event_index]["time"] <= ts:
-            current_event = trend_events[event_index]
+            event = trend_events[event_index]
             event_index += 1
-
-        if current_event is not None:
-            target = current_event["to"]
-            if position is None and target in {"LONG", "SHORT"} and target == direction:
-                pending = {
-                    "kind": "ENTRY",
-                    "target": target,
-                    "from": current_event["from"],
-                    "shape": current_event["shape"],
-                    "start": i,
-                }
-            elif position is not None and target == ("SHORT" if position["direction"] == "LONG" else "LONG"):
-                pending = {
-                    "kind": "EXIT",
-                    "target": target,
-                    "start": i,
-                    "reason": "TREND_CHANGE",
-                }
-
-        # 5m execution: after a major 30m transition, confirm 2 of 3 5m candles.
-        if pending is not None and i >= pending["start"] + CONFIRM_BARS:
-            if _confirm_5m(ex_closes, pending["start"], pending["target"]):
-                if pending["kind"] == "ENTRY" and position is None:
-                    entry_i = pending["start"] + CONFIRM_BARS
-                    entry = ex_closes[entry_i]
-                    position = {
-                        "direction": direction,
-                        "entry_i": entry_i,
-                        "entry": entry,
-                        "transition": f"{pending['from']}->{direction}",
-                        "shape": pending.get("shape"),
+            target = event["to"]
+            if position is None:
+                if target == direction:
+                    pending_entry = {
+                        "start": i,
+                        "from": event["from"],
+                        "to": target,
+                        "shape": event["shape"],
                     }
-                    peak = trough = entry
-                    max_fav = max_adv = 0.0
-                    pending = None
-                elif pending["kind"] == "EXIT" and position is not None:
-                    exit_i = pending["start"] + CONFIRM_BARS
-                    entry = position["entry"]
-                    exit_price = ex_closes[exit_i]
-                    pnl = ((exit_price / entry) - 1.0) * 100.0 if position["direction"] == "LONG" else ((entry / exit_price) - 1.0) * 100.0
-                    trades.append(KISS5Trade(
-                        trade_id=f"KISS5-{len(trades)+1:05d}",
-                        symbol=symbol,
-                        direction=position["direction"],
-                        entry_time=_ts(execution_rows[position["entry_i"]].get("timestamp")),
-                        exit_time=_ts(execution_rows[exit_i].get("timestamp")),
-                        entry_price=round(entry, 8),
-                        exit_price=round(exit_price, 8),
-                        pnl_pct=round(pnl, 6),
-                        entry_transition=position["transition"],
-                        transition_shape=position["shape"],
-                        exit_reason=pending["reason"],
-                        max_favorable_pct=round(max_fav, 6),
-                        max_adverse_pct=round(max_adv, 6),
-                        entry_rsi=rsis[position["entry_i"]],
-                        exit_rsi=rsis[exit_i],
-                    ))
+            else:
+                opposite = "SHORT" if position["direction"] == "LONG" else "LONG"
+                if target == opposite:
+                    # MAJOR TREND REVERSAL: no additional 5m confirmation.
+                    # The 30m chart already made the major decision; use the
+                    # first available 5m candle to get out.
+                    trade = _make_trade(
+                        trades, symbol, position["direction"], execution_rows, rsis,
+                        position, i, "30M_TREND_REVERSAL",
+                        f"{event['from']}->{event['to']}", max_fav, max_adv,
+                    )
+                    trades.append(trade)
                     position = None
+                    pending_trail = None
                     peak = trough = None
-                    pending = None
+                    max_fav = max_adv = 0.0
+                    # The same 30m event can now seed the next requested direction.
+                    if target == direction:
+                        pending_entry = {
+                            "start": i, "from": event["from"],
+                            "to": target, "shape": event["shape"],
+                        }
+
+        # Conservative ENTRY is unchanged: only use 5m confirmation after the
+        # 30m decision. This experiment is about EXIT first.
+        if position is None and pending_entry is not None:
+            start = pending_entry["start"]
+            if i >= start + CONFIRM_BARS and _entry_confirmed(ex_closes, start, direction):
+                entry_i = start + CONFIRM_BARS
+                entry = ex_closes[entry_i]
+                position = {
+                    "direction": direction,
+                    "entry_i": entry_i,
+                    "entry": entry,
+                    "transition": f"{pending_entry['from']}->{direction}",
+                    "shape": pending_entry.get("shape"),
+                }
+                peak = trough = entry
+                max_fav = max_adv = 0.0
+                pending_entry = None
 
         if position is None:
             continue
@@ -251,41 +290,45 @@ def run_kiss_30m_5m(
             emergency = rsis[i] is not None and rsis[i] > RSI_SHORT_EMERGENCY
             opposite = "LONG"
 
-        # A 5m trail starts the same 2-of-3 confirmation window; one noisy bar
-        # therefore does not throw us out of the trade.
-        if pending is None and trail_hit:
-            pending = {"kind": "EXIT", "target": opposite, "start": i, "reason": "TRAILING_TREND_CHANGE"}
-
+        # RSI is the emergency brake: it is deliberately immediate.
         if emergency:
-            exit_price = price
-            pnl = ((exit_price / entry) - 1.0) * 100.0 if position["direction"] == "LONG" else ((entry / exit_price) - 1.0) * 100.0
-            trades.append(KISS5Trade(
-                trade_id=f"KISS5-{len(trades)+1:05d}", symbol=symbol,
-                direction=position["direction"],
-                entry_time=_ts(execution_rows[position["entry_i"]].get("timestamp")),
-                exit_time=_ts(row.get("timestamp")), entry_price=round(entry, 8),
-                exit_price=round(exit_price, 8), pnl_pct=round(pnl, 6),
-                entry_transition=position["transition"], transition_shape=position["shape"],
-                exit_reason="RSI_EMERGENCY", max_favorable_pct=round(max_fav, 6),
-                max_adverse_pct=round(max_adv, 6), entry_rsi=rsis[position["entry_i"]],
-                exit_rsi=rsis[i],
+            trades.append(_make_trade(
+                trades, symbol, position["direction"], execution_rows, rsis,
+                position, i, "RSI_EMERGENCY", None, max_fav, max_adv,
             ))
             position = None
-            pending = None
+            pending_trail = None
+            peak = trough = None
+            max_fav = max_adv = 0.0
+            continue
+
+        # Trailing take-profit is allowed to detect a reversal by itself.
+        # Once the peak/trough is retraced by TRAIL_PCT, require 2 of the next
+        # 3 five-minute moves, but execute on the SECOND confirming move.
+        if pending_trail is None and trail_hit:
+            pending_trail = {
+                "start": i,
+                "target": opposite,
+                "reason": "TRAILING_TREND_CHANGE",
+            }
+        if pending_trail is not None and i > pending_trail["start"]:
+            exit_i = _exit_confirm_index(ex_closes, pending_trail["start"], position["direction"])
+            if exit_i == i:
+                trades.append(_make_trade(
+                    trades, symbol, position["direction"], execution_rows, rsis,
+                    position, i, pending_trail["reason"],
+                    f"{position['direction']}->{pending_trail['target']}", max_fav, max_adv,
+                ))
+                position = None
+                pending_trail = None
+                peak = trough = None
+                max_fav = max_adv = 0.0
 
     if position is not None:
         i = len(execution_rows) - 1
-        entry = position["entry"]
-        exit_price = ex_closes[i]
-        pnl = ((exit_price / entry) - 1.0) * 100.0 if position["direction"] == "LONG" else ((entry / exit_price) - 1.0) * 100.0
-        trades.append(KISS5Trade(
-            trade_id=f"KISS5-{len(trades)+1:05d}", symbol=symbol,
-            direction=position["direction"], entry_time=_ts(execution_rows[position["entry_i"]].get("timestamp")),
-            exit_time=_ts(execution_rows[i].get("timestamp")), entry_price=round(entry, 8),
-            exit_price=round(exit_price, 8), pnl_pct=round(pnl, 6),
-            entry_transition=position["transition"], transition_shape=position["shape"],
-            exit_reason="END_OF_DATA", max_favorable_pct=round(max_fav, 6),
-            max_adverse_pct=round(max_adv, 6), entry_rsi=rsis[position["entry_i"]], exit_rsi=rsis[i],
+        trades.append(_make_trade(
+            trades, symbol, position["direction"], execution_rows, rsis,
+            position, i, "END_OF_DATA", None, max_fav, max_adv,
         ))
 
     payload = [asdict(t) for t in trades]
@@ -304,5 +347,5 @@ def run_kiss_30m_5m(
         "avg_pnl_pct": round((total / len(payload)) if payload else 0.0, 6),
         "loser_count": sum(t["pnl_pct"] <= 0 for t in payload),
         "winner_count": winners,
-        "transition_count": transition_count,
+        "transition_count": len(trend_events),
     }
