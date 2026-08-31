@@ -1,3 +1,587 @@
+# AiMn Trade — Project Handoff Report
+
+## KISS Strategy / Backtest / 5-Minute Execution Experiment
+
+**Date: August 30, 2026**
+
+### 1. What we are building
+
+This is the **AiMn trading system**. The most important part of the system is the **trading strategy**.
+
+The guiding philosophy is:
+
+> **KISS — Keep It Simple, Stupid.**
+
+We deliberately moved away from the idea that a trading system needs dozens of indicators and complicated formulas.
+
+The strategy is fundamentally about recognizing only three market states:
+
+- **LONG** — market is trending upward 
+
+- **SHORT** — market is trending downward 
+
+- **FLAT** — sideways market 
+
+The important thing is **the transition between trends**, not the particular shape of the chart.
+
+Examples:
+
+- falling → rising = **V-Long** 
+
+- rising → falling = **V-Short** 
+
+- But the chart can also make W, M, U, inverted U, etc. 
+
+**The shape is not the strategy. The transition is the strategy.**
+
+
+# 2. Core KISS trading rules
+
+### Entries
+
+We enter when the market changes into a directional trend:
+
+- SHORT → LONG = LONG entry 
+
+- LONG → SHORT = SHORT entry 
+
+- FLAT → LONG = LONG entry 
+
+- FLAT → SHORT = SHORT entry 
+
+We **do not enter** simply because:
+
+- LONG → FLAT 
+
+- SHORT → FLAT 
+
+Those are situations where we wait for the next meaningful directional transition.
+
+### Exits
+
+While in a trade, we follow the trend.
+
+A meaningful reversal should eventually cause an exit.
+
+A trailing mechanism is used to protect the trade, but **minor noise must not immediately throw us out**.
+
+The original strategy specifies confirmation of approximately **2–4 candles** so that a temporary local reversal does not automatically become an exit.
+
+### Protection
+
+RSI is **not the strategy**.
+
+RSI is an emergency safety mechanism for unexpected events.
+
+For example:
+
+- unexpected very bad news while LONG 
+
+- unexpected extremely good news while SHORT 
+
+In those cases, waiting for the normal trend-transition detection may be too slow.
+
+Therefore:
+
+> **Trend transition = normal decision mechanism.**  
+**RSI = emergency protection.**  
+**Stop loss = final protection.**
+
+
+# 3. Very important strategic principle
+
+The goal is **not to predict everything**.
+
+The goal is to get on the correct side of the transition as early as reasonably possible.
+
+The problem we discovered is that the system can be **too cautious**.
+
+A trade can be theoretically correct but still lose money because:
+
+> **We entered too late, after much of the move had already happened.**
+
+Then the system may also:
+
+> **exit too late, after the trend has already reversed significantly.**
+
+That is currently one of our biggest concerns.
+
+
+# 4. What we discovered from the loser charts
+
+We deliberately decided to concentrate on **losing trades**, rather than spending our time studying winners.
+
+The reason is simple:
+
+> We already know the system can make money.  
+The losers tell us where the strategy is wasting money.
+
+The new KISS backtest produces a **Losers** section where individual Trade IDs can be selected and inspected.
+
+The chart shows:
+
+- candles 
+
+- entry 
+
+- exit 
+
+- Trade ID 
+
+- entry/exit prices 
+
+- transition 
+
+- exit reason 
+
+- RSI 
+
+- maximum favorable movement 
+
+- maximum adverse movement 
+
+This makes it possible to visually ask:
+
+> "Why did we enter here?"
+
+and
+
+> "Why did we wait until here to exit?"
+
+This is much more useful than simply looking at a total P&L number.
+
+
+# 5. Important discovery from NVDA
+
+NVDA became an especially important test because its chart contains many rapid reversals / V-shaped transitions and sudden jumps.
+
+We observed:
+
+> **The KISS system entered too late and exited too late.**
+
+This was particularly obvious in NVDA.
+
+The concern was not that the basic direction-selection system was necessarily wrong.
+
+The concern was **execution timing**.
+
+The transition can happen very quickly, so a 30-minute candle can cause the system to recognize the move much later than the actual turning point.
+
+
+# 6. The timeframe idea
+
+We therefore proposed a very important experiment:
+
+### 30-minute candles
+
+Use **30m for the major/global trend decision**.
+
+This answers:
+
+> "What is the market's major direction?"
+
+### 5-minute candles
+
+Use **5m for execution**.
+
+This answers:
+
+> "When exactly should I enter or exit?"
+
+The idea is:
+
+> **30m decides WHAT.  
+5m decides WHEN.**
+
+This should potentially reduce the late-entry and late-exit problem.
+
+But we do **not assume it works**.
+
+The only real test will tell us.
+
+
+# 7. Current experiment
+
+We deliberately decided:
+
+> **Do not make many changes at once.**
+
+The first experiment is simply:
+
+**30m trend decision + 5m execution.**
+
+We do not want to simultaneously introduce a large collection of indicators, filters, parameters, or optimization tricks.
+
+That would make it impossible to know what actually improved the results.
+
+
+# 8. Important existing-system constraint
+
+The following already works and should **NOT be changed**:
+
+- broker selection 
+
+- symbol selection 
+
+- direction selection 
+
+- candle/data selection 
+
+The explicit rule is:
+
+> **If it isn't broken, don't touch it.**
+
+The new strategy/execution experiment should therefore be isolated from the existing selection machinery as much as possible.
+
+
+# 9. Independent implementation
+
+We decided not to modify the existing complicated machinery unnecessarily.
+
+Instead, the new experiment should be **clean and independent**.
+
+A new engine was created:
+
+`engine/kiss\_execution\_5m.py`
+
+It implements the experimental:
+
+> **30m major trend / 5m execution**
+
+approach.
+
+The intent is to compare the result against the previous KISS implementation without contaminating the existing system.
+
+
+# 10. Current Git status
+
+The latest Git pull was:
+
+```
+`Already up to date.`
+```
+
+The relevant recent commit added:
+
+```
+`engine/kiss\_execution\_5m.py`
+
+`kiss\_backtest\_routes.py`
+```
+
+The latest successful commands were:
+
+```
+`cd ~/aimn-trade-final`
+
+`git pull origin main`
+
+`python -m py\_compile engine/kiss\_execution\_5m.py kiss\_backtest\_routes.py`
+
+`touch /var/www/meirniv\_pythonanywhere\_com\_wsgi.py`
+```
+
+There were no Python compilation errors.
+
+
+# 11. Existing KISS backtest
+
+The KISS backtest page is working.
+
+Example:
+
+```
+`/kiss\_backtest?broker\_id=2&symbol=NVDA&direction=LONG&timeframe=30m`
+```
+
+It displays:
+
+- total trades 
+
+- total P&L 
+
+- win rate 
+
+- losers 
+
+- detected transitions 
+
+- list of losing trades 
+
+- Trade IDs 
+
+- individual charts 
+
+- entry/exit markers 
+
+This is exactly the kind of report we wanted because it allows the human to inspect the actual bad trades.
+
+
+# 12. What we saw in the charts
+
+One NVDA example showed:
+
+```
+`KISS-00008`
+
+`LONG`
+
+`Entry: 2026-07-06 15:00 @ 196.514`
+
+`Exit: 2026-07-07 14:30 @ 192.57`
+
+`P&L: -2.007%`
+
+`Exit: TRAILING\_TREND\_CHANGE`
+```
+
+The visual conclusion was:
+
+> **Entry was too late. Exit was too late.**
+
+Another important observation was that the system can be **too cautious** around very fast transitions.
+
+
+# 13. The "ScSt" question
+
+There was a chart displaying something called **ScSt**.
+
+We concluded that this was not important to the KISS strategy and does not need to become part of the strategy.
+
+The strategy should remain simple.
+
+
+# 14. Strategy documentation
+
+The strategy has already been documented as the central KISS strategy.
+
+The important document is:
+
+```
+`doc/strategy/AiMn-KISS-Strategy-V3-full.md`
+```
+
+It explicitly describes:
+
+- LONG / SHORT / FLAT 
+
+- transitions 
+
+- V-Long / V-Short 
+
+- transition confirmation 
+
+- separate memory for live/backtest/tuner 
+
+- trailing protection 
+
+- emergency RSI 
+
+- stop loss 
+
+- shared strategy engine concept 
+
+The guiding architectural idea is:
+
+> **ONE STRATEGY, ONE ENGINE, DIFFERENT MEMORIES**
+
+Live trading, backtesting and tuning should each maintain their own state/history rather than interfering with each other.
+
+
+# 15. Why separate memory matters
+
+This was discussed carefully because it is easy for an AI or programmer to misunderstand.
+
+Think of each application as having its own notebook:
+
+- Live trading has its notebook. 
+
+- Backtest has its notebook. 
+
+- Tuner has its notebook. 
+
+They all use the **same strategy**, but each keeps its own memory of:
+
+- what trend was previously detected 
+
+- when it happened 
+
+- current trade state 
+
+- peak/trough information 
+
+- etc. 
+
+This prevents one application from confusing its state with another application.
+
+
+# 16. Important "go backward" idea
+
+Another important part of the strategy is how we find the most recent transition.
+
+Instead of repeatedly scanning the entire historical dataset forward from the beginning, the system should:
+
+> **Start at the newest candle and move backward to find the most recent transition.**
+
+Once that transition is known, save it in memory/database.
+
+Next time, start from the newest data and only process what is new.
+
+The purpose is both:
+
+- efficiency 
+
+- avoiding repeatedly rediscovering the same history 
+
+This concept should be explained simply in documentation because even an AI/programmer can misunderstand it.
+
+
+# 17. Current main problem
+
+The current question is **not**:
+
+> "Can we make a complicated indicator system?"
+
+It is:
+
+> **Can we execute the correct KISS trend-transition strategy earlier and exit at the correct transition without being fooled by minor noise?**
+
+Specifically:
+
+### Entry problem
+
+We may recognize the correct transition but enter after the price has already moved too far.
+
+### Exit problem
+
+We may recognize the reversal but exit after too much of the move has already been lost.
+
+### Noise problem
+
+A temporary local reversal should not immediately close a trade.
+
+We need to distinguish:
+
+**minor noise**
+
+from
+
+**a genuine major trend reversal.**
+
+
+# 18. Current testing philosophy
+
+We are experimenting scientifically.
+
+Do **not** change ten things at once.
+
+The process should be:
+
+1. Establish the KISS baseline. 
+
+2. Test 30m decision + 5m execution. 
+
+3. Compare the results. 
+
+4. Look primarily at losers. 
+
+5. Inspect individual charts. 
+
+6. Identify the reason for each loss. 
+
+7. Make one meaningful strategy change. 
+
+8. Test again. 
+
+9. Compare. 
+
+The human visual inspection of the losing charts is an important source of feedback for future AI training.
+
+
+# 19. What we ultimately want
+
+The goal is not merely a higher win rate.
+
+We want:
+
+- fewer unnecessary losing trades 
+
+- earlier correct entries 
+
+- earlier correct exits 
+
+- protection against sudden unexpected reversals 
+
+- resistance to minor noise 
+
+- consistent behavior across symbols 
+
+- a simple strategy that can be understood and audited 
+
+- the **same strategy** used by backtest, tuner and eventually live trading 
+
+Most importantly:
+
+> **We want to be on the other side of the trades that currently lose money.**
+
+The system already demonstrated that it can make money even while carrying substantial losers, so reducing the bad trades could potentially make a meaningful difference.
+
+
+# 20. Current immediate task
+
+The immediate task is:
+
+### Test the new 30m / 5m execution experiment.
+
+Use NVDA as an important test because:
+
+- it has rapid transitions 
+
+- it contains many V-shaped reversals 
+
+- it has sudden jumps 
+
+- the old implementation was clearly too late 
+
+Then compare the new results with the old KISS results.
+
+**Do not modify broker/symbol/direction selection.**
+
+**Do not add a pile of indicators.**
+
+**Do not optimize blindly.**
+
+First determine whether the simple 30m → 5m change actually solves the timing problem.
+
+
+## The guiding sentence for the new chat
+
+> **We already know what strategy we want. Now we are trying to make the execution happen at the right time without making KISS complicated.**
+
+### Current state
+
+The latest code has been pulled successfully and compiled successfully.
+
+```
+`engine/kiss\_execution\_5m.py`
+```
+
+is now in the project.
+
+The next job is to **run it, inspect the fresh results, especially NVDA losers, and compare them against the previous KISS 30m implementation.**
+
+**Do not reinvent the strategy. Improve the execution of the strategy we already agreed on.**
+
+
+You can paste **this entire report** into the new chat. It should give the new chat enough context to pick up the work without you having to tell the whole story again.
+
+
+
+
+# \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+
+
+
 # AiMn Trade — Strategy & Project Handoff Report
 
 ## Purpose
