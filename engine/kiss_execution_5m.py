@@ -8,6 +8,9 @@ This version deliberately fixes EXIT timing first.
   second confirming candle, rather than waiting for the third.
 - RSI remains emergency protection only.
 - Entry logic is intentionally left conservative for the next experiment.
+
+Trailing parameters are explicit so every report shows exactly what was tested:
+START = 0.0% (active from entry), MINUS = 1.5% from the favorable peak/trough.
 """
 from __future__ import annotations
 
@@ -20,7 +23,10 @@ TREND_WINDOW = 20
 TREND_BAND = 0.002
 CONFIRM_BARS = 3
 MIN_CONFIRM = 2
-TRAIL_PCT = 0.015
+TRAIL_START_PCT = 0.0
+TRAIL_MINUS_PCT = 0.015
+# Backward-compatible alias: the KISS document calls this the 1.5% trail.
+TRAIL_PCT = TRAIL_MINUS_PCT
 RSI_PERIOD = 14
 RSI_LONG_EMERGENCY = 20.0
 RSI_SHORT_EMERGENCY = 80.0
@@ -230,9 +236,6 @@ def run_kiss_30m_5m(
             else:
                 opposite = "SHORT" if position["direction"] == "LONG" else "LONG"
                 if target == opposite:
-                    # MAJOR TREND REVERSAL: no additional 5m confirmation.
-                    # The 30m chart already made the major decision; use the
-                    # first available 5m candle to get out.
                     trade = _make_trade(
                         trades, symbol, position["direction"], execution_rows, rsis,
                         position, i, "30M_TREND_REVERSAL",
@@ -243,7 +246,6 @@ def run_kiss_30m_5m(
                     pending_trail = None
                     peak = trough = None
                     max_fav = max_adv = 0.0
-                    # The same 30m event can now seed the next requested direction.
                     if target == direction:
                         pending_entry = {
                             "start": i, "from": event["from"],
@@ -278,7 +280,7 @@ def run_kiss_30m_5m(
             trough = min(trough, ex_lows[i])
             max_fav = max(max_fav, (peak / entry - 1.0) * 100.0)
             max_adv = min(max_adv, (ex_lows[i] / entry - 1.0) * 100.0)
-            trail_hit = price < peak * (1.0 - TRAIL_PCT)
+            trail_hit = peak >= entry * (1.0 + TRAIL_START_PCT) and price < peak * (1.0 - TRAIL_MINUS_PCT)
             emergency = rsis[i] is not None and rsis[i] < RSI_LONG_EMERGENCY
             opposite = "SHORT"
         else:
@@ -286,11 +288,10 @@ def run_kiss_30m_5m(
             peak = max(peak, ex_highs[i])
             max_fav = max(max_fav, (entry / trough - 1.0) * 100.0)
             max_adv = min(max_adv, (entry / ex_highs[i] - 1.0) * 100.0)
-            trail_hit = price > trough * (1.0 + TRAIL_PCT)
+            trail_hit = trough <= entry * (1.0 - TRAIL_START_PCT) and price > trough * (1.0 + TRAIL_MINUS_PCT)
             emergency = rsis[i] is not None and rsis[i] > RSI_SHORT_EMERGENCY
             opposite = "LONG"
 
-        # RSI is the emergency brake: it is deliberately immediate.
         if emergency:
             trades.append(_make_trade(
                 trades, symbol, position["direction"], execution_rows, rsis,
@@ -302,14 +303,14 @@ def run_kiss_30m_5m(
             max_fav = max_adv = 0.0
             continue
 
-        # Trailing take-profit is allowed to detect a reversal by itself.
-        # Once the peak/trough is retraced by TRAIL_PCT, require 2 of the next
-        # 3 five-minute moves, but execute on the SECOND confirming move.
+        # Trailing take-profit: the retracement is a real exit trigger. We still
+        # protect against one-candle noise by requiring 2 of the next 3 5m moves,
+        # but the exit occurs on the SECOND confirmation, not after a full 3-bar wait.
         if pending_trail is None and trail_hit:
             pending_trail = {
                 "start": i,
                 "target": opposite,
-                "reason": "TRAILING_TREND_CHANGE",
+                "reason": "TRAILING_TAKE_PROFIT",
             }
         if pending_trail is not None and i > pending_trail["start"]:
             exit_i = _exit_confirm_index(ex_closes, pending_trail["start"], position["direction"])
@@ -341,6 +342,9 @@ def run_kiss_30m_5m(
         "execution_timeframe": "5m",
         "candle_count_30m": len(trend_rows),
         "candle_count_5m": len(execution_rows),
+        "trailing_start_pct": TRAIL_START_PCT * 100.0,
+        "trailing_minus_pct": TRAIL_MINUS_PCT * 100.0,
+        "trailing_description": f"Starts at +{TRAIL_START_PCT * 100.0:.1f}% and exits after a {TRAIL_MINUS_PCT * 100.0:.1f}% retracement from peak/trough with 2-of-3 5m confirmation.",
         "trades": payload,
         "total_pnl_pct": round(total, 6),
         "win_rate_pct": round((winners / len(payload) * 100.0) if payload else 0.0, 4),
