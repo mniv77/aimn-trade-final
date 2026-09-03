@@ -66,8 +66,8 @@ def register_backtest_routes(app, db):
 
     @app.after_request
     def inject_kiss_button(response):
-        # Add one new button to the existing Auto Tuner page without editing
-        # its broker/symbol/direction/timeframe selection code.
+        # Add the independent KISS button to the clean Auto Tuner control page.
+        # The broker/symbol/direction/timeframe selection remains on the page.
         if request.path != '/auto_tuner' or response.status_code != 200:
             return response
         content_type = response.headers.get('Content-Type', '')
@@ -81,14 +81,14 @@ def register_backtest_routes(app, db):
 (function(){
   function addKissButton(){
     if(document.getElementById('kiss_backtest_btn')) return;
-    var target=document.getElementById('run_btn') || document.getElementById('run_all_btn');
-    if(!target || !target.parentNode) return;
+    var target=document.getElementById('kiss_button_anchor');
+    if(!target) return;
     var b=document.createElement('button');
     b.id='kiss_backtest_btn';
     b.type='button';
     b.textContent='🎯 RUN KISS BACKTEST';
-    b.style.cssText='padding:10px 24px;background:#7f1d1d;border:1px solid #ef4444;border-radius:4px;color:#fff;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;';
-    b.title='Run the independent KISS V3 strategy. Existing Auto Tuner is not changed.';
+    b.style.cssText='padding:10px 24px;background:#7f1d1d;border:1px solid #ef4444;border-radius:4px;color:#fff;font-family:Arial,sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;';
+    b.title='Run the independent KISS transition strategy backtest.';
     b.onclick=function(){
       var broker=document.getElementById('broker_select');
       var symbol=document.getElementById('symbol_select');
@@ -96,11 +96,12 @@ def register_backtest_routes(app, db):
       var longBtn=document.getElementById('btn_long');
       var shortBtn=document.getElementById('btn_short');
       var direction=(shortBtn && shortBtn.className.indexOf('active-short')>=0)?'SHORT':'LONG';
+      if(!broker || !broker.value){alert('Please choose a broker first.');return;}
       if(!symbol || !symbol.value){alert('Please choose a symbol first.');return;}
-      var u='/kiss_backtest?broker_id='+encodeURIComponent(broker?broker.value:'')+'&symbol='+encodeURIComponent(symbol.value)+'&direction='+encodeURIComponent(direction)+'&timeframe='+encodeURIComponent(tf?tf.value:'1hr');
+      var u='/kiss_backtest?broker_id='+encodeURIComponent(broker.value)+'&symbol='+encodeURIComponent(symbol.value)+'&direction='+encodeURIComponent(direction)+'&timeframe='+encodeURIComponent(tf?tf.value:'1hr');
       window.open(u,'_blank');
     };
-    target.parentNode.insertBefore(b,target.nextSibling);
+    target.appendChild(b);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addKissButton); else addKissButton();
 })();
