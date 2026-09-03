@@ -2,126 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HaGolem Auto Trading by AiMN — Tuner</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMN — KISS Backtest Control</title>
     <style>
         :root {
-            --bg:      #080d18;
-            --panel:   #0d1526;
-            --border:  #1a3050;
-            --accent:  #2563eb;
-            --accent2: #0ea5e9;
-            --gold:    #f59e0b;
-            --green:   #10b981;
-            --red:     #ef4444;
-            --text:    #c8d8f0;
-            --muted:   #4a6a90;
-            --label:   #7aa0c8;
+            --bg:#080d18; --panel:#0d1526; --border:#1a3050;
+            --accent:#2563eb; --accent2:#0ea5e9; --green:#10b981;
+            --red:#ef4444; --text:#c8d8f0; --muted:#4a6a90; --label:#7aa0c8;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 14px; min-height: 100vh; padding: 24px; }
-        .mono { font-family: 'Share Tech Mono', monospace; }
-        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
-        .header-logo  { font-family: 'Share Tech Mono', monospace; color: var(--accent2); font-size: 22px; letter-spacing: 3px; }
-        .header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: white; letter-spacing: 1px; }
-        .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-        .header-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 3px; }
-        #default_indicator { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--green); display: none; }
-        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; }
-        .panel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-        .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
-        .field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--label); margin-bottom: 6px; }
-        .field-hint  { font-size: 10px; color: var(--muted); margin-top: 4px; }
-        select, input[type="text"] { width: 100%; padding: 9px 12px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 13px; outline: none; transition: border-color 0.2s; }
-        select:focus, input[type="text"]:focus { border-color: var(--accent); }
-        select:disabled { opacity: 0.35; cursor: not-allowed; }
-        .dir-group { display: flex; gap: 8px; }
-        .dir-btn { flex: 1; padding: 9px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-align: center; transition: all 0.2s; user-select: none; }
-        .dir-btn:hover { border-color: var(--accent); color: var(--text); }
-        .dir-btn.active-long  { background: #052e16; border-color: var(--green); color: var(--green); }
-        .dir-btn.active-short { background: #450a0a; border-color: var(--red);   color: var(--red); }
-        .score-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .score-btn { padding: 7px 14px; background: #060c18; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; user-select: none; }
-        .score-btn.active { background: #1e3a5f; border-color: var(--accent2); color: var(--accent2); }
-        #run_btn { width: 100%; padding: 13px; background: var(--accent); border: none; border-radius: 5px; color: white; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 2px; cursor: pointer; transition: background 0.2s, transform 0.1s; text-transform: uppercase; }
-        #run_btn:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); }
-        #run_btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-        #set_default_btn { padding: 8px 18px; background: #1a3a1a; border: 1px solid var(--green); border-radius: 4px; color: var(--green); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; display: none; }
-        #set_default_btn:hover { background: #052e16; }
-        #reset_default_btn { padding: 8px 18px; background: #1a1500; border: 1px solid var(--gold); border-radius: 4px; color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
-        #reset_default_btn:hover { background: #2a2000; }
-        #result_box { font-family: 'Share Tech Mono', monospace; font-size: 13px; line-height: 1.8; white-space: pre-wrap; min-height: 140px; }
-        #chart_container { width: 100%; height: 350px; margin-top: 14px; border-radius: 4px; overflow: hidden; display: none; border: 1px solid var(--border); }
-        .log-ok   { color: var(--green); }
-        .log-err  { color: var(--red); }
-        .log-info { color: var(--accent2); }
-        .log-best { color: var(--gold); font-weight: bold; }
-        .log-sep  { color: var(--border); }
-        .status-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 3px 10px; border-radius: 3px; border: 1px solid; }
-        .status-blue  { background: #1e3a5f; border-color: var(--accent2); color: var(--accent2); }
-        .status-green { background: #052e16; border-color: var(--green);   color: var(--green); }
-        .status-red   { background: #450a0a; border-color: var(--red);     color: var(--red); }
-        .mode-tabs { display: flex; gap: 0; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-        .mode-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 1px; transition: all 0.2s; color: var(--muted); background: var(--panel); border: none; }
-        .mode-tab:hover { color: var(--text); }
-        .mode-tab.active-etf { background: #1e3a5f; color: #0ea5e9; border-bottom: 2px solid #0ea5e9; }
-        .mode-tab.active-crypto { background: #1a1a3a; color: #f59e0b; border-bottom: 2px solid #f59e0b; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { background:var(--bg); color:var(--text); font-family:Arial,sans-serif; min-height:100vh; padding:24px; }
+        .header { display:flex; align-items:center; gap:12px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+        .logo { color:var(--accent2); font-family:monospace; font-size:22px; letter-spacing:3px; }
+        h1 { color:white; font-size:26px; }
+        .header-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+        .badge { color:var(--accent2); border:1px solid var(--border); padding:4px 10px; border-radius:4px; font-family:monospace; font-size:11px; }
+        .top-actions { display:flex; justify-content:flex-end; margin-bottom:16px; }
+        .top-actions a, .dashboard { padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:bold; }
+        .chart-link { background:var(--accent); color:white; border:1px solid #3b82f6; }
+        .dashboard { background:var(--panel); color:var(--label); border:1px solid var(--border); }
+        .panel { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:18px 20px; margin-bottom:16px; }
+        .title { color:var(--muted); font-size:13px; font-weight:bold; letter-spacing:.12em; text-transform:uppercase; margin-bottom:14px; }
+        .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+        label { display:block; color:var(--label); font-size:11px; font-weight:bold; letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px; }
+        select { width:100%; padding:10px 12px; background:#060c18; border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:monospace; font-size:13px; }
+        .dir-group { display:flex; gap:8px; }
+        .dir-btn { flex:1; padding:10px; background:#060c18; border:1px solid var(--border); border-radius:4px; color:var(--muted); font-weight:bold; cursor:pointer; text-align:center; }
+        .dir-btn.active-long { background:#052e16; border-color:var(--green); color:var(--green); }
+        .dir-btn.active-short { background:#450a0a; border-color:var(--red); color:var(--red); }
+        .actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .feedback-link { display:inline-block; padding:10px 18px; background:#238636; color:white; border-radius:6px; text-decoration:none; font-weight:bold; }
+        .hint { color:var(--muted); font-size:12px; }
+        @media (max-width:900px) { .grid { grid-template-columns:1fr 1fr; } }
+        @media (max-width:600px) { .grid { grid-template-columns:1fr; } .header { flex-wrap:wrap; } .header-right { margin-left:0; width:100%; } }
     </style>
 </head>
 <body>
-<div style='padding: 15px 20px; background: #0d1526; border-bottom: 1px solid #1a3050; display: flex; justify-content: flex-end;'>
-    <a id="open_chart_link" href="/tuner_chart" target="_blank" style="background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #3b82f6; transition: background 0.2s;">
-        📊 Open Chart & Feedback
-    </a>
-</div>
+    <div class="top-actions">
+        <a id="open_chart_link" class="chart-link" href="/tuner_chart" target="_blank">📊 Open Chart &amp; Feedback</a>
+    </div>
+
     <div class="header">
-        <div class="header-logo">AiMN</div>
-        <div class="header-title">Auto Tuner</div>
+        <div class="logo">AiMN</div>
+        <h1>KISS Backtest Control</h1>
         <div class="header-right">
-            <span id="default_indicator">✅ Custom Default Loaded</span>
-            <button id="reset_default_btn" onclick="resetDefaults()">↺ Reset</button>
-            <div class="header-badge">V3.3</div>
-            <a href="/" style="padding: 8px 18px; background: #0d1526; border: 1px solid #1a3050; border-radius: 4px; color: #7aa0c8; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; text-decoration: none;">← Dashboard</a>
-        </div>
-    </div>
-
-    <div class="mode-tabs">
-        <button class="mode-tab active-etf" id="tab-etf" onclick="switchMode('etf')">📈 ETF / STOCKS</button>
-        <button class="mode-tab" id="tab-crypto" onclick="switchMode('crypto')">🪙 CRYPTO</button>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px;">
-        <div class="panel-title">⚡ Quick Actions &amp; Data Sync</div>
-        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-            <button id="fetch_candles_btn" onclick="fetchCandles()"
-                style="padding:10px 24px; background:#047857; border:none; border-radius:4px; color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
-                📥 Fetch Historical Candles
-            </button>
-            <button id="run_all_btn" onclick="runAllTuning()"
-                style="padding:10px 24px; background:#1d4ed8; border:none; border-radius:4px; color:white; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
-                ▶ Run All Tuning
-            </button>
-            <button id="disable_old_btn" onclick="disableOldStrategies()"
-                style="padding:10px 24px; background:#1a0a0a; border:1px solid #ef4444; border-radius:4px; color:#ef4444; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; cursor:pointer;">
-                🧹 Disable Old Strategies
-            </button>
-            <a href="/tuning_runs"
-                style="padding:10px 24px; background:#1a2a4a; border:1px solid #0ea5e9; border-radius:4px; color:#0ea5e9; font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; text-decoration:none;">
-                📋 View Tuning Runs
-            </a>
-            <span id="action_status" style="font-family:'Share Tech Mono',monospace; font-size:12px; color:#f59e0b; display:none;"></span>
+            <span class="badge">TRANSITION STRATEGY</span>
+            <a class="dashboard" href="/">← Dashboard</a>
         </div>
     </div>
 
     <div class="panel">
-        <div class="panel-title">🎯 Target</div>
-        <div class="grid-4">
+        <div class="title">🎯 Backtest Target</div>
+        <div class="grid">
             <div>
-                <label class="field-label">Broker</label>
+                <label for="broker_select">Broker</label>
                 <select id="broker_select" name="broker_id">
                     <option value="">-- Choose --</option>
                     {% for b in brokers %}
@@ -130,605 +64,102 @@
                 </select>
             </div>
             <div>
-                <label class="field-label">Symbol</label>
+                <label for="symbol_select">Symbol</label>
                 <select id="symbol_select" disabled>
                     <option value="">-- Choose Broker First --</option>
                 </select>
             </div>
             <div>
-                <label class="field-label">Direction</label>
+                <label>Direction</label>
                 <div class="dir-group">
                     <div class="dir-btn" id="btn_long" onclick="setDirection('LONG')">LONG</div>
                     <div class="dir-btn" id="btn_short" onclick="setDirection('SHORT')">SHORT</div>
                 </div>
             </div>
             <div>
-                <label class="field-label">Timeframe</label>
+                <label for="timeframe_select">Timeframe</label>
                 <select id="timeframe_select">
-                    <option value="5m">5m  — 7 days</option>
-                    <option value="15m">15m — 21 days</option>
-                    <option value="30m">30m — 42 days</option>
-                    <option value="1hr" selected>1hr — 84 days</option>
-                    <option value="6hr">6hr — 1 year</option>
+                    <option value="5m">5m</option>
+                    <option value="15m">15m</option>
+                    <option value="30m">30m</option>
+                    <option value="1hr" selected>1hr</option>
+                    <option value="6hr">6hr</option>
                 </select>
             </div>
         </div>
     </div>
 
     <div class="panel">
-        <div class="panel-title">📈 Entry Parameters (Grid Search)</div>
-        <div class="grid-3">
-            <div>
-                <label class="field-label">RSI Lookback Options</label>
-                <input type="text" id="rsi_len_options" value="50,100,168">
-                <div class="field-hint">Comma-separated bar values</div>
-            </div>
-            <div>
-                <label class="field-label">RSI Entry Threshold Options</label>
-                <input type="text" id="rsi_entry_options" value="25,35,40">
-                <div class="field-hint">Lower = more selective entry</div>
-            </div>
-            <div>
-                <label class="field-label">MACD (Fast / Slow / Signal)</label>
-                <div style="display:flex; gap:6px;">
-                    <input type="text" id="macd_fast" value="12" style="text-align:center;">
-                    <input type="text" id="macd_slow" value="26" style="text-align:center;">
-                    <input type="text" id="macd_sig"  value="9"  style="text-align:center;">
-                </div>
-                <div class="field-hint">Fixed — not grid searched</div>
-            </div>
-            <div>
-                <label class="field-label">Volume Spike Threshold</label>
-                <input type="text" id="volume_spike" value="2.0" style="text-align:center;">
-                <div class="field-hint">Ratio vs 20-bar avg (2.0 = 2x spike)</div>
-            </div>
-        </div>
+        <div class="title">▶ KISS Backtest</div>
+        <div id="kiss_button_anchor" class="actions"></div>
+        <p class="hint" style="margin-top:10px;">Uses the selected broker, symbol, direction and timeframe. The KISS backtest is independent of the retired Auto Tuner.</p>
     </div>
 
     <div class="panel">
-        <div class="panel-title">🛡️ Exit Parameters (Grid Search)</div>
-        <div class="grid-3">
-            <div>
-                <label class="field-label">Stop Loss % Options</label>
-                <input type="text" id="stop_loss_options" value="0.3,1.0,2.0">
-                <div class="field-hint">Max loss before exit</div>
-            </div>
-            <div>
-                <label class="field-label">Trail Start % Options</label>
-                <input type="text" id="trail_start_options" value="1.0,1.5,2.0">
-                <div class="field-hint">Peak profit to activate trail</div>
-            </div>
-            <div>
-                <label class="field-label">Trail Drop % Options</label>
-                <input type="text" id="trail_minus_options" value="0.3,0.5,0.7">
-                <div class="field-hint">Drop from peak to trigger exit</div>
-            </div>
-            <div>
-                <label class="field-label">RSI Exit Threshold Options</label>
-                <input type="text" id="rsi_exit_options" value="65,70">
-                <div class="field-hint">Exit when RSI reaches this level</div>
-            </div>
-        </div>
+        <div class="title">📈 Review</div>
+        <a class="feedback-link" href="/tuner_chart" target="_blank">📈 Open Feedback Chart (Working)</a>
     </div>
 
-    <div class="panel">
-        <div class="panel-title">⏱️ Profit Floor & Decay (Grid Search)</div>
-        <div class="grid-4">
-            <div>
-                <label class="field-label">Init Profit % Options</label>
-                <input type="text" id="init_profit_options" value="1.5,2.0,2.5">
-                <div class="field-hint">Minimum profit floor options</div>
-            </div>
-            <div>
-                <label class="field-label">Decay Start Options (hours)</label>
-                <input type="text" id="decay_start_options" value="4,5,6">
-                <div class="field-hint">Hours before floor decays</div>
-            </div>
-            <div>
-                <label class="field-label">Decay Rate (%/hour)</label>
-                <input type="text" id="decay_rate" value="0.5">
-                <div class="field-hint">How fast floor drops</div>
-            </div>
-        </div>
-    </div>
+<script>
+let direction = null;
+const brokerSelect = document.getElementById('broker_select');
+const symbolSelect = document.getElementById('symbol_select');
 
-    <div class="panel">
-        <div class="panel-title">⚙️ Backtest Settings</div>
-        <div class="grid-4">
-            <div>
-                <label class="field-label">Number of Bars</label>
-                <input type="text" id="bars" value="2016">
-                <div class="field-hint">Max from Gemini API</div>
-            </div>
-            <div>
-                <label class="field-label">Min Trades Required</label>
-                <input type="text" id="min_trades" value="3">
-                <div class="field-hint">Skip combos below this</div>
-            </div>
-            <div style="grid-column: span 2;">
-                <label class="field-label">Primary Scoring Metric</label>
-                <div class="score-group">
-                    <div class="score-btn active" id="score_total_pnl" onclick="setScore('total_pnl', this)">Total P&amp;L%</div>
-                    <div class="score-btn" id="score_winrate"     onclick="setScore('winrate', this)">Win Rate</div>
-                    <div class="score-btn" id="score_avg_pnl"     onclick="setScore('avg_pnl', this)">Avg PnL</div>
-                </div>
-                <input type="hidden" id="score_metric" value="total_pnl">
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
-            <div style="flex:1;">
-                <span class="field-label" style="display:inline;">Grid Combinations: </span>
-                <span class="mono" id="combo_count" style="color:var(--gold); font-size:16px;">—</span>
-                <span style="color:var(--muted); font-size:12px; margin-left:8px;" id="combo_est"></span>
-            </div>
-            <div id="status_badge" style="display:none;" class="status-badge status-blue"></div>
-        </div>
-        <div style="margin:12px 0;display:flex;gap:10px;"><a href="/tuner_chart" target="_blank" style="background:#238636;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:bold;">📈 Open Feedback Chart (Working)</a></div>
-<button id="run_btn" disabled>▶ RUN AUTO TUNER</button>
-    </div>
-
-    <!-- Floating Trade Review & Feedback Panel -->
-    <div id="trade_stepper_panel" style="display:none; position:fixed; bottom:20px; right:20px; width:400px; background:var(--panel); border:1px solid var(--accent2); border-radius:8px; padding:16px; z-index:10000; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <span style="font-family:'Barlow Condensed',sans-serif; font-weight:700; color:var(--accent2); font-size:16px;">Trade Stepper & Feedback</span>
-            <span id="trade_counter" class="mono" style="font-size:12px; color:var(--gold);">Trade 0 of 0</span>
-        </div>
-        <div id="trade_details" class="mono" style="font-size:12px; margin-bottom:10px; line-height:1.5; background:#060c18; padding:8px; border-radius:4px;">
-            <!-- Filled dynamically -->
-        </div>
-        <textarea id="trade_feedback_input" placeholder="Type your feedback for this trade setup..." style="width:100%; height:60px; background:#060c18; border:1px solid var(--border); color:var(--text); padding:6px; font-size:12px; border-radius:4px; margin-bottom:8px;"></textarea>
-        <div style="display:flex; gap:8px;">
-            <button onclick="prevTrade()" style="flex:1; padding:6px; background:#1e3a5f; color:white; border:none; border-radius:4px; cursor:pointer;">← Prev</button>
-            <button onclick="saveAndNextTrade()" style="flex:1; padding:6px; background:var(--accent); color:white; border:none; border-radius:4px; cursor:pointer;">Save & Next →</button>
-        </div>
-    </div>
-
-    <!-- DEBUG_BOX_START -->
-    <div id="debug_display_box" style="position: fixed; bottom: 10px; right: 10px; width: 450px; max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.9); color: #00ffcc; padding: 10px; font-family: monospace; font-size: 11px; z-index: 99999; border: 1px solid #00ffcc; border-radius: 5px;">
-        <div style="font-weight: bold; border-bottom: 1px solid #00ffcc; margin-bottom: 5px; padding-bottom: 2px;">DEBUG_LOG_PANEL</div>
-        <div id="debug_messages_content">Script initializing...</div>
-    </div>
-    <!-- DEBUG_BOX_END -->
-
-    <script>
-        const symbolSelect = document.getElementById("symbol_select");
-        const runBtn           = document.getElementById("run_btn");
-        const brokerSelect     = document.getElementById("broker_select");
-        
-        let feedbackTrades = [];
-        let feedbackIndex = 0;
-
-        function loadTradesForSymbol(symbol) {
-            fetch(`/api/symbol_trades/${symbol}`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'success' && data.trades.length > 0) {
-                    feedbackTrades = data.trades;
-                    feedbackIndex = 0;
-                    document.getElementById('trade_stepper_panel').style.display = 'block';
-                    renderCurrentTrade();
-                } else {
-                    alert("No saved backtest orders found for this symbol. Run a tuning backtest first!");
-                }
-            });
-        }
-
-        function renderCurrentTrade() {
-            if (feedbackTrades.length === 0) return;
-            const t = feedbackTrades[feedbackIndex];
-            document.getElementById('trade_counter').innerText = `Trade ${feedbackIndex + 1} of ${feedbackTrades.length}`;
-            document.getElementById('trade_details').innerHTML = `
-                <div><b>Entry:</b> ${t.entry_time} @ ${t.entry_price}</div>
-                <div><b>Exit:</b> ${t.exit_time} @ ${t.exit_price} (${t.exit_reason})</div>
-                <div><b>PnL:</b> <span style="color:${t.pnl_pct >= 0 ? 'var(--green)' : 'var(--red)'}">${t.pnl_pct}%</span></div>
-            `;
-            document.getElementById('trade_feedback_input').value = t.feedback || '';
-        }
-
-        function saveAndNextTrade() {
-            const t = feedbackTrades[feedbackIndex];
-            const feedback = document.getElementById('trade_feedback_input').value;
-
-            fetch('/api/save_trade_feedback', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ trade_id: t.id, feedback: feedback })
-            }).then(() => {
-                t.feedback = feedback;
-                if (feedbackIndex < feedbackTrades.length - 1) {
-                    feedbackIndex++;
-                    renderCurrentTrade();
-                } else {
-                    alert("Reached the last trade for this symbol!");
-                }
-            });
-        }
-
-        function prevTrade() {
-            if (feedbackIndex > 0) {
-                feedbackIndex--;
-                renderCurrentTrade();
-            }
-        }
-
-        function showDebug(tag, message) {
-            const content = document.getElementById("debug_messages_content");
-            if (content) {
-                const time = new Date().toLocaleTimeString();
-                content.innerHTML += `<br>[${time}] <b>${tag}</b>: ${JSON.stringify(message)}`;
-                const box = document.getElementById("debug_display_box");
-                if (box) box.scrollTop = box.scrollHeight;
-            }
-        }
-
-        let direction   = null;
-        let scoreMetric = 'total_pnl';
-        let lastResult  = null;
-        let chartInstance = null;
-        let candlestickSeries = null;
-
-       
-        const timeframeSelect  = document.getElementById("timeframe_select");
-
-        const statusBadge      = document.getElementById("status_badge");
-        const comboCount       = document.getElementById("combo_count");
-        const comboEst         = document.getElementById("combo_est");
-        const defaultIndicator = document.getElementById("default_indicator");
-        
-        
-        
-
-document.addEventListener("DOMContentLoaded", () => {
-    // --- ABSOLUTE UNBLOCK & OVERLAY KILLER ---
-
-    if (symbolSelect) {
-        // 1. Force enable and lift to top layer
-        symbolSelect.disabled = false;
-        symbolSelect.style.pointerEvents = "auto";
-        symbolSelect.style.opacity = "1";
-        symbolSelect.style.cursor = "pointer";
-        symbolSelect.style.zIndex = "999999";
-        symbolSelect.style.position = "relative";
-
-        // 2. Force unblock parent containers if a wrapper is blocking clicks
-        let parent = symbolSelect.parentElement;
-        while (parent && parent !== document.body) {
-            parent.style.pointerEvents = "auto";
-            parent = parent.parentElement;
-        }
-    }
-    // ------------------------------------------
-    
-    
-            const count = brokerSelect ? brokerSelect.options.length : 0;
-            showDebug("CLIENT", "broker_select option count: " + count);
-
-if (brokerSelect) {
-    brokerSelect.addEventListener("change", function() {
-        const brokerId = this.value;
-        showDebug("BROKER_CHANGE_FIRED", "Selected value: " + brokerId);
-
-        if (!brokerId) {
-            symbolSelect.disabled = true;
-            symbolSelect.innerHTML = '<option value="">-- Choose Broker First --</option>';
-            validateForm();
-            return;
-        }
-
-        symbolSelect.innerHTML = '<option value="">-- Loading Symbols --</option>';
-        showDebug("FETCHING_SYMBOLS", "Requesting: /get_symbols?broker_id=" + brokerId);
-
-        fetch('/get_symbols?broker_id=' + brokerId)
-            .then(response => {
-                showDebug("FETCH_STATUS", "HTTP Status: " + response.status);
-                return response.text();
-            })
-            .then(text => {
-                showDebug("RAW_RESPONSE", text);
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    showDebug("PARSE_ERROR", "Response is not valid JSON");
-                    symbolSelect.innerHTML = '<option value="">-- Invalid JSON Response --</option>';
-                    return;
-                }
-
-                symbolSelect.innerHTML = '<option value="">-- Choose Symbol --</option>';
-                let symbolList = [];
-                if (Array.isArray(data)) {
-                    symbolList = data;
-                } else if (data && data.symbols) {
-                    symbolList = data.symbols;
-                } else if (data && data.data) {
-                    symbolList = data.data;
-                }
-
-                symbolList.forEach(sym => {
-                    const opt = document.createElement('option');
-                    const symValue = (typeof sym === 'object' && sym !== null) ? (sym.symbol || sym.name || sym.ticker) : sym;
-                    opt.value = symValue;
-                    opt.textContent = symValue;
-                    symbolSelect.appendChild(opt);
-                });
-
-                // ==========================================
-                // 👉 PASTE THE UNBLOCK CODE RIGHT HERE:
-                // ==========================================
-                symbolSelect.disabled = false;
-                symbolSelect.style.pointerEvents = "auto";
-                symbolSelect.style.opacity = "1";
-
-                const customWrapper = symbolSelect.closest('.custom-select') || symbolSelect.nextElementSibling;
-                if (customWrapper && (customWrapper.classList.contains('select-wrapper') || customWrapper.classList.contains('dropdown'))) {
-                    customWrapper.style.pointerEvents = "auto";
-                    customWrapper.style.opacity = "1";
-                    customWrapper.classList.remove('disabled', 'locked');
-                }
-                // ==========================================
-
-                showDebug("SYMBOLS_LOADED", "Successfully processed " + symbolList.length + " symbols.");
-                validateForm();
-            })
-            .catch(err => {
-                showDebug("FETCH_ERROR", "Failed to load symbols: " + err);
-                symbolSelect.innerHTML = '<option value="">-- Error Loading Symbols --</option>';
-            });
-    });
+function setDirection(dir) {
+    direction = dir;
+    document.getElementById('btn_long').className = 'dir-btn' + (dir === 'LONG' ? ' active-long' : '');
+    document.getElementById('btn_short').className = 'dir-btn' + (dir === 'SHORT' ? ' active-short' : '');
 }
 
-            // 2. Keep this change event listener exactly as you had it!
-            if (symbolSelect) {
-                symbolSelect.addEventListener("change", function() {
-                    showDebug("SYMBOL_CHANGE_FIRED", "Selected symbol: " + this.value);
-                    validateForm();
-                });
-            }
+brokerSelect.addEventListener('change', function() {
+    const brokerId = this.value;
+    if (!brokerId) {
+        symbolSelect.disabled = true;
+        symbolSelect.innerHTML = '<option value="">-- Choose Broker First --</option>';
+        return;
+    }
+    symbolSelect.disabled = true;
+    symbolSelect.innerHTML = '<option value="">-- Loading Symbols --</option>';
+    fetch('/get_symbols?broker_id=' + encodeURIComponent(brokerId))
+        .then(r => r.json())
+        .then(data => {
+            const symbols = Array.isArray(data) ? data : (data.symbols || data.data || []);
+            symbolSelect.innerHTML = '<option value="">-- Choose Symbol --</option>';
+            symbols.forEach(sym => {
+                const value = (typeof sym === 'object' && sym !== null) ? (sym.symbol || sym.name || sym.ticker) : sym;
+                if (value) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    symbolSelect.appendChild(option);
+                }
+            });
+            symbolSelect.disabled = false;
+            updateChartLink();
+        })
+        .catch(() => {
+            symbolSelect.innerHTML = '<option value="">-- Error Loading Symbols --</option>';
+            symbolSelect.disabled = true;
         });
+});
 
-  
-            if (runBtn) {
-                runBtn.addEventListener("click", function() {
-                    if (runBtn.disabled) return;
+symbolSelect.addEventListener('change', updateChartLink);
 
-                    showDebug("RUN_CLICKED", "Auto Tuner execution started...");
-                    runBtn.disabled = true;
-                    runBtn.textContent = "⏳ RUNNING TUNER...";
-
-                    const payload = {
-                        broker_id: brokerSelect.value,
-                        symbol: symbolSelect.value,
-                        direction: direction,
-                        timeframe: timeframeSelect.value,
-                        rsi_len_options: document.getElementById('rsi_len_options').value,
-                        rsi_entry_options: document.getElementById('rsi_entry_options').value,
-                        stop_loss_options: document.getElementById('stop_loss_options').value,
-                        trail_start_options: document.getElementById('trail_start_options').value,
-                        trail_minus_options: document.getElementById('trail_minus_options').value,
-                        score_metric: document.getElementById('score_metric').value,
-                        bars: document.getElementById('bars').value,
-                        min_trades: document.getElementById('min_trades').value
-                    };
-
-                    showDebug("TUNER_PAYLOAD", payload);
-
-                    fetch('/api/run_tuning', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    })
-                    .then(response => {
-                        showDebug("TUNER_HTTP_STATUS", "Status: " + response.status);
-                        return response.json();
-                    })
-                    .then(data => {
-                        showDebug("TUNER_RESPONSE", data);
-                        runBtn.disabled = false;
-                        runBtn.textContent = "▶ RUN AUTO TUNER";
-if (data.status === 'success') {
-    showDebug("TUNER_SUCCESS", "Tuning completed successfully!");
-
-    // 1. Find or create the report box specifically
-    let resultBox = document.getElementById('report_box');
-    if (!resultBox) {
-        resultBox = document.createElement('div');
-        resultBox.id = 'report_box';
-    }
-
-    // 2. FORCE it to insert right after the Run Button
-    const runBtnElem = document.getElementById('run_btn') || document.getElementById('run') || document.querySelector('button');
-    if (runBtnElem && runBtnElem.parentNode) {
-        runBtnElem.parentNode.insertBefore(resultBox, runBtnElem.nextSibling);
-    }
-
-    // Grab the human-readable broker name from the dropdown
-    const brokerText = (typeof brokerSelect !== 'undefined' && brokerSelect && brokerSelect.options[brokerSelect.selectedIndex]) 
-        ? brokerSelect.options[brokerSelect.selectedIndex].text 
-        : (data.broker_id || 'N/A');
-
-    // Format Exit Reasons breakdown nicely
-    let exitReasonsHtml = '';
-    if (data.breakdown) {
-        const bd = data.breakdown;
-        exitReasonsHtml = `
-            <div style="background:#0f172a; padding:10px 12px; border-radius:6px; margin-bottom:12px; font-size:12px; color:#cbd5e1; border:1px solid #334155;">
-                <b style="color:#38bdf8; display:block; margin-bottom:6px; font-size:13px;">🚪 Exit Reasons Breakdown:</b>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
-                    <div><b>Gap Filter:</b> <span style="color:#22c55e;">Active</span></div>
-                    <div><b>Gap Filter:</b> <span style="color:#22c55e;">0.10% Active</span></div>
-                    <div><b>Vol Filter:</b> <span style="color:#22c55e;">0.80x Active</span></div>
-                    <div><b>RSI Filter:</b> <span style="color:#22c55e;">28-68 Active</span></div>
-                </div>
-            </div>
-        `;
-    }
-
-    resultBox.style.display = 'block';
-    resultBox.style.marginTop = '15px';
-    resultBox.innerHTML = `
-        <div style="background:#1e293b; color:#38bdf8; padding:15px; border-radius:8px; font-family:monospace; border:1px solid #334155;">
-            <h3 style="margin-top:0; color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:8px;">📊 Tuner Report</h3>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 13px;">
-                <p style="margin:3px 0;"><b>Broker:</b> ${brokerText}</p>
-                <p style="margin:3px 0;"><b>Symbol:</b> ${data.symbol || 'N/A'}</p>
-                <p style="margin:3px 0;"><b>Direction:</b> <span style="color:${data.direction === 'LONG' ? '#4ade80' : '#f87171'};">${data.direction || 'N/A'}</span></p>
-                <p style="margin:3px 0;"><b>Candle Time:</b> ${data.timeframe || 'N/A'}</p>
-                <p style="margin:3px 0;"><b># of Candles:</b> ${data.candle_count || 'N/A'}</p>
-                <p style="margin:3px 0;"><b>Total Trades:</b> ${(data.trades_val || (data.trades ? data.trades.length : 0)) ?? (data.trades ? data.trades.length : 'N/A')}</p>
-                <p style="margin:3px 0;"><b>Total PnL:</b> <span style="color:#4ade80;">${data.total_pnl_val ?? 'N/A'}%</span></p>
-                <p style="margin:3px 0;"><b>Win Rate:</b> ${data.win_rate_val ?? 'N/A'}%</p>
-                <p style="margin:3px 0; grid-column: span 2;"><b>Avg PnL:</b> ${((data.avg_pnl_val || (data.total_pnl_val/(data.trades_val||data.total_trades_val||1))) ? data.avg_pnl_val.toFixed(2) : (data.total_pnl_val && (data.trades_val || data.total_trades_val) ? (data.total_pnl_val / (data.trades_val || data.total_trades_val)).toFixed(2) : (data.total_pnl_val && data.trades ? (data.total_pnl_val / data.trades.length).toFixed(2) : 'N/A')))}%</p>
-            </div>
-
-            ${exitReasonsHtml}
-
-            <hr style="border-color:#334155; margin:10px 0;">
-            <b style="font-size:12px; color:#94a3b8;">Optimized Parameters:</b>
-            <pre style="color:#e2e8f0; white-space: pre-wrap; font-size:12px; margin-top:5px; background:#0f172a; padding:10px; border-radius:6px;">${JSON.stringify(data.params, null, 2)}</pre>
-        </div>
-    `;
-
-    showDebug("UI_UPDATED", "Report metrics processed and rendered right after the run button.");
-} else {
-                            showDebug("TUNER_NOTE", "Completed with response: " + JSON.stringify(data));
-                        }
-                    })
-                    .catch(err => {
-                        showDebug("TUNER_ERROR", "Failed to execute tuning: " + err);
-                        runBtn.disabled = false;
-                        runBtn.textContent = "▶ RUN AUTO TUNER";
-                    });
-                });
-            }
-
-        function setDirection(dir) {
-            direction = dir;
-            showDebug("DIRECTION_SET", "Direction chosen: " + dir);
-            document.getElementById('btn_long').className = 'dir-btn' + (dir === 'LONG' ? ' active-long' : '');
-            document.getElementById('btn_short').className = 'dir-btn' + (dir === 'SHORT' ? ' active-short' : '');
-            validateForm();
-        }
-
-        function setScore(metric, el) {
-            scoreMetric = metric;
-            document.getElementById('score_metric').value = metric;
-            document.querySelectorAll('.score-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-        }
-
-        function validateForm() {
-            const hasBroker = brokerSelect && brokerSelect.value;
-            const hasSymbol = symbolSelect && symbolSelect.value;
-            const hasDirection = direction !== null;
-
-            showDebug("VALIDATE", `Broker: ${hasBroker} (${brokerSelect.value}), Symbol: ${hasSymbol} (${symbolSelect.value}), Direction: ${hasDirection} (${direction})`);
-
-            if (runBtn) {
-                runBtn.disabled = !(hasBroker && hasSymbol && hasDirection);
-                showDebug("RUN_BTN_STATE", `Button disabled = ${runBtn.disabled}`);
-            }
-        }
-
-        function switchMode(mode) {
-            document.getElementById('tab-etf').className = 'mode-tab' + (mode === 'etf' ? ' active-etf' : '');
-            document.getElementById('tab-crypto').className = 'mode-tab' + (mode === 'crypto' ? ' active-crypto' : '');
-        }
-
-        function resetDefaults() {
-            location.reload();
-        }
-
-        function fetchCandles() {
-            alert("Fetch Historical Candles triggered.");
-        }
-
-        function runAllTuning() {
-            alert("Run All Tuning triggered.");
-        }
-
-        function disableOldStrategies() {
-            alert("Disable Old Strategies triggered.");
-        }
-        
-        
-        
-        
-// --- RUNS LAST: PERMANENTLY UNLOCKS SYMBOL SELECT FROM ANY FUNCTION ---
-window.addEventListener('load', () => {
-     // Universal element lookup to prevent null reference bugs
-    // Safely assign or find elements without redeclaring 'const' if they already exist
-    window.brokerSelect = window.brokerSelect || document.getElementById("broker_select") || document.getElementById("broker");
-    window.symbolSelect = window.symbolSelect || document.getElementById("symbol_select") || document.getElementById("symbol") || document.getElementById("symbols") || document.querySelector("select[name*='symbol']");
-    window.runBtn = window.runBtn || document.getElementById("run_btn") || document.getElementById("run");
-
-    // Force unblock the symbol dropdown immediately
-    if (window.symbolSelect) {
-        window.symbolSelect.disabled = false;
-        window.symbolSelect.removeAttribute("disabled");
-        window.symbolSelect.style.pointerEvents = "auto";
-        window.symbolSelect.style.opacity = "1";
-        window.symbolSelect.style.cursor = "pointer";
-    }
-    
-});  
-
-
-        </script>
-<script>
-    const symbolSelect = document.getElementById("symbol_select");
-    if (symbolSelect) {
-        symbolSelect.addEventListener("change", function() {
-            const sym = this.value;
-            // Fetch latest trade for this symbol to link directly to its review chart
-            fetch(`/api/symbol_trades/${sym}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success' && data.trades && data.trades.length > 0) {
-                        const latestTradeId = data.trades[0].id;
-                        document.getElementById('open_chart_link').href = `/tuner_chart
-                    }
-                })
-                .catch(err => console.error("Error updating chart link:", err));
-        });
-    }
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
-    const symbolSelect = document.getElementById("symbol_select");
-    const chartLink = document.getElementById("open_chart_link");
-    let latestBySymbol = {};
+async function updateChartLink() {
+    const sym = (symbolSelect.value || '').toUpperCase();
+    const chartLink = document.getElementById('open_chart_link');
+    if (!sym) { chartLink.href = '/tuner_chart'; return; }
     try {
         const r = await fetch('/api/trades_list');
         const j = await r.json();
-        (j.trades||[]).forEach(t=>{
-            const s=(t.symbol||'').toUpperCase();
-            if(!latestBySymbol[s]) latestBySymbol[s]=t.id;
-        });
-    } catch(e){}
-    function updateChartLink(){
-        if(!symbolSelect ||!chartLink) return;
-        const sym = (symbolSelect.value || "BTCUSDT").toUpperCase();
-        const tid = latestBySymbol[sym] || latestBySymbol[sym.replace('USDT','USD')] || latestBySymbol[sym.replace('USD','USDT')] || '';
-        if(tid){
-            chartLink.href = `/tuner_chart
-            chartLink.textContent = `📊 Open Chart #${tid} & Feedback`;
-        } else {
-            chartLink.href = `/tuner_chart
-            chartLink.textContent = `📊 Open Chart Live ${sym}`;
-        }
+        const trade = (j.trades || []).find(t => (t.symbol || '').toUpperCase() === sym);
+        chartLink.href = trade ? `/tuner_chart?trade_id=${encodeURIComponent(trade.id)}` : '/tuner_chart';
+    } catch (e) {
+        chartLink.href = '/tuner_chart';
     }
-    if(symbolSelect){
-        symbolSelect.addEventListener("change", updateChartLink);
-        updateChartLink();
-    }
-});
+}
+
+window.__aimnKissDirection = function() { return direction || 'LONG'; };
 </script>
 </body>
-
 </html>
-
