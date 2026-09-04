@@ -5,21 +5,20 @@ Purpose:
     Study what information available AT a 30m transition distinguishes
     REAL transitions from WEAK/FALSE transitions.
 
-This is RESEARCH ONLY:
+RESEARCH ONLY:
     - no engine changes
     - no database writes
     - no live trading
-    - no look-ahead in predictor features
+    - predictor features use no future information
 
 The future is used only to assign the ex-post REAL/WEAK/FALSE label.
-All features printed for a transition are calculated from candles/state
-information at or before that transition.
 """
 
 from __future__ import annotations
 
+from bisect import bisect_left
 from collections import Counter
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple
 
 from db import get_db_connection
 from engine.kiss_execution_5m import get_market_state, _v_shape, rsi_wilder
@@ -74,24 +73,28 @@ def classify_transition(
     future_rows: Sequence[dict],
     direction: str,
 ) -> Tuple[str, float, float]:
-    """Ex-post label only. Never used to construct live features."""
+    """Ex-post label only. MFE/MAE are returned as positive magnitudes."""
     favorable = []
-    adverse = []
+    adverse_signed = []
+
     for r in future_rows[:LOOKAHEAD_5M]:
         hi = float(r["high"])
         lo = float(r["low"])
         if direction == "LONG":
             favorable.append(pct(hi, entry_price))
-            adverse.append(pct(lo, entry_price))
+            adverse_signed.append(pct(lo, entry_price))
         else:
             favorable.append(pct(entry_price, lo))
-            adverse.append(pct(entry_price, hi))
+            adverse_signed.append(pct(entry_price, hi))
 
     if not favorable:
         return "UNKNOWN", 0.0, 0.0
 
-    mfe = max(favorable)
-    mae = max(adverse)
+    mfe = max(0.0, max(favorable))
+    # For both LONG and SHORT the adverse series is negative when price moves
+    # against the position. Convert its largest negative excursion to +MAE.
+    mae = max(0.0, -min(adverse_signed))
+
     if mfe >= REAL_MFE and mfe >= max(mae, 0.0001) * REAL_RATIO:
         label = "REAL"
     elif mae >= FALSE_MAE and mfe < FALSE_MFE:
@@ -171,7 +174,7 @@ def combo_scan(rows: List[dict]) -> None:
     ]
 
     print("\n=== SIMPLE DNA COMBINATION SCAN ===")
-    print("Only groups with N >= 5 are shown. This is exploratory, not a trading rule.")
+    print("Only groups with N >= 5 are shown. Exploratory only; not a trading rule.")
     for title, fn in specs:
         groups: Dict[str, List[dict]] = {}
         for r in rows:
@@ -206,6 +209,9 @@ def main() -> None:
                 "timestamp": trend[i]["timestamp"],
             })
 
+    # Use binary search on the sorted 5m timestamps. This guarantees that
+    # every transition gets its own first execution candle at/after the
+    # transition rather than accidentally reusing the same candle.
     exec_times = [r["timestamp"] for r in execution]
     rows: List[dict] = []
 
@@ -216,13 +222,8 @@ def main() -> None:
         if i >= len(trend) - 1:
             continue
 
-        # Find execution candle at or immediately after the transition.
-        ex_i = None
-        for j, ts in enumerate(exec_times):
-            if ts >= t["timestamp"]:
-                ex_i = j
-                break
-        if ex_i is None or ex_i >= len(execution):
+        ex_i = bisect_left(exec_times, t["timestamp"])
+        if ex_i >= len(execution):
             continue
 
         entry_price = float(execution[ex_i]["close"])
@@ -237,7 +238,7 @@ def main() -> None:
         ma_slope = pct(ma20, prev_ma) if prev_ma else 0.0
         shape = _v_shape(closes, i) or "NO_SHAPE"
 
-        # Consecutive previous-state duration, entirely backward-looking.
+        # Backward-looking duration of the state immediately before transition.
         prev_duration = 0
         k = i - 1
         while k >= 0 and states[k] == t["from"]:
@@ -253,6 +254,7 @@ def main() -> None:
                 return 0.0
             return pct(closes[i], closes[i - n])
 
+        # Current and previous 12 completed 30m closes are known at transition.
         recent = closes[max(0, i - 12): i + 1]
         recent_high = max(recent) if recent else closes[i]
         recent_low = min(recent) if recent else closes[i]
@@ -284,22 +286,6 @@ def main() -> None:
             "mae": mae,
         })
 
-    print("KISS TRANSITION DNA FEATURE DIAGNOSTIC")
-    print("=" * 72)
-    print(f"Symbol: {SYMBOL}")
-    print(f"30m candles: {len(trend)}")
-    print(f"5m candles:  {len(execution)}")
-    print(f"Transitions analyzed: {len(rows)}")
-    print("Features use ONLY information available at/before transition.")
-    print("REAL/WEAK/FALSE uses the following 4-hour future outcome labels.")
-
-    counts = Counter(r["label"] for r in rows)
-    print(f"\nLABELS: REAL={counts['REAL']}  WEAK={counts['WEAK']}  FALSE={counts['FALSE']}")
-
-    summarize(rows, "transition")
-    summarize(rows, "shape")
-    summarize(rows, "rsi_bin") if any("rsi_bin" in r for r in rows) else None
-
     for r in rows:
         r["rsi_bin"] = bin_rsi(r["rsi"])
         r["distance_bin"] = bin_dist(r["distance"])
@@ -307,13 +293,27 @@ def main() -> None:
         r["churn_bin"] = bin_churn(r["churn"])
         r["ma_slope_bin"] = "UP" if r["ma_slope"] > 0 else "DOWN" if r["ma_slope"] < 0 else "FLAT"
 
+    print("KISS TRANSITION DNA FEATURE DIAGNOSTIC")
+    print("=" * 72)
+    print(f"Symbol: {SYMBOL}")
+    print(f"30m candles: {len(trend)}")
+    print(f"5m candles:  {len(execution)}")
+    print(f"Transitions analyzed: {len(rows)}")
+    print("Features use ONLY information available at/before transition.")
+    print("REAL/WEAK/FALSE uses the next 4 hours of 5m price action.")
+    print("MAE is reported as a positive adverse-move magnitude.")
+
+    counts = Counter(r["label"] for r in rows)
+    print(f"\nLABELS: REAL={counts['REAL']}  WEAK={counts['WEAK']}  FALSE={counts['FALSE']}")
+
+    summarize(rows, "transition")
+    summarize(rows, "shape")
     summarize(rows, "rsi_bin")
     summarize(rows, "distance_bin")
     summarize(rows, "duration_bin")
     summarize(rows, "churn_bin")
     summarize(rows, "ma_slope_bin")
 
-    # Direction-specific contextual features.
     for direction in ("LONG", "SHORT"):
         subset = [r for r in rows if r["direction"] == direction]
         print(f"\n{'=' * 72}\nDIRECTION: {direction} | N={len(subset)}")
