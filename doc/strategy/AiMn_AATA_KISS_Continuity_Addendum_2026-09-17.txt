@@ -1,0 +1,230 @@
+AiMn / AATA — KISS Strategy
+MASTER CONTINUITY REPORT ADDENDUM
+Updated: 2026-09-17
+Purpose: Preserve the latest research/workflow state before moving to a new chat.
+
+============================================================
+LATEST RESEARCH ADDITIONS — V13.13 THROUGH V13.16
+============================================================
+
+V13.13 — ALL TRAJECTORY SEQUENCE AUDIT
+--------------------------------------
+Base research question:
+Does the complete chronological trajectory contain information that is lost
+when the trajectory is reduced to its final/current state?
+
+23 trajectory cases were examined.
+
+Important methodological correction:
+The chronological sequence must preserve state re-entry. Consecutive duplicate
+states are compressed, but a state returning later is retained.
+
+Meaningful trajectory states:
+- NEUTRAL
+- RECOVERING
+- DETERIORATING
+- PERSISTENT_FAILURE
+
+Examples demonstrated that trajectories can contain repeated deterioration/
+recovery cycles and that the final state can hide important prior deterioration.
+
+V13.13 checkpoint state counts:
++10m: N=23, AVG=-0.001%, REC=9, NEUT=2, DET=11, PERSIST=1
++15m: N=23, AVG=-0.014%, REC=9, NEUT=6, DET=7, PERSIST=1
++20m: N=23, AVG=-0.004%, REC=8, NEUT=4, DET=10, PERSIST=1
++25m: N=23, AVG=-0.044%, REC=8, NEUT=3, DET=9, PERSIST=3
++30m: N=23, AVG=-0.095%, REC=6, NEUT=4, DET=9, PERSIST=4
++45m: N=23, AVG=-0.180%, REC=6, NEUT=0, DET=11, PERSIST=6
++60m: N=23, AVG=-0.124%, REC=5, NEUT=0, DET=11, PERSIST=7
+
+V13.14 — SEQUENCE INFORMATION-GAIN AUDIT
+-----------------------------------------
+Question:
+Does complete chronological state history contain predictive information that
+current/final state alone does not?
+
+At checkpoints +10/+15/+20/+25/+30/+45/+60:
+- Current state = latest state at that checkpoint.
+- Chronological sequence = all state changes through that checkpoint,
+  with only consecutive duplicates compressed.
+- Future return is measured from the checkpoint, not from the original
+  opposite-transition detection.
+
+The comparison is deliberately within the same current state at the same
+checkpoint. This prevents a motif from merely appearing predictive because
+it is associated with a different current state.
+
+Only repeated exact sequence groups are considered for information-gain-style
+comparison. Unique sequences are not treated as validated patterns.
+
+Research only:
+- No AI model trained.
+- No production engine changed.
+- No order logic changed.
+
+V13.14 confirmed that raw trajectories preserve re-entry patterns such as:
+OPPOSITE_DETECTED -> PERSISTENT_FAILURE -> DETERIORATING -> PERSISTENT_FAILURE
+and:
+OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> NEUTRAL -> DETERIORATING
+and:
+OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> DETERIORATING ->
+PERSISTENT_FAILURE
+
+These examples reinforce that a trajectory is potentially richer than a
+single final-state label.
+
+V13.15 — SEQUENCE MOTIF INFORMATION AUDIT
+------------------------------------------
+Question:
+Does chronological motif history add information beyond CURRENT STATE?
+
+120 motif observations were produced after repairing the future-return
+calculation.
+
+Future return was correctly reconstructed from each StatePoint.return_pct:
+- LONG: price factor = 1 + return_pct/100
+- SHORT: price factor = 1 - return_pct/100
+
+The central comparison remained:
+motif observations versus ALL observations having the SAME CURRENT STATE
+at the SAME CHECKPOINT, using future return measured from that checkpoint.
+
+Initial motif set accidentally contained duplicate aliases:
+- DETERIORATING -> RECOVERING
+- RECOVERY AFTER DETERIORATION
+
+and:
+- DETERIORATING -> RECOVERING -> DETERIORATING
+- RETURN TO DETERIORATION
+
+This was identified as a methodological problem because the same underlying
+trajectory could be counted twice under different names.
+
+One illustrative V13.15 result:
+At +15m, current state RECOVERING:
+- state baseline N=9
+- +15m future return AVG = -0.217%
+- +30m future return AVG = -0.284%
+- +45m future return AVG = -0.236%
+
+Motif DETERIORATING -> RECOVERING:
+- N=3
+- +15m AVG = -0.666%
+- +30m AVG = -1.029%
+- +45m AVG = -1.195%
+
+This is interesting research evidence, but N=3 is too small to validate a
+general rule. The duplicate alias produced the same underlying observation
+and therefore must not be treated as independent evidence.
+
+V13.16 — DEDUPLICATED MOTIF AUDIT
+----------------------------------
+Exact filename:
+kiss_transition_detector_v5_6_12_13_16_deduplicated_motif_audit.py
+
+Created by cloning V13.15, then repairing the motif definitions and audit
+accounting. Syntax check passed.
+
+Canonical motifs now contain ONLY:
+1. DETERIORATING -> RECOVERING
+2. DETERIORATING -> RECOVERING -> DETERIORATING
+3. RECOVERING -> NEUTRAL -> DETERIORATING
+4. PERSISTENT_FAILURE HISTORY
+
+Duplicate aliases were removed.
+
+V13.16 also adds explicit unique trajectory-case accounting:
+unique case key =
+(symbol, direction, opposite_time)
+
+It separately reports:
+- UNIQUE TRAJECTORY CASES
+- UNIQUE SYMBOLS
+- UNIQUE LONG CASES
+- UNIQUE SHORT CASES
+
+Checkpoint observations are explicitly NOT treated as independent cases.
+
+V13.16 remains research-only:
+- No production KISS engine changes.
+- No order execution changes.
+- No trading rule has been promoted from research.
+- No AI model trained.
+
+MAIN EXECUTION CHAIN FIX
+------------------------
+The V13.16 file originally still called the obsolete V13.15 function in its
+__main__ block.
+
+That was corrected.
+
+Current execution chain is:
+run_v1312_classify_prefix_audit(all_paths)
+run_v1313_all_trajectory_sequence_audit(all_paths)
+run_v1314_sequence_information_gain_audit(all_paths)
+run_v1316_deduplicated_motif_audit(all_paths)
+
+The V13.15 call was removed from the V13.16 execution chain.
+
+Verification output:
+V13.16 MAIN CALL UPDATED
+V13.15 CALL REMOVED FROM V13.16 EXECUTION CHAIN
+V13.16 CALL ADDED
+V13.16 MAIN FIX SYNTAX CHECK PASSED
+
+CURRENT V13.16 RUN STATUS — 2026-09-17
+---------------------------------------
+The file was launched with:
+
+python kiss_transition_detector_v5_6_12_13_16_deduplicated_motif_audit.py > v1316_run.txt 2>&1
+
+At the time this addendum was written, the actual V13.16 result output had
+NOT yet been reviewed. The next step is therefore NOT another code change.
+
+Next command after the run completes:
+
+grep -n -E "V13.16|UNIQUE TRAJECTORY|TOTAL MOTIF|MOTIF|INFORMATION|DELTA|COMPLETE|ERROR|Traceback" v1316_run.txt | tail -120
+
+Then inspect the actual V13.16 evidence before deciding whether any further
+research version is justified.
+
+============================================================
+CURRENT RESEARCH DISCIPLINE
+============================================================
+
+Do NOT create V13.17 until V13.16 results are understood.
+
+Do NOT promote motifs to production rules based on these small samples.
+
+The project objective remains:
+Transition recognition is primary.
+RSI is relative-price context and emergency rescue only.
+Hard stop is final safety protection.
+Trajectory/thesis-health research is intended to improve recognition of
+real deterioration/opposite transition, not to replace transition recognition
+with a conventional indicator strategy.
+
+The research hierarchy remains:
+1. Trend transition recognition
+2. RSI relative-price context
+3. RSI rescue emergency exit
+4. Hard stop final protection
+
+The desired live behavior remains:
+Market -> AI observes -> transition recognition -> entry -> hold/manage ->
+opposite transition -> exit -> result -> review/learning
+
+============================================================
+IMPORTANT WORKFLOW RULES
+============================================================
+
+- Preserve working code.
+- One major change at a time.
+- Inspect before editing.
+- Always name the EXACT filename before any edit.
+- Prefer Bash-driven edits over manual Python editing.
+- Research changes must remain separate from production unless explicitly
+  validated and intentionally promoted.
+- Never silently overwrite the continuity report.
+- Before creating another research version, understand the evidence from the
+  current version.
