@@ -1,0 +1,665 @@
+V13.16 — DEDUPLICATED SEQUENCE MOTIF AUDIT
+==============================================================================================================
+QUESTION: Does chronological motif history add information beyond CURRENT STATE?
+RESEARCH ONLY — NO ORDERS — NO PRODUCTION ENGINE CHANGES
+
+TOTAL MOTIF OBSERVATIONS : 83
+
+V13.16 UNIQUE TRAJECTORY CASE AUDIT
+--------------------------------------------------------------------------------------------------------------
+UNIQUE TRAJECTORY CASES : 14
+UNIQUE SYMBOLS          : 5
+UNIQUE LONG CASES       : 8
+UNIQUE SHORT CASES      : 6
+CHECKPOINT OBSERVATIONS ARE NOT TREATED AS INDEPENDENT CASES
+--------------------------------------------------------------------------------------------------------------
+
+
+==============================================================================================================
+CHECKPOINT +10m
+==============================================================================================================
+
+CURRENT STATE = PERSISTENT_FAILURE
+STATE OBSERVATIONS = 1
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=1 AVG=-0.005%
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=-0.005% STATE_N=1 STATE_AVG=-0.005% DELTA=+0.000%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+==============================================================================================================
+CHECKPOINT +15m
+==============================================================================================================
+
+CURRENT STATE = PERSISTENT_FAILURE
+STATE OBSERVATIONS = 1
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=1 AVG=-0.082%
+  +30m STATE BASELINE N=1 AVG=-0.220%
+  +45m STATE BASELINE N=1 AVG=-0.885%
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=-0.082% STATE_N=1 STATE_AVG=-0.082% DELTA=+0.000%
+    +30m MOTIF_N=1 MOTIF_AVG=-0.220% STATE_N=1 STATE_AVG=-0.220% DELTA=+0.000%
+    +45m MOTIF_N=1 MOTIF_AVG=-0.885% STATE_N=1 STATE_AVG=-0.885% DELTA=+0.000%
+    +60m N=0
+
+CURRENT STATE = RECOVERING
+STATE OBSERVATIONS = 3
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=9 AVG=-0.217%
+  +30m STATE BASELINE N=9 AVG=-0.284%
+  +45m STATE BASELINE N=9 AVG=-0.236%
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 3
+    +15m MOTIF_N=3 MOTIF_AVG=-0.666% STATE_N=9 STATE_AVG=-0.217% DELTA=-0.449%
+    +30m MOTIF_N=3 MOTIF_AVG=-1.029% STATE_N=9 STATE_AVG=-0.284% DELTA=-0.745%
+    +45m MOTIF_N=3 MOTIF_AVG=-1.195% STATE_N=9 STATE_AVG=-0.236% DELTA=-0.958%
+    +60m N=0
+
+==============================================================================================================
+CHECKPOINT +20m
+==============================================================================================================
+
+CURRENT STATE = DETERIORATING
+STATE OBSERVATIONS = 5
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: DETERIORATING -> RECOVERING -> DETERIORATING
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: RECOVERING -> NEUTRAL -> DETERIORATING
+  OBSERVATIONS: 2
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = NEUTRAL
+STATE OBSERVATIONS = 2
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 2
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = PERSISTENT_FAILURE
+STATE OBSERVATIONS = 1
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+==============================================================================================================
+CHECKPOINT +25m
+==============================================================================================================
+
+CURRENT STATE = DETERIORATING
+STATE OBSERVATIONS = 4
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: RECOVERING -> NEUTRAL -> DETERIORATING
+  OBSERVATIONS: 3
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = NEUTRAL
+STATE OBSERVATIONS = 1
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = PERSISTENT_FAILURE
+STATE OBSERVATIONS = 5
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: DETERIORATING -> RECOVERING -> DETERIORATING
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 3
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = RECOVERING
+STATE OBSERVATIONS = 1
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+==============================================================================================================
+CHECKPOINT +30m
+==============================================================================================================
+
+CURRENT STATE = DETERIORATING
+STATE OBSERVATIONS = 6
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=9 AVG=-0.179%
+  +30m STATE BASELINE N=9 AVG=+0.039%
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 2
+    +15m MOTIF_N=2 MOTIF_AVG=-0.324% STATE_N=9 STATE_AVG=-0.179% DELTA=-0.144%
+    +30m MOTIF_N=2 MOTIF_AVG=-0.376% STATE_N=9 STATE_AVG=+0.039% DELTA=-0.414%
+    +45m N=0
+    +60m N=0
+
+  MOTIF: DETERIORATING -> RECOVERING -> DETERIORATING
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=+0.007% STATE_N=9 STATE_AVG=-0.179% DELTA=+0.186%
+    +30m MOTIF_N=1 MOTIF_AVG=+0.122% STATE_N=9 STATE_AVG=+0.039% DELTA=+0.083%
+    +45m N=0
+    +60m N=0
+
+  MOTIF: RECOVERING -> NEUTRAL -> DETERIORATING
+  OBSERVATIONS: 2
+    +15m MOTIF_N=2 MOTIF_AVG=-0.472% STATE_N=9 STATE_AVG=-0.179% DELTA=-0.293%
+    +30m MOTIF_N=2 MOTIF_AVG=-0.702% STATE_N=9 STATE_AVG=+0.039% DELTA=-0.741%
+    +45m N=0
+    +60m N=0
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=-0.368% STATE_N=9 STATE_AVG=-0.179% DELTA=-0.189%
+    +30m MOTIF_N=1 MOTIF_AVG=-0.225% STATE_N=9 STATE_AVG=+0.039% DELTA=-0.264%
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = NEUTRAL
+STATE OBSERVATIONS = 1
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=4 AVG=-0.055%
+  +30m STATE BASELINE N=4 AVG=-0.164%
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=+0.028% STATE_N=4 STATE_AVG=-0.055% DELTA=+0.083%
+    +30m MOTIF_N=1 MOTIF_AVG=+0.142% STATE_N=4 STATE_AVG=-0.164% DELTA=+0.306%
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = PERSISTENT_FAILURE
+STATE OBSERVATIONS = 7
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=4 AVG=-0.035%
+  +30m STATE BASELINE N=4 AVG=-0.309%
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=-0.461% STATE_N=4 STATE_AVG=-0.035% DELTA=-0.427%
+    +30m MOTIF_N=1 MOTIF_AVG=-0.850% STATE_N=4 STATE_AVG=-0.309% DELTA=-0.540%
+    +45m N=0
+    +60m N=0
+
+  MOTIF: DETERIORATING -> RECOVERING -> DETERIORATING
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=-0.461% STATE_N=4 STATE_AVG=-0.035% DELTA=-0.427%
+    +30m MOTIF_N=1 MOTIF_AVG=-0.850% STATE_N=4 STATE_AVG=-0.309% DELTA=-0.540%
+    +45m N=0
+    +60m N=0
+
+  MOTIF: RECOVERING -> NEUTRAL -> DETERIORATING
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=+0.243% STATE_N=4 STATE_AVG=-0.035% DELTA=+0.278%
+    +30m MOTIF_N=1 MOTIF_AVG=-0.153% STATE_N=4 STATE_AVG=-0.309% DELTA=+0.157%
+    +45m N=0
+    +60m N=0
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 4
+    +15m MOTIF_N=4 MOTIF_AVG=-0.035% STATE_N=4 STATE_AVG=-0.035% DELTA=+0.000%
+    +30m MOTIF_N=4 MOTIF_AVG=-0.309% STATE_N=4 STATE_AVG=-0.309% DELTA=+0.000%
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = RECOVERING
+STATE OBSERVATIONS = 1
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=6 AVG=+0.004%
+  +30m STATE BASELINE N=6 AVG=+0.147%
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=+0.145% STATE_N=6 STATE_AVG=+0.004% DELTA=+0.142%
+    +30m MOTIF_N=1 MOTIF_AVG=-0.042% STATE_N=6 STATE_AVG=+0.147% DELTA=-0.189%
+    +45m N=0
+    +60m N=0
+
+==============================================================================================================
+CHECKPOINT +45m
+==============================================================================================================
+
+CURRENT STATE = DETERIORATING
+STATE OBSERVATIONS = 8
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=11 AVG=+0.146%
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 2
+    +15m MOTIF_N=2 MOTIF_AVG=+0.115% STATE_N=11 STATE_AVG=+0.146% DELTA=-0.031%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: DETERIORATING -> RECOVERING -> DETERIORATING
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=+0.115% STATE_N=11 STATE_AVG=+0.146% DELTA=-0.030%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: RECOVERING -> NEUTRAL -> DETERIORATING
+  OBSERVATIONS: 3
+    +15m MOTIF_N=3 MOTIF_AVG=-0.104% STATE_N=11 STATE_AVG=+0.146% DELTA=-0.250%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 2
+    +15m MOTIF_N=2 MOTIF_AVG=-0.023% STATE_N=11 STATE_AVG=+0.146% DELTA=-0.169%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = PERSISTENT_FAILURE
+STATE OBSERVATIONS = 11
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=6 AVG=-0.249%
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 2
+    +15m MOTIF_N=2 MOTIF_AVG=-0.303% STATE_N=6 STATE_AVG=-0.249% DELTA=-0.054%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: DETERIORATING -> RECOVERING -> DETERIORATING
+  OBSERVATIONS: 1
+    +15m MOTIF_N=1 MOTIF_AVG=-0.386% STATE_N=6 STATE_AVG=-0.249% DELTA=-0.137%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: RECOVERING -> NEUTRAL -> DETERIORATING
+  OBSERVATIONS: 2
+    +15m MOTIF_N=2 MOTIF_AVG=-0.231% STATE_N=6 STATE_AVG=-0.249% DELTA=+0.018%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 6
+    +15m MOTIF_N=6 MOTIF_AVG=-0.249% STATE_N=6 STATE_AVG=-0.249% DELTA=+0.000%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = RECOVERING
+STATE OBSERVATIONS = 2
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=6 AVG=+0.197%
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 2
+    +15m MOTIF_N=2 MOTIF_AVG=+0.367% STATE_N=6 STATE_AVG=+0.197% DELTA=+0.169%
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+==============================================================================================================
+CHECKPOINT +60m
+==============================================================================================================
+
+CURRENT STATE = DETERIORATING
+STATE OBSERVATIONS = 8
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 3
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: DETERIORATING -> RECOVERING -> DETERIORATING
+  OBSERVATIONS: 2
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: RECOVERING -> NEUTRAL -> DETERIORATING
+  OBSERVATIONS: 2
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = PERSISTENT_FAILURE
+STATE OBSERVATIONS = 13
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 2
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: DETERIORATING -> RECOVERING -> DETERIORATING
+  OBSERVATIONS: 1
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: RECOVERING -> NEUTRAL -> DETERIORATING
+  OBSERVATIONS: 3
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+  MOTIF: PERSISTENT_FAILURE HISTORY
+  OBSERVATIONS: 7
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+CURRENT STATE = RECOVERING
+STATE OBSERVATIONS = 2
+--------------------------------------------------------------------------------------------------------------
+  +15m STATE BASELINE N=0
+  +30m STATE BASELINE N=0
+  +45m STATE BASELINE N=0
+  +60m STATE BASELINE N=0
+
+  MOTIFS PRESENT WITHIN THIS CURRENT STATE
+  ----------------------------------------------------------------------------------------------------------
+
+  MOTIF: DETERIORATING -> RECOVERING
+  OBSERVATIONS: 2
+    +15m N=0
+    +30m N=0
+    +45m N=0
+    +60m N=0
+
+==============================================================================================================
+V13.16 MOTIF PRESENCE BY CURRENT STATE
+==============================================================================================================
+
++10m
+  PERSISTENT_FAILURE     N=1
+      1x PERSISTENT_FAILURE HISTORY
+
++15m
+  PERSISTENT_FAILURE     N=1
+      1x PERSISTENT_FAILURE HISTORY
+  RECOVERING             N=3
+      3x DETERIORATING -> RECOVERING
+
++20m
+  DETERIORATING          N=5
+      2x RECOVERING -> NEUTRAL -> DETERIORATING
+      1x DETERIORATING -> RECOVERING
+      1x DETERIORATING -> RECOVERING -> DETERIORATING
+      1x PERSISTENT_FAILURE HISTORY
+  NEUTRAL                N=2
+      2x DETERIORATING -> RECOVERING
+  PERSISTENT_FAILURE     N=1
+      1x PERSISTENT_FAILURE HISTORY
+
++25m
+  DETERIORATING          N=4
+      3x RECOVERING -> NEUTRAL -> DETERIORATING
+      1x DETERIORATING -> RECOVERING
+  NEUTRAL                N=1
+      1x DETERIORATING -> RECOVERING
+  PERSISTENT_FAILURE     N=5
+      3x PERSISTENT_FAILURE HISTORY
+      1x DETERIORATING -> RECOVERING
+      1x DETERIORATING -> RECOVERING -> DETERIORATING
+  RECOVERING             N=1
+      1x DETERIORATING -> RECOVERING
+
++30m
+  DETERIORATING          N=6
+      2x DETERIORATING -> RECOVERING
+      2x RECOVERING -> NEUTRAL -> DETERIORATING
+      1x DETERIORATING -> RECOVERING -> DETERIORATING
+      1x PERSISTENT_FAILURE HISTORY
+  NEUTRAL                N=1
+      1x DETERIORATING -> RECOVERING
+  PERSISTENT_FAILURE     N=7
+      4x PERSISTENT_FAILURE HISTORY
+      1x DETERIORATING -> RECOVERING
+      1x DETERIORATING -> RECOVERING -> DETERIORATING
+      1x RECOVERING -> NEUTRAL -> DETERIORATING
+  RECOVERING             N=1
+      1x DETERIORATING -> RECOVERING
+
++45m
+  DETERIORATING          N=8
+      3x RECOVERING -> NEUTRAL -> DETERIORATING
+      2x DETERIORATING -> RECOVERING
+      2x PERSISTENT_FAILURE HISTORY
+      1x DETERIORATING -> RECOVERING -> DETERIORATING
+  PERSISTENT_FAILURE     N=11
+      6x PERSISTENT_FAILURE HISTORY
+      2x DETERIORATING -> RECOVERING
+      2x RECOVERING -> NEUTRAL -> DETERIORATING
+      1x DETERIORATING -> RECOVERING -> DETERIORATING
+  RECOVERING             N=2
+      2x DETERIORATING -> RECOVERING
+
++60m
+  DETERIORATING          N=8
+      3x DETERIORATING -> RECOVERING
+      2x DETERIORATING -> RECOVERING -> DETERIORATING
+      2x RECOVERING -> NEUTRAL -> DETERIORATING
+      1x PERSISTENT_FAILURE HISTORY
+  PERSISTENT_FAILURE     N=13
+      7x PERSISTENT_FAILURE HISTORY
+      3x RECOVERING -> NEUTRAL -> DETERIORATING
+      2x DETERIORATING -> RECOVERING
+      1x DETERIORATING -> RECOVERING -> DETERIORATING
+  RECOVERING             N=2
+      2x DETERIORATING -> RECOVERING
+
+==============================================================================================================
+V13.16 INTERPRETATION RULE
+==============================================================================================================
+A motif is interesting only when it repeatedly appears within the SAME CURRENT STATE and shows a persistent difference in subsequent returns versus the CURRENT-STATE baseline.
+A single observation, a single symbol, or a single horizon does NOT validate a motif.
+No motif from this audit becomes an entry, hold, warning, or exit rule.
+V13.16 is research only. NO PRODUCTION CODE CHANGED.
+==============================================================================================================
+
+==============================================================================

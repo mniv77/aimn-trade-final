@@ -1,0 +1,1051 @@
+# V5.6.12.11 - Trajectory State Machine
+# V5.6.12.13 - Classification Outcome Validation
+# RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+# RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Sequence, Tuple
+
+import kiss_transition_detector_v5_6_12_8_persistent_reversal as v128
+
+def val(row, *names):
+    for name in names:
+        if isinstance(row, dict):
+            if name in row:
+                return row[name]
+        elif hasattr(row, name):
+            return getattr(row, name)
+    return None
+
+
+CHECKPOINTS = (5, 10, 15, 20, 25, 30, 45, 60)
+
+RECOVERY_MOVE_PCT = 0.10
+DETERIORATING_MOVE_PCT = 0.20
+PERSISTENT_MOVE_PCT = 0.50
+
+RECOVERY_FAVORABLE_RATIO = 0.50
+DETERIORATING_ADVERSE_RATIO = 0.67
+
+DETERIORATING_CONSECUTIVE = 2
+PERSISTENT_CONSECUTIVE = 3
+
+@dataclass
+class StatePoint:
+    minutes: int
+    state: str
+    return_pct: float
+    favorable_ratio: float
+    adverse_ratio: float
+    consecutive_adverse: int
+    mae_pct: float
+    mfe_pct: float
+
+@dataclass
+class StatePath:
+    symbol: str
+    direction: str
+    opposite_time: datetime
+    official_time: datetime
+    warning_lead: float
+    points: List[StatePoint]
+def signed_return(direction: str, entry_price: float, price: float) -> float:
+    if not entry_price:
+        return 0.0
+
+    raw = (price - entry_price) / entry_price * 100.0
+
+    if direction == "SHORT":
+        raw = -raw
+
+    return raw
+
+
+def classify_state(
+    return_pct: float,
+    favorable_ratio: float,
+    adverse_ratio: float,
+    consecutive_adverse: int,
+) -> str:
+    if (
+        return_pct <= -PERSISTENT_MOVE_PCT
+        and (
+            consecutive_adverse >= PERSISTENT_CONSECUTIVE
+            or adverse_ratio >= DETERIORATING_ADVERSE_RATIO
+        )
+    ):
+        return "PERSISTENT_FAILURE"
+
+    if (
+        return_pct >= RECOVERY_MOVE_PCT
+        and favorable_ratio >= RECOVERY_FAVORABLE_RATIO
+    ):
+        return "RECOVERING"
+
+    if (
+        return_pct <= -DETERIORATING_MOVE_PCT
+        or adverse_ratio >= DETERIORATING_ADVERSE_RATIO
+        or consecutive_adverse >= DETERIORATING_CONSECUTIVE
+    ):
+        return "DETERIORATING"
+
+    return "NEUTRAL"
+def close_index(rows: Sequence[Dict[str, Any]], target: datetime) -> Optional[int]:
+    for i, row in enumerate(rows):
+        ts = val(row, "timestamp", "time", "datetime", "date")
+        if ts + timedelta(minutes=5) == target:
+            return i
+    return None
+
+
+def price_from_row(row: Any) -> float:
+    x = val(row, "close", "Close", "c")
+    if x is None:
+        raise KeyError("No close price found")
+    return float(x)
+
+
+def measure_checkpoint(
+    rows: Sequence[Dict[str, Any]],
+    start_index: int,
+    direction: str,
+    entry_price: float,
+    minutes: int,
+) -> Optional[StatePoint]:
+    target_time = val(rows[start_index], "timestamp", "time", "datetime", "date") + timedelta(minutes=minutes)
+
+    end_index = close_index(rows, target_time)
+    if end_index is None or end_index <= start_index:
+        return None
+
+    prices = [price_from_row(rows[i]) for i in range(start_index, end_index + 1)]
+
+    if not prices:
+        return None
+
+    return_pct = signed_return(direction, entry_price, prices[-1])
+
+    favorable = 0
+    adverse = 0
+    consecutive = 0
+    max_consecutive = 0
+
+    for i in range(1, len(prices)):
+        move = signed_return(direction, prices[i - 1], prices[i])
+
+        if move > 0:
+            favorable += 1
+            consecutive = 0
+        elif move < 0:
+            adverse += 1
+            consecutive += 1
+            max_consecutive = max(max_consecutive, consecutive)
+
+    total_moves = favorable + adverse
+
+    favorable_ratio = favorable / total_moves if total_moves else 0.0
+    adverse_ratio = adverse / total_moves if total_moves else 0.0
+
+    mae_pct = min(
+        signed_return(direction, entry_price, price)
+        for price in prices
+    )
+
+    mfe_pct = max(
+        signed_return(direction, entry_price, price)
+        for price in prices
+    )
+
+    state = classify_state(
+        return_pct,
+        favorable_ratio,
+        adverse_ratio,
+        max_consecutive,
+    )
+
+    return StatePoint(
+        minutes=minutes,
+        state=state,
+        return_pct=return_pct,
+        favorable_ratio=favorable_ratio,
+        adverse_ratio=adverse_ratio,
+        consecutive_adverse=max_consecutive,
+        mae_pct=mae_pct,
+        mfe_pct=mfe_pct,
+    )
+def build_state_path(
+    rows5: Sequence[Dict[str, Any]],
+    case: Any,
+) -> Optional[StatePath]:
+    start_index = close_index(rows5, case.opposite_time)
+
+    if start_index is None:
+        return None
+
+    entry_price = float(case.decision_price)
+
+    points: List[StatePoint] = []
+
+    for minutes in CHECKPOINTS:
+        point = measure_checkpoint(
+            rows5,
+            start_index,
+            case.direction,
+            entry_price,
+            minutes,
+        )
+
+        if point is not None:
+            points.append(point)
+
+    if not points:
+        return None
+
+    return StatePath(
+        symbol=case.symbol,
+        direction=case.direction,
+        opposite_time=case.opposite_time,
+        official_time=case.official_time,
+        warning_lead=case.warning_lead,
+        points=points,
+    )
+
+
+def path_label(path: StatePath) -> str:
+    labels = ["OPPOSITE_DETECTED"]
+
+    previous = None
+
+    for point in path.points:
+        if point.state != previous:
+            labels.append(point.state)
+            previous = point.state
+
+    return " -> ".join(labels)
+
+def process_symbol(symbol: str) -> List[StatePath]:
+    rows5 = v128.v125.base.load_rows(symbol, "5m")
+    rows30 = v128.v125.base.load_rows(symbol, "30m")
+
+    if not rows5 or not rows30:
+        print(f"{symbol}: missing data")
+        return []
+
+    transitions = v128.v125.base.build_directional_transitions(symbol, rows30)
+    observations = v128.v125.base.build_warning_observations(symbol, rows5)
+    episodes = v128.v125.base.cluster_warning_episodes(observations)
+    assignments = v128.v125.base.assign_one_episode_per_transition(transitions, episodes)
+
+    paths: List[StatePath] = []
+
+    for transition, episode in assignments:
+        lead = (transition.timestamp - episode.first_timestamp).total_seconds() / 60.0
+        assignment = v128.v125.base.Assignment(transition, episode, lead)
+        case = v128.evaluate_assignment(rows5, assignment)
+
+        if case is None:
+            continue
+
+        path = build_state_path(rows5, case)
+        if path is not None:
+            paths.append(path)
+
+    print(f"{symbol}: transitions={len(transitions)} assignments={len(assignments)} trajectory_cases={len(paths)}")
+    return paths
+
+
+def main() -> None:
+    symbols = ("NVDA", "AAPL", "MSFT", "AMZN", "TSLA", "SPY", "QQQ")
+    all_paths: List[StatePath] = []
+
+    print("=" * 72)
+    print("V5.6.12.11 - TRAJECTORY STATE MACHINE")
+    print("RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES")
+    print("=" * 72)
+
+    for symbol in symbols:
+        try:
+            paths = process_symbol(symbol)
+            all_paths.extend(paths)
+        except Exception as exc:
+            print(f"{symbol}: ERROR {exc}")
+
+    print()
+    print(f"TOTAL TRAJECTORY CASES = {len(all_paths)}")
+    print()
+
+    for path in all_paths:
+        print(
+            f"{path.symbol} {path.direction} "
+            f"opposite={path.opposite_time} "
+            f"official={path.official_time} "
+            f"lead={path.warning_lead:.1f}m"
+        )
+        print(f"  PATH: {path_label(path)}")
+
+        for point in path.points:
+            print(
+                f"  +{point.minutes:>2}m "
+                f"{point.state:<18} "
+                f"ret={point.return_pct:+.3f}% "
+                f"fav={point.favorable_ratio:.1%} "
+                f"adv={point.adverse_ratio:.1%} "
+                f"consec={point.consecutive_adverse}"
+            )
+
+    print()
+    print("=" * 72)
+    print("CHECKPOINT SUMMARY")
+    print("=" * 72)
+
+    for minutes in CHECKPOINTS:
+        points = [
+            point
+            for path in all_paths
+            for point in path.points
+            if point.minutes == minutes
+        ]
+
+        if not points:
+            continue
+
+        avg_return = sum(point.return_pct for point in points) / len(points)
+        recovering = sum(point.state == "RECOVERING" for point in points)
+        neutral = sum(point.state == "NEUTRAL" for point in points)
+        deteriorating = sum(point.state == "DETERIORATING" for point in points)
+        persistent = sum(point.state == "PERSISTENT_FAILURE" for point in points)
+
+        print(
+            f"+{minutes:>2}m N={len(points):>2} "
+            f"AVG={avg_return:+.3f}% "
+            f"REC={recovering} "
+            f"NEUT={neutral} "
+            f"DET={deteriorating} "
+            f"PERSIST={persistent}"
+        )
+
+    print()
+    print("=" * 90)
+    print("GLOBAL CLASSIFICATION VALIDATION")
+    print("=" * 90)
+
+    results = []
+
+    for path in all_paths:
+        classification = classify_path(path)
+
+        row = {
+            "symbol": path.symbol,
+            "direction": path.direction,
+            "classification": classification,
+        }
+
+        for minutes in (15, 30, 45, 60):
+            value = next((point.return_pct for point in path.points if point.minutes == minutes), None)
+            row[minutes] = value
+            row[f"label_{minutes}"] = outcome_label(value)
+
+        results.append(row)
+
+    classifications = (
+        "HOLD",
+        "WARNING",
+        "EXIT_CANDIDATE",
+        "REVERSAL_CONFIRMED",
+    )
+
+    for classification in classifications:
+        subset = [
+            r for r in results
+            if r["classification"] == classification
+        ]
+
+        print()
+        print(f"{classification}: N={len(subset)}")
+
+        for minutes in (15, 30, 45, 60):
+            values = [
+                r[minutes]
+                for r in subset
+                if r[minutes] is not None
+            ]
+
+            if not values:
+                continue
+
+            favorable = sum(
+                r[f"label_{minutes}"] == "FAVORABLE"
+                for r in subset
+            )
+
+            adverse = sum(
+                r[f"label_{minutes}"] == "ADVERSE"
+                for r in subset
+            )
+
+            neutral = sum(
+                r[f"label_{minutes}"] == "NEUTRAL"
+                for r in subset
+            )
+
+            avg = sum(values) / len(values)
+
+            print(
+                f"  +{minutes}m N={len(values):2d} "
+                f"AVG={avg:+.3f}% "
+                f"FAV={favorable:2d} "
+                f"ADV={adverse:2d} "
+                f"NEU={neutral:2d}"
+            )
+
+
+
+
+    run_v131_causal_validation(all_paths)
+    run_v132_fixed_horizon_validation(all_paths)
+    run_v133_exit_reversal_validation(all_paths)
+
+def classify_path(path: StatePath) -> str:
+    states = [point.state for point in path.points]
+    persistent_count = states.count("PERSISTENT_FAILURE")
+    has_recovery = "RECOVERING" in states
+    final_state = states[-1] if states else "NEUTRAL"
+
+    if persistent_count >= 2 and final_state == "PERSISTENT_FAILURE":
+        return "REVERSAL_CONFIRMED"
+
+    if persistent_count >= 1:
+        return "EXIT_CANDIDATE"
+
+    if final_state == "DETERIORATING":
+        return "WARNING"
+
+    if has_recovery or final_state == "NEUTRAL":
+        return "HOLD"
+
+    return "WARNING"
+
+
+def classify_prefix(path: StatePath, minutes: int) -> str:
+    prefix = [point for point in path.points if point.minutes <= minutes]
+
+    if not prefix:
+        return "WARNING"
+
+    states = [point.state for point in prefix]
+    persistent_count = states.count("PERSISTENT_FAILURE")
+    has_recovery = "RECOVERING" in states
+    final_state = states[-1]
+
+    if persistent_count >= 2 and final_state == "PERSISTENT_FAILURE":
+        return "REVERSAL_CONFIRMED"
+
+    if persistent_count >= 1:
+        return "EXIT_CANDIDATE"
+
+    if final_state == "DETERIORATING":
+        return "WARNING"
+
+    if has_recovery or final_state == "NEUTRAL":
+        return "HOLD"
+
+    return "WARNING"
+
+
+def outcome_label(return_pct: Optional[float]) -> str:
+    if return_pct is None:
+        return "UNKNOWN"
+
+    if return_pct >= 0.25:
+        return "FAVORABLE"
+
+    if return_pct <= -0.25:
+        return "ADVERSE"
+
+    return "NEUTRAL"
+
+def run_v131_causal_validation(paths):
+    print()
+    print("=" * 90)
+    print("V13.1 - CAUSAL / LIVE-TIMING VALIDATION")
+    print("Only information available at each checkpoint is used.")
+    print("Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES")
+    print("=" * 90)
+
+    checkpoints = (10, 15, 20, 25, 30, 45, 60)
+
+    results = []
+
+    for path in paths:
+        if not path.points:
+            continue
+
+        for minutes in checkpoints:
+            point = next(
+                (p for p in path.points if p.minutes == minutes),
+                None,
+            )
+
+            if point is None:
+                continue
+
+            state = classify_prefix(path, minutes)
+
+            future_points = [
+                p for p in path.points
+                if p.minutes > minutes
+            ]
+
+            if not future_points:
+                continue
+
+            final_point = future_points[-1]
+
+            results.append({
+                "symbol": path.symbol,
+                "direction": path.direction,
+                "opposite_time": path.opposite_time,
+                "official_time": path.official_time,
+                "decision_minutes": minutes,
+                "decision_state": state,
+                "decision_return": point.return_pct,
+                "future_60_return": final_point.return_pct,
+            })
+
+    print()
+    print("DECISION-POINT SUMMARY")
+    print("-" * 90)
+
+    for minutes in checkpoints:
+        subset = [
+            r for r in results
+            if r["decision_minutes"] == minutes
+        ]
+
+        if not subset:
+            continue
+
+        print()
+        print(f"+{minutes}m  N={len(subset)}")
+
+        for state in (
+            "HOLD",
+            "WARNING",
+            "EXIT_CANDIDATE",
+            "REVERSAL_CONFIRMED",
+        ):
+            rows = [
+                r for r in subset
+                if r["decision_state"] == state
+            ]
+
+            if not rows:
+                continue
+
+            values = [
+                r["decision_return"]
+                for r in rows
+                if r["decision_return"] is not None
+            ]
+
+            if not values:
+                continue
+
+            favorable = sum(v >= 0.25 for v in values)
+            adverse = sum(v <= -0.25 for v in values)
+            neutral = len(values) - favorable - adverse
+
+            avg = sum(values) / len(values)
+
+            print(
+                f"  {state:20s} "
+                f"N={len(values):2d} "
+                f"AVG={avg:+.3f}% "
+                f"FAV={favorable:2d} "
+                f"ADV={adverse:2d} "
+                f"NEU={neutral:2d}"
+            )
+
+    print()
+    print("=" * 90)
+    print("FIRST EXIT / REVERSAL DECISION")
+    print("=" * 90)
+
+    first_decisions = []
+
+    for path in paths:
+        for minutes in checkpoints:
+            state = classify_prefix(path, minutes)
+
+            if state in (
+                "EXIT_CANDIDATE",
+                "REVERSAL_CONFIRMED",
+            ):
+                point = next(
+                    (p for p in path.points if p.minutes == minutes),
+                    None,
+                )
+
+                if point is not None:
+                    first_decisions.append({
+                        "symbol": path.symbol,
+                        "direction": path.direction,
+                        "minutes": minutes,
+                        "state": state,
+                        "return": point.return_pct,
+                    })
+                    break
+
+    if not first_decisions:
+        print("No causal exit decisions detected.")
+        return
+
+    for row in first_decisions:
+        print(
+            f"{row['symbol']:5s} "
+            f"{row['direction']:5s} "
+            f"+{row['minutes']:2d}m "
+            f"{row['state']:20s} "
+            f"return={row['return']:+.3f}%"
+        )
+
+    print()
+    print(
+        f"FIRST CAUSAL EXIT/REVERSAL DECISIONS = "
+        f"{len(first_decisions)}"
+    )
+
+    avg = sum(r["return"] for r in first_decisions) / len(first_decisions)
+
+    print(f"AVERAGE DECISION RETURN = {avg:+.3f}%")
+
+
+def run_v132_fixed_horizon_validation(paths):
+    print()
+    print("=" * 90)
+    print("V13.2 - FIXED 60-MINUTE FORWARD-HORIZON VALIDATION")
+    print("Decision uses only information available at the decision checkpoint.")
+    print("Outcome is measured exactly 60 minutes AFTER that decision.")
+    print("Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES")
+    print("=" * 90)
+
+    checkpoints = (10, 15, 20, 25, 30, 45, 60)
+    results = []
+
+    # Cache 5m data once per symbol.
+    rows_cache = {}
+
+    for path in paths:
+        if not path.points:
+            continue
+
+        if path.symbol not in rows_cache:
+            rows_cache[path.symbol] = v128.v125.base.load_rows(
+                path.symbol, "5m"
+            )
+
+        rows5 = rows_cache[path.symbol]
+
+        if not rows5:
+            continue
+
+        start_index = close_index(rows5, path.opposite_time)
+
+        if start_index is None:
+            continue
+
+        for minutes in checkpoints:
+            decision_point = next(
+                (p for p in path.points if p.minutes == minutes),
+                None,
+            )
+
+            if decision_point is None:
+                continue
+
+            decision_time = (
+                path.opposite_time + timedelta(minutes=minutes)
+            )
+
+            future_time = decision_time + timedelta(minutes=60)
+
+            future_index = close_index(rows5, future_time)
+
+            if future_index is None:
+                continue
+
+            decision_index = close_index(rows5, decision_time)
+
+            if decision_index is None:
+                continue
+
+            decision_price = price_from_row(rows5[decision_index])
+            future_price = price_from_row(rows5[future_index])
+
+            forward_return = signed_return(
+                path.direction,
+                decision_price,
+                future_price,
+            )
+
+            state = classify_prefix(path, minutes)
+
+            results.append({
+                "symbol": path.symbol,
+                "direction": path.direction,
+                "decision_minutes": minutes,
+                "decision_state": state,
+                "decision_return": decision_point.return_pct,
+                "forward_60_return": forward_return,
+            })
+
+    print()
+    print("FIXED-HORIZON DECISION SUMMARY")
+    print("-" * 90)
+
+    for minutes in checkpoints:
+        subset = [
+            r for r in results
+            if r["decision_minutes"] == minutes
+        ]
+
+        if not subset:
+            continue
+
+        print()
+        print(f"+{minutes}m  N={len(subset)}")
+
+        for state in (
+            "HOLD",
+            "WARNING",
+            "EXIT_CANDIDATE",
+            "REVERSAL_CONFIRMED",
+        ):
+            rows = [
+                r for r in subset
+                if r["decision_state"] == state
+            ]
+
+            if not rows:
+                continue
+
+            values = [
+                r["forward_60_return"]
+                for r in rows
+                if r["forward_60_return"] is not None
+            ]
+
+            if not values:
+                continue
+
+            favorable = sum(v >= 0.25 for v in values)
+            adverse = sum(v <= -0.25 for v in values)
+            neutral = len(values) - favorable - adverse
+
+            avg = sum(values) / len(values)
+
+            print(
+                f"  {state:20s} "
+                f"N={len(values):2d} "
+                f"AVG_60M={avg:+.3f}% "
+                f"FAV={favorable:2d} "
+                f"ADV={adverse:2d} "
+                f"NEU={neutral:2d}"
+            )
+
+    print()
+    print("=" * 90)
+    print("FIRST CAUSAL EXIT / REVERSAL — FIXED 60-MINUTE OUTCOME")
+    print("=" * 90)
+
+    first_decisions = []
+
+    for path in paths:
+        for minutes in checkpoints:
+            state = classify_prefix(path, minutes)
+
+            if state not in (
+                "EXIT_CANDIDATE",
+                "REVERSAL_CONFIRMED",
+            ):
+                continue
+
+            if path.symbol not in rows_cache:
+                rows_cache[path.symbol] = v128.v125.base.load_rows(
+                    path.symbol, "5m"
+                )
+
+            rows5 = rows_cache[path.symbol]
+
+            decision_index = close_index(
+                rows5,
+                path.opposite_time + timedelta(minutes=minutes),
+            )
+
+            future_index = close_index(
+                rows5,
+                path.opposite_time + timedelta(minutes=minutes + 60),
+            )
+
+            if decision_index is None or future_index is None:
+                continue
+
+            decision_price = price_from_row(rows5[decision_index])
+            future_price = price_from_row(rows5[future_index])
+
+            forward_return = signed_return(
+                path.direction,
+                decision_price,
+                future_price,
+            )
+
+            first_decisions.append({
+                "symbol": path.symbol,
+                "direction": path.direction,
+                "minutes": minutes,
+                "state": state,
+                "forward_return": forward_return,
+            })
+
+            break
+
+    if not first_decisions:
+        print("No causal exit/reversal decisions with fixed horizon.")
+        return
+
+    for row in first_decisions:
+        outcome = outcome_label(row["forward_return"])
+
+        print(
+            f"{row['symbol']:5s} "
+            f"{row['direction']:5s} "
+            f"+{row['minutes']:2d}m "
+            f"{row['state']:20s} "
+            f"NEXT_60M={row['forward_return']:+.3f}% "
+            f"{outcome}"
+        )
+
+    print()
+    print(
+        f"FIRST CAUSAL EXIT/REVERSAL DECISIONS = "
+        f"{len(first_decisions)}"
+    )
+
+    avg = (
+        sum(r["forward_return"] for r in first_decisions)
+        / len(first_decisions)
+    )
+
+    improved = sum(
+        r["forward_return"] < 0
+        for r in first_decisions
+    )
+
+    print(f"AVERAGE NEXT-60M RETURN = {avg:+.3f}%")
+    print(
+        f"EXIT WOULD HAVE AVOIDED ADVERSE MOVE = "
+        f"{improved}/{len(first_decisions)}"
+    )
+
+
+def run_v133_exit_reversal_validation(paths):
+    print()
+    print("=" * 90)
+    print("V13.3 - EXIT CANDIDATE / REVERSAL CONFIRMATION VALIDATION")
+    print("Decision uses only information available at the decision checkpoint.")
+    print("Tests whether deterioration recovers or continues into the opposite trend.")
+    print("Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES")
+    print("=" * 90)
+
+    checkpoints = (10, 15, 20, 25, 30, 45, 60)
+    rows_cache = {}
+    first_decisions = []
+
+    for path in paths:
+        if not path.points:
+            continue
+
+        if path.symbol not in rows_cache:
+            rows_cache[path.symbol] = v128.v125.base.load_rows(
+                path.symbol, "5m"
+            )
+
+        rows5 = rows_cache[path.symbol]
+
+        if not rows5:
+            continue
+
+        for minutes in checkpoints:
+            state = classify_prefix(path, minutes)
+
+            if state not in (
+                "EXIT_CANDIDATE",
+                "REVERSAL_CONFIRMED",
+            ):
+                continue
+
+            decision_time = (
+                path.opposite_time + timedelta(minutes=minutes)
+            )
+
+            decision_index = close_index(rows5, decision_time)
+
+            if decision_index is None:
+                continue
+
+            decision_price = price_from_row(rows5[decision_index])
+
+            horizon_results = {}
+
+            for horizon in (15, 30, 60):
+                future_time = (
+                    decision_time + timedelta(minutes=horizon)
+                )
+
+                future_index = close_index(rows5, future_time)
+
+                if future_index is None:
+                    continue
+
+                future_price = price_from_row(rows5[future_index])
+
+                horizon_results[horizon] = signed_return(
+                    path.direction,
+                    decision_price,
+                    future_price,
+                )
+
+            if not horizon_results:
+                continue
+
+            first_decisions.append({
+                "symbol": path.symbol,
+                "direction": path.direction,
+                "minutes": minutes,
+                "state": state,
+                "returns": horizon_results,
+            })
+
+            break
+
+    print()
+    print("FIRST EXIT / REVERSAL DECISIONS")
+    print("-" * 90)
+
+    if not first_decisions:
+        print("No qualifying decisions with complete forward horizons.")
+        return
+
+    for row in first_decisions:
+        values = row["returns"]
+
+        parts = []
+        for horizon in (15, 30, 60):
+            if horizon in values:
+                parts.append(
+                    f"{horizon}M={values[horizon]:+.3f}%"
+                )
+
+        print(
+            f"{row['symbol']:5s} "
+            f"{row['direction']:5s} "
+            f"+{row['minutes']:2d}m "
+            f"{row['state']:20s} "
+            + " ".join(parts)
+        )
+
+    print()
+    print("CLASSIFICATION OUTCOME SUMMARY")
+    print("-" * 90)
+
+    for state in (
+        "EXIT_CANDIDATE",
+        "REVERSAL_CONFIRMED",
+    ):
+        subset = [
+            row for row in first_decisions
+            if row["state"] == state
+        ]
+
+        if not subset:
+            continue
+
+        print()
+        print(f"{state}")
+
+        for horizon in (15, 30, 60):
+            values = [
+                row["returns"][horizon]
+                for row in subset
+                if horizon in row["returns"]
+            ]
+
+            if not values:
+                continue
+
+            favorable = sum(v >= 0.25 for v in values)
+            adverse = sum(v <= -0.25 for v in values)
+            neutral = len(values) - favorable - adverse
+            avg = sum(values) / len(values)
+
+            print(
+                f"  NEXT {horizon:2d}M: "
+                f"N={len(values):2d} "
+                f"AVG={avg:+.3f}% "
+                f"FAV={favorable:2d} "
+                f"ADV={adverse:2d} "
+                f"NEU={neutral:2d}"
+            )
+
+    print()
+    print("=" * 90)
+    print("V13.3 INTERPRETATION DATA")
+    print("=" * 90)
+
+    exit_rows = [
+        row for row in first_decisions
+        if row["state"] == "EXIT_CANDIDATE"
+    ]
+
+    reversal_rows = [
+        row for row in first_decisions
+        if row["state"] == "REVERSAL_CONFIRMED"
+    ]
+
+    print(
+        f"FIRST EXIT_CANDIDATE DECISIONS = {len(exit_rows)}"
+    )
+    print(
+        f"FIRST REVERSAL_CONFIRMED DECISIONS = {len(reversal_rows)}"
+    )
+
+    for label, subset in (
+        ("EXIT_CANDIDATE", exit_rows),
+        ("REVERSAL_CONFIRMED", reversal_rows),
+    ):
+        if not subset:
+            continue
+
+        adverse_60 = sum(
+            row["returns"].get(60, 0.0) <= -0.25
+            for row in subset
+            if 60 in row["returns"]
+        )
+
+        favorable_60 = sum(
+            row["returns"].get(60, 0.0) >= 0.25
+            for row in subset
+            if 60 in row["returns"]
+        )
+
+        print(
+            f"{label}: "
+            f"60M_ADVERSE={adverse_60} "
+            f"60M_FAVORABLE={favorable_60}"
+        )
+
+if __name__ == "__main__":
+    main()

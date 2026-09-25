@@ -1,0 +1,1417 @@
+========================================================================
+V5.6.12.11 - TRAJECTORY STATE MACHINE
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+
+TOTAL TRAJECTORY CASES = 23
+
+NVDA LONG opposite=2026-06-05 10:20:00 official=2026-06-05 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> PERSISTENT_FAILURE -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m PERSISTENT_FAILURE ret=-0.519% fav=0.0% adv=100.0% consec=1
+  +15m PERSISTENT_FAILURE ret=-0.784% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.472% fav=33.3% adv=66.7% consec=2
+  +25m PERSISTENT_FAILURE ret=-0.524% fav=25.0% adv=75.0% consec=2
+  +30m PERSISTENT_FAILURE ret=-0.866% fav=20.0% adv=80.0% consec=2
+  +45m PERSISTENT_FAILURE ret=-1.003% fav=25.0% adv=75.0% consec=3
+  +60m PERSISTENT_FAILURE ret=-1.663% fav=18.2% adv=81.8% consec=4
+NVDA LONG opposite=2026-06-09 10:20:00 official=2026-06-09 14:30:00 lead=295.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> DETERIORATING
+  +10m RECOVERING         ret=+0.291% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.313% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.179% fav=66.7% adv=33.3% consec=1
+  +25m RECOVERING         ret=+0.383% fav=75.0% adv=25.0% consec=1
+  +30m NEUTRAL            ret=-0.044% fav=60.0% adv=40.0% consec=1
+  +45m DETERIORATING      ret=+0.000% fav=62.5% adv=37.5% consec=2
+  +60m DETERIORATING      ret=-0.029% fav=54.5% adv=45.5% consec=2
+NVDA SHORT opposite=2026-07-07 10:20:00 official=2026-07-07 16:30:00 lead=415.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> DETERIORATING
+  +10m RECOVERING         ret=+0.132% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.244% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.299% fav=100.0% adv=0.0% consec=0
+  +25m RECOVERING         ret=+0.296% fav=75.0% adv=25.0% consec=1
+  +30m RECOVERING         ret=+0.348% fav=80.0% adv=20.0% consec=1
+  +45m DETERIORATING      ret=-0.125% fav=50.0% adv=50.0% consec=3
+  +60m DETERIORATING      ret=-0.378% fav=45.5% adv=54.5% consec=4
+NVDA LONG opposite=2026-07-16 10:20:00 official=2026-07-16 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> NEUTRAL -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m DETERIORATING      ret=-0.206% fav=0.0% adv=100.0% consec=1
+  +15m RECOVERING         ret=+0.101% fav=50.0% adv=50.0% consec=1
+  +20m NEUTRAL            ret=+0.026% fav=33.3% adv=66.7% consec=1
+  +25m DETERIORATING      ret=-0.225% fav=25.0% adv=75.0% consec=2
+  +30m DETERIORATING      ret=-0.438% fav=20.0% adv=80.0% consec=3
+  +45m PERSISTENT_FAILURE ret=-1.090% fav=12.5% adv=87.5% consec=6
+  +60m PERSISTENT_FAILURE ret=-1.308% fav=18.2% adv=81.8% consec=7
+NVDA SHORT opposite=2026-07-30 10:35:00 official=2026-07-30 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING
+  +10m RECOVERING         ret=+0.484% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.636% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.829% fav=100.0% adv=0.0% consec=0
+  +25m RECOVERING         ret=+1.194% fav=100.0% adv=0.0% consec=0
+  +30m RECOVERING         ret=+1.196% fav=100.0% adv=0.0% consec=0
+  +45m RECOVERING         ret=+1.486% fav=75.0% adv=25.0% consec=2
+  +60m RECOVERING         ret=+1.889% fav=72.7% adv=27.3% consec=2
+NVDA LONG opposite=2026-08-06 10:35:00 official=2026-08-06 15:30:00 lead=355.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> NEUTRAL -> DETERIORATING
+  +10m DETERIORATING      ret=-0.346% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.241% fav=50.0% adv=50.0% consec=1
+  +20m NEUTRAL            ret=-0.160% fav=66.7% adv=33.3% consec=1
+  +25m NEUTRAL            ret=-0.155% fav=75.0% adv=25.0% consec=1
+  +30m DETERIORATING      ret=-0.287% fav=60.0% adv=40.0% consec=1
+  +45m DETERIORATING      ret=-0.639% fav=62.5% adv=37.5% consec=2
+  +60m DETERIORATING      ret=-0.704% fav=54.5% adv=45.5% consec=2
+NVDA SHORT opposite=2026-08-12 10:35:00 official=2026-08-12 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> DETERIORATING
+  +10m DETERIORATING      ret=-0.288% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.364% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.212% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=+0.028% fav=50.0% adv=50.0% consec=2
+  +30m RECOVERING         ret=+0.112% fav=60.0% adv=40.0% consec=2
+  +45m RECOVERING         ret=+0.257% fav=62.5% adv=37.5% consec=2
+  +60m DETERIORATING      ret=+0.069% fav=45.5% adv=54.5% consec=3
+AAPL LONG opposite=2026-06-12 10:20:00 official=2026-06-12 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING
+  +10m DETERIORATING      ret=-0.212% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.282% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.342% fav=0.0% adv=100.0% consec=3
+  +25m DETERIORATING      ret=-0.476% fav=0.0% adv=100.0% consec=4
+  +30m PERSISTENT_FAILURE ret=-0.584% fav=0.0% adv=100.0% consec=5
+  +45m DETERIORATING      ret=-0.369% fav=25.0% adv=75.0% consec=6
+  +60m DETERIORATING      ret=-0.019% fav=45.5% adv=54.5% consec=6
+AAPL LONG opposite=2026-07-22 10:35:00 official=2026-07-22 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> RECOVERING -> DETERIORATING -> RECOVERING
+  +10m RECOVERING         ret=+0.129% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=+0.086% fav=50.0% adv=50.0% consec=1
+  +20m RECOVERING         ret=+0.162% fav=66.7% adv=33.3% consec=1
+  +25m RECOVERING         ret=+0.229% fav=75.0% adv=25.0% consec=1
+  +30m RECOVERING         ret=+0.324% fav=80.0% adv=20.0% consec=1
+  +45m DETERIORATING      ret=-0.069% fav=50.0% adv=50.0% consec=3
+  +60m RECOVERING         ret=+0.385% fav=63.6% adv=36.4% consec=3
+MSFT SHORT opposite=2026-06-26 10:35:00 official=2026-06-26 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m RECOVERING         ret=+0.365% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=-0.041% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=-0.373% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=-0.474% fav=25.0% adv=75.0% consec=3
+  +30m PERSISTENT_FAILURE ret=-0.722% fav=20.0% adv=80.0% consec=4
+  +45m DETERIORATING      ret=-0.477% fav=37.5% adv=62.5% consec=4
+  +60m PERSISTENT_FAILURE ret=-0.876% fav=36.4% adv=63.6% consec=4
+MSFT SHORT opposite=2026-07-27 10:35:00 official=2026-07-27 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> NEUTRAL -> RECOVERING -> NEUTRAL -> PERSISTENT_FAILURE
+  +10m DETERIORATING      ret=-0.236% fav=0.0% adv=100.0% consec=1
+  +15m NEUTRAL            ret=+0.003% fav=50.0% adv=50.0% consec=1
+  +20m RECOVERING         ret=+0.109% fav=66.7% adv=33.3% consec=1
+  +25m NEUTRAL            ret=+0.001% fav=50.0% adv=50.0% consec=1
+  +30m NEUTRAL            ret=+0.033% fav=60.0% adv=40.0% consec=1
+  +45m PERSISTENT_FAILURE ret=-0.842% fav=37.5% adv=62.5% consec=3
+  +60m PERSISTENT_FAILURE ret=-0.967% fav=36.4% adv=63.6% consec=3
+MSFT SHORT opposite=2026-08-13 10:20:00 official=2026-08-13 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING
+  +10m RECOVERING         ret=+0.259% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.529% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.382% fav=66.7% adv=33.3% consec=1
+  +25m RECOVERING         ret=+0.485% fav=75.0% adv=25.0% consec=1
+  +30m RECOVERING         ret=+0.630% fav=80.0% adv=20.0% consec=1
+  +45m RECOVERING         ret=+0.730% fav=75.0% adv=25.0% consec=1
+  +60m RECOVERING         ret=+1.049% fav=81.8% adv=18.2% consec=1
+AMZN SHORT opposite=2026-06-04 11:45:00 official=2026-06-04 14:00:00 lead=165.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> NEUTRAL -> DETERIORATING
+  +10m DETERIORATING      ret=-0.020% fav=0.0% adv=100.0% consec=1
+  +15m RECOVERING         ret=+0.140% fav=50.0% adv=50.0% consec=1
+  +20m NEUTRAL            ret=+0.039% fav=33.3% adv=66.7% consec=1
+  +25m NEUTRAL            ret=+0.045% fav=50.0% adv=50.0% consec=1
+  +30m NEUTRAL            ret=-0.059% fav=40.0% adv=60.0% consec=1
+  +45m DETERIORATING      ret=-0.031% fav=37.5% adv=62.5% consec=2
+  +60m DETERIORATING      ret=+0.083% fav=45.5% adv=54.5% consec=2
+AMZN LONG opposite=2026-06-12 10:05:00 official=2026-06-12 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> RECOVERING -> DETERIORATING
+  +10m RECOVERING         ret=+0.295% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=+0.100% fav=50.0% adv=50.0% consec=1
+  +20m RECOVERING         ret=+0.445% fav=66.7% adv=33.3% consec=1
+  +25m RECOVERING         ret=+0.328% fav=50.0% adv=50.0% consec=1
+  +30m DETERIORATING      ret=+0.236% fav=40.0% adv=60.0% consec=2
+  +45m DETERIORATING      ret=-0.362% fav=25.0% adv=75.0% consec=5
+  +60m DETERIORATING      ret=+0.562% fav=45.5% adv=54.5% consec=5
+AMZN LONG opposite=2026-06-22 10:35:00 official=2026-06-22 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m RECOVERING         ret=+0.419% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=+0.004% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=-0.155% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=-0.391% fav=25.0% adv=75.0% consec=3
+  +30m DETERIORATING      ret=-0.429% fav=20.0% adv=80.0% consec=4
+  +45m PERSISTENT_FAILURE ret=-0.718% fav=37.5% adv=62.5% consec=4
+  +60m PERSISTENT_FAILURE ret=-0.958% fav=36.4% adv=63.6% consec=4
+AMZN SHORT opposite=2026-07-30 10:05:00 official=2026-07-30 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> DETERIORATING
+  +10m DETERIORATING      ret=-0.057% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.481% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.053% fav=33.3% adv=66.7% consec=2
+  +25m RECOVERING         ret=+0.124% fav=50.0% adv=50.0% consec=2
+  +30m DETERIORATING      ret=-0.150% fav=40.0% adv=60.0% consec=2
+  +45m DETERIORATING      ret=-0.143% fav=50.0% adv=50.0% consec=2
+  +60m DETERIORATING      ret=-0.027% fav=54.5% adv=45.5% consec=2
+AMZN LONG opposite=2026-08-11 10:05:00 official=2026-08-11 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> NEUTRAL -> DETERIORATING
+  +10m NEUTRAL            ret=+0.044% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=+0.073% fav=100.0% adv=0.0% consec=0
+  +20m NEUTRAL            ret=-0.182% fav=66.7% adv=33.3% consec=1
+  +25m DETERIORATING      ret=-0.334% fav=50.0% adv=50.0% consec=2
+  +30m DETERIORATING      ret=-0.178% fav=60.0% adv=40.0% consec=2
+  +45m DETERIORATING      ret=-0.265% fav=50.0% adv=50.0% consec=2
+  +60m DETERIORATING      ret=-0.249% fav=54.5% adv=45.5% consec=2
+TSLA LONG opposite=2026-07-02 10:35:00 official=2026-07-02 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m DETERIORATING      ret=-0.093% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.360% fav=0.0% adv=100.0% consec=2
+  +20m PERSISTENT_FAILURE ret=-0.529% fav=0.0% adv=100.0% consec=3
+  +25m PERSISTENT_FAILURE ret=-0.702% fav=0.0% adv=100.0% consec=4
+  +30m DETERIORATING      ret=-0.319% fav=20.0% adv=80.0% consec=4
+  +45m PERSISTENT_FAILURE ret=-0.687% fav=25.0% adv=75.0% consec=4
+  +60m PERSISTENT_FAILURE ret=-0.544% fav=36.4% adv=63.6% consec=4
+TSLA LONG opposite=2026-07-31 10:05:00 official=2026-07-31 14:30:00 lead=295.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING
+  +10m DETERIORATING      ret=-0.201% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.399% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.248% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=+0.002% fav=50.0% adv=50.0% consec=2
+  +30m DETERIORATING      ret=+0.043% fav=60.0% adv=40.0% consec=2
+  +45m RECOVERING         ret=+0.598% fav=75.0% adv=25.0% consec=2
+  +60m RECOVERING         ret=+1.525% fav=72.7% adv=27.3% consec=2
+TSLA SHORT opposite=2026-08-07 10:05:00 official=2026-08-07 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m DETERIORATING      ret=-0.125% fav=0.0% adv=100.0% consec=1
+  +15m RECOVERING         ret=+0.250% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=-0.296% fav=33.3% adv=66.7% consec=1
+  +25m PERSISTENT_FAILURE ret=-0.759% fav=25.0% adv=75.0% consec=2
+  +30m PERSISTENT_FAILURE ret=-1.006% fav=20.0% adv=80.0% consec=3
+  +45m PERSISTENT_FAILURE ret=-1.472% fav=12.5% adv=87.5% consec=6
+  +60m PERSISTENT_FAILURE ret=-1.864% fav=9.1% adv=90.9% consec=9
+SPY SHORT opposite=2026-06-09 10:05:00 official=2026-06-09 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> NEUTRAL -> RECOVERING
+  +10m NEUTRAL            ret=+0.022% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.349% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.540% fav=100.0% adv=0.0% consec=0
+  +25m RECOVERING         ret=+0.294% fav=75.0% adv=25.0% consec=1
+  +30m RECOVERING         ret=+0.394% fav=80.0% adv=20.0% consec=1
+  +45m RECOVERING         ret=+0.740% fav=87.5% adv=12.5% consec=1
+  +60m RECOVERING         ret=+0.859% fav=72.7% adv=27.3% consec=2
+QQQ SHORT opposite=2026-06-11 10:20:00 official=2026-06-11 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> NEUTRAL -> RECOVERING -> DETERIORATING
+  +10m DETERIORATING      ret=-0.422% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.381% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=-0.250% fav=66.7% adv=33.3% consec=1
+  +25m DETERIORATING      ret=-0.375% fav=50.0% adv=50.0% consec=1
+  +30m NEUTRAL            ret=-0.196% fav=60.0% adv=40.0% consec=1
+  +45m RECOVERING         ret=+0.387% fav=75.0% adv=25.0% consec=1
+  +60m DETERIORATING      ret=-0.009% fav=54.5% adv=45.5% consec=3
+QQQ SHORT opposite=2026-07-30 10:05:00 official=2026-07-30 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> DETERIORATING
+  +10m RECOVERING         ret=+0.273% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.192% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=+0.179% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=-0.007% fav=25.0% adv=75.0% consec=3
+  +30m DETERIORATING      ret=-0.220% fav=20.0% adv=80.0% consec=4
+  +45m DETERIORATING      ret=-0.045% fav=37.5% adv=62.5% consec=5
+  +60m DETERIORATING      ret=+0.321% fav=45.5% adv=54.5% consec=5
+
+========================================================================
+CHECKPOINT SUMMARY
+========================================================================
++10m N=23 AVG=-0.001% REC=9 NEUT=2 DET=11 PERSIST=1
++15m N=23 AVG=-0.014% REC=9 NEUT=6 DET=7 PERSIST=1
++20m N=23 AVG=-0.004% REC=8 NEUT=4 DET=10 PERSIST=1
++25m N=23 AVG=-0.044% REC=8 NEUT=3 DET=9 PERSIST=3
++30m N=23 AVG=-0.095% REC=6 NEUT=4 DET=9 PERSIST=4
++45m N=23 AVG=-0.180% REC=6 NEUT=0 DET=11 PERSIST=6
++60m N=23 AVG=-0.124% REC=5 NEUT=0 DET=11 PERSIST=7
+
+==========================================================================================
+GLOBAL CLASSIFICATION VALIDATION
+==========================================================================================
+
+HOLD: N=5
+  +15m N= 5 AVG=+0.240% FAV= 3 ADV= 1 NEU= 1
+  +30m N= 5 AVG=+0.517% FAV= 4 ADV= 0 NEU= 1
+  +45m N= 5 AVG=+0.697% FAV= 4 ADV= 0 NEU= 1
+  +60m N= 5 AVG=+1.141% FAV= 5 ADV= 0 NEU= 0
+
+WARNING: N=10
+  +15m N=10 AVG=-0.041% FAV= 1 ADV= 3 NEU= 6
+  +30m N=10 AVG=-0.044% FAV= 1 ADV= 1 NEU= 8
+  +45m N=10 AVG=-0.097% FAV= 2 ADV= 3 NEU= 5
+  +60m N=10 AVG=-0.036% FAV= 2 ADV= 2 NEU= 6
+
+EXIT_CANDIDATE: N=1
+  +15m N= 1 AVG=-0.282% FAV= 0 ADV= 1 NEU= 0
+  +30m N= 1 AVG=-0.584% FAV= 0 ADV= 1 NEU= 0
+  +45m N= 1 AVG=-0.369% FAV= 0 ADV= 1 NEU= 0
+  +60m N= 1 AVG=-0.019% FAV= 0 ADV= 0 NEU= 1
+
+REVERSAL_CONFIRMED: N=7
+  +15m N= 7 AVG=-0.118% FAV= 1 ADV= 2 NEU= 4
+  +30m N= 7 AVG=-0.535% FAV= 0 ADV= 6 NEU= 1
+  +45m N= 7 AVG=-0.898% FAV= 0 ADV= 7 NEU= 0
+  +60m N= 7 AVG=-1.169% FAV= 0 ADV= 7 NEU= 0
+
+==========================================================================================
+V13.1 - CAUSAL / LIVE-TIMING VALIDATION
+Only information available at each checkpoint is used.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+DECISION-POINT SUMMARY
+------------------------------------------------------------------------------------------
+
++10m  N=23
+  HOLD                 N=11 AVG=+0.246% FAV= 7 ADV= 0 NEU= 4
+  WARNING              N=11 AVG=-0.200% FAV= 0 ADV= 3 NEU= 8
+  EXIT_CANDIDATE       N= 1 AVG=-0.519% FAV= 0 ADV= 1 NEU= 0
+
++15m  N=23
+  HOLD                 N=15 AVG=+0.199% FAV= 5 ADV= 0 NEU=10
+  WARNING              N= 7 AVG=-0.358% FAV= 0 ADV= 6 NEU= 1
+  REVERSAL_CONFIRMED   N= 1 AVG=-0.784% FAV= 0 ADV= 1 NEU= 0
+
++20m  N=23
+  HOLD                 N=12 AVG=+0.222% FAV= 5 ADV= 0 NEU= 7
+  WARNING              N= 9 AVG=-0.194% FAV= 0 ADV= 4 NEU= 5
+  EXIT_CANDIDATE       N= 2 AVG=-0.500% FAV= 0 ADV= 2 NEU= 0
+
++25m  N=23
+  HOLD                 N=11 AVG=+0.293% FAV= 6 ADV= 0 NEU= 5
+  WARNING              N= 9 AVG=-0.250% FAV= 0 ADV= 5 NEU= 4
+  EXIT_CANDIDATE       N= 1 AVG=-0.759% FAV= 0 ADV= 1 NEU= 0
+  REVERSAL_CONFIRMED   N= 2 AVG=-0.613% FAV= 0 ADV= 2 NEU= 0
+
++30m  N=23
+  HOLD                 N=10 AVG=+0.274% FAV= 5 ADV= 0 NEU= 5
+  WARNING              N= 8 AVG=-0.178% FAV= 0 ADV= 3 NEU= 5
+  EXIT_CANDIDATE       N= 3 AVG=-0.542% FAV= 0 ADV= 3 NEU= 0
+  REVERSAL_CONFIRMED   N= 2 AVG=-0.936% FAV= 0 ADV= 2 NEU= 0
+
++45m  N=23
+  HOLD                 N= 6 AVG=+0.700% FAV= 6 ADV= 0 NEU= 0
+  WARNING              N= 9 AVG=-0.187% FAV= 0 ADV= 3 NEU= 6
+  EXIT_CANDIDATE       N= 5 AVG=-0.699% FAV= 0 ADV= 5 NEU= 0
+  REVERSAL_CONFIRMED   N= 3 AVG=-1.054% FAV= 0 ADV= 3 NEU= 0
+
+==========================================================================================
+FIRST EXIT / REVERSAL DECISION
+==========================================================================================
+NVDA  LONG  +10m EXIT_CANDIDATE       return=-0.519%
+NVDA  LONG  +45m EXIT_CANDIDATE       return=-1.090%
+AAPL  LONG  +30m EXIT_CANDIDATE       return=-0.584%
+MSFT  SHORT +30m EXIT_CANDIDATE       return=-0.722%
+MSFT  SHORT +45m EXIT_CANDIDATE       return=-0.842%
+AMZN  LONG  +45m EXIT_CANDIDATE       return=-0.718%
+TSLA  LONG  +20m EXIT_CANDIDATE       return=-0.529%
+TSLA  SHORT +25m EXIT_CANDIDATE       return=-0.759%
+
+FIRST CAUSAL EXIT/REVERSAL DECISIONS = 8
+AVERAGE DECISION RETURN = -0.720%
+
+==========================================================================================
+V13.2 - FIXED 60-MINUTE FORWARD-HORIZON VALIDATION
+Decision uses only information available at the decision checkpoint.
+Outcome is measured exactly 60 minutes AFTER that decision.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+FIXED-HORIZON DECISION SUMMARY
+------------------------------------------------------------------------------------------
+
++10m  N=23
+  HOLD                 N=11 AVG_60M=-0.051% FAV= 5 ADV= 5 NEU= 1
+  WARNING              N=11 AVG_60M=-0.014% FAV= 6 ADV= 4 NEU= 1
+  EXIT_CANDIDATE       N= 1 AVG_60M=-1.205% FAV= 0 ADV= 1 NEU= 0
+
++15m  N=23
+  HOLD                 N=15 AVG_60M=-0.220% FAV= 4 ADV= 8 NEU= 3
+  WARNING              N= 7 AVG_60M=+0.311% FAV= 3 ADV= 1 NEU= 3
+  REVERSAL_CONFIRMED   N= 1 AVG_60M=-1.652% FAV= 0 ADV= 1 NEU= 0
+
++20m  N=23
+  HOLD                 N=12 AVG_60M=-0.048% FAV= 4 ADV= 6 NEU= 2
+  WARNING              N= 9 AVG_60M=-0.097% FAV= 3 ADV= 3 NEU= 3
+  EXIT_CANDIDATE       N= 2 AVG_60M=-0.517% FAV= 1 ADV= 1 NEU= 0
+
++25m  N=23
+  HOLD                 N=11 AVG_60M=+0.113% FAV= 5 ADV= 3 NEU= 3
+  WARNING              N= 9 AVG_60M=+0.080% FAV= 4 ADV= 2 NEU= 3
+  EXIT_CANDIDATE       N= 1 AVG_60M=-1.849% FAV= 0 ADV= 1 NEU= 0
+  REVERSAL_CONFIRMED   N= 2 AVG_60M=-0.616% FAV= 0 ADV= 1 NEU= 1
+
++30m  N=23
+  HOLD                 N=10 AVG_60M=+0.190% FAV= 4 ADV= 1 NEU= 5
+  WARNING              N= 8 AVG_60M=+0.004% FAV= 3 ADV= 2 NEU= 3
+  EXIT_CANDIDATE       N= 3 AVG_60M=+0.197% FAV= 2 ADV= 1 NEU= 0
+  REVERSAL_CONFIRMED   N= 2 AVG_60M=-1.232% FAV= 0 ADV= 2 NEU= 0
+
++45m  N=23
+  HOLD                 N= 6 AVG_60M=-0.101% FAV= 2 ADV= 2 NEU= 2
+  WARNING              N= 9 AVG_60M=-0.370% FAV= 1 ADV= 4 NEU= 4
+  EXIT_CANDIDATE       N= 5 AVG_60M=+0.133% FAV= 2 ADV= 1 NEU= 2
+  REVERSAL_CONFIRMED   N= 3 AVG_60M=-0.539% FAV= 0 ADV= 2 NEU= 1
+
++60m  N=23
+  HOLD                 N= 5 AVG_60M=+0.145% FAV= 2 ADV= 1 NEU= 2
+  WARNING              N=10 AVG_60M=-0.641% FAV= 2 ADV= 6 NEU= 2
+  EXIT_CANDIDATE       N= 1 AVG_60M=-0.352% FAV= 0 ADV= 1 NEU= 0
+  REVERSAL_CONFIRMED   N= 7 AVG_60M=-0.288% FAV= 2 ADV= 3 NEU= 2
+
+==========================================================================================
+FIRST CAUSAL EXIT / REVERSAL — FIXED 60-MINUTE OUTCOME
+==========================================================================================
+NVDA  LONG  +10m EXIT_CANDIDATE       NEXT_60M=-1.205% ADVERSE
+NVDA  LONG  +45m EXIT_CANDIDATE       NEXT_60M=+0.591% FAVORABLE
+AAPL  LONG  +30m EXIT_CANDIDATE       NEXT_60M=+0.310% FAVORABLE
+MSFT  SHORT +30m EXIT_CANDIDATE       NEXT_60M=-0.293% ADVERSE
+MSFT  SHORT +45m EXIT_CANDIDATE       NEXT_60M=+0.741% FAVORABLE
+AMZN  LONG  +45m EXIT_CANDIDATE       NEXT_60M=-0.204% NEUTRAL
+TSLA  LONG  +20m EXIT_CANDIDATE       NEXT_60M=+0.868% FAVORABLE
+TSLA  SHORT +25m EXIT_CANDIDATE       NEXT_60M=-1.849% ADVERSE
+
+FIRST CAUSAL EXIT/REVERSAL DECISIONS = 8
+AVERAGE NEXT-60M RETURN = -0.130%
+EXIT WOULD HAVE AVOIDED ADVERSE MOVE = 4/8
+
+==========================================================================================
+V13.3 - EXIT CANDIDATE / REVERSAL CONFIRMATION VALIDATION
+Decision uses only information available at the decision checkpoint.
+Tests whether deterioration recovers or continues into the opposite trend.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+FIRST EXIT / REVERSAL DECISIONS
+------------------------------------------------------------------------------------------
+NVDA  LONG  +10m EXIT_CANDIDATE       15M=-0.082% 30M=-0.220% 60M=-1.205%
+NVDA  LONG  +45m EXIT_CANDIDATE       15M=+0.126% 30M=+0.504% 60M=+0.591%
+AAPL  LONG  +30m EXIT_CANDIDATE       15M=+0.667% 30M=+0.823% 60M=+0.310%
+MSFT  SHORT +30m EXIT_CANDIDATE       15M=+0.249% 30M=-0.542% 60M=-0.293%
+MSFT  SHORT +45m EXIT_CANDIDATE       15M=+0.010% 30M=+0.466% 60M=+0.741%
+AMZN  LONG  +45m EXIT_CANDIDATE       15M=+0.120% 30M=+0.135% 60M=-0.204%
+TSLA  LONG  +20m EXIT_CANDIDATE       15M=+0.053% 30M=+0.033% 60M=+0.868%
+TSLA  SHORT +25m EXIT_CANDIDATE       15M=-0.461% 30M=-0.850% 60M=-1.849%
+
+CLASSIFICATION OUTCOME SUMMARY
+------------------------------------------------------------------------------------------
+
+EXIT_CANDIDATE
+  NEXT 15M: N= 8 AVG=+0.085% FAV= 1 ADV= 1 NEU= 6
+  NEXT 30M: N= 8 AVG=+0.044% FAV= 3 ADV= 2 NEU= 3
+  NEXT 60M: N= 8 AVG=-0.130% FAV= 4 ADV= 3 NEU= 1
+
+==========================================================================================
+V13.3 INTERPRETATION DATA
+==========================================================================================
+FIRST EXIT_CANDIDATE DECISIONS = 8
+FIRST REVERSAL_CONFIRMED DECISIONS = 0
+EXIT_CANDIDATE: 60M_ADVERSE=3 60M_FAVORABLE=4
+
+==========================================================================================
+V13.4 - RECOVERY VS CONTINUED FAILURE VALIDATION
+Starts at the first causal EXIT_CANDIDATE.
+Examines the following 15m / 30m / 45m / 60m trajectory.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+EXIT_CANDIDATE TRAJECTORIES
+------------------------------------------------------------------------------------------
+NVDA  LONG  candidate@+10m +15M=-0.082% +30M=-0.220% +45M=-0.885% +60M=-1.205%
+NVDA  LONG  candidate@+45m +15M=+0.126% +30M=+0.504% +45M=+0.591% +60M=+0.591%
+AAPL  LONG  candidate@+30m +15M=+0.667% +30M=+0.823% +45M=+0.767% +60M=+0.310%
+MSFT  SHORT candidate@+30m +15M=+0.249% +30M=-0.542% +45M=-0.493% +60M=-0.293%
+MSFT  SHORT candidate@+45m +15M=+0.010% +30M=+0.466% +45M=+0.587% +60M=+0.741%
+AMZN  LONG  candidate@+45m +15M=+0.120% +30M=+0.135% +45M=-0.079% +60M=-0.204%
+TSLA  LONG  candidate@+20m +15M=+0.053% +30M=+0.033% +45M=+0.751% +60M=+0.868%
+TSLA  SHORT candidate@+25m +15M=-0.461% +30M=-0.850% +45M=-0.792% +60M=-1.849%
+
+==========================================================================================
+V13.4 TRAJECTORY CLASSIFICATION
+==========================================================================================
+NVDA  LONG  candidate@+10m CONTINUED_FAILURE  START=-0.082% FINAL=-1.205% MIN=-1.205% MAX=-0.082%
+NVDA  LONG  candidate@+45m NEUTRAL            START=+0.126% FINAL=+0.591% MIN=+0.126% MAX=+0.591%
+AAPL  LONG  candidate@+30m NEUTRAL            START=+0.667% FINAL=+0.310% MIN=+0.310% MAX=+0.823%
+MSFT  SHORT candidate@+30m CONTINUED_FAILURE  START=+0.249% FINAL=-0.293% MIN=-0.542% MAX=+0.249%
+MSFT  SHORT candidate@+45m NEUTRAL            START=+0.010% FINAL=+0.741% MIN=+0.010% MAX=+0.741%
+AMZN  LONG  candidate@+45m NEUTRAL            START=+0.120% FINAL=-0.204% MIN=-0.204% MAX=+0.135%
+TSLA  LONG  candidate@+20m NEUTRAL            START=+0.053% FINAL=+0.868% MIN=+0.033% MAX=+0.868%
+TSLA  SHORT candidate@+25m CONTINUED_FAILURE  START=-0.461% FINAL=-1.849% MIN=-1.849% MAX=-0.461%
+
+CLASSIFICATION SUMMARY
+------------------------------------------------------------------------------------------
+CONTINUED_FAILURE  N= 3 AVG_FINAL_60M=-1.115%
+NEUTRAL            N= 5 AVG_FINAL_60M=+0.461%
+
+==========================================================================================
+TOTAL FIRST EXIT_CANDIDATE TRAJECTORIES = 8
+==========================================================================================
+
+==========================================================================================
+V13.5 - EARLIEST TRAJECTORY SHAPE VALIDATION
+Starts at the first causal EXIT_CANDIDATE.
+Uses 5-minute trajectory points to separate recovery from continued failure.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+5-MINUTE TRAJECTORY SHAPES
+------------------------------------------------------------------------------------------
+NVDA  LONG  candidate@+10m CONTINUED_FAILURE    EARLIEST= +20m FINAL=-1.205% PATH=+5:+0.315% +10:+0.263% +15:-0.082% +20:-0.272% +25:-0.182% +30:-0.220% +45:-0.885% +60:-1.205%
+NVDA  LONG  candidate@+45m UNRESOLVED           EARLIEST=  --- FINAL=+0.591% PATH=+5:+0.048% +10:-0.136% +15:+0.126% +20:+0.155% +25:+0.364% +30:+0.504% +45:+0.591% +60:+0.591%
+AAPL  LONG  candidate@+30m RECOVERY             EARLIEST= +10m FINAL=+0.310% PATH=+5:+0.345% +10:+0.510% +15:+0.667% +20:+0.736% +25:+0.863% +30:+0.823% +45:+0.767% +60:+0.310%
+MSFT  SHORT candidate@+30m UNRESOLVED           EARLIEST=  --- FINAL=-0.293% PATH=+5:-0.295% +10:-0.016% +15:+0.249% +20:-0.072% +25:-0.413% +30:-0.542% +45:-0.493% +60:-0.293%
+MSFT  SHORT candidate@+45m UNRESOLVED           EARLIEST=  --- FINAL=+0.741% PATH=+5:-0.167% +10:-0.202% +15:+0.010% +20:+0.250% +25:+0.314% +30:+0.466% +45:+0.587% +60:+0.741%
+AMZN  LONG  candidate@+45m UNRESOLVED           EARLIEST=  --- FINAL=-0.204% PATH=+5:+0.015% +10:-0.137% +15:+0.120% +20:+0.371% +25:+0.492% +30:+0.135% +45:-0.079% +60:-0.204%
+TSLA  LONG  candidate@+20m CONTINUED_FAILURE    EARLIEST= +10m FINAL=+0.868% PATH=+5:+0.385% +10:-0.315% +15:+0.053% +20:+0.015% +25:-0.341% +30:+0.033% +45:+0.751% +60:+0.868%
+TSLA  SHORT candidate@+25m CONTINUED_FAILURE    EARLIEST= +15m FINAL=-1.849% PATH=+5:-0.138% +10:-0.206% +15:-0.461% +20:-0.781% +25:-0.787% +30:-0.850% +45:-0.792% +60:-1.849%
+
+V13.5 SUMMARY
+------------------------------------------------------------------------------------------
+RECOVERY             N= 1 AVG_FINAL_60M=+0.310% AVG_EARLIEST=10.0m
+CONTINUED_FAILURE    N= 3 AVG_FINAL_60M=-0.729% AVG_EARLIEST=15.0m
+UNRESOLVED           N= 4 AVG_FINAL_60M=+0.209% AVG_EARLIEST=---
+
+TOTAL FIRST EXIT_CANDIDATE TRAJECTORIES = 8
+==========================================================================================
+
+==========================================================================================
+V13.6 - TRAJECTORY SHAPE / STABILIZATION VALIDATION
+Starts at the first causal EXIT_CANDIDATE.
+Uses non-monotonic 5-minute trajectory shape.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+NVDA  LONG  candidate@+10m PATH=+5:+0.315% +10:+0.263% +15:-0.082% +20:-0.272% +25:-0.182% +30:-0.220% +45:-0.885% +60:-1.205%
+  +20m CONTINUED_FAILURE
+  FINAL_SHAPE=CONTINUED_FAILURE
+NVDA  LONG  candidate@+45m PATH=+5:+0.048% +10:-0.136% +15:+0.126% +20:+0.155% +25:+0.364% +30:+0.504% +45:+0.591% +60:+0.591%
+  +15m STABILIZING
+  +25m RECOVERY
+  FINAL_SHAPE=RECOVERY
+AAPL  LONG  candidate@+30m PATH=+5:+0.345% +10:+0.510% +15:+0.667% +20:+0.736% +25:+0.863% +30:+0.823% +45:+0.767% +60:+0.310%
+  +10m STABILIZING
+  +15m RECOVERY
+  FINAL_SHAPE=UNRESOLVED
+MSFT  SHORT candidate@+30m PATH=+5:-0.295% +10:-0.016% +15:+0.249% +20:-0.072% +25:-0.413% +30:-0.542% +45:-0.493% +60:-0.293%
+  + 5m CONTINUED_FAILURE
+  +10m STABILIZING
+  +15m RECOVERY
+  +25m CONTINUED_FAILURE
+  +60m STABILIZING
+  FINAL_SHAPE=STABILIZING
+MSFT  SHORT candidate@+45m PATH=+5:-0.167% +10:-0.202% +15:+0.010% +20:+0.250% +25:+0.314% +30:+0.466% +45:+0.587% +60:+0.741%
+  +15m STABILIZING
+  +20m RECOVERY
+  FINAL_SHAPE=RECOVERY
+AMZN  LONG  candidate@+45m PATH=+5:+0.015% +10:-0.137% +15:+0.120% +20:+0.371% +25:+0.492% +30:+0.135% +45:-0.079% +60:-0.204%
+  +15m STABILIZING
+  +20m RECOVERY
+  FINAL_SHAPE=UNRESOLVED
+TSLA  LONG  candidate@+20m PATH=+5:+0.385% +10:-0.315% +15:+0.053% +20:+0.015% +25:-0.341% +30:+0.033% +45:+0.751% +60:+0.868%
+  +10m CONTINUED_FAILURE
+  +15m STABILIZING
+  +25m CONTINUED_FAILURE
+  +45m RECOVERY
+  FINAL_SHAPE=RECOVERY
+TSLA  SHORT candidate@+25m PATH=+5:-0.138% +10:-0.206% +15:-0.461% +20:-0.781% +25:-0.787% +30:-0.850% +45:-0.792% +60:-1.849%
+  +15m CONTINUED_FAILURE
+  FINAL_SHAPE=CONTINUED_FAILURE
+
+==========================================================================================
+V13.6 SUMMARY
+------------------------------------------------------------------------------------------
+CONTINUED_FAILURE    N= 6 AVG_EARLIEST=16.7m
+STABILIZING          N= 7 AVG_EARLIEST=20.0m
+RECOVERY             N= 6 AVG_EARLIEST=23.3m
+TOTAL CLASSIFICATION EVENTS = 19
+==========================================================================================
+
+==========================================================================================
+V13.7 - POST-STATE OUTCOME VALIDATION
+What happens during the 60 minutes AFTER first V13.6 state recognition
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+NVDA  LONG  STATE=+20m CONTINUED_FAILURE    NEXT60=-1.205% MFE=-0.182% MAE=-1.205% ADVERSE
+NVDA  LONG  STATE=+15m STABILIZING          NEXT60=+0.591% MFE=+0.591% MAE=+0.155% FAVORABLE
+NVDA  LONG  STATE=+25m RECOVERY             NEXT60=+0.591% MFE=+0.591% MAE=+0.504% FAVORABLE
+AAPL  LONG  STATE=+10m STABILIZING          NEXT60=+0.310% MFE=+0.863% MAE=+0.310% FAVORABLE
+AAPL  LONG  STATE=+15m RECOVERY             NEXT60=+0.310% MFE=+0.863% MAE=+0.310% FAVORABLE
+MSFT  SHORT STATE=+ 5m CONTINUED_FAILURE    NEXT60=-0.293% MFE=+0.249% MAE=-0.542% ADVERSE
+MSFT  SHORT STATE=+10m STABILIZING          NEXT60=-0.293% MFE=+0.249% MAE=-0.542% ADVERSE
+MSFT  SHORT STATE=+15m RECOVERY             NEXT60=-0.293% MFE=-0.072% MAE=-0.542% ADVERSE
+MSFT  SHORT STATE=+25m CONTINUED_FAILURE    NEXT60=-0.293% MFE=-0.293% MAE=-0.542% ADVERSE
+MSFT  SHORT STATE=+15m STABILIZING          NEXT60=+0.741% MFE=+0.741% MAE=+0.250% FAVORABLE
+MSFT  SHORT STATE=+20m RECOVERY             NEXT60=+0.741% MFE=+0.741% MAE=+0.314% FAVORABLE
+AMZN  LONG  STATE=+15m STABILIZING          NEXT60=-0.204% MFE=+0.492% MAE=-0.204% NEUTRAL
+AMZN  LONG  STATE=+20m RECOVERY             NEXT60=-0.204% MFE=+0.492% MAE=-0.204% NEUTRAL
+TSLA  LONG  STATE=+10m CONTINUED_FAILURE    NEXT60=+0.868% MFE=+0.868% MAE=-0.341% FAVORABLE
+TSLA  LONG  STATE=+15m STABILIZING          NEXT60=+0.868% MFE=+0.868% MAE=-0.341% FAVORABLE
+TSLA  LONG  STATE=+25m CONTINUED_FAILURE    NEXT60=+0.868% MFE=+0.868% MAE=+0.033% FAVORABLE
+TSLA  LONG  STATE=+45m RECOVERY             NEXT60=+0.868% MFE=+0.868% MAE=+0.868% FAVORABLE
+TSLA  SHORT STATE=+15m CONTINUED_FAILURE    NEXT60=-1.849% MFE=-0.781% MAE=-1.849% ADVERSE
+
+==========================================================================================
+V13.7 SUMMARY BY FIRST RECOGNIZED STATE
+==========================================================================================
+CONTINUED_FAILURE    N= 6 FAV= 2 ADV= 4 NEU= 0 AVG60=-0.317% AVG_MFE=+0.122% AVG_MAE=-0.741%
+STABILIZING          N= 6 FAV= 4 ADV= 1 NEU= 1 AVG60=+0.336% AVG_MFE=+0.634% AVG_MAE=-0.062%
+RECOVERY             N= 6 FAV= 4 ADV= 1 NEU= 1 AVG60=+0.336% AVG_MFE=+0.581% AVG_MAE=+0.208%
+
+==========================================================================================
+V13.7 DIRECTIONAL VALIDATION
+==========================================================================================
+LONG  N=11 FAV= 8 ADV= 1 NEU= 2 AVG60=+0.333%
+SHORT N= 7 FAV= 2 ADV= 5 NEU= 0 AVG60=-0.220%
+
+==========================================================================================
+TOTAL V13.7 POST-STATE EVENTS = 18
+==========================================================================================
+
+==========================================================================================
+V13.9.1 — STATE-SEQUENCE OUTCOME VALIDATION
+==========================================================================================
+NVDA  LONG  CANDIDATE +45m COMPLETE +25m | STABILIZING -> RECOVERY
+  15m: RET=+0.548% MFE=+0.664% MAE=-0.136% FAVORABLE
+  30m: RET=+0.625% MFE=+0.664% MAE=-0.136% FAVORABLE
+  60m: NO DATA
+AAPL  LONG  CANDIDATE +30m COMPLETE +15m | STABILIZING -> RECOVERY
+  15m: RET=+0.823% MFE=+0.863% MAE=+0.345% FAVORABLE
+  30m: RET=+0.767% MFE=+0.901% MAE=+0.345% FAVORABLE
+  60m: NO DATA
+MSFT  SHORT CANDIDATE +45m COMPLETE +20m | STABILIZING -> RECOVERY
+  15m: RET=+0.456% MFE=+0.466% MAE=-0.202% FAVORABLE
+  30m: RET=+0.504% MFE=+0.626% MAE=-0.202% FAVORABLE
+  60m: NO DATA
+AMZN  LONG  CANDIDATE +45m COMPLETE +20m | STABILIZING -> RECOVERY
+  15m: RET=+0.096% MFE=+0.492% MAE=-0.137% NEUTRAL
+  30m: RET=+0.002% MFE=+0.492% MAE=-0.137% NEUTRAL
+  60m: NO DATA
+TSLA  LONG  CANDIDATE +20m COMPLETE +45m | CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY
+  15m: RET=+0.868% MFE=+0.903% MAE=-0.341% FAVORABLE
+  30m: NO DATA
+  60m: NO DATA
+
+V13.9.1 SUMMARY BY COMPLETE SEQUENCE
+
+CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY N=1
+  15m N=1 FAV=1 ADV=0 NEU=0 AVG_RET=+0.868% AVG_MFE=+0.903% AVG_MAE=-0.341%
+
+STABILIZING -> RECOVERY N=4
+  15m N=4 FAV=3 ADV=0 NEU=1 AVG_RET=+0.481% AVG_MFE=+0.621% AVG_MAE=-0.033%
+  30m N=4 FAV=3 ADV=0 NEU=1 AVG_RET=+0.475% AVG_MFE=+0.671% AVG_MAE=-0.033%
+
+V13.9.1 DIRECTIONAL VALIDATION
+
+LONG N=4
+  15m N=4 FAV=3 ADV=0 NEU=1 AVG_RET=+0.584%
+  30m N=3 FAV=2 ADV=0 NEU=1 AVG_RET=+0.465%
+
+SHORT N=1
+  15m N=1 FAV=1 ADV=0 NEU=0 AVG_RET=+0.456%
+  30m N=1 FAV=1 ADV=0 NEU=0 AVG_RET=+0.504%
+
+TOTAL V13.9.1 SEQUENCE EVENTS = 5
+==========================================================================================
+
+==============================================================================
+V13.10 — EXIT vs HOLD AT TRAJECTORY STATE
+==============================================================================
+
+RESEARCH ONLY — NO ENGINE CHANGES
+
+TRAJECTORY DECISION CASES: 5
+
+------------------------------------------------------------------------------
+STATE × DIRECTION × HORIZON
+------------------------------------------------------------------------------
+STABILIZING        LONG  +15m N= 3 HOLD=+0.022% EXIT= 1 HOLD_WIN= 2 TIE= 0
+STABILIZING        LONG  +30m N= 3 HOLD=-0.002% EXIT= 1 HOLD_WIN= 1 TIE= 1
+STABILIZING        LONG  +45m N= 3 HOLD=-0.355% EXIT= 3 HOLD_WIN= 0 TIE= 0
+STABILIZING        LONG  +60m N= 3 HOLD=-0.246% EXIT= 2 HOLD_WIN= 0 TIE= 1
+
+STABILIZING        SHORT +15m N= 1 HOLD=+0.207% EXIT= 0 HOLD_WIN= 1 TIE= 0
+STABILIZING        SHORT +30m N= 1 HOLD=+0.255% EXIT= 0 HOLD_WIN= 1 TIE= 0
+STABILIZING        SHORT +45m N= 1 HOLD=+0.504% EXIT= 0 HOLD_WIN= 1 TIE= 0
+STABILIZING        SHORT +60m N= 1 HOLD=+0.020% EXIT= 0 HOLD_WIN= 0 TIE= 1
+
+CONTINUED_FAILURE  LONG  +15m N= 1 HOLD=+0.116% EXIT= 0 HOLD_WIN= 1 TIE= 0
+CONTINUED_FAILURE  LONG  +30m N= 1 HOLD=-1.279% EXIT= 1 HOLD_WIN= 0 TIE= 0
+CONTINUED_FAILURE  LONG  +45m N= 1 HOLD=-1.340% EXIT= 1 HOLD_WIN= 0 TIE= 0
+CONTINUED_FAILURE  LONG  +60m N= 1 HOLD=-1.990% EXIT= 1 HOLD_WIN= 0 TIE= 0
+
+
+------------------------------------------------------------------------------
+STATE-ONLY DECISION VALUE
+------------------------------------------------------------------------------
+
+STABILIZING        +15m N= 4 AVG_HOLD=+0.068% EXIT_BETTER= 1(25.0%) HOLD_BETTER= 3(75.0%) TIE= 0
+STABILIZING        +30m N= 4 AVG_HOLD=+0.062% EXIT_BETTER= 1(25.0%) HOLD_BETTER= 2(50.0%) TIE= 1
+STABILIZING        +45m N= 4 AVG_HOLD=-0.140% EXIT_BETTER= 3(75.0%) HOLD_BETTER= 1(25.0%) TIE= 0
+STABILIZING        +60m N= 4 AVG_HOLD=-0.180% EXIT_BETTER= 2(50.0%) HOLD_BETTER= 0( 0.0%) TIE= 2
+
+CONTINUED_FAILURE  +15m N= 1 AVG_HOLD=+0.116% EXIT_BETTER= 0( 0.0%) HOLD_BETTER= 1(100.0%) TIE= 0
+CONTINUED_FAILURE  +30m N= 1 AVG_HOLD=-1.279% EXIT_BETTER= 1(100.0%) HOLD_BETTER= 0( 0.0%) TIE= 0
+CONTINUED_FAILURE  +45m N= 1 AVG_HOLD=-1.340% EXIT_BETTER= 1(100.0%) HOLD_BETTER= 0( 0.0%) TIE= 0
+CONTINUED_FAILURE  +60m N= 1 AVG_HOLD=-1.990% EXIT_BETTER= 1(100.0%) HOLD_BETTER= 0( 0.0%) TIE= 0
+
+
+------------------------------------------------------------------------------
+DIRECTION SUMMARY
+------------------------------------------------------------------------------
+LONG  +15m N= 4 AVG_HOLD=+0.045% EXIT_BETTER= 1 HOLD_BETTER= 3
+LONG  +30m N= 4 AVG_HOLD=-0.322% EXIT_BETTER= 2 HOLD_BETTER= 1
+LONG  +45m N= 4 AVG_HOLD=-0.601% EXIT_BETTER= 4 HOLD_BETTER= 0
+LONG  +60m N= 4 AVG_HOLD=-0.682% EXIT_BETTER= 3 HOLD_BETTER= 0
+
+SHORT +15m N= 1 AVG_HOLD=+0.207% EXIT_BETTER= 0 HOLD_BETTER= 1
+SHORT +30m N= 1 AVG_HOLD=+0.255% EXIT_BETTER= 0 HOLD_BETTER= 1
+SHORT +45m N= 1 AVG_HOLD=+0.504% EXIT_BETTER= 0 HOLD_BETTER= 1
+SHORT +60m N= 1 AVG_HOLD=+0.020% EXIT_BETTER= 0 HOLD_BETTER= 0
+
+
+------------------------------------------------------------------------------
+INDIVIDUAL DECISION CASES
+------------------------------------------------------------------------------
+NVDA  LONG  STABILIZING        2026-07-16 11:30:00
+    +15m HOLD=+0.184% HOLD_BETTER
+    +30m HOLD=+0.261% HOLD_BETTER
+    +45m HOLD=-0.198% EXIT_BETTER
+    +60m HOLD=+0.077% TIE
+AAPL  LONG  STABILIZING        2026-06-12 11:05:00
+    +15m HOLD=+0.155% HOLD_BETTER
+    +30m HOLD=+0.099% TIE
+    +45m HOLD=-0.355% EXIT_BETTER
+    +60m HOLD=-0.334% EXIT_BETTER
+MSFT  SHORT STABILIZING        2026-07-27 11:40:00
+    +15m HOLD=+0.207% HOLD_BETTER
+    +30m HOLD=+0.255% HOLD_BETTER
+    +45m HOLD=+0.504% HOLD_BETTER
+    +60m HOLD=+0.020% TIE
+AMZN  LONG  STABILIZING        2026-06-22 11:40:00
+    +15m HOLD=-0.273% EXIT_BETTER
+    +30m HOLD=-0.367% EXIT_BETTER
+    +45m HOLD=-0.512% EXIT_BETTER
+    +60m HOLD=-0.482% EXIT_BETTER
+TSLA  LONG  CONTINUED_FAILURE  2026-07-02 11:40:00
+    +15m HOLD=+0.116% HOLD_BETTER
+    +30m HOLD=-1.279% EXIT_BETTER
+    +45m HOLD=-1.340% EXIT_BETTER
+    +60m HOLD=-1.990% EXIT_BETTER
+
+==============================================================================
+V13.10 RESEARCH INTERPRETATION
+==============================================================================
+
+The purpose is NOT to declare an EXIT rule.
+The purpose is to determine whether post-transition
+trajectory state contains useful information about
+whether the original trade should be preserved.
+
+Important:
+  RECOVERY should generally favor HOLD.
+  CONTINUED_FAILURE should increasingly favor EXIT.
+  STABILIZING is the difficult middle state.
+
+No production engine changes were made.
+==============================================================================
+
+========================================================================
+V5.6.12.11 - TRAJECTORY STATE MACHINE
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+
+TOTAL TRAJECTORY CASES = 23
+
+NVDA LONG opposite=2026-06-05 10:20:00 official=2026-06-05 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> PERSISTENT_FAILURE -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m PERSISTENT_FAILURE ret=-0.519% fav=0.0% adv=100.0% consec=1
+  +15m PERSISTENT_FAILURE ret=-0.784% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.472% fav=33.3% adv=66.7% consec=2
+  +25m PERSISTENT_FAILURE ret=-0.524% fav=25.0% adv=75.0% consec=2
+  +30m PERSISTENT_FAILURE ret=-0.866% fav=20.0% adv=80.0% consec=2
+  +45m PERSISTENT_FAILURE ret=-1.003% fav=25.0% adv=75.0% consec=3
+  +60m PERSISTENT_FAILURE ret=-1.663% fav=18.2% adv=81.8% consec=4
+NVDA LONG opposite=2026-06-09 10:20:00 official=2026-06-09 14:30:00 lead=295.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> DETERIORATING
+  +10m RECOVERING         ret=+0.291% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.313% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.179% fav=66.7% adv=33.3% consec=1
+  +25m RECOVERING         ret=+0.383% fav=75.0% adv=25.0% consec=1
+  +30m NEUTRAL            ret=-0.044% fav=60.0% adv=40.0% consec=1
+  +45m DETERIORATING      ret=+0.000% fav=62.5% adv=37.5% consec=2
+  +60m DETERIORATING      ret=-0.029% fav=54.5% adv=45.5% consec=2
+NVDA SHORT opposite=2026-07-07 10:20:00 official=2026-07-07 16:30:00 lead=415.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> DETERIORATING
+  +10m RECOVERING         ret=+0.132% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.244% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.299% fav=100.0% adv=0.0% consec=0
+  +25m RECOVERING         ret=+0.296% fav=75.0% adv=25.0% consec=1
+  +30m RECOVERING         ret=+0.348% fav=80.0% adv=20.0% consec=1
+  +45m DETERIORATING      ret=-0.125% fav=50.0% adv=50.0% consec=3
+  +60m DETERIORATING      ret=-0.378% fav=45.5% adv=54.5% consec=4
+NVDA LONG opposite=2026-07-16 10:20:00 official=2026-07-16 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> NEUTRAL -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m DETERIORATING      ret=-0.206% fav=0.0% adv=100.0% consec=1
+  +15m RECOVERING         ret=+0.101% fav=50.0% adv=50.0% consec=1
+  +20m NEUTRAL            ret=+0.026% fav=33.3% adv=66.7% consec=1
+  +25m DETERIORATING      ret=-0.225% fav=25.0% adv=75.0% consec=2
+  +30m DETERIORATING      ret=-0.438% fav=20.0% adv=80.0% consec=3
+  +45m PERSISTENT_FAILURE ret=-1.090% fav=12.5% adv=87.5% consec=6
+  +60m PERSISTENT_FAILURE ret=-1.308% fav=18.2% adv=81.8% consec=7
+NVDA SHORT opposite=2026-07-30 10:35:00 official=2026-07-30 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING
+  +10m RECOVERING         ret=+0.484% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.636% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.829% fav=100.0% adv=0.0% consec=0
+  +25m RECOVERING         ret=+1.194% fav=100.0% adv=0.0% consec=0
+  +30m RECOVERING         ret=+1.196% fav=100.0% adv=0.0% consec=0
+  +45m RECOVERING         ret=+1.486% fav=75.0% adv=25.0% consec=2
+  +60m RECOVERING         ret=+1.889% fav=72.7% adv=27.3% consec=2
+NVDA LONG opposite=2026-08-06 10:35:00 official=2026-08-06 15:30:00 lead=355.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> NEUTRAL -> DETERIORATING
+  +10m DETERIORATING      ret=-0.346% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.241% fav=50.0% adv=50.0% consec=1
+  +20m NEUTRAL            ret=-0.160% fav=66.7% adv=33.3% consec=1
+  +25m NEUTRAL            ret=-0.155% fav=75.0% adv=25.0% consec=1
+  +30m DETERIORATING      ret=-0.287% fav=60.0% adv=40.0% consec=1
+  +45m DETERIORATING      ret=-0.639% fav=62.5% adv=37.5% consec=2
+  +60m DETERIORATING      ret=-0.704% fav=54.5% adv=45.5% consec=2
+NVDA SHORT opposite=2026-08-12 10:35:00 official=2026-08-12 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> DETERIORATING
+  +10m DETERIORATING      ret=-0.288% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.364% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.212% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=+0.028% fav=50.0% adv=50.0% consec=2
+  +30m RECOVERING         ret=+0.112% fav=60.0% adv=40.0% consec=2
+  +45m RECOVERING         ret=+0.257% fav=62.5% adv=37.5% consec=2
+  +60m DETERIORATING      ret=+0.069% fav=45.5% adv=54.5% consec=3
+AAPL LONG opposite=2026-06-12 10:20:00 official=2026-06-12 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING
+  +10m DETERIORATING      ret=-0.212% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.282% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.342% fav=0.0% adv=100.0% consec=3
+  +25m DETERIORATING      ret=-0.476% fav=0.0% adv=100.0% consec=4
+  +30m PERSISTENT_FAILURE ret=-0.584% fav=0.0% adv=100.0% consec=5
+  +45m DETERIORATING      ret=-0.369% fav=25.0% adv=75.0% consec=6
+  +60m DETERIORATING      ret=-0.019% fav=45.5% adv=54.5% consec=6
+AAPL LONG opposite=2026-07-22 10:35:00 official=2026-07-22 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> RECOVERING -> DETERIORATING -> RECOVERING
+  +10m RECOVERING         ret=+0.129% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=+0.086% fav=50.0% adv=50.0% consec=1
+  +20m RECOVERING         ret=+0.162% fav=66.7% adv=33.3% consec=1
+  +25m RECOVERING         ret=+0.229% fav=75.0% adv=25.0% consec=1
+  +30m RECOVERING         ret=+0.324% fav=80.0% adv=20.0% consec=1
+  +45m DETERIORATING      ret=-0.069% fav=50.0% adv=50.0% consec=3
+  +60m RECOVERING         ret=+0.385% fav=63.6% adv=36.4% consec=3
+MSFT SHORT opposite=2026-06-26 10:35:00 official=2026-06-26 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m RECOVERING         ret=+0.365% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=-0.041% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=-0.373% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=-0.474% fav=25.0% adv=75.0% consec=3
+  +30m PERSISTENT_FAILURE ret=-0.722% fav=20.0% adv=80.0% consec=4
+  +45m DETERIORATING      ret=-0.477% fav=37.5% adv=62.5% consec=4
+  +60m PERSISTENT_FAILURE ret=-0.876% fav=36.4% adv=63.6% consec=4
+MSFT SHORT opposite=2026-07-27 10:35:00 official=2026-07-27 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> NEUTRAL -> RECOVERING -> NEUTRAL -> PERSISTENT_FAILURE
+  +10m DETERIORATING      ret=-0.236% fav=0.0% adv=100.0% consec=1
+  +15m NEUTRAL            ret=+0.003% fav=50.0% adv=50.0% consec=1
+  +20m RECOVERING         ret=+0.109% fav=66.7% adv=33.3% consec=1
+  +25m NEUTRAL            ret=+0.001% fav=50.0% adv=50.0% consec=1
+  +30m NEUTRAL            ret=+0.033% fav=60.0% adv=40.0% consec=1
+  +45m PERSISTENT_FAILURE ret=-0.842% fav=37.5% adv=62.5% consec=3
+  +60m PERSISTENT_FAILURE ret=-0.967% fav=36.4% adv=63.6% consec=3
+MSFT SHORT opposite=2026-08-13 10:20:00 official=2026-08-13 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING
+  +10m RECOVERING         ret=+0.259% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.529% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.382% fav=66.7% adv=33.3% consec=1
+  +25m RECOVERING         ret=+0.485% fav=75.0% adv=25.0% consec=1
+  +30m RECOVERING         ret=+0.630% fav=80.0% adv=20.0% consec=1
+  +45m RECOVERING         ret=+0.730% fav=75.0% adv=25.0% consec=1
+  +60m RECOVERING         ret=+1.049% fav=81.8% adv=18.2% consec=1
+AMZN SHORT opposite=2026-06-04 11:45:00 official=2026-06-04 14:00:00 lead=165.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> NEUTRAL -> DETERIORATING
+  +10m DETERIORATING      ret=-0.020% fav=0.0% adv=100.0% consec=1
+  +15m RECOVERING         ret=+0.140% fav=50.0% adv=50.0% consec=1
+  +20m NEUTRAL            ret=+0.039% fav=33.3% adv=66.7% consec=1
+  +25m NEUTRAL            ret=+0.045% fav=50.0% adv=50.0% consec=1
+  +30m NEUTRAL            ret=-0.059% fav=40.0% adv=60.0% consec=1
+  +45m DETERIORATING      ret=-0.031% fav=37.5% adv=62.5% consec=2
+  +60m DETERIORATING      ret=+0.083% fav=45.5% adv=54.5% consec=2
+AMZN LONG opposite=2026-06-12 10:05:00 official=2026-06-12 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> RECOVERING -> DETERIORATING
+  +10m RECOVERING         ret=+0.295% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=+0.100% fav=50.0% adv=50.0% consec=1
+  +20m RECOVERING         ret=+0.445% fav=66.7% adv=33.3% consec=1
+  +25m RECOVERING         ret=+0.328% fav=50.0% adv=50.0% consec=1
+  +30m DETERIORATING      ret=+0.236% fav=40.0% adv=60.0% consec=2
+  +45m DETERIORATING      ret=-0.362% fav=25.0% adv=75.0% consec=5
+  +60m DETERIORATING      ret=+0.562% fav=45.5% adv=54.5% consec=5
+AMZN LONG opposite=2026-06-22 10:35:00 official=2026-06-22 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> NEUTRAL -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m RECOVERING         ret=+0.419% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=+0.004% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=-0.155% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=-0.391% fav=25.0% adv=75.0% consec=3
+  +30m DETERIORATING      ret=-0.429% fav=20.0% adv=80.0% consec=4
+  +45m PERSISTENT_FAILURE ret=-0.718% fav=37.5% adv=62.5% consec=4
+  +60m PERSISTENT_FAILURE ret=-0.958% fav=36.4% adv=63.6% consec=4
+AMZN SHORT opposite=2026-07-30 10:05:00 official=2026-07-30 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> DETERIORATING
+  +10m DETERIORATING      ret=-0.057% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.481% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.053% fav=33.3% adv=66.7% consec=2
+  +25m RECOVERING         ret=+0.124% fav=50.0% adv=50.0% consec=2
+  +30m DETERIORATING      ret=-0.150% fav=40.0% adv=60.0% consec=2
+  +45m DETERIORATING      ret=-0.143% fav=50.0% adv=50.0% consec=2
+  +60m DETERIORATING      ret=-0.027% fav=54.5% adv=45.5% consec=2
+AMZN LONG opposite=2026-08-11 10:05:00 official=2026-08-11 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> NEUTRAL -> DETERIORATING
+  +10m NEUTRAL            ret=+0.044% fav=100.0% adv=0.0% consec=0
+  +15m NEUTRAL            ret=+0.073% fav=100.0% adv=0.0% consec=0
+  +20m NEUTRAL            ret=-0.182% fav=66.7% adv=33.3% consec=1
+  +25m DETERIORATING      ret=-0.334% fav=50.0% adv=50.0% consec=2
+  +30m DETERIORATING      ret=-0.178% fav=60.0% adv=40.0% consec=2
+  +45m DETERIORATING      ret=-0.265% fav=50.0% adv=50.0% consec=2
+  +60m DETERIORATING      ret=-0.249% fav=54.5% adv=45.5% consec=2
+TSLA LONG opposite=2026-07-02 10:35:00 official=2026-07-02 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m DETERIORATING      ret=-0.093% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.360% fav=0.0% adv=100.0% consec=2
+  +20m PERSISTENT_FAILURE ret=-0.529% fav=0.0% adv=100.0% consec=3
+  +25m PERSISTENT_FAILURE ret=-0.702% fav=0.0% adv=100.0% consec=4
+  +30m DETERIORATING      ret=-0.319% fav=20.0% adv=80.0% consec=4
+  +45m PERSISTENT_FAILURE ret=-0.687% fav=25.0% adv=75.0% consec=4
+  +60m PERSISTENT_FAILURE ret=-0.544% fav=36.4% adv=63.6% consec=4
+TSLA LONG opposite=2026-07-31 10:05:00 official=2026-07-31 14:30:00 lead=295.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING
+  +10m DETERIORATING      ret=-0.201% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.399% fav=0.0% adv=100.0% consec=2
+  +20m DETERIORATING      ret=-0.248% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=+0.002% fav=50.0% adv=50.0% consec=2
+  +30m DETERIORATING      ret=+0.043% fav=60.0% adv=40.0% consec=2
+  +45m RECOVERING         ret=+0.598% fav=75.0% adv=25.0% consec=2
+  +60m RECOVERING         ret=+1.525% fav=72.7% adv=27.3% consec=2
+TSLA SHORT opposite=2026-08-07 10:05:00 official=2026-08-07 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> RECOVERING -> DETERIORATING -> PERSISTENT_FAILURE
+  +10m DETERIORATING      ret=-0.125% fav=0.0% adv=100.0% consec=1
+  +15m RECOVERING         ret=+0.250% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=-0.296% fav=33.3% adv=66.7% consec=1
+  +25m PERSISTENT_FAILURE ret=-0.759% fav=25.0% adv=75.0% consec=2
+  +30m PERSISTENT_FAILURE ret=-1.006% fav=20.0% adv=80.0% consec=3
+  +45m PERSISTENT_FAILURE ret=-1.472% fav=12.5% adv=87.5% consec=6
+  +60m PERSISTENT_FAILURE ret=-1.864% fav=9.1% adv=90.9% consec=9
+SPY SHORT opposite=2026-06-09 10:05:00 official=2026-06-09 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> NEUTRAL -> RECOVERING
+  +10m NEUTRAL            ret=+0.022% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.349% fav=100.0% adv=0.0% consec=0
+  +20m RECOVERING         ret=+0.540% fav=100.0% adv=0.0% consec=0
+  +25m RECOVERING         ret=+0.294% fav=75.0% adv=25.0% consec=1
+  +30m RECOVERING         ret=+0.394% fav=80.0% adv=20.0% consec=1
+  +45m RECOVERING         ret=+0.740% fav=87.5% adv=12.5% consec=1
+  +60m RECOVERING         ret=+0.859% fav=72.7% adv=27.3% consec=2
+QQQ SHORT opposite=2026-06-11 10:20:00 official=2026-06-11 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> DETERIORATING -> NEUTRAL -> RECOVERING -> DETERIORATING
+  +10m DETERIORATING      ret=-0.422% fav=0.0% adv=100.0% consec=1
+  +15m DETERIORATING      ret=-0.381% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=-0.250% fav=66.7% adv=33.3% consec=1
+  +25m DETERIORATING      ret=-0.375% fav=50.0% adv=50.0% consec=1
+  +30m NEUTRAL            ret=-0.196% fav=60.0% adv=40.0% consec=1
+  +45m RECOVERING         ret=+0.387% fav=75.0% adv=25.0% consec=1
+  +60m DETERIORATING      ret=-0.009% fav=54.5% adv=45.5% consec=3
+QQQ SHORT opposite=2026-07-30 10:05:00 official=2026-07-30 14:00:00 lead=265.0m
+  PATH: OPPOSITE_DETECTED -> RECOVERING -> DETERIORATING
+  +10m RECOVERING         ret=+0.273% fav=100.0% adv=0.0% consec=0
+  +15m RECOVERING         ret=+0.192% fav=50.0% adv=50.0% consec=1
+  +20m DETERIORATING      ret=+0.179% fav=33.3% adv=66.7% consec=2
+  +25m DETERIORATING      ret=-0.007% fav=25.0% adv=75.0% consec=3
+  +30m DETERIORATING      ret=-0.220% fav=20.0% adv=80.0% consec=4
+  +45m DETERIORATING      ret=-0.045% fav=37.5% adv=62.5% consec=5
+  +60m DETERIORATING      ret=+0.321% fav=45.5% adv=54.5% consec=5
+
+========================================================================
+CHECKPOINT SUMMARY
+========================================================================
++10m N=23 AVG=-0.001% REC=9 NEUT=2 DET=11 PERSIST=1
++15m N=23 AVG=-0.014% REC=9 NEUT=6 DET=7 PERSIST=1
++20m N=23 AVG=-0.004% REC=8 NEUT=4 DET=10 PERSIST=1
++25m N=23 AVG=-0.044% REC=8 NEUT=3 DET=9 PERSIST=3
++30m N=23 AVG=-0.095% REC=6 NEUT=4 DET=9 PERSIST=4
++45m N=23 AVG=-0.180% REC=6 NEUT=0 DET=11 PERSIST=6
++60m N=23 AVG=-0.124% REC=5 NEUT=0 DET=11 PERSIST=7
+
+==========================================================================================
+GLOBAL CLASSIFICATION VALIDATION
+==========================================================================================
+
+HOLD: N=5
+  +15m N= 5 AVG=+0.240% FAV= 3 ADV= 1 NEU= 1
+  +30m N= 5 AVG=+0.517% FAV= 4 ADV= 0 NEU= 1
+  +45m N= 5 AVG=+0.697% FAV= 4 ADV= 0 NEU= 1
+  +60m N= 5 AVG=+1.141% FAV= 5 ADV= 0 NEU= 0
+
+WARNING: N=10
+  +15m N=10 AVG=-0.041% FAV= 1 ADV= 3 NEU= 6
+  +30m N=10 AVG=-0.044% FAV= 1 ADV= 1 NEU= 8
+  +45m N=10 AVG=-0.097% FAV= 2 ADV= 3 NEU= 5
+  +60m N=10 AVG=-0.036% FAV= 2 ADV= 2 NEU= 6
+
+EXIT_CANDIDATE: N=1
+  +15m N= 1 AVG=-0.282% FAV= 0 ADV= 1 NEU= 0
+  +30m N= 1 AVG=-0.584% FAV= 0 ADV= 1 NEU= 0
+  +45m N= 1 AVG=-0.369% FAV= 0 ADV= 1 NEU= 0
+  +60m N= 1 AVG=-0.019% FAV= 0 ADV= 0 NEU= 1
+
+REVERSAL_CONFIRMED: N=7
+  +15m N= 7 AVG=-0.118% FAV= 1 ADV= 2 NEU= 4
+  +30m N= 7 AVG=-0.535% FAV= 0 ADV= 6 NEU= 1
+  +45m N= 7 AVG=-0.898% FAV= 0 ADV= 7 NEU= 0
+  +60m N= 7 AVG=-1.169% FAV= 0 ADV= 7 NEU= 0
+
+==========================================================================================
+V13.1 - CAUSAL / LIVE-TIMING VALIDATION
+Only information available at each checkpoint is used.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+DECISION-POINT SUMMARY
+------------------------------------------------------------------------------------------
+
++10m  N=23
+  HOLD                 N=11 AVG=+0.246% FAV= 7 ADV= 0 NEU= 4
+  WARNING              N=11 AVG=-0.200% FAV= 0 ADV= 3 NEU= 8
+  EXIT_CANDIDATE       N= 1 AVG=-0.519% FAV= 0 ADV= 1 NEU= 0
+
++15m  N=23
+  HOLD                 N=15 AVG=+0.199% FAV= 5 ADV= 0 NEU=10
+  WARNING              N= 7 AVG=-0.358% FAV= 0 ADV= 6 NEU= 1
+  REVERSAL_CONFIRMED   N= 1 AVG=-0.784% FAV= 0 ADV= 1 NEU= 0
+
++20m  N=23
+  HOLD                 N=12 AVG=+0.222% FAV= 5 ADV= 0 NEU= 7
+  WARNING              N= 9 AVG=-0.194% FAV= 0 ADV= 4 NEU= 5
+  EXIT_CANDIDATE       N= 2 AVG=-0.500% FAV= 0 ADV= 2 NEU= 0
+
++25m  N=23
+  HOLD                 N=11 AVG=+0.293% FAV= 6 ADV= 0 NEU= 5
+  WARNING              N= 9 AVG=-0.250% FAV= 0 ADV= 5 NEU= 4
+  EXIT_CANDIDATE       N= 1 AVG=-0.759% FAV= 0 ADV= 1 NEU= 0
+  REVERSAL_CONFIRMED   N= 2 AVG=-0.613% FAV= 0 ADV= 2 NEU= 0
+
++30m  N=23
+  HOLD                 N=10 AVG=+0.274% FAV= 5 ADV= 0 NEU= 5
+  WARNING              N= 8 AVG=-0.178% FAV= 0 ADV= 3 NEU= 5
+  EXIT_CANDIDATE       N= 3 AVG=-0.542% FAV= 0 ADV= 3 NEU= 0
+  REVERSAL_CONFIRMED   N= 2 AVG=-0.936% FAV= 0 ADV= 2 NEU= 0
+
++45m  N=23
+  HOLD                 N= 6 AVG=+0.700% FAV= 6 ADV= 0 NEU= 0
+  WARNING              N= 9 AVG=-0.187% FAV= 0 ADV= 3 NEU= 6
+  EXIT_CANDIDATE       N= 5 AVG=-0.699% FAV= 0 ADV= 5 NEU= 0
+  REVERSAL_CONFIRMED   N= 3 AVG=-1.054% FAV= 0 ADV= 3 NEU= 0
+
+==========================================================================================
+FIRST EXIT / REVERSAL DECISION
+==========================================================================================
+NVDA  LONG  +10m EXIT_CANDIDATE       return=-0.519%
+NVDA  LONG  +45m EXIT_CANDIDATE       return=-1.090%
+AAPL  LONG  +30m EXIT_CANDIDATE       return=-0.584%
+MSFT  SHORT +30m EXIT_CANDIDATE       return=-0.722%
+MSFT  SHORT +45m EXIT_CANDIDATE       return=-0.842%
+AMZN  LONG  +45m EXIT_CANDIDATE       return=-0.718%
+TSLA  LONG  +20m EXIT_CANDIDATE       return=-0.529%
+TSLA  SHORT +25m EXIT_CANDIDATE       return=-0.759%
+
+FIRST CAUSAL EXIT/REVERSAL DECISIONS = 8
+AVERAGE DECISION RETURN = -0.720%
+
+==========================================================================================
+V13.2 - FIXED 60-MINUTE FORWARD-HORIZON VALIDATION
+Decision uses only information available at the decision checkpoint.
+Outcome is measured exactly 60 minutes AFTER that decision.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+FIXED-HORIZON DECISION SUMMARY
+------------------------------------------------------------------------------------------
+
++10m  N=23
+  HOLD                 N=11 AVG_60M=-0.051% FAV= 5 ADV= 5 NEU= 1
+  WARNING              N=11 AVG_60M=-0.014% FAV= 6 ADV= 4 NEU= 1
+  EXIT_CANDIDATE       N= 1 AVG_60M=-1.205% FAV= 0 ADV= 1 NEU= 0
+
++15m  N=23
+  HOLD                 N=15 AVG_60M=-0.220% FAV= 4 ADV= 8 NEU= 3
+  WARNING              N= 7 AVG_60M=+0.311% FAV= 3 ADV= 1 NEU= 3
+  REVERSAL_CONFIRMED   N= 1 AVG_60M=-1.652% FAV= 0 ADV= 1 NEU= 0
+
++20m  N=23
+  HOLD                 N=12 AVG_60M=-0.048% FAV= 4 ADV= 6 NEU= 2
+  WARNING              N= 9 AVG_60M=-0.097% FAV= 3 ADV= 3 NEU= 3
+  EXIT_CANDIDATE       N= 2 AVG_60M=-0.517% FAV= 1 ADV= 1 NEU= 0
+
++25m  N=23
+  HOLD                 N=11 AVG_60M=+0.113% FAV= 5 ADV= 3 NEU= 3
+  WARNING              N= 9 AVG_60M=+0.080% FAV= 4 ADV= 2 NEU= 3
+  EXIT_CANDIDATE       N= 1 AVG_60M=-1.849% FAV= 0 ADV= 1 NEU= 0
+  REVERSAL_CONFIRMED   N= 2 AVG_60M=-0.616% FAV= 0 ADV= 1 NEU= 1
+
++30m  N=23
+  HOLD                 N=10 AVG_60M=+0.190% FAV= 4 ADV= 1 NEU= 5
+  WARNING              N= 8 AVG_60M=+0.004% FAV= 3 ADV= 2 NEU= 3
+  EXIT_CANDIDATE       N= 3 AVG_60M=+0.197% FAV= 2 ADV= 1 NEU= 0
+  REVERSAL_CONFIRMED   N= 2 AVG_60M=-1.232% FAV= 0 ADV= 2 NEU= 0
+
++45m  N=23
+  HOLD                 N= 6 AVG_60M=-0.101% FAV= 2 ADV= 2 NEU= 2
+  WARNING              N= 9 AVG_60M=-0.370% FAV= 1 ADV= 4 NEU= 4
+  EXIT_CANDIDATE       N= 5 AVG_60M=+0.133% FAV= 2 ADV= 1 NEU= 2
+  REVERSAL_CONFIRMED   N= 3 AVG_60M=-0.539% FAV= 0 ADV= 2 NEU= 1
+
++60m  N=23
+  HOLD                 N= 5 AVG_60M=+0.145% FAV= 2 ADV= 1 NEU= 2
+  WARNING              N=10 AVG_60M=-0.641% FAV= 2 ADV= 6 NEU= 2
+  EXIT_CANDIDATE       N= 1 AVG_60M=-0.352% FAV= 0 ADV= 1 NEU= 0
+  REVERSAL_CONFIRMED   N= 7 AVG_60M=-0.288% FAV= 2 ADV= 3 NEU= 2
+
+==========================================================================================
+FIRST CAUSAL EXIT / REVERSAL — FIXED 60-MINUTE OUTCOME
+==========================================================================================
+NVDA  LONG  +10m EXIT_CANDIDATE       NEXT_60M=-1.205% ADVERSE
+NVDA  LONG  +45m EXIT_CANDIDATE       NEXT_60M=+0.591% FAVORABLE
+AAPL  LONG  +30m EXIT_CANDIDATE       NEXT_60M=+0.310% FAVORABLE
+MSFT  SHORT +30m EXIT_CANDIDATE       NEXT_60M=-0.293% ADVERSE
+MSFT  SHORT +45m EXIT_CANDIDATE       NEXT_60M=+0.741% FAVORABLE
+AMZN  LONG  +45m EXIT_CANDIDATE       NEXT_60M=-0.204% NEUTRAL
+TSLA  LONG  +20m EXIT_CANDIDATE       NEXT_60M=+0.868% FAVORABLE
+TSLA  SHORT +25m EXIT_CANDIDATE       NEXT_60M=-1.849% ADVERSE
+
+FIRST CAUSAL EXIT/REVERSAL DECISIONS = 8
+AVERAGE NEXT-60M RETURN = -0.130%
+EXIT WOULD HAVE AVOIDED ADVERSE MOVE = 4/8
+
+==========================================================================================
+V13.3 - EXIT CANDIDATE / REVERSAL CONFIRMATION VALIDATION
+Decision uses only information available at the decision checkpoint.
+Tests whether deterioration recovers or continues into the opposite trend.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+FIRST EXIT / REVERSAL DECISIONS
+------------------------------------------------------------------------------------------
+NVDA  LONG  +10m EXIT_CANDIDATE       15M=-0.082% 30M=-0.220% 60M=-1.205%
+NVDA  LONG  +45m EXIT_CANDIDATE       15M=+0.126% 30M=+0.504% 60M=+0.591%
+AAPL  LONG  +30m EXIT_CANDIDATE       15M=+0.667% 30M=+0.823% 60M=+0.310%
+MSFT  SHORT +30m EXIT_CANDIDATE       15M=+0.249% 30M=-0.542% 60M=-0.293%
+MSFT  SHORT +45m EXIT_CANDIDATE       15M=+0.010% 30M=+0.466% 60M=+0.741%
+AMZN  LONG  +45m EXIT_CANDIDATE       15M=+0.120% 30M=+0.135% 60M=-0.204%
+TSLA  LONG  +20m EXIT_CANDIDATE       15M=+0.053% 30M=+0.033% 60M=+0.868%
+TSLA  SHORT +25m EXIT_CANDIDATE       15M=-0.461% 30M=-0.850% 60M=-1.849%
+
+CLASSIFICATION OUTCOME SUMMARY
+------------------------------------------------------------------------------------------
+
+EXIT_CANDIDATE
+  NEXT 15M: N= 8 AVG=+0.085% FAV= 1 ADV= 1 NEU= 6
+  NEXT 30M: N= 8 AVG=+0.044% FAV= 3 ADV= 2 NEU= 3
+  NEXT 60M: N= 8 AVG=-0.130% FAV= 4 ADV= 3 NEU= 1
+
+==========================================================================================
+V13.3 INTERPRETATION DATA
+==========================================================================================
+FIRST EXIT_CANDIDATE DECISIONS = 8
+FIRST REVERSAL_CONFIRMED DECISIONS = 0
+EXIT_CANDIDATE: 60M_ADVERSE=3 60M_FAVORABLE=4
+
+==========================================================================================
+V13.4 - RECOVERY VS CONTINUED FAILURE VALIDATION
+Starts at the first causal EXIT_CANDIDATE.
+Examines the following 15m / 30m / 45m / 60m trajectory.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+EXIT_CANDIDATE TRAJECTORIES
+------------------------------------------------------------------------------------------
+NVDA  LONG  candidate@+10m +15M=-0.082% +30M=-0.220% +45M=-0.885% +60M=-1.205%
+NVDA  LONG  candidate@+45m +15M=+0.126% +30M=+0.504% +45M=+0.591% +60M=+0.591%
+AAPL  LONG  candidate@+30m +15M=+0.667% +30M=+0.823% +45M=+0.767% +60M=+0.310%
+MSFT  SHORT candidate@+30m +15M=+0.249% +30M=-0.542% +45M=-0.493% +60M=-0.293%
+MSFT  SHORT candidate@+45m +15M=+0.010% +30M=+0.466% +45M=+0.587% +60M=+0.741%
+AMZN  LONG  candidate@+45m +15M=+0.120% +30M=+0.135% +45M=-0.079% +60M=-0.204%
+TSLA  LONG  candidate@+20m +15M=+0.053% +30M=+0.033% +45M=+0.751% +60M=+0.868%
+TSLA  SHORT candidate@+25m +15M=-0.461% +30M=-0.850% +45M=-0.792% +60M=-1.849%
+
+==========================================================================================
+V13.4 TRAJECTORY CLASSIFICATION
+==========================================================================================
+NVDA  LONG  candidate@+10m CONTINUED_FAILURE  START=-0.082% FINAL=-1.205% MIN=-1.205% MAX=-0.082%
+NVDA  LONG  candidate@+45m NEUTRAL            START=+0.126% FINAL=+0.591% MIN=+0.126% MAX=+0.591%
+AAPL  LONG  candidate@+30m NEUTRAL            START=+0.667% FINAL=+0.310% MIN=+0.310% MAX=+0.823%
+MSFT  SHORT candidate@+30m CONTINUED_FAILURE  START=+0.249% FINAL=-0.293% MIN=-0.542% MAX=+0.249%
+MSFT  SHORT candidate@+45m NEUTRAL            START=+0.010% FINAL=+0.741% MIN=+0.010% MAX=+0.741%
+AMZN  LONG  candidate@+45m NEUTRAL            START=+0.120% FINAL=-0.204% MIN=-0.204% MAX=+0.135%
+TSLA  LONG  candidate@+20m NEUTRAL            START=+0.053% FINAL=+0.868% MIN=+0.033% MAX=+0.868%
+TSLA  SHORT candidate@+25m CONTINUED_FAILURE  START=-0.461% FINAL=-1.849% MIN=-1.849% MAX=-0.461%
+
+CLASSIFICATION SUMMARY
+------------------------------------------------------------------------------------------
+CONTINUED_FAILURE  N= 3 AVG_FINAL_60M=-1.115%
+NEUTRAL            N= 5 AVG_FINAL_60M=+0.461%
+
+==========================================================================================
+TOTAL FIRST EXIT_CANDIDATE TRAJECTORIES = 8
+==========================================================================================
+
+==========================================================================================
+V13.5 - EARLIEST TRAJECTORY SHAPE VALIDATION
+Starts at the first causal EXIT_CANDIDATE.
+Uses 5-minute trajectory points to separate recovery from continued failure.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+
+5-MINUTE TRAJECTORY SHAPES
+------------------------------------------------------------------------------------------
+NVDA  LONG  candidate@+10m CONTINUED_FAILURE    EARLIEST= +20m FINAL=-1.205% PATH=+5:+0.315% +10:+0.263% +15:-0.082% +20:-0.272% +25:-0.182% +30:-0.220% +45:-0.885% +60:-1.205%
+NVDA  LONG  candidate@+45m UNRESOLVED           EARLIEST=  --- FINAL=+0.591% PATH=+5:+0.048% +10:-0.136% +15:+0.126% +20:+0.155% +25:+0.364% +30:+0.504% +45:+0.591% +60:+0.591%
+AAPL  LONG  candidate@+30m RECOVERY             EARLIEST= +10m FINAL=+0.310% PATH=+5:+0.345% +10:+0.510% +15:+0.667% +20:+0.736% +25:+0.863% +30:+0.823% +45:+0.767% +60:+0.310%
+MSFT  SHORT candidate@+30m UNRESOLVED           EARLIEST=  --- FINAL=-0.293% PATH=+5:-0.295% +10:-0.016% +15:+0.249% +20:-0.072% +25:-0.413% +30:-0.542% +45:-0.493% +60:-0.293%
+MSFT  SHORT candidate@+45m UNRESOLVED           EARLIEST=  --- FINAL=+0.741% PATH=+5:-0.167% +10:-0.202% +15:+0.010% +20:+0.250% +25:+0.314% +30:+0.466% +45:+0.587% +60:+0.741%
+AMZN  LONG  candidate@+45m UNRESOLVED           EARLIEST=  --- FINAL=-0.204% PATH=+5:+0.015% +10:-0.137% +15:+0.120% +20:+0.371% +25:+0.492% +30:+0.135% +45:-0.079% +60:-0.204%
+TSLA  LONG  candidate@+20m CONTINUED_FAILURE    EARLIEST= +10m FINAL=+0.868% PATH=+5:+0.385% +10:-0.315% +15:+0.053% +20:+0.015% +25:-0.341% +30:+0.033% +45:+0.751% +60:+0.868%
+TSLA  SHORT candidate@+25m CONTINUED_FAILURE    EARLIEST= +15m FINAL=-1.849% PATH=+5:-0.138% +10:-0.206% +15:-0.461% +20:-0.781% +25:-0.787% +30:-0.850% +45:-0.792% +60:-1.849%
+
+V13.5 SUMMARY
+------------------------------------------------------------------------------------------
+RECOVERY             N= 1 AVG_FINAL_60M=+0.310% AVG_EARLIEST=10.0m
+CONTINUED_FAILURE    N= 3 AVG_FINAL_60M=-0.729% AVG_EARLIEST=15.0m
+UNRESOLVED           N= 4 AVG_FINAL_60M=+0.209% AVG_EARLIEST=---
+
+TOTAL FIRST EXIT_CANDIDATE TRAJECTORIES = 8
+==========================================================================================
+
+==========================================================================================
+V13.6 - TRAJECTORY SHAPE / STABILIZATION VALIDATION
+Starts at the first causal EXIT_CANDIDATE.
+Uses non-monotonic 5-minute trajectory shape.
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+NVDA  LONG  candidate@+10m PATH=+5:+0.315% +10:+0.263% +15:-0.082% +20:-0.272% +25:-0.182% +30:-0.220% +45:-0.885% +60:-1.205%
+  +20m CONTINUED_FAILURE
+  FINAL_SHAPE=CONTINUED_FAILURE
+NVDA  LONG  candidate@+45m PATH=+5:+0.048% +10:-0.136% +15:+0.126% +20:+0.155% +25:+0.364% +30:+0.504% +45:+0.591% +60:+0.591%
+  +15m STABILIZING
+  +25m RECOVERY
+  FINAL_SHAPE=RECOVERY
+AAPL  LONG  candidate@+30m PATH=+5:+0.345% +10:+0.510% +15:+0.667% +20:+0.736% +25:+0.863% +30:+0.823% +45:+0.767% +60:+0.310%
+  +10m STABILIZING
+  +15m RECOVERY
+  FINAL_SHAPE=UNRESOLVED
+MSFT  SHORT candidate@+30m PATH=+5:-0.295% +10:-0.016% +15:+0.249% +20:-0.072% +25:-0.413% +30:-0.542% +45:-0.493% +60:-0.293%
+  + 5m CONTINUED_FAILURE
+  +10m STABILIZING
+  +15m RECOVERY
+  +25m CONTINUED_FAILURE
+  +60m STABILIZING
+  FINAL_SHAPE=STABILIZING
+MSFT  SHORT candidate@+45m PATH=+5:-0.167% +10:-0.202% +15:+0.010% +20:+0.250% +25:+0.314% +30:+0.466% +45:+0.587% +60:+0.741%
+  +15m STABILIZING
+  +20m RECOVERY
+  FINAL_SHAPE=RECOVERY
+AMZN  LONG  candidate@+45m PATH=+5:+0.015% +10:-0.137% +15:+0.120% +20:+0.371% +25:+0.492% +30:+0.135% +45:-0.079% +60:-0.204%
+  +15m STABILIZING
+  +20m RECOVERY
+  FINAL_SHAPE=UNRESOLVED
+TSLA  LONG  candidate@+20m PATH=+5:+0.385% +10:-0.315% +15:+0.053% +20:+0.015% +25:-0.341% +30:+0.033% +45:+0.751% +60:+0.868%
+  +10m CONTINUED_FAILURE
+  +15m STABILIZING
+  +25m CONTINUED_FAILURE
+  +45m RECOVERY
+  FINAL_SHAPE=RECOVERY
+TSLA  SHORT candidate@+25m PATH=+5:-0.138% +10:-0.206% +15:-0.461% +20:-0.781% +25:-0.787% +30:-0.850% +45:-0.792% +60:-1.849%
+  +15m CONTINUED_FAILURE
+  FINAL_SHAPE=CONTINUED_FAILURE
+
+==========================================================================================
+V13.6 SUMMARY
+------------------------------------------------------------------------------------------
+CONTINUED_FAILURE    N= 6 AVG_EARLIEST=16.7m
+STABILIZING          N= 7 AVG_EARLIEST=20.0m
+RECOVERY             N= 6 AVG_EARLIEST=23.3m
+TOTAL CLASSIFICATION EVENTS = 19
+==========================================================================================
+
+==========================================================================================
+V13.7 - POST-STATE OUTCOME VALIDATION
+What happens during the 60 minutes AFTER first V13.6 state recognition
+Research only - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+==========================================================================================
+NVDA  LONG  STATE=+20m CONTINUED_FAILURE    NEXT60=-1.205% MFE=-0.182% MAE=-1.205% ADVERSE
+NVDA  LONG  STATE=+15m STABILIZING          NEXT60=+0.591% MFE=+0.591% MAE=+0.155% FAVORABLE
+NVDA  LONG  STATE=+25m RECOVERY             NEXT60=+0.591% MFE=+0.591% MAE=+0.504% FAVORABLE
+AAPL  LONG  STATE=+10m STABILIZING          NEXT60=+0.310% MFE=+0.863% MAE=+0.310% FAVORABLE
+AAPL  LONG  STATE=+15m RECOVERY             NEXT60=+0.310% MFE=+0.863% MAE=+0.310% FAVORABLE
+MSFT  SHORT STATE=+ 5m CONTINUED_FAILURE    NEXT60=-0.293% MFE=+0.249% MAE=-0.542% ADVERSE
+MSFT  SHORT STATE=+10m STABILIZING          NEXT60=-0.293% MFE=+0.249% MAE=-0.542% ADVERSE
+MSFT  SHORT STATE=+15m RECOVERY             NEXT60=-0.293% MFE=-0.072% MAE=-0.542% ADVERSE
+MSFT  SHORT STATE=+25m CONTINUED_FAILURE    NEXT60=-0.293% MFE=-0.293% MAE=-0.542% ADVERSE
+MSFT  SHORT STATE=+15m STABILIZING          NEXT60=+0.741% MFE=+0.741% MAE=+0.250% FAVORABLE
+MSFT  SHORT STATE=+20m RECOVERY             NEXT60=+0.741% MFE=+0.741% MAE=+0.314% FAVORABLE
+AMZN  LONG  STATE=+15m STABILIZING          NEXT60=-0.204% MFE=+0.492% MAE=-0.204% NEUTRAL
+AMZN  LONG  STATE=+20m RECOVERY             NEXT60=-0.204% MFE=+0.492% MAE=-0.204% NEUTRAL
+TSLA  LONG  STATE=+10m CONTINUED_FAILURE    NEXT60=+0.868% MFE=+0.868% MAE=-0.341% FAVORABLE
+TSLA  LONG  STATE=+15m STABILIZING          NEXT60=+0.868% MFE=+0.868% MAE=-0.341% FAVORABLE
+TSLA  LONG  STATE=+25m CONTINUED_FAILURE    NEXT60=+0.868% MFE=+0.868% MAE=+0.033% FAVORABLE
+TSLA  LONG  STATE=+45m RECOVERY             NEXT60=+0.868% MFE=+0.868% MAE=+0.868% FAVORABLE
+TSLA  SHORT STATE=+15m CONTINUED_FAILURE    NEXT60=-1.849% MFE=-0.781% MAE=-1.849% ADVERSE
+
+==========================================================================================
+V13.7 SUMMARY BY FIRST RECOGNIZED STATE
+==========================================================================================
+CONTINUED_FAILURE    N= 6 FAV= 2 ADV= 4 NEU= 0 AVG60=-0.317% AVG_MFE=+0.122% AVG_MAE=-0.741%
+STABILIZING          N= 6 FAV= 4 ADV= 1 NEU= 1 AVG60=+0.336% AVG_MFE=+0.634% AVG_MAE=-0.062%
+RECOVERY             N= 6 FAV= 4 ADV= 1 NEU= 1 AVG60=+0.336% AVG_MFE=+0.581% AVG_MAE=+0.208%
+
+==========================================================================================
+V13.7 DIRECTIONAL VALIDATION
+==========================================================================================
+LONG  N=11 FAV= 8 ADV= 1 NEU= 2 AVG60=+0.333%
+SHORT N= 7 FAV= 2 ADV= 5 NEU= 0 AVG60=-0.220%
+
+==========================================================================================
+TOTAL V13.7 POST-STATE EVENTS = 18
+==========================================================================================
+
+==========================================================================================
+V13.9.1 — STATE-SEQUENCE OUTCOME VALIDATION
+==========================================================================================
+NVDA  LONG  CANDIDATE +45m COMPLETE +25m | STABILIZING -> RECOVERY
+  15m: RET=+0.548% MFE=+0.664% MAE=-0.136% FAVORABLE
+  30m: RET=+0.625% MFE=+0.664% MAE=-0.136% FAVORABLE
+  60m: NO DATA
+AAPL  LONG  CANDIDATE +30m COMPLETE +15m | STABILIZING -> RECOVERY
+  15m: RET=+0.823% MFE=+0.863% MAE=+0.345% FAVORABLE
+  30m: RET=+0.767% MFE=+0.901% MAE=+0.345% FAVORABLE
+  60m: NO DATA
+MSFT  SHORT CANDIDATE +45m COMPLETE +20m | STABILIZING -> RECOVERY
+  15m: RET=+0.456% MFE=+0.466% MAE=-0.202% FAVORABLE
+  30m: RET=+0.504% MFE=+0.626% MAE=-0.202% FAVORABLE
+  60m: NO DATA
+AMZN  LONG  CANDIDATE +45m COMPLETE +20m | STABILIZING -> RECOVERY
+  15m: RET=+0.096% MFE=+0.492% MAE=-0.137% NEUTRAL
+  30m: RET=+0.002% MFE=+0.492% MAE=-0.137% NEUTRAL
+  60m: NO DATA
+TSLA  LONG  CANDIDATE +20m COMPLETE +45m | CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY
+  15m: RET=+0.868% MFE=+0.903% MAE=-0.341% FAVORABLE
+  30m: NO DATA
+  60m: NO DATA
+
+V13.9.1 SUMMARY BY COMPLETE SEQUENCE
+
+CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY N=1
+  15m N=1 FAV=1 ADV=0 NEU=0 AVG_RET=+0.868% AVG_MFE=+0.903% AVG_MAE=-0.341%
+
+STABILIZING -> RECOVERY N=4
+  15m N=4 FAV=3 ADV=0 NEU=1 AVG_RET=+0.481% AVG_MFE=+0.621% AVG_MAE=-0.033%
+  30m N=4 FAV=3 ADV=0 NEU=1 AVG_RET=+0.475% AVG_MFE=+0.671% AVG_MAE=-0.033%
+
+V13.9.1 DIRECTIONAL VALIDATION
+
+LONG N=4
+  15m N=4 FAV=3 ADV=0 NEU=1 AVG_RET=+0.584%
+  30m N=3 FAV=2 ADV=0 NEU=1 AVG_RET=+0.465%
+
+SHORT N=1
+  15m N=1 FAV=1 ADV=0 NEU=0 AVG_RET=+0.456%
+  30m N=1 FAV=1 ADV=0 NEU=0 AVG_RET=+0.504%
+
+TOTAL V13.9.1 SEQUENCE EVENTS = 5
+==========================================================================================
+
+==============================================================================
+V13.11 — STATE-SEQUENCE DECISION ANALYSIS
+==============================================================================
+
+RESEARCH ONLY — NO ENGINE CHANGES
+
+SEQUENCE DECISION CASES: 5
+
+------------------------------------------------------------------------------
+NVDA LONG STABILIZING -> RECOVERY 2026-07-16 11:30:00
+ +15m HOLD=+0.184% HOLD_BETTER
+ +30m HOLD=+0.261% HOLD_BETTER
+ +45m HOLD=-0.198% EXIT_BETTER
+ +60m HOLD=+0.077% TIE
+------------------------------------------------------------------------------
+AAPL LONG STABILIZING -> RECOVERY 2026-06-12 11:05:00
+ +15m HOLD=+0.155% HOLD_BETTER
+ +30m HOLD=+0.099% TIE
+ +45m HOLD=-0.355% EXIT_BETTER
+ +60m HOLD=-0.334% EXIT_BETTER
+------------------------------------------------------------------------------
+MSFT SHORT STABILIZING -> RECOVERY 2026-07-27 11:40:00
+ +15m HOLD=+0.207% HOLD_BETTER
+ +30m HOLD=+0.255% HOLD_BETTER
+ +45m HOLD=+0.504% HOLD_BETTER
+ +60m HOLD=+0.020% TIE
+------------------------------------------------------------------------------
+AMZN LONG STABILIZING -> RECOVERY 2026-06-22 11:40:00
+ +15m HOLD=-0.273% EXIT_BETTER
+ +30m HOLD=-0.367% EXIT_BETTER
+ +45m HOLD=-0.512% EXIT_BETTER
+ +60m HOLD=-0.482% EXIT_BETTER
+------------------------------------------------------------------------------
+TSLA LONG CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY 2026-07-02 11:40:00
+ +15m HOLD=+0.116% HOLD_BETTER
+ +30m HOLD=-1.279% EXIT_BETTER
+ +45m HOLD=-1.340% EXIT_BETTER
+ +60m HOLD=-1.990% EXIT_BETTER
+
+==============================================================================
+V13.11 SEQUENCE SUMMARY
+==============================================================================
+
+CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY | LONG | +15m | N=1 | AVG=+0.116% | EXIT_BETTER=0 | HOLD_BETTER=1 | TIE=0
+CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY | LONG | +30m | N=1 | AVG=-1.279% | EXIT_BETTER=1 | HOLD_BETTER=0 | TIE=0
+CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY | LONG | +45m | N=1 | AVG=-1.340% | EXIT_BETTER=1 | HOLD_BETTER=0 | TIE=0
+CONTINUED_FAILURE -> STABILIZING -> CONTINUED_FAILURE -> RECOVERY | LONG | +60m | N=1 | AVG=-1.990% | EXIT_BETTER=1 | HOLD_BETTER=0 | TIE=0
+STABILIZING -> RECOVERY | LONG | +15m | N=3 | AVG=+0.022% | EXIT_BETTER=1 | HOLD_BETTER=2 | TIE=0
+STABILIZING -> RECOVERY | LONG | +30m | N=3 | AVG=-0.002% | EXIT_BETTER=1 | HOLD_BETTER=1 | TIE=1
+STABILIZING -> RECOVERY | LONG | +45m | N=3 | AVG=-0.355% | EXIT_BETTER=3 | HOLD_BETTER=0 | TIE=0
+STABILIZING -> RECOVERY | LONG | +60m | N=3 | AVG=-0.246% | EXIT_BETTER=2 | HOLD_BETTER=0 | TIE=1
+STABILIZING -> RECOVERY | SHORT | +15m | N=1 | AVG=+0.207% | EXIT_BETTER=0 | HOLD_BETTER=1 | TIE=0
+STABILIZING -> RECOVERY | SHORT | +30m | N=1 | AVG=+0.255% | EXIT_BETTER=0 | HOLD_BETTER=1 | TIE=0
+STABILIZING -> RECOVERY | SHORT | +45m | N=1 | AVG=+0.504% | EXIT_BETTER=0 | HOLD_BETTER=1 | TIE=0
+STABILIZING -> RECOVERY | SHORT | +60m | N=1 | AVG=+0.020% | EXIT_BETTER=0 | HOLD_BETTER=0 | TIE=1
+
+==============================================================================
+V13.11 RESEARCH INTERPRETATION
+==============================================================================
+
+The question is NOT which sequence should become
+a trading rule.
+
+The question is whether the COMPLETE trajectory
+sequence contains useful decision information that
+would be lost by looking only at the final state.
+
+Examples:
+  STABILIZING -> RECOVERY
+  CONTINUED_FAILURE -> STABILIZING -> RECOVERY
+  STABILIZING -> CONTINUED_FAILURE
+
+V13.11 does not change production trading logic.
+==============================================================================
+
