@@ -302,11 +302,12 @@ def run_symbol(
             direction = pending["to"]
 
             if direction == "LONG":
-                if row["low"] < pending["extreme"]:
+                new_extreme = row["low"] < pending["extreme"]
+                if new_extreme:
                     pending["extreme"] = row["low"]
                     pending["extreme_time"] = ts
                 trigger = pending["extreme"] * (1.0 + entry_trail_pct)
-                if row["high"] >= trigger and ts > pending["known_utc"]:
+                if (not new_extreme) and row["high"] >= trigger and ts > pending["known_utc"]:
                     entry_price = trigger
                     position = {
                         "direction": "LONG",
@@ -327,11 +328,12 @@ def run_symbol(
                     pending = None
 
             else:
-                if row["high"] > pending["extreme"]:
+                new_extreme = row["high"] > pending["extreme"]
+                if new_extreme:
                     pending["extreme"] = row["high"]
                     pending["extreme_time"] = ts
                 trigger = pending["extreme"] * (1.0 - entry_trail_pct)
-                if row["low"] <= trigger and ts > pending["known_utc"]:
+                if (not new_extreme) and row["low"] <= trigger and ts > pending["known_utc"]:
                     entry_price = trigger
                     position = {
                         "direction": "SHORT",
@@ -357,7 +359,8 @@ def run_symbol(
         direction = position["direction"]
 
         if direction == "LONG":
-            if row["high"] > position["exit_extreme"]:
+            new_extreme = row["high"] > position["exit_extreme"]
+            if new_extreme:
                 position["exit_extreme"] = row["high"]
                 position["exit_extreme_time"] = ts
             position["max_favorable"] = max(
@@ -369,9 +372,10 @@ def run_symbol(
                 pct(row["low"], position["entry_price"]),
             )
             exit_trigger = position["exit_extreme"] * (1.0 - exit_trail_pct)
-            hit = row["low"] <= exit_trigger
+            hit = (not new_extreme) and row["low"] <= exit_trigger
         else:
-            if row["low"] < position["exit_extreme"]:
+            new_extreme = row["low"] < position["exit_extreme"]
+            if new_extreme:
                 position["exit_extreme"] = row["low"]
                 position["exit_extreme_time"] = ts
             position["max_favorable"] = max(
@@ -383,7 +387,7 @@ def run_symbol(
                 pct(position["entry_price"], row["high"]),
             )
             exit_trigger = position["exit_extreme"] * (1.0 + exit_trail_pct)
-            hit = row["high"] >= exit_trigger
+            hit = (not new_extreme) and row["high"] >= exit_trigger
 
         position["exit_trigger"] = exit_trigger
 
