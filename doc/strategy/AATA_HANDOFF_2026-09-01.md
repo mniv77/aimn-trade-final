@@ -276,3 +276,245 @@ When continuing:
 6. Compare loser trades first.
 
 **Golden rule:** We are testing the strategy, not trying to make a pretty backtest. The losing trades are the laboratory.
+
+
+---
+
+## 17. V13.17 / KISS Transition Research Archive — Experiments #1–#18
+### Research milestone: 2026-09-29
+
+RESEARCH ONLY — NO ORDERS — NO PRODUCTION ENGINE CHANGES — NO AI TRAINING — NO THRESHOLD PROMOTION
+
+This section preserves the major trajectory research performed after the original handoff. Read it before beginning a new transition/trajectory experiment.
+
+### 17.1 Research foundation
+
+The V13.17 case-aware research uses completed candles only, causal timing, no hindsight/future leakage, and 28 unique trajectory cases keyed by symbol, direction, and opposite_time. States are PERSISTENT_FAILURE, DETERIORATING, NEUTRAL, and RECOVERING.
+
+Core principle: a transition is a trajectory, not a single candle, state, RSI value, or return reversal. A warning is not automatically an exit. Thesis failure is not automatically a reversal. Recovery is not defined by one positive return change.
+
+### 17.2 Established 28-case outcome groups
+
+Current post-first-deterioration persistence audit:
+- LATER_PF_BY_60: 11
+- NO_PF_BY_60: 17
+
+Descriptive persistence differences:
+- Negative persistence >=2: PF 11/11 vs NO_PF 4/17
+- Negative persistence >=3: PF 8/11 vs NO_PF 2/17
+- Positive persistence >=2: PF 2/11 vs NO_PF 9/17
+- Positive persistence >=3: PF 0/11 vs NO_PF 3/17
+
+Persistent direction of return change is more informative than a single improvement/worsening observation, but it is not sufficient as an operational rule.
+
+### 17.3 Experiments #1–#5 — persistence, geometry and failed recovery
+
+Early experiments established that mixed post-D return geometry was not itself a reliable separator; persistent negative return-change runs were concentrated in PF cases; first positive reversal was not enough to establish recovery; severity measures overlapped too much to justify a threshold; and third consecutive negative movement was highly concentrated in PF but had a NO_PF counterexample (NVDA #06).
+
+Important counterexample: NVDA #06 reached three consecutive negative return changes but ultimately remained NO_PF.
+
+Conclusion: more deterioration is informative, but even persistent deterioration is not automatically final failure.
+
+### 17.4 Experiments #6–#8 — recovery and resilience
+
+A positive reversal is an event, not a recovery.
+
+Important examples:
+- TSLA #19: D D D D D R R — sustained recovery, NO_PF.
+- TSLA #18: D D PF PF D PF PF — apparent positive reversal followed by renewed deterioration, PF.
+- TSLA #20: D R D PF PF PF PF — even a RECOVERING state can be temporary.
+- NVDA #07: D D D D R R D — recovery can suffer a negative challenge and still finish NO_PF.
+- AMZN #16: D D D R D D D — recovery can be challenged and later improve again while remaining NO_PF.
+
+The useful sequence became:
+FIRST POSITIVE REVERSAL → APPARENT RECOVERY → FIRST NEGATIVE CHALLENGE → STATE RESPONSE → SUBSEQUENT TRAJECTORY.
+
+Recovery is a trajectory property, not a single event.
+
+### 17.5 Experiment #9 — State / Return Divergence
+
+State and return are two partially independent trajectory dimensions. State can improve while return worsens; return can improve while state remains unchanged or worsens; or both can agree.
+
+Examples:
+- QQQ #23: state remains DETERIORATING while return improves strongly; final NO_PF.
+- NVDA #07: return improves while state remains D, later state becomes R, then suffers a challenge; final NO_PF.
+- AAPL #08: return improves after a temporary PF state, but state remains D; canonical corrected outcome is NO_PF.
+- GOOGL #27: state and return agree on deterioration; final PF.
+- GOOGL #28: eventual state/return convergence toward deterioration; final PF.
+
+Conclusion: neither state nor return is the answer; disagreement and later resolution are more informative.
+
+### 17.6 Experiment #10 — Convergence / Resolution
+
+Divergence was defined as return changing while state remains unchanged. Convergence was the first later state change in the same direction as the return change.
+
+15 cases qualified using the first such event per case:
+- Recovery convergence: #06, #07, #16, #19, #22.
+- Deterioration convergence: #04, #08, #10, #11, #15, #18, #24, #25, #27, #28.
+
+Recovery convergence: 5/5 ended NO_PF.
+Deterioration convergence: 9/10 ended PF; AAPL #08 was the exception.
+
+Conclusion: convergence establishes a direction; it does not prove the final outcome.
+
+### 17.7 Experiment #11 — Post-Resolution Challenge
+
+The next checkpoint after convergence was treated as the first challenge.
+
+Recovery convergence: all 5 observed cases ended NO_PF. Most first challenges continued recovery, but AMZN #16 had a negative challenge and still ended NO_PF.
+
+Deterioration convergence: 9/10 ended PF. Positive challenges after deterioration did not necessarily rescue the trajectory, notably TSLA #18 and GOOGL #25. AAPL #08 again showed that deterioration convergence can later unwind.
+
+Conclusion: the challenge after convergence is more informative than convergence alone, but a single challenge is not decisive.
+
+### 17.8 Experiment #12 — Multi-Challenge Resilience
+
+Two successive challenges were examined where available.
+
+Recovery cases #06, #07, #16, #19, and #22 all ended NO_PF despite different aligned/counter challenge sequences.
+
+Deterioration cases showed both outcomes: most ended PF, but AAPL #08 survived despite counter-direction challenges. Positive challenges did not reliably rescue TSLA #18 or GOOGL #25.
+
+Conclusion: two challenges provide context, but simple aligned/counter sequences still do not classify outcomes universally.
+
+### 17.9 Experiment #13 — Direction Re-Establishment
+
+After a counter-direction challenge, the next return change in the original direction was called direction re-establishment.
+
+Examples:
+- recovery re-established: AMZN #16 → NO_PF;
+- recovery did not re-establish within observable horizon: NVDA #06 → NO_PF;
+- deterioration re-established: MSFT #10, TSLA #18, GOOGL #25 → PF;
+- deterioration did not re-establish: AAPL #08 → NO_PF.
+
+Conclusion: re-establishment is more informative than a single challenge, but re-establishment alone is not a final classifier.
+
+### 17.10 Experiment #14 — Re-Establishment Strength & Persistence
+
+The question became whether re-established direction persists for 1, 2, or 3 later checkpoints.
+
+AMZN #16 recovery re-established and persisted for two positive intervals → NO_PF.
+Deterioration re-establishment in #10, #18, #24 and #25 was followed by continued deterioration → PF.
+AAPL #08 did not re-establish deterioration after its positive challenge → NO_PF.
+
+Conclusion: persistence after re-establishment is more interesting than re-establishment itself, but the sample remained too small for a rule.
+
+### 17.11 Experiment #15 — Second-Challenge Survival
+
+Observable cases were limited:
+- NVDA #07: recovery → second negative challenge → NO_PF.
+- QQQ #22: recovery → second negative challenge → NO_PF.
+- TSLA #18: deterioration re-established → positive second challenge while state remained PF → PF.
+
+Conclusion: a second challenge does not automatically determine the outcome.
+
+### 17.12 Experiment #16 — Second-Challenge Resolution
+
+Only #07, #22, and #18 had observable second challenges, and in each case the challenge occurred at the final +60 checkpoint. Therefore immediate response could be observed, but true post-challenge resolution could not.
+
+### 17.13 Experiment #17 — Resolution Persistence
+
+Strict definition:
+Re-establishment → persistence → Challenge #2 → immediate response → NEXT checkpoint → persistence of response.
+
+Result: 0 qualifying cases. The relevant second challenges occurred at +60, which was the end of the available horizon. No information after +60 was inferred.
+
+This is a valid data limitation, not a failed experiment.
+
+### 17.14 Experiment #18 — Extended-Horizon Resolution Test
+
+Question: after directional re-establishment, can we observe at least two later checkpoints to determine whether that direction persists?
+
+Three PF cases qualified under the strict extended-horizon definition:
+- #04 NVDA LONG
+- #25 GOOGL LONG
+- #28 GOOGL LONG
+
+All three showed continued deterioration across the remaining checkpoints and ended PF.
+
+The critical counterexample test then asked:
+Can a NO_PF case also show a re-established direction that persists for 2+ later checkpoints?
+
+YES.
+
+Clear NO_PF counterexamples:
+
+#16 AMZN SHORT
+D D D R D D D
+After the negative challenge, positive return direction re-established at +45 (+0.006752) and +60 (+0.115634). Two consecutive positive return changes. Outcome: NO_PF.
+
+#23 QQQ SHORT
+R R D D D D D
+After the negative sequence, positive return direction re-established at +45 (+0.174558) and +60 (+0.366719). Two consecutive positive return changes. Outcome: NO_PF.
+
+#26 GOOGL LONG
+D D D D D D D
+Positive return direction re-established at +45 (+0.221208) and +60 (+0.129960). Two consecutive positive return changes. Outcome: NO_PF.
+
+#13 AMZN SHORT
+D R N N N D D
+After deterioration returned, positive return direction appeared at +45 (+0.027548) and +60 (+0.114128). Two consecutive positive return changes. Outcome: NO_PF.
+
+### 17.15 Critical #18 conclusion
+
+Extended directional persistence by itself does NOT separate PF from NO_PF.
+
+Do NOT promote any of the following to a production rule:
+- 2 positive intervals = recovery;
+- 2 negative intervals = failure;
+- re-established direction + persistence = exit;
+- any fixed return-change threshold;
+- any single state transition as a production rule.
+
+The more promising question is now:
+After re-establishment and persistence, do STATE and RETURN subsequently converge toward the same trajectory outcome?
+
+### 17.16 Current research hierarchy
+
+TRANSITION RECOGNITION
+→ TRAJECTORY STATE
+→ RETURN DIRECTION
+→ CONVERGENCE
+→ CHALLENGE
+→ DIRECTIONAL RESPONSE
+→ RE-ESTABLISHMENT
+→ PERSISTENCE
+→ STATE / RETURN CONVERGENCE
+→ EVENTUAL TRAJECTORY
+
+This hierarchy is descriptive research, not a production trading rule.
+
+### 17.17 Next experiment — #19
+
+#19 — Re-Establishment + State/Return Convergence Test
+
+Question:
+After direction re-establishes and persists, does state eventually move into agreement with the return direction, and does that agreement persist?
+
+Priority counterexamples:
+- #16 AMZN — return improves while state remains D → NO_PF.
+- #23 QQQ — return improves while state remains D → NO_PF.
+- #26 GOOGL — return improves while state remains D → NO_PF.
+- #13 AMZN — return improves while state remains D → NO_PF.
+
+Compare these with PF cases where negative return persistence is accompanied by progression toward PERSISTENT_FAILURE.
+
+Do not convert #19 into an operational rule unless the pattern survives direction-controlled, symbol-controlled, and larger-sample validation.
+
+### 17.18 Important canonical correction
+
+A historical persistence audit temporarily classified AAPL #08 as LATER_PF_BY_60 because an older outcome function treated the presence of any intermediate PERSISTENT_FAILURE state as a PF outcome.
+
+The corrected canonical interpretation uses the final +60 state:
+D D D D PF D D
+Therefore AAPL #08 is a critical NO_PF counterexample and must not contaminate later experiments with the old PF label.
+
+### 17.19 Research philosophy — preserve the counterexamples
+
+The most important lesson from this research is not a new indicator or threshold. It is the discipline of keeping the counterexamples.
+
+A pattern that looks strong on PF cases must immediately be tested against NO_PF cases with the same trajectory structure.
+
+The objective is not to make the backtest look better. The objective is to understand why losers become losers, why apparent failures sometimes recover, why apparent recoveries sometimes fail, when state and return disagree, how that disagreement resolves, and which trajectory information is actually available at the time a decision would have been made.
+
+This research archive is part of the strategic memory of AIMn/AATA and should be read before starting a new transition/trajectory experiment.
