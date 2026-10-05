@@ -1,0 +1,256 @@
+
+==============================================================================================================
+V13.17 ALL-STATEPOINT PERSISTENT FAILURE CLEARANCE AUDIT
+==============================================================================================================
+RESEARCH ONLY
+NO ORDERS
+NO PRODUCTION ENGINE CHANGES
+NO AI TRAINING
+
+===== BUILD V13.17 RESEARCH PATHS =====
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+RAW PATH OBJECTS = 28
+UNIQUE TRAJECTORY CASES = 28
+ALL-STATEPOINT CLEARANCE OBSERVATIONS = 5
+
+==============================================================================================================
+ALL-STATEPOINT FIRST PERSISTENT-FAILURE CLEARANCE
+==============================================================================================================
+
+CASE 1
+  SYMBOL            = AAPL
+  DIRECTION         = LONG
+  OPPOSITE_TIME     = 2026-06-12 10:20:00
+  CLEARANCE STATE   = +45m
+  CURRENT STATE     = DETERIORATING
+  CURRENT RETURN    = -0.3688272658971327
+  NEXT STATEPOINT   = +60m
+  NEXT STATE        = DETERIORATING
+  PATH CLASS        = CONTINUED_FAILURE_PATH
+  FUTURE +5 m     = NA
+  FUTURE +10m     = NA
+  FUTURE +15m     = +0.351%
+  FUTURE +20m     = NA
+  FUTURE +30m     = NA
+
+CASE 2
+  SYMBOL            = GOOGL
+  DIRECTION         = LONG
+  OPPOSITE_TIME     = 2026-06-22 10:20:00
+  CLEARANCE STATE   = +25m
+  CURRENT STATE     = DETERIORATING
+  CURRENT RETURN    = -0.2855755775766056
+  NEXT STATEPOINT   = +30m
+  NEXT STATE        = PERSISTENT_FAILURE
+  PATH CLASS        = CONTINUED_FAILURE_PATH
+  FUTURE +5 m     = -0.450%
+  FUTURE +10m     = NA
+  FUTURE +15m     = NA
+  FUTURE +20m     = -1.089%
+  FUTURE +30m     = NA
+
+CASE 3
+  SYMBOL            = MSFT
+  DIRECTION         = SHORT
+  OPPOSITE_TIME     = 2026-06-26 10:35:00
+  CLEARANCE STATE   = +45m
+  CURRENT STATE     = DETERIORATING
+  CURRENT RETURN    = -0.4765665423054928
+  NEXT STATEPOINT   = +60m
+  NEXT STATE        = PERSISTENT_FAILURE
+  PATH CLASS        = CONTINUED_FAILURE_PATH
+  FUTURE +5 m     = NA
+  FUTURE +10m     = NA
+  FUTURE +15m     = -0.397%
+  FUTURE +20m     = NA
+  FUTURE +30m     = NA
+
+CASE 4
+  SYMBOL            = NVDA
+  DIRECTION         = LONG
+  OPPOSITE_TIME     = 2026-06-05 10:20:00
+  CLEARANCE STATE   = +20m
+  CURRENT STATE     = DETERIORATING
+  CURRENT RETURN    = -0.4719971821063867
+  NEXT STATEPOINT   = +25m
+  NEXT STATE        = PERSISTENT_FAILURE
+  PATH CLASS        = CONTINUED_FAILURE_PATH
+  FUTURE +5 m     = -0.052%
+  FUTURE +10m     = -0.396%
+  FUTURE +15m     = NA
+  FUTURE +20m     = NA
+  FUTURE +30m     = NA
+
+CASE 5
+  SYMBOL            = TSLA
+  DIRECTION         = LONG
+  OPPOSITE_TIME     = 2026-07-02 10:35:00
+  CLEARANCE STATE   = +30m
+  CURRENT STATE     = DETERIORATING
+  CURRENT RETURN    = -0.3194688048108329
+  NEXT STATEPOINT   = +45m
+  NEXT STATE        = PERSISTENT_FAILURE
+  PATH CLASS        = CONTINUED_FAILURE_PATH
+  FUTURE +5 m     = NA
+  FUTURE +10m     = NA
+  FUTURE +15m     = -0.368%
+  FUTURE +20m     = NA
+  FUTURE +30m     = -0.225%
+
+==============================================================================================================
+POST-FAILURE PATH SUMMARY
+==============================================================================================================
+RECOVERY_PATH            = 0
+CONTINUED_FAILURE_PATH  = 5
+NEUTRAL_OR_OTHER_PATH   = 0
+
+==============================================================================================================
+IMMEDIATE POST-FAILURE STATE TRANSITIONS
+==============================================================================================================
+DETERIORATING          -> DETERIORATING          N=1
+DETERIORATING          -> PERSISTENT_FAILURE     N=4
+
+==============================================================================================================
+ALL-STATEPOINT CLEARANCE CASES BY SYMBOL
+==============================================================================================================
+NVDA   CASES=1
+AAPL   CASES=1
+MSFT   CASES=1
+AMZN   CASES=0
+TSLA   CASES=1
+SPY    CASES=0
+QQQ    CASES=0
+GOOGL  CASES=1
+
+==============================================================================================================
+CLEARANCE TIMING SUMMARY
+==============================================================================================================
++20m CASES=1
++25m CASES=1
++30m CASES=1
++45m CASES=2
+
+==============================================================================================================
+FULL OBSERVED STATE PATHS
+==============================================================================================================
+
+AAPL   LONG  CLEARANCE=+45m PATH=CONTINUED_FAILURE_PATH
+  +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:DETERIORATING -> +60m:DETERIORATING
+
+GOOGL  LONG  CLEARANCE=+25m PATH=CONTINUED_FAILURE_PATH
+  +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:PERSISTENT_FAILURE -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+MSFT   SHORT CLEARANCE=+45m PATH=CONTINUED_FAILURE_PATH
+  +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:DETERIORATING -> +60m:PERSISTENT_FAILURE
+
+NVDA   LONG  CLEARANCE=+20m PATH=CONTINUED_FAILURE_PATH
+  +10m:PERSISTENT_FAILURE -> +15m:PERSISTENT_FAILURE -> +20m:DETERIORATING -> +25m:PERSISTENT_FAILURE -> +30m:PERSISTENT_FAILURE -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+TSLA   LONG  CLEARANCE=+30m PATH=CONTINUED_FAILURE_PATH
+  +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:PERSISTENT_FAILURE -> +25m:PERSISTENT_FAILURE -> +30m:DETERIORATING -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+==============================================================================================================
+RECOVERY VS CONTINUED-FAILURE DESCRIPTIVE COMPARISON
+==============================================================================================================
+
+CONTROL GROUP: DIRECTION=LONG STATE=DETERIORATING CLEARANCE=+20m CASES=1
+  RECOVERY_PATH N=0
+  CONTINUED_FAILURE_PATH N=1
+
+  +5m RECOVERY_AVG=NA CONTINUED_AVG=-0.052% NO TWO-SIDED COMPARISON
+
+  +10m RECOVERY_AVG=NA CONTINUED_AVG=-0.396% NO TWO-SIDED COMPARISON
+
+  +15m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +20m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +30m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+CONTROL GROUP: DIRECTION=LONG STATE=DETERIORATING CLEARANCE=+25m CASES=1
+  RECOVERY_PATH N=0
+  CONTINUED_FAILURE_PATH N=1
+
+  +5m RECOVERY_AVG=NA CONTINUED_AVG=-0.450% NO TWO-SIDED COMPARISON
+
+  +10m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +15m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +20m RECOVERY_AVG=NA CONTINUED_AVG=-1.089% NO TWO-SIDED COMPARISON
+
+  +30m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+CONTROL GROUP: DIRECTION=LONG STATE=DETERIORATING CLEARANCE=+30m CASES=1
+  RECOVERY_PATH N=0
+  CONTINUED_FAILURE_PATH N=1
+
+  +5m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +10m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +15m RECOVERY_AVG=NA CONTINUED_AVG=-0.368% NO TWO-SIDED COMPARISON
+
+  +20m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +30m RECOVERY_AVG=NA CONTINUED_AVG=-0.225% NO TWO-SIDED COMPARISON
+
+CONTROL GROUP: DIRECTION=LONG STATE=DETERIORATING CLEARANCE=+45m CASES=1
+  RECOVERY_PATH N=0
+  CONTINUED_FAILURE_PATH N=1
+
+  +5m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +10m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +15m RECOVERY_AVG=NA CONTINUED_AVG=+0.351% NO TWO-SIDED COMPARISON
+
+  +20m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +30m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+CONTROL GROUP: DIRECTION=SHORT STATE=DETERIORATING CLEARANCE=+45m CASES=1
+  RECOVERY_PATH N=0
+  CONTINUED_FAILURE_PATH N=1
+
+  +5m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +10m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +15m RECOVERY_AVG=NA CONTINUED_AVG=-0.397% NO TWO-SIDED COMPARISON
+
+  +20m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+  +30m RECOVERY_AVG=NA CONTINUED_AVG=NA NO TWO-SIDED COMPARISON
+
+==============================================================================================================
+V13.17 ALL-STATEPOINT CLEARANCE — INTERPRETATION
+==============================================================================================================
+This audit uses every existing StatePoint already produced by V13.17.
+It does not create new indicators or production rules.
+A single observation, symbol, or horizon does NOT validate a trading rule.
+No result becomes an entry, hold, warning, rescue, or exit rule.
+NO PRODUCTION CODE CHANGED.
+
+V13.17 ALL-STATEPOINT FAILURE CLEARANCE AUDIT COMPLETE

@@ -1,0 +1,156 @@
+{
+  "research_only": true,
+  "experiment": "#33 Raw V Geometry vs Trailing Entry Outcome",
+  "method": "Exact-transition join of Experiment #32 raw 5m V geometry with Experiment #30 trailing-entry outcomes.",
+  "entry_trails_pct": [
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5
+  ],
+  "exit_trail_pct": 1.5,
+  "raw_transition_count": 559,
+  "level_summary": [
+    {
+      "trail_pct": 0.25,
+      "transitions_with_entry": 385,
+      "wins": 167,
+      "losses": 218,
+      "flats": 0,
+      "avg_pnl_pct": 0.328844,
+      "avg_v_depth_pct": 0.372244,
+      "avg_recovery_speed_pct_per_min": 0.07351,
+      "recovered": 264,
+      "favorable_reached": 150
+    },
+    {
+      "trail_pct": 0.5,
+      "transitions_with_entry": 351,
+      "wins": 142,
+      "losses": 209,
+      "flats": 0,
+      "avg_pnl_pct": 0.24109,
+      "avg_v_depth_pct": 0.34805,
+      "avg_recovery_speed_pct_per_min": 0.07609,
+      "recovered": 247,
+      "favorable_reached": 155
+    },
+    {
+      "trail_pct": 0.75,
+      "transitions_with_entry": 301,
+      "wins": 118,
+      "losses": 183,
+      "flats": 0,
+      "avg_pnl_pct": 0.248231,
+      "avg_v_depth_pct": 0.313604,
+      "avg_recovery_speed_pct_per_min": 0.081182,
+      "recovered": 221,
+      "favorable_reached": 154
+    },
+    {
+      "trail_pct": 1.0,
+      "transitions_with_entry": 267,
+      "wins": 106,
+      "losses": 161,
+      "flats": 0,
+      "avg_pnl_pct": 0.192451,
+      "avg_v_depth_pct": 0.289446,
+      "avg_recovery_speed_pct_per_min": 0.082517,
+      "recovered": 200,
+      "favorable_reached": 147
+    },
+    {
+      "trail_pct": 1.25,
+      "transitions_with_entry": 219,
+      "wins": 92,
+      "losses": 127,
+      "flats": 0,
+      "avg_pnl_pct": 0.26021,
+      "avg_v_depth_pct": 0.263444,
+      "avg_recovery_speed_pct_per_min": 0.083969,
+      "recovered": 170,
+      "favorable_reached": 127
+    },
+    {
+      "trail_pct": 1.5,
+      "transitions_with_entry": 189,
+      "wins": 79,
+      "losses": 110,
+      "flats": 0,
+      "avg_pnl_pct": 0.288331,
+      "avg_v_depth_pct": 0.242052,
+      "avg_recovery_speed_pct_per_min": 0.08489,
+      "recovered": 151,
+      "favorable_reached": 115
+    }
+  ],
+  "filtered_transition_summary": [
+    {
+      "from_trail_pct": 0.25,
+      "at_trail_pct": 0.5,
+      "transitions_filtered": 53,
+      "previous_winners": 12,
+      "previous_losers": 41,
+      "avg_previous_pnl_pct": -0.199285,
+      "avg_v_depth_pct": 0.476157,
+      "avg_recovery_speed_pct_per_min": 0.037557,
+      "recovered": 26,
+      "favorable_reached": 0
+    },
+    {
+      "from_trail_pct": 0.5,
+      "at_trail_pct": 0.75,
+      "transitions_filtered": 69,
+      "previous_winners": 13,
+      "previous_losers": 56,
+      "avg_previous_pnl_pct": -0.574241,
+      "avg_v_depth_pct": 0.429394,
+      "avg_recovery_speed_pct_per_min": 0.041016,
+      "recovered": 34,
+      "favorable_reached": 7
+    },
+    {
+      "from_trail_pct": 0.75,
+      "at_trail_pct": 1.0,
+      "transitions_filtered": 54,
+      "previous_winners": 3,
+      "previous_losers": 51,
+      "avg_previous_pnl_pct": -0.67752,
+      "avg_v_depth_pct": 0.368916,
+      "avg_recovery_speed_pct_per_min": 0.061403,
+      "recovered": 31,
+      "favorable_reached": 15
+    },
+    {
+      "from_trail_pct": 1.0,
+      "at_trail_pct": 1.25,
+      "transitions_filtered": 56,
+      "previous_winners": 4,
+      "previous_losers": 52,
+      "avg_previous_pnl_pct": -0.776103,
+      "avg_v_depth_pct": 0.385549,
+      "avg_recovery_speed_pct_per_min": 0.072146,
+      "recovered": 36,
+      "favorable_reached": 21
+    },
+    {
+      "from_trail_pct": 1.25,
+      "at_trail_pct": 1.5,
+      "transitions_filtered": 34,
+      "previous_winners": 4,
+      "previous_losers": 30,
+      "avg_previous_pnl_pct": -0.763323,
+      "avg_v_depth_pct": 0.358254,
+      "avg_recovery_speed_pct_per_min": 0.078792,
+      "recovered": 22,
+      "favorable_reached": 16
+    }
+  ],
+  "outputs": {
+    "comparison": "/home/MeirNiv/aimn-trade-final/kiss/results/exp33_raw_v_vs_entry_outcome/raw_v_entry_trail_comparison.csv",
+    "filtered": "/home/MeirNiv/aimn-trade-final/kiss/results/exp33_raw_v_vs_entry_outcome/raw_v_filtered_by_trail.csv",
+    "depth_buckets": "/home/MeirNiv/aimn-trade-final/kiss/results/exp33_raw_v_vs_entry_outcome/raw_v_depth_bucket_vs_entry_outcome.csv"
+  }
+}

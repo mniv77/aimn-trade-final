@@ -1,0 +1,155 @@
+{
+  "research_only": true,
+  "experiment": "#32 Raw-Candle V Reconstruction",
+  "method": "Raw 5m candles after completed 30m transition; no entry-trail fields used",
+  "trend_window": 20,
+  "trend_band_pct": 0.2,
+  "case_count": 559,
+  "complete_horizon_cases": 441,
+  "avg_depth_pct": 0.367356,
+  "median_depth_pct": 0.23834,
+  "avg_time_to_extreme_min": 25.733453,
+  "avg_recovery_speed_pct_per_min": 0.068163,
+  "recovered_cases": 344,
+  "favorable_threshold_reached_cases": 183,
+  "depth_buckets": {
+    "<0.25": {
+      "cases": 290,
+      "recovered": 175,
+      "favorable_reached": 120,
+      "avg_depth_pct": 0.083973,
+      "avg_recovery_speed_pct_per_min": 0.060887,
+      "avg_max_favorable_pct": 0.564967,
+      "avg_max_adverse_pct": -0.083835
+    },
+    "0.25-0.50": {
+      "cases": 130,
+      "recovered": 86,
+      "favorable_reached": 35,
+      "avg_depth_pct": 0.355623,
+      "avg_recovery_speed_pct_per_min": 0.060364,
+      "avg_max_favorable_pct": 0.435707,
+      "avg_max_adverse_pct": -0.354311
+    },
+    "0.50-1.00": {
+      "cases": 93,
+      "recovered": 60,
+      "favorable_reached": 23,
+      "avg_depth_pct": 0.680708,
+      "avg_recovery_speed_pct_per_min": 0.070577,
+      "avg_max_favorable_pct": 0.302569,
+      "avg_max_adverse_pct": -0.675945
+    },
+    "1.00-1.50": {
+      "cases": 30,
+      "recovered": 15,
+      "favorable_reached": 5,
+      "avg_depth_pct": 1.200808,
+      "avg_recovery_speed_pct_per_min": 0.10407,
+      "avg_max_favorable_pct": 0.282397,
+      "avg_max_adverse_pct": -1.186418
+    },
+    ">=1.50": {
+      "cases": 16,
+      "recovered": 8,
+      "favorable_reached": 0,
+      "avg_depth_pct": 2.214928,
+      "avg_recovery_speed_pct_per_min": 0.225735,
+      "avg_max_favorable_pct": 0.114096,
+      "avg_max_adverse_pct": -2.159523
+    }
+  },
+  "by_symbol": {
+    "SPY": {
+      "cases": 73,
+      "long": 29,
+      "short": 44,
+      "recovered": 31,
+      "favorable_reached": 7,
+      "avg_depth_pct": 0.233645,
+      "avg_time_to_extreme_min": 29.726027,
+      "avg_recovery_speed_pct_per_min": 0.037224
+    },
+    "QQQ": {
+      "cases": 69,
+      "long": 30,
+      "short": 39,
+      "recovered": 43,
+      "favorable_reached": 12,
+      "avg_depth_pct": 0.336629,
+      "avg_time_to_extreme_min": 28.695652,
+      "avg_recovery_speed_pct_per_min": 0.054345
+    },
+    "NVDA": {
+      "cases": 79,
+      "long": 41,
+      "short": 38,
+      "recovered": 52,
+      "favorable_reached": 38,
+      "avg_depth_pct": 0.451894,
+      "avg_time_to_extreme_min": 26.64557,
+      "avg_recovery_speed_pct_per_min": 0.078878
+    },
+    "AAPL": {
+      "cases": 75,
+      "long": 42,
+      "short": 33,
+      "recovered": 43,
+      "favorable_reached": 22,
+      "avg_depth_pct": 0.280947,
+      "avg_time_to_extreme_min": 25.133333,
+      "avg_recovery_speed_pct_per_min": 0.051731
+    },
+    "TSLA": {
+      "cases": 70,
+      "long": 34,
+      "short": 36,
+      "recovered": 53,
+      "favorable_reached": 29,
+      "avg_depth_pct": 0.570563,
+      "avg_time_to_extreme_min": 24.5,
+      "avg_recovery_speed_pct_per_min": 0.087961
+    },
+    "MSFT": {
+      "cases": 58,
+      "long": 31,
+      "short": 27,
+      "recovered": 34,
+      "favorable_reached": 23,
+      "avg_depth_pct": 0.3109,
+      "avg_time_to_extreme_min": 26.982759,
+      "avg_recovery_speed_pct_per_min": 0.055018
+    },
+    "AMZN": {
+      "cases": 68,
+      "long": 32,
+      "short": 36,
+      "recovered": 48,
+      "favorable_reached": 25,
+      "avg_depth_pct": 0.420267,
+      "avg_time_to_extreme_min": 20.441176,
+      "avg_recovery_speed_pct_per_min": 0.087418
+    },
+    "GOOGL": {
+      "cases": 67,
+      "long": 29,
+      "short": 38,
+      "recovered": 40,
+      "favorable_reached": 27,
+      "avg_depth_pct": 0.324598,
+      "avg_time_to_extreme_min": 23.507463,
+      "avg_recovery_speed_pct_per_min": 0.072563
+    }
+  },
+  "parameters": {
+    "horizon_minutes": 60,
+    "recovery_pct_from_raw_extreme": 0.25,
+    "near_extreme_pct": 0.1,
+    "favorable_pct_from_transition": 0.5
+  },
+  "outputs": {
+    "geometry_csv": "kiss/results/exp32_raw_candle_v_geometry/raw_v_geometry.csv",
+    "trajectory_csv": "kiss/results/exp32_raw_candle_v_geometry/raw_v_trajectory.csv",
+    "summary_json": "kiss/results/exp32_raw_candle_v_geometry/raw_v_summary.json"
+  }
+}

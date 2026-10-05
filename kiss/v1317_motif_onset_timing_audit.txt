@@ -1,0 +1,390 @@
+================================================================================
+V13.17 — GOOGL MOTIF REPLICATION AUDIT
+================================================================================
+RESEARCH ONLY
+NO ORDERS
+NO PRODUCTION ENGINE CHANGES
+NO AI TRAINING
+
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+RAW TRAJECTORY PATHS:    28
+UNIQUE TRAJECTORY CASES: 28
+
+================================================================================
+V13.17 MOTIF ONSET / TIMING AUDIT
+================================================================================
+
+UNIQUE CASES: 28
+
+NVDA  CASES= 7
+AAPL  CASES= 2
+MSFT  CASES= 3
+AMZN  CASES= 5
+TSLA  CASES= 3
+SPY   CASES= 1
+QQQ   CASES= 2
+GOOGL CASES= 5
+
+================================================================================
+FIRST MOTIF ONSET SUMMARY
+================================================================================
+
+MOTIF: DR_REC
+  CASES WITH MOTIF: 7
+  SYMBOLS WITH MOTIF: 4
+  SYMBOL LIST: AAPL, AMZN, NVDA, TSLA
+  FIRST ONSET +15m: 3
+  FIRST ONSET +30m: 2
+  FIRST ONSET +45m: 1
+  FIRST ONSET +60m: 1
+
+MOTIF: DR_REC_DR
+  CASES WITH MOTIF: 2
+  SYMBOLS WITH MOTIF: 2
+  SYMBOL LIST: AMZN, TSLA
+  FIRST ONSET +30m: 2
+
+MOTIF: REC_NEU_DET
+  CASES WITH MOTIF: 4
+  SYMBOLS WITH MOTIF: 3
+  SYMBOL LIST: AMZN, MSFT, NVDA
+  FIRST ONSET +30m: 3
+  FIRST ONSET +45m: 1
+
+MOTIF: PERSISTENT_FAILURE_HISTORY
+  CASES WITH MOTIF: 12
+  SYMBOLS WITH MOTIF: 6
+  SYMBOL LIST: AAPL, AMZN, GOOGL, MSFT, NVDA, TSLA
+  FIRST ONSET +15m: 1
+  FIRST ONSET +30m: 6
+  FIRST ONSET +45m: 4
+  FIRST ONSET +60m: 1
+
+================================================================================
+CASE-LEVEL MOTIF ONSET
+================================================================================
+--------------------------------------------------------------------------------
+AAPL  LONG  OPPOSITE=2026-06-12 10:20:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-0.584%
+  SEQUENCE=DETERIORATING -> DETERIORATING -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: +0.216%
+  FUTURE +30m FROM ONSET: +0.569%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+AAPL  LONG  OPPOSITE=2026-07-22 10:35:00 MOTIF=DR_REC
+  FIRST ONSET=+60m STATE=RECOVERING RETURN=+0.385%
+  SEQUENCE=RECOVERING -> NEUTRAL -> RECOVERING -> RECOVERING -> RECOVERING -> DETERIORATING -> RECOVERING
+  FUTURE +15m FROM ONSET: NA
+  FUTURE +30m FROM ONSET: NA
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+AMZN  SHORT OPPOSITE=2026-06-04 11:45:00 MOTIF=DR_REC
+  FIRST ONSET=+15m STATE=RECOVERING RETURN=+0.140%
+  SEQUENCE=DETERIORATING -> RECOVERING
+  FUTURE +15m FROM ONSET: -0.199%
+  FUTURE +30m FROM ONSET: -0.171%
+  FUTURE +45m FROM ONSET: -0.057%
+--------------------------------------------------------------------------------
+AMZN  LONG  OPPOSITE=2026-06-22 10:35:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+45m STATE=PERSISTENT_FAILURE RETURN=-0.718%
+  SEQUENCE=RECOVERING -> NEUTRAL -> DETERIORATING -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: -0.242%
+  FUTURE +30m FROM ONSET: NA
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+AMZN  LONG  OPPOSITE=2026-06-22 10:35:00 MOTIF=REC_NEU_DET
+  FIRST ONSET=+30m STATE=DETERIORATING RETURN=-0.429%
+  SEQUENCE=RECOVERING -> NEUTRAL -> DETERIORATING -> DETERIORATING -> DETERIORATING
+  FUTURE +15m FROM ONSET: -0.290%
+  FUTURE +30m FROM ONSET: -0.531%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+AMZN  SHORT OPPOSITE=2026-07-30 10:05:00 MOTIF=DR_REC
+  FIRST ONSET=+30m STATE=DETERIORATING RETURN=-0.150%
+  SEQUENCE=DETERIORATING -> DETERIORATING -> DETERIORATING -> RECOVERING -> DETERIORATING
+  FUTURE +15m FROM ONSET: +0.007%
+  FUTURE +30m FROM ONSET: +0.122%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+AMZN  SHORT OPPOSITE=2026-07-30 10:05:00 MOTIF=DR_REC_DR
+  FIRST ONSET=+30m STATE=DETERIORATING RETURN=-0.150%
+  SEQUENCE=DETERIORATING -> DETERIORATING -> DETERIORATING -> RECOVERING -> DETERIORATING
+  FUTURE +15m FROM ONSET: +0.007%
+  FUTURE +30m FROM ONSET: +0.122%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+GOOGL SHORT OPPOSITE=2026-06-04 11:45:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-0.819%
+  SEQUENCE=NEUTRAL -> NEUTRAL -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: +0.004%
+  FUTURE +30m FROM ONSET: -0.026%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+GOOGL LONG  OPPOSITE=2026-06-22 10:20:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-0.734%
+  SEQUENCE=DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: -0.642%
+  FUTURE +30m FROM ONSET: -1.312%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+GOOGL SHORT OPPOSITE=2026-07-24 10:35:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+45m STATE=PERSISTENT_FAILURE RETURN=-0.593%
+  SEQUENCE=RECOVERING -> RECOVERING -> RECOVERING -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: -0.287%
+  FUTURE +30m FROM ONSET: NA
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+GOOGL LONG  OPPOSITE=2026-08-05 10:35:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+60m STATE=PERSISTENT_FAILURE RETURN=-0.798%
+  SEQUENCE=DETERIORATING -> NEUTRAL -> NEUTRAL -> NEUTRAL -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: NA
+  FUTURE +30m FROM ONSET: NA
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+MSFT  SHORT OPPOSITE=2026-06-26 10:35:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-0.722%
+  SEQUENCE=RECOVERING -> NEUTRAL -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: +0.243%
+  FUTURE +30m FROM ONSET: -0.153%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+MSFT  SHORT OPPOSITE=2026-06-26 10:35:00 MOTIF=REC_NEU_DET
+  FIRST ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-0.722%
+  SEQUENCE=RECOVERING -> NEUTRAL -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: +0.243%
+  FUTURE +30m FROM ONSET: -0.153%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+MSFT  SHORT OPPOSITE=2026-07-27 10:35:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+45m STATE=PERSISTENT_FAILURE RETURN=-0.842%
+  SEQUENCE=DETERIORATING -> NEUTRAL -> RECOVERING -> NEUTRAL -> NEUTRAL -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: -0.125%
+  FUTURE +30m FROM ONSET: NA
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+NVDA  LONG  OPPOSITE=2026-06-05 10:20:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+15m STATE=PERSISTENT_FAILURE RETURN=-0.784%
+  SEQUENCE=PERSISTENT_FAILURE -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: -0.082%
+  FUTURE +30m FROM ONSET: -0.220%
+  FUTURE +45m FROM ONSET: -0.885%
+--------------------------------------------------------------------------------
+NVDA  LONG  OPPOSITE=2026-06-09 10:20:00 MOTIF=REC_NEU_DET
+  FIRST ONSET=+45m STATE=DETERIORATING RETURN=+0.000%
+  SEQUENCE=RECOVERING -> RECOVERING -> RECOVERING -> RECOVERING -> NEUTRAL -> DETERIORATING
+  FUTURE +15m FROM ONSET: -0.029%
+  FUTURE +30m FROM ONSET: NA
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+NVDA  LONG  OPPOSITE=2026-07-16 10:20:00 MOTIF=DR_REC
+  FIRST ONSET=+15m STATE=RECOVERING RETURN=+0.101%
+  SEQUENCE=DETERIORATING -> RECOVERING
+  FUTURE +15m FROM ONSET: -0.538%
+  FUTURE +30m FROM ONSET: -1.189%
+  FUTURE +45m FROM ONSET: -1.407%
+--------------------------------------------------------------------------------
+NVDA  LONG  OPPOSITE=2026-07-16 10:20:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+45m STATE=PERSISTENT_FAILURE RETURN=-1.090%
+  SEQUENCE=DETERIORATING -> RECOVERING -> NEUTRAL -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: -0.220%
+  FUTURE +30m FROM ONSET: NA
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+NVDA  LONG  OPPOSITE=2026-07-16 10:20:00 MOTIF=REC_NEU_DET
+  FIRST ONSET=+30m STATE=DETERIORATING RETURN=-0.438%
+  SEQUENCE=DETERIORATING -> RECOVERING -> NEUTRAL -> DETERIORATING -> DETERIORATING
+  FUTURE +15m FROM ONSET: -0.654%
+  FUTURE +30m FROM ONSET: -0.873%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+NVDA  SHORT OPPOSITE=2026-08-12 10:35:00 MOTIF=DR_REC
+  FIRST ONSET=+30m STATE=RECOVERING RETURN=+0.112%
+  SEQUENCE=DETERIORATING -> DETERIORATING -> DETERIORATING -> DETERIORATING -> RECOVERING
+  FUTURE +15m FROM ONSET: +0.145%
+  FUTURE +30m FROM ONSET: -0.042%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+TSLA  LONG  OPPOSITE=2026-07-02 10:35:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+30m STATE=DETERIORATING RETURN=-0.319%
+  SEQUENCE=DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE -> PERSISTENT_FAILURE -> DETERIORATING
+  FUTURE +15m FROM ONSET: -0.368%
+  FUTURE +30m FROM ONSET: -0.225%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+TSLA  LONG  OPPOSITE=2026-07-31 10:05:00 MOTIF=DR_REC
+  FIRST ONSET=+45m STATE=RECOVERING RETURN=+0.598%
+  SEQUENCE=DETERIORATING -> DETERIORATING -> DETERIORATING -> DETERIORATING -> DETERIORATING -> RECOVERING
+  FUTURE +15m FROM ONSET: +0.921%
+  FUTURE +30m FROM ONSET: NA
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+TSLA  SHORT OPPOSITE=2026-08-07 10:05:00 MOTIF=DR_REC
+  FIRST ONSET=+15m STATE=RECOVERING RETURN=+0.250%
+  SEQUENCE=DETERIORATING -> RECOVERING
+  FUTURE +15m FROM ONSET: -1.259%
+  FUTURE +30m FROM ONSET: -1.727%
+  FUTURE +45m FROM ONSET: -2.120%
+--------------------------------------------------------------------------------
+TSLA  SHORT OPPOSITE=2026-08-07 10:05:00 MOTIF=DR_REC_DR
+  FIRST ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-1.006%
+  SEQUENCE=DETERIORATING -> RECOVERING -> DETERIORATING -> PERSISTENT_FAILURE -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: -0.461%
+  FUTURE +30m FROM ONSET: -0.850%
+  FUTURE +45m FROM ONSET: NA
+--------------------------------------------------------------------------------
+TSLA  SHORT OPPOSITE=2026-08-07 10:05:00 MOTIF=PERSISTENT_FAILURE_HISTORY
+  FIRST ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-1.006%
+  SEQUENCE=DETERIORATING -> RECOVERING -> DETERIORATING -> PERSISTENT_FAILURE -> PERSISTENT_FAILURE
+  FUTURE +15m FROM ONSET: -0.461%
+  FUTURE +30m FROM ONSET: -0.850%
+  FUTURE +45m FROM ONSET: NA
+
+================================================================================
+MOTIF ONSET BY SYMBOL
+================================================================================
+
+NVDA 
+  DR_REC                         N= 2 ONSETS=[15, 30]
+  DR_REC_DR                      NONE
+  REC_NEU_DET                    N= 2 ONSETS=[45, 30]
+  PERSISTENT_FAILURE_HISTORY     N= 2 ONSETS=[15, 45]
+
+AAPL 
+  DR_REC                         N= 1 ONSETS=[60]
+  DR_REC_DR                      NONE
+  REC_NEU_DET                    NONE
+  PERSISTENT_FAILURE_HISTORY     N= 1 ONSETS=[30]
+
+MSFT 
+  DR_REC                         NONE
+  DR_REC_DR                      NONE
+  REC_NEU_DET                    N= 1 ONSETS=[30]
+  PERSISTENT_FAILURE_HISTORY     N= 2 ONSETS=[30, 45]
+
+AMZN 
+  DR_REC                         N= 2 ONSETS=[15, 30]
+  DR_REC_DR                      N= 1 ONSETS=[30]
+  REC_NEU_DET                    N= 1 ONSETS=[30]
+  PERSISTENT_FAILURE_HISTORY     N= 1 ONSETS=[45]
+
+TSLA 
+  DR_REC                         N= 2 ONSETS=[45, 15]
+  DR_REC_DR                      N= 1 ONSETS=[30]
+  REC_NEU_DET                    NONE
+  PERSISTENT_FAILURE_HISTORY     N= 2 ONSETS=[30, 30]
+
+SPY  
+  DR_REC                         NONE
+  DR_REC_DR                      NONE
+  REC_NEU_DET                    NONE
+  PERSISTENT_FAILURE_HISTORY     NONE
+
+QQQ  
+  DR_REC                         NONE
+  DR_REC_DR                      NONE
+  REC_NEU_DET                    NONE
+  PERSISTENT_FAILURE_HISTORY     NONE
+
+GOOGL
+  DR_REC                         NONE
+  DR_REC_DR                      NONE
+  REC_NEU_DET                    NONE
+  PERSISTENT_FAILURE_HISTORY     N= 4 ONSETS=[30, 30, 45, 60]
+
+================================================================================
+GOOGL MOTIF TIMING
+================================================================================
+
+MOTIF: DR_REC
+  GOOGL: NOT OBSERVED
+
+MOTIF: DR_REC_DR
+  GOOGL: NOT OBSERVED
+
+MOTIF: REC_NEU_DET
+  GOOGL: NOT OBSERVED
+
+MOTIF: PERSISTENT_FAILURE_HISTORY
+  SHORT OPPOSITE=2026-06-04 11:45:00 FIRST_ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-0.819%
+      FUTURE +15m FROM ONSET=+0.004%
+      FUTURE +30m FROM ONSET=-0.026%
+  LONG  OPPOSITE=2026-06-22 10:20:00 FIRST_ONSET=+30m STATE=PERSISTENT_FAILURE RETURN=-0.734%
+      FUTURE +15m FROM ONSET=-0.642%
+      FUTURE +30m FROM ONSET=-1.312%
+  SHORT OPPOSITE=2026-07-24 10:35:00 FIRST_ONSET=+45m STATE=PERSISTENT_FAILURE RETURN=-0.593%
+      FUTURE +15m FROM ONSET=-0.287%
+  LONG  OPPOSITE=2026-08-05 10:35:00 FIRST_ONSET=+60m STATE=PERSISTENT_FAILURE RETURN=-0.798%
+
+================================================================================
+MOTIF TIMING / LATENESS
+================================================================================
+DR_REC                         N= 7 +15= 3 +30= 2 +45/+60= 2 AVG_ONSET=+30.0m
+DR_REC_DR                      N= 2 +15= 0 +30= 2 +45/+60= 0 AVG_ONSET=+30.0m
+REC_NEU_DET                    N= 4 +15= 0 +30= 3 +45/+60= 1 AVG_ONSET=+33.8m
+PERSISTENT_FAILURE_HISTORY     N=12 +15= 1 +30= 6 +45/+60= 5 AVG_ONSET=+36.2m
+
+================================================================================
+FUTURE RETURN FROM FIRST MOTIF ONSET
+================================================================================
+
+MOTIF: DR_REC
+  +15m N= 6 AVG=  -0.154% NEG= 3 POS= 3
+  +30m N= 5 AVG=  -0.602% NEG= 4 POS= 1
+  +45m N= 3 AVG=  -1.195% NEG= 3 POS= 0
+
+MOTIF: DR_REC_DR
+  +15m N= 2 AVG=  -0.227% NEG= 1 POS= 1
+  +30m N= 2 AVG=  -0.364% NEG= 1 POS= 1
+  +45m N=0
+
+MOTIF: REC_NEU_DET
+  +15m N= 4 AVG=  -0.183% NEG= 3 POS= 1
+  +30m N= 3 AVG=  -0.519% NEG= 3 POS= 0
+  +45m N=0
+
+MOTIF: PERSISTENT_FAILURE_HISTORY
+  +15m N=11 AVG=  -0.179% NEG= 8 POS= 3
+  +30m N= 7 AVG=  -0.317% NEG= 6 POS= 1
+  +45m N= 1 AVG=  -0.885% NEG= 1 POS= 0
+
+================================================================================
+INTERPRETATION
+================================================================================
+
+EXPANDED UNIQUE CASES: 28
+GOOGL CASES: 5
+
+The primary question is TIMING:
+Does a motif appear early enough to add information, or only after deterioration is already visible?
+
+PERSISTENT_FAILURE HISTORY is treated separately because it is a history-presence condition rather than a multi-state transition sequence.
+
+No motif is promoted to an entry, hold, warning, or exit rule.
+NO PRODUCTION ENGINE CHANGE.
+NO ORDERS.
+NO AI TRAINING.
+
+================================================================================
+MOTIF ONSET / TIMING AUDIT COMPLETE
+================================================================================

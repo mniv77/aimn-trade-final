@@ -1,0 +1,151 @@
+================================================================================
+V13.17 — GOOGL MOTIF REPLICATION AUDIT
+================================================================================
+RESEARCH ONLY
+NO ORDERS
+NO PRODUCTION ENGINE CHANGES
+NO AI TRAINING
+
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+RAW TRAJECTORY PATHS:    28
+UNIQUE TRAJECTORY CASES: 28
+
+================================================================================
+V13.17 PERSISTENT FAILURE MEMORY AUDIT
+================================================================================
+
+RESEARCH ONLY
+NO ORDERS
+NO PRODUCTION ENGINE CHANGES
+NO AI TRAINING
+
+UNIQUE TRAJECTORY CASES: 28
+
+NVDA  CASES= 7
+AAPL  CASES= 2
+MSFT  CASES= 3
+AMZN  CASES= 5
+TSLA  CASES= 3
+SPY   CASES= 1
+QQQ   CASES= 2
+GOOGL CASES= 5
+
+================================================================================
+FIRST RESIDUAL-MEMORY OBSERVATIONS
+================================================================================
+
+One observation per case: first checkpoint where prior PERSISTENT_FAILURE exists but CURRENT_STATE is different.
+
+--------------------------------------------------------------------------------
+AAPL  LONG  OPPOSITE=2026-06-12 10:20:00
+  FIRST MEMORY CHECKPOINT=+45m
+  CURRENT STATE=DETERIORATING
+  CURRENT RETURN=-0.369%
+  HISTORY SEQUENCE=DETERIORATING -> DETERIORATING -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING
+  FUTURE +15m FROM MEMORY CHECKPOINT=+0.351%
+  FUTURE +30m FROM MEMORY CHECKPOINT=NA
+  FUTURE +45m FROM MEMORY CHECKPOINT=NA
+--------------------------------------------------------------------------------
+MSFT  SHORT OPPOSITE=2026-06-26 10:35:00
+  FIRST MEMORY CHECKPOINT=+45m
+  CURRENT STATE=DETERIORATING
+  CURRENT RETURN=-0.477%
+  HISTORY SEQUENCE=RECOVERING -> NEUTRAL -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE -> DETERIORATING
+  FUTURE +15m FROM MEMORY CHECKPOINT=-0.397%
+  FUTURE +30m FROM MEMORY CHECKPOINT=NA
+  FUTURE +45m FROM MEMORY CHECKPOINT=NA
+--------------------------------------------------------------------------------
+TSLA  LONG  OPPOSITE=2026-07-02 10:35:00
+  FIRST MEMORY CHECKPOINT=+30m
+  CURRENT STATE=DETERIORATING
+  CURRENT RETURN=-0.319%
+  HISTORY SEQUENCE=DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE -> PERSISTENT_FAILURE -> DETERIORATING
+  FUTURE +15m FROM MEMORY CHECKPOINT=-0.368%
+  FUTURE +30m FROM MEMORY CHECKPOINT=-0.225%
+  FUTURE +45m FROM MEMORY CHECKPOINT=NA
+
+================================================================================
+RESIDUAL MEMORY BY SYMBOL
+================================================================================
+
+NVDA  MEMORY_CASES= 0 NONE
+AAPL  MEMORY_CASES= 1 DETERIORATING=1
+MSFT  MEMORY_CASES= 1 DETERIORATING=1
+AMZN  MEMORY_CASES= 0 NONE
+TSLA  MEMORY_CASES= 1 DETERIORATING=1
+SPY   MEMORY_CASES= 0 NONE
+QQQ   MEMORY_CASES= 0 NONE
+GOOGL MEMORY_CASES= 0 NONE
+
+================================================================================
+HISTORY / CURRENT-STATE OVERLAP AUDIT
+================================================================================
+
+MEMORY OBSERVATIONS: 31
+CURRENT=PERSISTENT_FAILURE: 27
+CURRENT!=PERSISTENT_FAILURE: 4
+
+RESIDUAL MEMORY + CURRENT STATE DETERIORATING: 4
+
+================================================================================
+GOOGL RESIDUAL-MEMORY FOCUS
+================================================================================
+
+GOOGL HAS NO RESIDUAL-MEMORY OBSERVATION.
+
+================================================================================
+MATCHED RESIDUAL-MEMORY CONTROL
+================================================================================
+
+MATCH KEY = DIRECTION + CURRENT STATE + CHECKPOINT
+PRESENT = prior persistent failure exists
+ABSENT = no prior persistent failure exists
+
+LONG  STATE=DETERIORATING      CP=+30m H=+15m P_N= 1 A_N= 8 P_AVG=  -0.368% A_AVG=  -0.169% DELTA=  -0.199%
+LONG  STATE=DETERIORATING      CP=+30m H=+30m P_N= 1 A_N= 8 P_AVG=  -0.225% A_AVG=  -0.038% DELTA=  -0.187%
+LONG  STATE=DETERIORATING      CP=+45m H=+15m P_N= 1 A_N= 7 P_AVG=  +0.351% A_AVG=  +0.144% DELTA=  +0.207%
+SHORT STATE=DETERIORATING      CP=+45m H=+15m P_N= 1 A_N= 4 P_AVG=  -0.397% A_AVG=  +0.086% DELTA=  -0.483%
+
+================================================================================
+V13.17 PERSISTENT FAILURE MEMORY — INTERPRETATION
+================================================================================
+
+UNIQUE CASES: 28
+RESIDUAL-MEMORY CASES: 3
+
+PRIMARY QUESTION:
+Does prior persistent failure remain informative after CURRENT_STATE changes?
+
+If memory persists while CURRENT_STATE is recovering, deteriorating, or neutral, it may represent trajectory history rather than simply duplicating the current state.
+
+The evidence is descriptive and exploratory.
+Small samples do NOT validate a trading rule.
+NO ENTRY / HOLD / WARNING / EXIT RULE CREATED.
+NO PRODUCTION ENGINE CHANGE.
+NO ORDERS.
+NO AI TRAINING.
+
+================================================================================
+PERSISTENT FAILURE MEMORY AUDIT COMPLETE
+================================================================================

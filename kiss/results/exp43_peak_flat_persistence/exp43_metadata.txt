@@ -1,0 +1,50 @@
+================================================================================
+EXPERIMENT #43 COMPLETE
+================================================================================
+
+QUESTION
+--------
+When the favorable peak stops advancing, what happens afterward?
+
+SOURCE
+------
+/home/MeirNiv/aimn-trade-final/kiss/results/exp42_v_peak_divergence/nvda_v_peak_divergence_transitions.csv
+
+SOURCE ROWS
+-----------
+61
+
+PEAK-FLAT OBSERVATIONS
+----------------------
+27
+
+TRADES
+------
+Total trades represented       : 30
+Trades with PEAK_FLAT           : 16
+
+RESEARCH STATUS
+---------------
+PURE OBSERVATION.
+
+No entry rule.
+No exit rule.
+No V threshold.
+No minor/medium/major classification.
+No optimization.
+No parameter promotion.
+No production changes.
+No orders.
+No AI training.
+
+A flat peak is an observation only.
+
+OUTPUTS
+-------
+/home/MeirNiv/aimn-trade-final/kiss/results/exp43_peak_flat_persistence/nvda_peak_flat_persistence_transitions.csv
+/home/MeirNiv/aimn-trade-final/kiss/results/exp43_peak_flat_persistence/nvda_peak_flat_persistence_summary.csv
+/home/MeirNiv/aimn-trade-final/kiss/results/exp43_peak_flat_persistence/nvda_peak_flat_resolution_summary.csv
+/home/MeirNiv/aimn-trade-final/kiss/results/exp43_peak_flat_persistence/nvda_peak_flat_persistence_trade_summary.csv
+/home/MeirNiv/aimn-trade-final/kiss/results/exp43_peak_flat_persistence/exp43_metadata.txt
+
+================================================================================

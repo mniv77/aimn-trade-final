@@ -1,0 +1,28 @@
+AIMn KISS — Experiment #48
+UNPROFITABLE V: ADVERSE PERSISTENCE
+
+Research only.
+No production strategy changes.
+No orders.
+No AI training.
+No threshold promotion.
+No re-entry simulation.
+
+CAUSAL EVENT COLUMN:
+v_reversal_candle_utc
+
+RAW PRICE COLUMN:
+candle_utc
+
+Events supplied by #46: 5
+Raw cases matched: 3
+Missing raw cases: 0
+Missing exact V candles: 2
+
+No percentage threshold was used to classify
+post-V path behavior.
+
+Outputs:
+/home/MeirNiv/aimn-trade-final/kiss/results/exp48_adverse_persistence/nvda_adverse_persistence_events.csv
+/home/MeirNiv/aimn-trade-final/kiss/results/exp48_adverse_persistence/nvda_adverse_persistence_path.csv
+/home/MeirNiv/aimn-trade-final/kiss/results/exp48_adverse_persistence/nvda_adverse_persistence_summary.csv

@@ -1,0 +1,259 @@
+
+========================================================================================================================
+V13.17 PF PREDECESSOR SEVERITY AUDIT
+========================================================================================================================
+
+TARGET: LONG +30M STATE = DETERIORATING
+PREDICTOR: RECOVERY_FAILED_BY_30M
+OUTCOME: PF AFTER +30M AND BY +60M
+SEVERITY = exact +30m StatePoint measurements
+NO FUTURE LEAKAGE
+NO PRODUCTION CODE CHANGED
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+TARGET CASES BUILT = 8
+
+========================================================================================================================
+EXACT +30M SEVERITY — TARGET CASES
+========================================================================================================================
+
+AMZN   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  RETURN_PCT          = -0.1780329179231948
+  FAVORABLE_RATIO     = 0.6
+  ADVERSE_RATIO       = 0.4
+  CONSECUTIVE_ADVERSE = 2
+  MAE_PCT             = -0.3342658867129368
+  MFE_PCT             = 0.07266649711150261
+  PRIOR STATE         = DETERIORATING
+  PATH                 = +10m:NEUTRAL -> +15m:NEUTRAL -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+GOOGL  CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  RETURN_PCT          = -0.024885939444207104
+  FAVORABLE_RATIO     = 0.2
+  ADVERSE_RATIO       = 0.8
+  CONSECUTIVE_ADVERSE = 2
+  MAE_PCT             = -0.0984377160237784
+  MFE_PCT             = 0.026268491635566788
+  PRIOR STATE         = DETERIORATING
+  PATH                 = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+GOOGL  CLEAN  OUTCOME=LATE_PF_BY_60      FIRST_PF=+60m
+  RETURN_PCT          = -0.23048716605552524
+  FAVORABLE_RATIO     = 0.4
+  ADVERSE_RATIO       = 0.6
+  CONSECUTIVE_ADVERSE = 2
+  MAE_PCT             = -0.23048716605552524
+  MFE_PCT             = 0.064169722367733
+  PRIOR STATE         = NEUTRAL
+  PATH                 = +10m:DETERIORATING -> +15m:NEUTRAL -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:DETERIORATING
+
+NVDA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  RETURN_PCT          = -0.2866894197952198
+  FAVORABLE_RATIO     = 0.6
+  ADVERSE_RATIO       = 0.4
+  CONSECUTIVE_ADVERSE = 1
+  MAE_PCT             = -0.3458475540386762
+  MFE_PCT             = 0.0
+  PRIOR STATE         = NEUTRAL
+  PATH                 = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:DETERIORATING
+
+TSLA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  RETURN_PCT          = 0.042732935588334665
+  FAVORABLE_RATIO     = 0.6
+  ADVERSE_RATIO       = 0.4
+  CONSECUTIVE_ADVERSE = 2
+  MAE_PCT             = -0.3993885903061897
+  MFE_PCT             = 0.042732935588334665
+  PRIOR STATE         = DETERIORATING
+  PATH                 = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+AMZN   FAILED OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  RETURN_PCT          = 0.23646572730161788
+  FAVORABLE_RATIO     = 0.4
+  ADVERSE_RATIO       = 0.6
+  CONSECUTIVE_ADVERSE = 2
+  MAE_PCT             = 0.0
+  MFE_PCT             = 0.4449623900837001
+  PRIOR STATE         = RECOVERING
+  PATH                 = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:DETERIORATING
+
+AMZN   FAILED OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+  RETURN_PCT          = -0.42925751200645623
+  FAVORABLE_RATIO     = 0.2
+  ADVERSE_RATIO       = 0.8
+  CONSECUTIVE_ADVERSE = 4
+  MAE_PCT             = -0.42925751200645623
+  MFE_PCT             = 0.418632326065712
+  PRIOR STATE         = DETERIORATING
+  PATH                 = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+NVDA   FAILED OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+  RETURN_PCT          = -0.4383023567733244
+  FAVORABLE_RATIO     = 0.2
+  ADVERSE_RATIO       = 0.8
+  CONSECUTIVE_ADVERSE = 3
+  MAE_PCT             = -0.4383023567733244
+  MFE_PCT             = 0.10059398352175128
+  PRIOR STATE         = DETERIORATING
+  PATH                 = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+========================================================================================================================
+SEVERITY SUMMARY — RECOVERY_FAILED_BY_30M
+========================================================================================================================
+
+CASES = 3
+LATER PF BY +60M = 2
+NO PF BY +60M    = 1
+
+  RETURN_PCT               N=3 AVG=-0.210365 MEDIAN=-0.429258 MIN=-0.438302 MAX=+0.236466
+
+  FAVORABLE_RATIO          N=3 AVG=+0.266667 MEDIAN=+0.200000 MIN=+0.200000 MAX=+0.400000
+
+  ADVERSE_RATIO            N=3 AVG=+0.733333 MEDIAN=+0.800000 MIN=+0.600000 MAX=+0.800000
+
+  CONSECUTIVE_ADVERSE      N=3 AVG=3.000 MEDIAN=3.000 MIN=2 MAX=4
+
+  MAE_PCT                  N=3 AVG=-0.289187 MEDIAN=-0.429258 MIN=-0.438302 MAX=+0.000000
+
+  MFE_PCT                  N=3 AVG=+0.321396 MEDIAN=+0.418632 MIN=+0.100594 MAX=+0.444962
+
+========================================================================================================================
+SEVERITY SUMMARY — NO_RECOVERY_FAILURE_BY_30M
+========================================================================================================================
+
+CASES = 5
+LATER PF BY +60M = 1
+NO PF BY +60M    = 4
+
+  RETURN_PCT               N=5 AVG=-0.135473 MEDIAN=-0.178033 MIN=-0.286689 MAX=+0.042733
+
+  FAVORABLE_RATIO          N=5 AVG=+0.480000 MEDIAN=+0.600000 MIN=+0.200000 MAX=+0.600000
+
+  ADVERSE_RATIO            N=5 AVG=+0.520000 MEDIAN=+0.400000 MIN=+0.400000 MAX=+0.800000
+
+  CONSECUTIVE_ADVERSE      N=5 AVG=1.800 MEDIAN=2.000 MIN=1 MAX=2
+
+  MAE_PCT                  N=5 AVG=-0.281685 MEDIAN=-0.334266 MIN=-0.399389 MAX=-0.098438
+
+  MFE_PCT                  N=5 AVG=+0.041168 MEDIAN=+0.042733 MIN=+0.000000 MAX=+0.072666
+
+========================================================================================================================
+SEVERITY BY OUTCOME
+========================================================================================================================
+
+========================================================================================================================
+SEVERITY SUMMARY — LATER_PF_BY_60
+========================================================================================================================
+
+CASES = 3
+LATER PF BY +60M = 3
+NO PF BY +60M    = 0
+
+  RETURN_PCT               N=3 AVG=-0.366016 MEDIAN=-0.429258 MIN=-0.438302 MAX=-0.230487
+
+  FAVORABLE_RATIO          N=3 AVG=+0.266667 MEDIAN=+0.200000 MIN=+0.200000 MAX=+0.400000
+
+  ADVERSE_RATIO            N=3 AVG=+0.733333 MEDIAN=+0.800000 MIN=+0.600000 MAX=+0.800000
+
+  CONSECUTIVE_ADVERSE      N=3 AVG=3.000 MEDIAN=3.000 MIN=2 MAX=4
+
+  MAE_PCT                  N=3 AVG=-0.366016 MEDIAN=-0.429258 MIN=-0.438302 MAX=-0.230487
+
+  MFE_PCT                  N=3 AVG=+0.194465 MEDIAN=+0.100594 MIN=+0.064170 MAX=+0.418632
+
+========================================================================================================================
+SEVERITY SUMMARY — NO_PF_BY_60
+========================================================================================================================
+
+CASES = 5
+LATER PF BY +60M = 0
+NO PF BY +60M    = 5
+
+  RETURN_PCT               N=5 AVG=-0.042082 MEDIAN=-0.024886 MIN=-0.286689 MAX=+0.236466
+
+  FAVORABLE_RATIO          N=5 AVG=+0.480000 MEDIAN=+0.600000 MIN=+0.200000 MAX=+0.600000
+
+  ADVERSE_RATIO            N=5 AVG=+0.520000 MEDIAN=+0.400000 MIN=+0.400000 MAX=+0.800000
+
+  CONSECUTIVE_ADVERSE      N=5 AVG=1.800 MEDIAN=2.000 MIN=1 MAX=2
+
+  MAE_PCT                  N=5 AVG=-0.235588 MEDIAN=-0.334266 MIN=-0.399389 MAX=+0.000000
+
+  MFE_PCT                  N=5 AVG=+0.117326 MEDIAN=+0.042733 MIN=+0.000000 MAX=+0.444962
+
+========================================================================================================================
+FAILED-RECOVERY vs CLEAN — CURRENT SEVERITY OVERLAP
+========================================================================================================================
+
+The audit does NOT create a severity score.
+Each variable is shown independently.
+
+RETURN_PCT:
+  FAILED N=3 VALUES=[-0.4383023567733244, 0.23646572730161788, -0.42925751200645623]
+  CLEAN  N=5 VALUES=[-0.2866894197952198, -0.1780329179231948, 0.042732935588334665, -0.024885939444207104, -0.23048716605552524]
+  RANGE OVERLAP = True
+  OVERLAP RANGE = -0.2866894197952198 to 0.042732935588334665
+FAVORABLE_RATIO:
+  FAILED N=3 VALUES=[0.2, 0.4, 0.2]
+  CLEAN  N=5 VALUES=[0.6, 0.6, 0.6, 0.2, 0.4]
+  RANGE OVERLAP = True
+  OVERLAP RANGE = 0.2 to 0.4
+ADVERSE_RATIO:
+  FAILED N=3 VALUES=[0.8, 0.6, 0.8]
+  CLEAN  N=5 VALUES=[0.4, 0.4, 0.4, 0.8, 0.6]
+  RANGE OVERLAP = True
+  OVERLAP RANGE = 0.6 to 0.8
+CONSECUTIVE_ADVERSE:
+  FAILED N=3 VALUES=[3.0, 2.0, 4.0]
+  CLEAN  N=5 VALUES=[1.0, 2.0, 2.0, 2.0, 2.0]
+  RANGE OVERLAP = True
+  OVERLAP RANGE = 2.0 to 2.0
+MAE_PCT:
+  FAILED N=3 VALUES=[-0.4383023567733244, 0.0, -0.42925751200645623]
+  CLEAN  N=5 VALUES=[-0.3458475540386762, -0.3342658867129368, -0.3993885903061897, -0.0984377160237784, -0.23048716605552524]
+  RANGE OVERLAP = True
+  OVERLAP RANGE = -0.3993885903061897 to -0.0984377160237784
+MFE_PCT:
+  FAILED N=3 VALUES=[0.10059398352175128, 0.4449623900837001, 0.418632326065712]
+  CLEAN  N=5 VALUES=[0.0, 0.07266649711150261, 0.042732935588334665, 0.026268491635566788, 0.064169722367733]
+  RANGE OVERLAP = False
+
+========================================================================================================================
+V13.17 PF PREDECESSOR SEVERITY — INTERPRETATION
+========================================================================================================================
+
+TARGET CASES = 8
+FAILED-RECOVERY = 3
+CLEAN = 5
+
+The purpose of this audit is to determine whether the two groups occupy similar or different current-state severity ranges at +30m.
+No composite severity score is constructed.
+No threshold is derived.
+No result becomes an entry, warning, rescue, hold, or exit rule.
+The sample remains very small.
+No production code changed.
+
+========================================================================================================================
+V13.17 PF PREDECESSOR SEVERITY AUDIT COMPLETE
+========================================================================================================================

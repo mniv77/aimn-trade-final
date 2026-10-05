@@ -1,0 +1,97 @@
+{
+  "research_only": true,
+  "entry_trail_pct": 1.5,
+  "exit_trail_pct": 1.5,
+  "trend_window": 20,
+  "trend_band_pct": 0.2,
+  "source_timeframe": "5m",
+  "advisor_timeframe": "30m",
+  "symbols": [
+    {
+      "symbol": "SPY",
+      "candles_5m": 4680,
+      "trades": 6,
+      "winners": 3,
+      "losers": 3,
+      "win_rate_pct": 50.0,
+      "total_pnl_pct": 2.0633,
+      "avg_pnl_pct": 0.3439
+    },
+    {
+      "symbol": "QQQ",
+      "candles_5m": 4680,
+      "trades": 18,
+      "winners": 5,
+      "losers": 13,
+      "win_rate_pct": 27.78,
+      "total_pnl_pct": -6.2232,
+      "avg_pnl_pct": -0.3457
+    },
+    {
+      "symbol": "NVDA",
+      "candles_5m": 4680,
+      "trades": 31,
+      "winners": 13,
+      "losers": 18,
+      "win_rate_pct": 41.94,
+      "total_pnl_pct": -3.7249,
+      "avg_pnl_pct": -0.1202
+    },
+    {
+      "symbol": "AAPL",
+      "candles_5m": 4680,
+      "trades": 23,
+      "winners": 7,
+      "losers": 16,
+      "win_rate_pct": 30.43,
+      "total_pnl_pct": 8.5594,
+      "avg_pnl_pct": 0.3721
+    },
+    {
+      "symbol": "TSLA",
+      "candles_5m": 4680,
+      "trades": 36,
+      "winners": 18,
+      "losers": 18,
+      "win_rate_pct": 50.0,
+      "total_pnl_pct": 25.751,
+      "avg_pnl_pct": 0.7153
+    },
+    {
+      "symbol": "MSFT",
+      "candles_5m": 4680,
+      "trades": 22,
+      "winners": 9,
+      "losers": 13,
+      "win_rate_pct": 40.91,
+      "total_pnl_pct": 6.254,
+      "avg_pnl_pct": 0.2843
+    },
+    {
+      "symbol": "AMZN",
+      "candles_5m": 4680,
+      "trades": 32,
+      "winners": 13,
+      "losers": 19,
+      "win_rate_pct": 40.62,
+      "total_pnl_pct": 2.9187,
+      "avg_pnl_pct": 0.0912
+    },
+    {
+      "symbol": "GOOGL",
+      "candles_5m": 4680,
+      "trades": 21,
+      "winners": 11,
+      "losers": 10,
+      "win_rate_pct": 52.38,
+      "total_pnl_pct": 18.8964,
+      "avg_pnl_pct": 0.8998
+    }
+  ],
+  "total_trades": 189,
+  "winners": 79,
+  "losers": 110,
+  "win_rate_pct": 41.8,
+  "total_pnl_pct": 54.4946,
+  "average_pnl_pct": 0.2883
+}

@@ -1,0 +1,743 @@
+==============================================================================================================
+AIMn / KISS V13.17
+CAUSAL POST-FIRST-DETERIORATION PERSISTENCE TRANSITION AUDIT
+==============================================================================================================
+
+RESEARCH ONLY
+NO ORDERS
+NO PRODUCTION ENGINE CHANGES
+NO AI TRAINING
+NO THRESHOLD PROMOTION
+
+FEATURES are constructed only from information available at each checkpoint.
+EVENTUAL OUTCOME is reported separately.
+
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+TOTAL TRAJECTORY CASES = 28
+
+==============================================================================================================
+CASE #01  NVDA  LONG  LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +20m return=-0.471997
+FIRST NEGATIVE               D+5m     state=PERSISTENT_FAILURE   dRETURN=-0.051661
+SECOND NEGATIVE              D+10m    state=PERSISTENT_FAILURE   dRETURN=-0.342374
+THIRD NEGATIVE               D+25m    state=PERSISTENT_FAILURE   dRETURN=-0.136668
+FIRST POSITIVE REVERSAL      NONE
+MAX NEGATIVE RUN           = 4
+MAX POSITIVE RUN           = 0
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #02  NVDA  LONG  NO_PF_BY_60
+==============================================================================================================
+FIRST D = +45m return=+0.000000
+FIRST NEGATIVE               D+15m    state=DETERIORATING        dRETURN=-0.029080
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      NONE
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 0
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #03  NVDA  SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = +45m return=-0.124786
+FIRST NEGATIVE               D+15m    state=DETERIORATING        dRETURN=-0.253211
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      NONE
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 0
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #04  NVDA  LONG  LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.205978
+FIRST NEGATIVE               D+10m    state=NEUTRAL              dRETURN=-0.074248
+SECOND NEGATIVE              D+15m    state=DETERIORATING        dRETURN=-0.251485
+THIRD NEGATIVE               D+20m    state=DETERIORATING        dRETURN=-0.213163
+FIRST POSITIVE REVERSAL      D+5m     state=RECOVERING           dRETURN=+0.306572
+MAX NEGATIVE RUN           = 5
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #05  NVDA  SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = NONE
+
+==============================================================================================================
+CASE #06  NVDA  LONG  NO_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.345848
+FIRST NEGATIVE               D+20m    state=DETERIORATING        dRETURN=-0.131968
+SECOND NEGATIVE              D+35m    state=DETERIORATING        dRETURN=-0.352673
+THIRD NEGATIVE               D+50m    state=DETERIORATING        dRETURN=-0.064164
+FIRST POSITIVE REVERSAL      D+5m     state=DETERIORATING        dRETURN=+0.104664
+MAX NEGATIVE RUN           = 3
+MAX POSITIVE RUN           = 3
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = True
+
+==============================================================================================================
+CASE #07  NVDA  SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.287953
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.075895
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+10m    state=DETERIORATING        dRETURN=+0.151789
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 4
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = True
+
+==============================================================================================================
+CASE #08  AAPL  LONG  LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.211734
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.070009
+SECOND NEGATIVE              D+10m    state=DETERIORATING        dRETURN=-0.059764
+THIRD NEGATIVE               D+15m    state=DETERIORATING        dRETURN=-0.134895
+FIRST POSITIVE REVERSAL      D+35m    state=DETERIORATING        dRETURN=+0.215149
+MAX NEGATIVE RUN           = 4
+MAX POSITIVE RUN           = 2
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #09  AAPL  LONG  NO_PF_BY_60
+==============================================================================================================
+FIRST D = +45m return=-0.069327
+FIRST NEGATIVE               NONE
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+15m    state=RECOVERING           dRETURN=+0.454475
+MAX NEGATIVE RUN           = 0
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #10  MSFT  SHORT LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +20m return=-0.373084
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.100760
+SECOND NEGATIVE              D+10m    state=PERSISTENT_FAILURE   dRETURN=-0.247815
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+25m    state=DETERIORATING        dRETURN=+0.245091
+MAX NEGATIVE RUN           = 2
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #11  MSFT  SHORT LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.236049
+FIRST NEGATIVE               D+15m    state=NEUTRAL              dRETURN=-0.107761
+SECOND NEGATIVE              D+50m    state=PERSISTENT_FAILURE   dRETURN=-0.125722
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+5m     state=NEUTRAL              dRETURN=+0.238614
+MAX NEGATIVE RUN           = 2
+MAX POSITIVE RUN           = 2
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #12  MSFT  SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = NONE
+
+==============================================================================================================
+CASE #13  AMZN  SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.019677
+FIRST NEGATIVE               D+10m    state=NEUTRAL              dRETURN=-0.100354
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+5m     state=RECOVERING           dRETURN=+0.159386
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 2
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #14  AMZN  LONG  NO_PF_BY_60
+==============================================================================================================
+FIRST D = +30m return=+0.236466
+FIRST NEGATIVE               D+15m    state=DETERIORATING        dRETURN=-0.598792
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+30m    state=DETERIORATING        dRETURN=+0.923827
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #15  AMZN  LONG  LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +20m return=-0.155128
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.235879
+SECOND NEGATIVE              D+10m    state=DETERIORATING        dRETURN=-0.038251
+THIRD NEGATIVE               D+25m    state=PERSISTENT_FAILURE   dRETURN=-0.289005
+FIRST POSITIVE REVERSAL      NONE
+MAX NEGATIVE RUN           = 4
+MAX POSITIVE RUN           = 0
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #16  AMZN  SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.056973
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.424131
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+10m    state=DETERIORATING        dRETURN=+0.428351
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 2
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #17  AMZN  LONG  NO_PF_BY_60
+==============================================================================================================
+FIRST D = +25m return=-0.334266
+FIRST NEGATIVE               D+20m    state=DETERIORATING        dRETURN=-0.087200
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+5m     state=DETERIORATING        dRETURN=+0.156233
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #18  TSLA  LONG  LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.092709
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.266850
+SECOND NEGATIVE              D+10m    state=PERSISTENT_FAILURE   dRETURN=-0.169131
+THIRD NEGATIVE               D+15m    state=PERSISTENT_FAILURE   dRETURN=-0.172889
+FIRST POSITIVE REVERSAL      D+20m    state=DETERIORATING        dRETURN=+0.382110
+MAX NEGATIVE RUN           = 3
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #19  TSLA  LONG  NO_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.200516
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.198873
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+10m    state=DETERIORATING        dRETURN=+0.151209
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 5
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = True
+
+==============================================================================================================
+CASE #20  TSLA  SHORT LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.125015
+FIRST NEGATIVE               D+10m    state=DETERIORATING        dRETURN=-0.546364
+SECOND NEGATIVE              D+15m    state=PERSISTENT_FAILURE   dRETURN=-0.463020
+THIRD NEGATIVE               D+20m    state=PERSISTENT_FAILURE   dRETURN=-0.246944
+FIRST POSITIVE REVERSAL      D+5m     state=RECOVERING           dRETURN=+0.375046
+MAX NEGATIVE RUN           = 5
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #21  SPY   SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = NONE
+
+==============================================================================================================
+CASE #22  QQQ   SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.421754
+FIRST NEGATIVE               D+15m    state=DETERIORATING        dRETURN=-0.124382
+SECOND NEGATIVE              NONE
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+5m     state=DETERIORATING        dRETURN=+0.040746
+MAX NEGATIVE RUN           = 1
+MAX POSITIVE RUN           = 2
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #23  QQQ   SHORT NO_PF_BY_60
+==============================================================================================================
+FIRST D = +20m return=+0.178959
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.186293
+SECOND NEGATIVE              D+10m    state=DETERIORATING        dRETURN=-0.212697
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+25m    state=DETERIORATING        dRETURN=+0.174558
+MAX NEGATIVE RUN           = 2
+MAX POSITIVE RUN           = 2
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #24  GOOGL SHORT LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +20m return=-0.248855
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.209276
+SECOND NEGATIVE              D+10m    state=PERSISTENT_FAILURE   dRETURN=-0.360541
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+25m    state=PERSISTENT_FAILURE   dRETURN=+0.004066
+MAX NEGATIVE RUN           = 2
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #25  GOOGL LONG  LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.189908
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.192764
+SECOND NEGATIVE              D+10m    state=PERSISTENT_FAILURE   dRETURN=-0.271297
+THIRD NEGATIVE               D+50m    state=PERSISTENT_FAILURE   dRETURN=-0.664820
+FIRST POSITIVE REVERSAL      D+15m    state=DETERIORATING        dRETURN=+0.368392
+MAX NEGATIVE RUN           = 3
+MAX POSITIVE RUN           = 1
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #26  GOOGL LONG  NO_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.085718
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.012719
+SECOND NEGATIVE              D+20m    state=DETERIORATING        dRETURN=-0.013826
+THIRD NEGATIVE               NONE
+FIRST POSITIVE REVERSAL      D+10m    state=DETERIORATING        dRETURN=+0.124706
+MAX NEGATIVE RUN           = 2
+MAX POSITIVE RUN           = 2
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #27  GOOGL SHORT LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +25m return=+0.015677
+FIRST NEGATIVE               D+5m     state=DETERIORATING        dRETURN=-0.360569
+SECOND NEGATIVE              D+20m    state=PERSISTENT_FAILURE   dRETURN=-0.247695
+THIRD NEGATIVE               D+35m    state=PERSISTENT_FAILURE   dRETURN=-0.288456
+FIRST POSITIVE REVERSAL      NONE
+MAX NEGATIVE RUN           = 3
+MAX POSITIVE RUN           = 0
+POSITIVE PERSISTENCE >=2   = False
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+CASE #28  GOOGL LONG  LATER_PF_BY_60
+==============================================================================================================
+FIRST D = +10m return=-0.045050
+FIRST NEGATIVE               D+15m    state=NEUTRAL              dRETURN=-0.184652
+SECOND NEGATIVE              D+20m    state=DETERIORATING        dRETURN=-0.110005
+THIRD NEGATIVE               D+35m    state=DETERIORATING        dRETURN=-0.144054
+FIRST POSITIVE REVERSAL      D+5m     state=NEUTRAL              dRETURN=+0.079099
+MAX NEGATIVE RUN           = 4
+MAX POSITIVE RUN           = 2
+POSITIVE PERSISTENCE >=2   = True
+POSITIVE PERSISTENCE >=3   = False
+
+==============================================================================================================
+FIRST NEGATIVE RETURN-CHANGE INTERVAL
+==============================================================================================================
+CASE SYMBOL DIR    OUTCOME             ELAPSED STATE                       dRETURN
+--------------------------------------------------------------------------------------------------------------
+   1 NVDA   LONG   LATER_PF_BY_60           5m PERSISTENT_FAILURE        -0.051661
+   2 NVDA   LONG   NO_PF_BY_60             15m DETERIORATING             -0.029080
+   3 NVDA   SHORT  NO_PF_BY_60             15m DETERIORATING             -0.253211
+   4 NVDA   LONG   LATER_PF_BY_60          10m NEUTRAL                   -0.074248
+   6 NVDA   LONG   NO_PF_BY_60             20m DETERIORATING             -0.131968
+   7 NVDA   SHORT  NO_PF_BY_60              5m DETERIORATING             -0.075895
+   8 AAPL   LONG   LATER_PF_BY_60           5m DETERIORATING             -0.070009
+  10 MSFT   SHORT  LATER_PF_BY_60           5m DETERIORATING             -0.100760
+  11 MSFT   SHORT  LATER_PF_BY_60          15m NEUTRAL                   -0.107761
+  13 AMZN   SHORT  NO_PF_BY_60             10m NEUTRAL                   -0.100354
+  14 AMZN   LONG   NO_PF_BY_60             15m DETERIORATING             -0.598792
+  15 AMZN   LONG   LATER_PF_BY_60           5m DETERIORATING             -0.235879
+  16 AMZN   SHORT  NO_PF_BY_60              5m DETERIORATING             -0.424131
+  17 AMZN   LONG   NO_PF_BY_60             20m DETERIORATING             -0.087200
+  18 TSLA   LONG   LATER_PF_BY_60           5m DETERIORATING             -0.266850
+  19 TSLA   LONG   NO_PF_BY_60              5m DETERIORATING             -0.198873
+  20 TSLA   SHORT  LATER_PF_BY_60          10m DETERIORATING             -0.546364
+  22 QQQ    SHORT  NO_PF_BY_60             15m DETERIORATING             -0.124382
+  23 QQQ    SHORT  NO_PF_BY_60              5m DETERIORATING             -0.186293
+  24 GOOGL  SHORT  LATER_PF_BY_60           5m DETERIORATING             -0.209276
+  25 GOOGL  LONG   LATER_PF_BY_60           5m DETERIORATING             -0.192764
+  26 GOOGL  LONG   NO_PF_BY_60              5m DETERIORATING             -0.012719
+  27 GOOGL  SHORT  LATER_PF_BY_60           5m DETERIORATING             -0.360569
+  28 GOOGL  LONG   LATER_PF_BY_60          15m NEUTRAL                   -0.184652
+
+==============================================================================================================
+SECOND CONSECUTIVE NEGATIVE RETURN-CHANGE INTERVAL
+==============================================================================================================
+CASE SYMBOL DIR    OUTCOME             ELAPSED STATE                       dRETURN
+--------------------------------------------------------------------------------------------------------------
+   1 NVDA   LONG   LATER_PF_BY_60          10m PERSISTENT_FAILURE        -0.342374
+   4 NVDA   LONG   LATER_PF_BY_60          15m DETERIORATING             -0.251485
+   6 NVDA   LONG   NO_PF_BY_60             35m DETERIORATING             -0.352673
+   8 AAPL   LONG   LATER_PF_BY_60          10m DETERIORATING             -0.059764
+  10 MSFT   SHORT  LATER_PF_BY_60          10m PERSISTENT_FAILURE        -0.247815
+  11 MSFT   SHORT  LATER_PF_BY_60          50m PERSISTENT_FAILURE        -0.125722
+  15 AMZN   LONG   LATER_PF_BY_60          10m DETERIORATING             -0.038251
+  18 TSLA   LONG   LATER_PF_BY_60          10m PERSISTENT_FAILURE        -0.169131
+  20 TSLA   SHORT  LATER_PF_BY_60          15m PERSISTENT_FAILURE        -0.463020
+  23 QQQ    SHORT  NO_PF_BY_60             10m DETERIORATING             -0.212697
+  24 GOOGL  SHORT  LATER_PF_BY_60          10m PERSISTENT_FAILURE        -0.360541
+  25 GOOGL  LONG   LATER_PF_BY_60          10m PERSISTENT_FAILURE        -0.271297
+  26 GOOGL  LONG   NO_PF_BY_60             20m DETERIORATING             -0.013826
+  27 GOOGL  SHORT  LATER_PF_BY_60          20m PERSISTENT_FAILURE        -0.247695
+  28 GOOGL  LONG   LATER_PF_BY_60          20m DETERIORATING             -0.110005
+
+==============================================================================================================
+THIRD CONSECUTIVE NEGATIVE RETURN-CHANGE INTERVAL
+==============================================================================================================
+CASE SYMBOL DIR    OUTCOME             ELAPSED STATE                       dRETURN
+--------------------------------------------------------------------------------------------------------------
+   1 NVDA   LONG   LATER_PF_BY_60          25m PERSISTENT_FAILURE        -0.136668
+   4 NVDA   LONG   LATER_PF_BY_60          20m DETERIORATING             -0.213163
+   6 NVDA   LONG   NO_PF_BY_60             50m DETERIORATING             -0.064164
+   8 AAPL   LONG   LATER_PF_BY_60          15m DETERIORATING             -0.134895
+  15 AMZN   LONG   LATER_PF_BY_60          25m PERSISTENT_FAILURE        -0.289005
+  18 TSLA   LONG   LATER_PF_BY_60          15m PERSISTENT_FAILURE        -0.172889
+  20 TSLA   SHORT  LATER_PF_BY_60          20m PERSISTENT_FAILURE        -0.246944
+  25 GOOGL  LONG   LATER_PF_BY_60          50m PERSISTENT_FAILURE        -0.664820
+  27 GOOGL  SHORT  LATER_PF_BY_60          35m PERSISTENT_FAILURE        -0.288456
+  28 GOOGL  LONG   LATER_PF_BY_60          35m DETERIORATING             -0.144054
+
+==============================================================================================================
+FIRST POSITIVE RETURN-CHANGE REVERSAL
+==============================================================================================================
+CASE SYMBOL DIR    OUTCOME             ELAPSED STATE                       dRETURN
+--------------------------------------------------------------------------------------------------------------
+   4 NVDA   LONG   LATER_PF_BY_60           5m RECOVERING                +0.306572
+   6 NVDA   LONG   NO_PF_BY_60              5m DETERIORATING             +0.104664
+   7 NVDA   SHORT  NO_PF_BY_60             10m DETERIORATING             +0.151789
+   8 AAPL   LONG   LATER_PF_BY_60          35m DETERIORATING             +0.215149
+   9 AAPL   LONG   NO_PF_BY_60             15m RECOVERING                +0.454475
+  10 MSFT   SHORT  LATER_PF_BY_60          25m DETERIORATING             +0.245091
+  11 MSFT   SHORT  LATER_PF_BY_60           5m NEUTRAL                   +0.238614
+  13 AMZN   SHORT  NO_PF_BY_60              5m RECOVERING                +0.159386
+  14 AMZN   LONG   NO_PF_BY_60             30m DETERIORATING             +0.923827
+  16 AMZN   SHORT  NO_PF_BY_60             10m DETERIORATING             +0.428351
+  17 AMZN   LONG   NO_PF_BY_60              5m DETERIORATING             +0.156233
+  18 TSLA   LONG   LATER_PF_BY_60          20m DETERIORATING             +0.382110
+  19 TSLA   LONG   NO_PF_BY_60             10m DETERIORATING             +0.151209
+  20 TSLA   SHORT  LATER_PF_BY_60           5m RECOVERING                +0.375046
+  22 QQQ    SHORT  NO_PF_BY_60              5m DETERIORATING             +0.040746
+  23 QQQ    SHORT  NO_PF_BY_60             25m DETERIORATING             +0.174558
+  24 GOOGL  SHORT  LATER_PF_BY_60          25m PERSISTENT_FAILURE        +0.004066
+  25 GOOGL  LONG   LATER_PF_BY_60          15m DETERIORATING             +0.368392
+  26 GOOGL  LONG   NO_PF_BY_60             10m DETERIORATING             +0.124706
+  28 GOOGL  LONG   LATER_PF_BY_60           5m NEUTRAL                   +0.079099
+
+--------------------------------------------------------------------------------------------------------------
+EVENT: FIRST NEGATIVE
+--------------------------------------------------------------------------------------------------------------
+N = 24
+  LATER_PF_BY_60        12 / 24  = 50.000%
+  NO_PF_BY_60           12 / 24  = 50.000%
+
+--------------------------------------------------------------------------------------------------------------
+EVENT: SECOND CONSECUTIVE NEGATIVE
+--------------------------------------------------------------------------------------------------------------
+N = 15
+  LATER_PF_BY_60        12 / 15  = 80.000%
+  NO_PF_BY_60            3 / 15  = 20.000%
+
+--------------------------------------------------------------------------------------------------------------
+EVENT: THIRD CONSECUTIVE NEGATIVE
+--------------------------------------------------------------------------------------------------------------
+N = 10
+  LATER_PF_BY_60         9 / 10  = 90.000%
+  NO_PF_BY_60            1 / 10  = 10.000%
+
+--------------------------------------------------------------------------------------------------------------
+EVENT: FIRST POSITIVE REVERSAL
+--------------------------------------------------------------------------------------------------------------
+N = 20
+  LATER_PF_BY_60         9 / 20  = 45.000%
+  NO_PF_BY_60           11 / 20  = 55.000%
+
+==============================================================================================================
+PERSISTENCE THRESHOLD SUMMARY
+==============================================================================================================
+
+LATER_PF_BY_60  N=12
+  negative run >= 1: 12/12
+  positive run >= 1: 9/12
+  negative run >= 2: 12/12
+  positive run >= 2: 3/12
+  negative run >= 3: 9/12
+  positive run >= 3: 0/12
+
+NO_PF_BY_60  N=13
+  negative run >= 1: 12/13
+  positive run >= 1: 11/13
+  negative run >= 2: 3/13
+  positive run >= 2: 8/13
+  negative run >= 3: 1/13
+  positive run >= 3: 3/13
+
+==============================================================================================================
+FIRST POSITIVE REVERSAL PERSISTENCE
+==============================================================================================================
+
+POSITIVE RUN >= 1
+  LATER_PF_BY_60     9/9
+  NO_PF_BY_60        11/11
+
+POSITIVE RUN >= 2
+  LATER_PF_BY_60     3/9
+  NO_PF_BY_60        6/11
+
+POSITIVE RUN >= 3
+  LATER_PF_BY_60     0/9
+  NO_PF_BY_60        3/11
+
+==============================================================================================================
+FIRST POSITIVE REVERSAL — STATE AT REVERSAL
+==============================================================================================================
+
+LATER_PF_BY_60
+  DETERIORATING          N=4 cases=8,10,18,25
+  NEUTRAL                N=2 cases=11,28
+  RECOVERING             N=2 cases=4,20
+  PERSISTENT_FAILURE     N=1 cases=24
+
+NO_PF_BY_60
+  DETERIORATING          N=9 cases=6,7,14,16,17,19,22,23,26
+  RECOVERING             N=2 cases=9,13
+
+==============================================================================================================
+DIRECTION-CONTROLLED PERSISTENCE
+==============================================================================================================
+
+### LONG
+  LATER_PF_BY_60     N=7   NEG>=2=7   NEG>=3=7   POS>=2=2   POS>=3=0  
+  NO_PF_BY_60        N=7   NEG>=2=2   NEG>=3=1   POS>=2=3   POS>=3=2  
+
+### SHORT
+  LATER_PF_BY_60     N=5   NEG>=2=5   NEG>=3=2   POS>=2=1   POS>=3=0  
+  NO_PF_BY_60        N=6   NEG>=2=1   NEG>=3=0   POS>=2=5   POS>=3=1  
+
+==============================================================================================================
+FIRST NEGATIVE — DIRECTION CONTROL
+==============================================================================================================
+
+--------------------------------------------------------------------------------------------------------------
+LONG
+--------------------------------------------------------------------------------------------------------------
+N = 13
+  LATER_PF_BY_60         7 / 13  = 53.846%
+  NO_PF_BY_60            6 / 13  = 46.154%
+
+--------------------------------------------------------------------------------------------------------------
+SHORT
+--------------------------------------------------------------------------------------------------------------
+N = 11
+  LATER_PF_BY_60         5 / 11  = 45.455%
+  NO_PF_BY_60            6 / 11  = 54.545%
+
+==============================================================================================================
+SECOND NEGATIVE — DIRECTION CONTROL
+==============================================================================================================
+
+--------------------------------------------------------------------------------------------------------------
+LONG
+--------------------------------------------------------------------------------------------------------------
+N = 9
+  LATER_PF_BY_60         7 / 9   = 77.778%
+  NO_PF_BY_60            2 / 9   = 22.222%
+
+--------------------------------------------------------------------------------------------------------------
+SHORT
+--------------------------------------------------------------------------------------------------------------
+N = 6
+  LATER_PF_BY_60         5 / 6   = 83.333%
+  NO_PF_BY_60            1 / 6   = 16.667%
+
+==============================================================================================================
+THIRD NEGATIVE — DIRECTION CONTROL
+==============================================================================================================
+
+--------------------------------------------------------------------------------------------------------------
+LONG
+--------------------------------------------------------------------------------------------------------------
+N = 8
+  LATER_PF_BY_60         7 / 8   = 87.500%
+  NO_PF_BY_60            1 / 8   = 12.500%
+
+--------------------------------------------------------------------------------------------------------------
+SHORT
+--------------------------------------------------------------------------------------------------------------
+N = 2
+  LATER_PF_BY_60         2 / 2   = 100.000%
+  NO_PF_BY_60            0 / 2   =  0.000%
+
+==============================================================================================================
+FIRST POSITIVE — DIRECTION CONTROL
+==============================================================================================================
+
+--------------------------------------------------------------------------------------------------------------
+LONG
+--------------------------------------------------------------------------------------------------------------
+N = 11
+  LATER_PF_BY_60         5 / 11  = 45.455%
+  NO_PF_BY_60            6 / 11  = 54.545%
+
+--------------------------------------------------------------------------------------------------------------
+SHORT
+--------------------------------------------------------------------------------------------------------------
+N = 9
+  LATER_PF_BY_60         4 / 9   = 44.444%
+  NO_PF_BY_60            5 / 9   = 55.556%
+
+==============================================================================================================
+SYMBOL-CONTROLLED PERSISTENCE
+==============================================================================================================
+SYMBOL     N  PF  NO  NEG2 PF  NEG2 NO  NEG3 PF  NEG3 NO
+--------------------------------------------------------------------------------------------------------------
+AAPL       2   1   1        1        0        1        0
+AMZN       5   1   4        1        0        1        0
+GOOGL      5   4   1        4        1        3        0
+MSFT       2   2   0        2        0        0        0
+NVDA       6   2   4        2        1        2        1
+QQQ        2   0   2        0        1        0        0
+SPY        0   0   0        0        0        0        0
+TSLA       3   2   1        2        0        2        0
+
+==============================================================================================================
+FIRST NEGATIVE — SYMBOL CONTROL
+==============================================================================================================
+SYMBOL      N    PF  NO_PF   PF_RATE
+--------------------------------------------------------------------------------------------------------------
+AAPL        1     1      0   100.0%
+AMZN        5     1      4    20.0%
+GOOGL       5     4      1    80.0%
+MSFT        2     2      0   100.0%
+NVDA        6     2      4    33.3%
+QQQ         2     0      2     0.0%
+TSLA        3     2      1    66.7%
+
+==============================================================================================================
+SECOND NEGATIVE — SYMBOL CONTROL
+==============================================================================================================
+SYMBOL      N    PF  NO_PF   PF_RATE
+--------------------------------------------------------------------------------------------------------------
+AAPL        1     1      0   100.0%
+AMZN        1     1      0   100.0%
+GOOGL       5     4      1    80.0%
+MSFT        2     2      0   100.0%
+NVDA        3     2      1    66.7%
+QQQ         1     0      1     0.0%
+TSLA        2     2      0   100.0%
+
+==============================================================================================================
+THIRD NEGATIVE — SYMBOL CONTROL
+==============================================================================================================
+SYMBOL      N    PF  NO_PF   PF_RATE
+--------------------------------------------------------------------------------------------------------------
+AAPL        1     1      0   100.0%
+AMZN        1     1      0   100.0%
+GOOGL       3     3      0   100.0%
+NVDA        3     2      1    66.7%
+TSLA        2     2      0   100.0%
+
+==============================================================================================================
+FIRST POSITIVE — SYMBOL CONTROL
+==============================================================================================================
+SYMBOL      N    PF  NO_PF   PF_RATE
+--------------------------------------------------------------------------------------------------------------
+AAPL        2     1      1    50.0%
+AMZN        4     0      4     0.0%
+GOOGL       4     3      1    75.0%
+MSFT        2     2      0   100.0%
+NVDA        3     1      2    33.3%
+QQQ         2     0      2     0.0%
+TSLA        3     2      1    66.7%
+
+==============================================================================================================
+FIRST NEGATIVE / FIRST POSITIVE — ACTUAL ELAPSED TIME
+==============================================================================================================
+
+LATER_PF_BY_60
+  first negative elapsed: [5, 10, 5, 5, 15, 5, 5, 10, 5, 5, 5, 15]
+  first positive elapsed: [5, 35, 25, 5, 20, 5, 25, 15, 5]
+
+NO_PF_BY_60
+  first negative elapsed: [15, 15, 20, 5, 10, 15, 5, 20, 5, 15, 5, 5]
+  first positive elapsed: [5, 10, 15, 5, 30, 10, 5, 10, 5, 25, 10]
+
+==============================================================================================================
+RESEARCH INTERPRETATION
+==============================================================================================================
+
+1. FIRST D is the beginning of the post-deterioration observation window.
+
+2. FIRST NEGATIVE, SECOND NEGATIVE, and THIRD NEGATIVE are causal
+   trajectory observations. Each is known only after the corresponding
+   completed checkpoint occurs.
+
+3. A positive return-change interval is an inflection observation only.
+   It is NOT automatically recovery.
+
+4. Positive persistence is measured separately because a single positive
+   interval can be temporary.
+
+5. Eventual PF / NO_PF is a future research label. It must NOT be mixed
+   into the causal feature construction.
+
+6. Direction-controlled results are required because LONG and SHORT
+   trajectories can have different behavior.
+
+7. Symbol-controlled results are required because a pooled pattern can
+   otherwise be dominated by one or two symbols.
+
+8. Actual elapsed time from FIRST D is used. Late FIRST-D cases are
+   therefore not mislabeled as D+30 / D+45 / D+60.
+
+9. This audit does NOT establish a trading rule.
+
+10. The next decision should depend on whether persistence separation
+    remains visible after direction and symbol controls.
+

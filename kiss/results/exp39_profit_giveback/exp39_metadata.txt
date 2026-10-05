@@ -1,0 +1,37 @@
+EXPERIMENT #39 — NVDA PROFIT GIVEBACK PURE OBSERVATION
+
+Purpose:
+Measure how much already-earned profit is given back during a profitable pullback and what happens afterward.
+
+Research status:
+PURE OBSERVATION ONLY
+
+No entry rule.
+No exit rule.
+No V threshold.
+No minor/medium/major classification.
+No optimization.
+No production changes.
+No orders.
+No AI training.
+
+Source:
+kiss/results/exp38_profit_at_v/nvda_profit_at_v_events.csv
+
+Event count: 100
+Unique trades: 39
+Unique cases: 39
+
+Important:
+Multiple events can belong to the same trade. Event counts therefore must not be interpreted as independent trade counts.
+
+Key quantity:
+profit_giveback_pct_of_peak = initial_pullback_pct / favorable_peak_before_v_pct * 100
+
+This quantity describes the fraction of previously earned profit surrendered during the observed pullback.
+
+It is descriptive only and does not establish a trading threshold.
+
+All eventual P&L fields are hindsight/reference fields.
+
+Experiment #39 does not change AIMn.

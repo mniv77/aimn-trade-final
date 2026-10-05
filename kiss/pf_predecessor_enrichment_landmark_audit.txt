@@ -1,0 +1,394 @@
+
+===================================================================================================================
+V13.17 PF PREDECESSOR ENRICHMENT — +30M LANDMARK AUDIT
+===================================================================================================================
+
+PREDICTOR:
+  RECOVERING -> DETERIORATING BY +30M
+
+OUTCOME:
+  PF AFTER +30M AND BY +60M
+
+Cases reaching PF by +30m are excluded.
+LONG and SHORT are reported separately.
+No future information is used for predictor classification.
+No production code changed.
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+TOTAL BUILT CASES = 28
+
+===================================================================================================================
+LANDMARK POPULATION
+===================================================================================================================
+
+TOTAL CASES             = 28
+EARLY PF EXCLUDED       = 7
+ELIGIBLE AT +30M        = 21
+LATER PF BY +60M       = 5
+NO PF BY +60M           = 16
+
+===================================================================================================================
+LANDMARK POPULATION BY DIRECTION
+===================================================================================================================
+
+DIRECTION = LONG
+  TOTAL              = 14
+  EARLY PF EXCLUDED  = 4
+  ELIGIBLE            = 10
+  LATER PF            = 3
+  NO PF                = 7
+
+DIRECTION = SHORT
+  TOTAL              = 14
+  EARLY PF EXCLUDED  = 3
+  ELIGIBLE            = 11
+  LATER PF            = 2
+  NO PF                = 9
+
+===================================================================================================================
+EXACT LANDMARK CASES
+===================================================================================================================
+
+DIRECTION = LONG
+
+NVDA   LONG  OUTCOME=EARLY_PF_EXCLUDED  FIRST_PF=+10m
+  LANDMARK STATE       = PERSISTENT_FAILURE
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:PERSISTENT_FAILURE -> +15m:PERSISTENT_FAILURE -> +20m:DETERIORATING -> +25m:PERSISTENT_FAILURE -> +30m:PERSISTENT_FAILURE
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+GOOGL  LONG  OUTCOME=EARLY_PF_EXCLUDED  FIRST_PF=+20m
+  LANDMARK STATE       = PERSISTENT_FAILURE
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:PERSISTENT_FAILURE -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+TSLA   LONG  OUTCOME=EARLY_PF_EXCLUDED  FIRST_PF=+20m
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:PERSISTENT_FAILURE -> +25m:PERSISTENT_FAILURE -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+AAPL   LONG  OUTCOME=EARLY_PF_EXCLUDED  FIRST_PF=+30m
+  LANDMARK STATE       = PERSISTENT_FAILURE
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+AMZN   LONG  OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = True
+  LAST RECOVERING      = +10m
+  FIRST DETERIORATING  = +20m
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+NVDA   LONG  OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = True
+  LAST RECOVERING      = +15m
+  FIRST DETERIORATING  = +25m
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+GOOGL  LONG  OUTCOME=LATE_PF_BY_60      FIRST_PF=+60m
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:NEUTRAL -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:PERSISTENT_FAILURE
+
+AAPL   LONG  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = RECOVERING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +30m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:RECOVERING
+
+AMZN   LONG  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = True
+  LAST RECOVERING      = +25m
+  FIRST DETERIORATING  = +30m
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+AMZN   LONG  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:NEUTRAL -> +15m:NEUTRAL -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+GOOGL  LONG  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+NVDA   LONG  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = NEUTRAL
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +25m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:NEUTRAL
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+NVDA   LONG  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+TSLA   LONG  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:RECOVERING -> +60m:RECOVERING
+
+DIRECTION = SHORT
+
+TSLA   SHORT OUTCOME=EARLY_PF_EXCLUDED  FIRST_PF=+25m
+  LANDMARK STATE       = PERSISTENT_FAILURE
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:DETERIORATING -> +25m:PERSISTENT_FAILURE -> +30m:PERSISTENT_FAILURE
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+GOOGL  SHORT OUTCOME=EARLY_PF_EXCLUDED  FIRST_PF=+30m
+  LANDMARK STATE       = PERSISTENT_FAILURE
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:NEUTRAL -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+MSFT   SHORT OUTCOME=EARLY_PF_EXCLUDED  FIRST_PF=+30m
+  LANDMARK STATE       = PERSISTENT_FAILURE
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:PERSISTENT_FAILURE
+
+GOOGL  SHORT OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = True
+  LAST RECOVERING      = +20m
+  FIRST DETERIORATING  = +25m
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:DETERIORATING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+MSFT   SHORT OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+  LANDMARK STATE       = NEUTRAL
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +20m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:NEUTRAL -> +30m:NEUTRAL
+  POST-30M PATH        = +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+AMZN   SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = NEUTRAL
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +15m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:NEUTRAL
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+AMZN   SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = True
+  LAST RECOVERING      = +25m
+  FIRST DETERIORATING  = +30m
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:RECOVERING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+MSFT   SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = RECOVERING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +30m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+  POST-30M PATH        = +45m:RECOVERING -> +60m:RECOVERING
+
+NVDA   SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = RECOVERING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +30m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+NVDA   SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = RECOVERING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +30m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+  POST-30M PATH        = +45m:RECOVERING -> +60m:RECOVERING
+
+NVDA   SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = RECOVERING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +30m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:RECOVERING
+  POST-30M PATH        = +45m:RECOVERING -> +60m:DETERIORATING
+
+QQQ    SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = NEUTRAL
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = NONE
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:NEUTRAL
+  POST-30M PATH        = +45m:RECOVERING -> +60m:DETERIORATING
+
+QQQ    SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = DETERIORATING
+  RECOVERY FAILED      = True
+  LAST RECOVERING      = +15m
+  FIRST DETERIORATING  = +20m
+  PRE-30M PATH         = +10m:RECOVERING -> +15m:RECOVERING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+  POST-30M PATH        = +45m:DETERIORATING -> +60m:DETERIORATING
+
+SPY    SHORT OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  LANDMARK STATE       = RECOVERING
+  RECOVERY FAILED      = False
+  LAST RECOVERING      = +30m
+  FIRST DETERIORATING  = NONE
+  PRE-30M PATH         = +10m:NEUTRAL -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+  POST-30M PATH        = +45m:RECOVERING -> +60m:RECOVERING
+
+===================================================================================================================
+PREDICTOR x OUTCOME CONTINGENCY
+===================================================================================================================
+
+RECOVERY_FAILED_BY_30M
+  LATER_PF_BY_60M = 3
+  NO_PF_BY_60M    = 3
+  TOTAL           = 6
+
+NO_RECOVERY_FAILURE_BY_30M
+  LATER_PF_BY_60M = 2
+  NO_PF_BY_60M    = 13
+  TOTAL           = 15
+
+===================================================================================================================
+ENRICHMENT — LONG
+===================================================================================================================
+
+RECOVERY_FAILED_BY_30M
+  CASES             = 3
+  LATER PF BY +60M = 2
+  LATER PF RATE     = 0.6667
+
+NO RECOVERY FAILURE BY +30M
+  CASES             = 7
+  LATER PF BY +60M = 1
+  LATER PF RATE     = 0.1429
+
+DESCRIPTIVE RATE DELTA = +0.5238
+DESCRIPTIVE RATE RATIO = 4.6667
+
+This is descriptive enrichment only.
+
+===================================================================================================================
+ENRICHMENT — SHORT
+===================================================================================================================
+
+RECOVERY_FAILED_BY_30M
+  CASES             = 3
+  LATER PF BY +60M = 1
+  LATER PF RATE     = 0.3333
+
+NO RECOVERY FAILURE BY +30M
+  CASES             = 8
+  LATER PF BY +60M = 1
+  LATER PF RATE     = 0.1250
+
+DESCRIPTIVE RATE DELTA = +0.2083
+DESCRIPTIVE RATE RATIO = 2.6667
+
+This is descriptive enrichment only.
+
+===================================================================================================================
+ENRICHMENT — POOLED
+===================================================================================================================
+
+RECOVERY_FAILED_BY_30M
+  CASES             = 6
+  LATER PF BY +60M = 3
+  LATER PF RATE     = 0.5000
+
+NO RECOVERY FAILURE BY +30M
+  CASES             = 15
+  LATER PF BY +60M = 2
+  LATER PF RATE     = 0.1333
+
+DESCRIPTIVE RATE DELTA = +0.3667
+DESCRIPTIVE RATE RATIO = 3.7500
+
+This is descriptive enrichment only.
+
+===================================================================================================================
+V13.17 PF PREDECESSOR ENRICHMENT — INTERPRETATION
+===================================================================================================================
+
+ELIGIBLE CASES AT +30M = 21
+LATER PF CASES          = 5
+RECOVERY-FAILED CASES   = 6
+OTHER PRE-PF CASES      = 15
+
+The predictor is measured entirely at or before +30m.
+The outcome is measured only after +30m.
+Cases reaching PF by +30m are excluded.
+This prevents PF outcome information from defining the predictor.
+
+A rate difference would be evidence of descriptive association only.
+It would NOT establish causality.
+The sample remains too small for promotion to a rule.
+No result becomes an entry, warning, rescue, hold, or exit rule.
+No production code changed.
+
+===================================================================================================================
+V13.17 PF PREDECESSOR ENRICHMENT LANDMARK AUDIT COMPLETE
+===================================================================================================================

@@ -1,0 +1,39 @@
+AIMn KISS — Experiment #47
+UNPROFITABLE V: NOISE vs CONTINUING REVERSAL
+================================================================================
+
+Research only.
+No production strategy changes.
+No orders.
+No AI training.
+No threshold promotion.
+No re-entry simulation.
+
+QUESTION
+--------
+At an unprofitable V, is price merely making noise,
+or is the reversal continuing against the trade?
+
+SOURCE
+------
+/home/MeirNiv/aimn-trade-final/kiss/results/exp46_not_yet_profitable_v/nvda_not_yet_profitable_v_events.csv
+
+EVENTS
+5
+
+UNIQUE TRADES
+5
+
+CLASSIFICATION
+--------------
+IMMEDIATE_NOISE: 0
+NOISE_THEN_RECOVERY: 0
+CONTINUING_REVERSAL: 0
+MIXED: 0
+INSUFFICIENT: 5
+
+IMPORTANT
+---------
+The experiment does not promote any threshold or trading rule.
+Insufficient events remain insufficient rather than being forced
+into a noise or continuation category.

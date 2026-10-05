@@ -1,0 +1,39 @@
+EXPERIMENT #40 — NVDA PROFIT GIVEBACK TRAJECTORY
+
+Question:
+After a profitable V begins giving back earned profit, what happens next?
+
+Research status:
+PURE OBSERVATION ONLY
+
+No entry rule.
+No exit rule.
+No V threshold.
+No minor/medium/major classification.
+No optimization.
+No parameter promotion.
+No production changes.
+No orders.
+No AI training.
+
+Source:
+kiss/results/exp39_profit_giveback/nvda_profit_giveback_events.csv
+
+Event count: 100
+Unique trades: 39
+Unique cases: 39
+
+Important:
+Multiple events may belong to the same trade. Events are therefore observations rather than independent trades.
+
+Trajectory definition:
+CONTINUED means all available post-V checkpoints improved relative to P&L at V.
+DETERIORATING means all available post-V checkpoints worsened relative to P&L at V.
+MIXED means both improvement and deterioration were observed across the available checkpoints.
+
+These trajectory labels are descriptive only.
+They are not trading rules.
+
+All eventual P&L fields are hindsight/reference information.
+
+Experiment #40 does not change AIMn.

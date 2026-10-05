@@ -1,0 +1,12 @@
+Experiment #44 — Peak Resumption After Flat
+Pure observation only.
+
+Source: /home/MeirNiv/aimn-trade-final/kiss/results/exp42_v_peak_divergence/nvda_v_peak_divergence_transitions.csv
+Source rows: 61
+Flat field: pnl_peak_relationship
+Flat value: PEAK_FLAT
+PEAK_FLAT rows: 27
+Flat episodes: 17
+Flat trades: 16
+
+No trading rule was created.

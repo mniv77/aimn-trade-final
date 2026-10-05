@@ -1,0 +1,267 @@
+
+========================================================================================================================
+V13.17 PF PREDECESSOR STATE-CONTROLLED AUDIT
+========================================================================================================================
+
+PREDICTOR:
+  RECOVERY_FAILED_BY_30M
+
+OUTCOME:
+  PF AFTER +30M AND BY +60M
+
+CONTROLS:
+  DIRECTION
+  STATE AT +30M
+
+Cases reaching PF by +30m are excluded.
+No future information is used for predictor assignment.
+No production code changed.
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+TOTAL BUILT CASES = 28
+
+========================================================================================================================
+ELIGIBLE +30M POPULATION
+========================================================================================================================
+
+TOTAL CASES        = 28
+EXCLUDED EARLY PF  = 7
+ELIGIBLE CASES     = 21
+LATER PF BY +60M   = 5
+NO PF BY +60M      = 16
+
+========================================================================================================================
+DIRECTION + STATE POPULATION
+========================================================================================================================
+
+DIRECTION = LONG
+  STATE=RECOVERING             CASES=1 FAILED=0 CLEAN=1 LATER_PF=0
+  STATE=NEUTRAL                CASES=1 FAILED=0 CLEAN=1 LATER_PF=0
+  STATE=DETERIORATING          CASES=8 FAILED=3 CLEAN=5 LATER_PF=3
+
+DIRECTION = SHORT
+  STATE=RECOVERING             CASES=5 FAILED=0 CLEAN=5 LATER_PF=0
+  STATE=NEUTRAL                CASES=3 FAILED=0 CLEAN=3 LATER_PF=1
+  STATE=DETERIORATING          CASES=3 FAILED=3 CLEAN=0 LATER_PF=1
+
+========================================================================================================================
+DIRECTION-CONTROLLED SUMMARY (WITHOUT STATE POOLING)
+========================================================================================================================
+
+DIRECTION = LONG
+  FAILED N=3 PF=2 RATE=0.6667
+  CLEAN  N=7 PF=1 RATE=0.1429
+
+DIRECTION = SHORT
+  FAILED N=3 PF=1 RATE=0.3333
+  CLEAN  N=8 PF=1 RATE=0.1250
+
+========================================================================================================================
+DIRECTION + +30M STATE CONTROLLED COMPARISONS
+========================================================================================================================
+
+------------------------------------------------------------------------------------------------------------------------
+STRATUM: LONG +30M_STATE=RECOVERING
+------------------------------------------------------------------------------------------------------------------------
+
+  RECOVERY_FAILED_BY_30M
+    CASES             = 0
+    LATER PF BY +60M  = 0
+    NO PF BY +60M     = 0
+    LATER PF RATE     = NA
+
+  NO_RECOVERY_FAILURE_BY_30M
+    CASES             = 1
+    LATER PF BY +60M  = 0
+    NO PF BY +60M     = 1
+    LATER PF RATE     = 0.0000
+
+  WITHIN-STRATUM RATE DELTA = NA
+  STATUS = NOT COMPARABLE
+
+  EXACT CASES:
+    AAPL   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+
+------------------------------------------------------------------------------------------------------------------------
+STRATUM: LONG +30M_STATE=NEUTRAL
+------------------------------------------------------------------------------------------------------------------------
+
+  RECOVERY_FAILED_BY_30M
+    CASES             = 0
+    LATER PF BY +60M  = 0
+    NO PF BY +60M     = 0
+    LATER PF RATE     = NA
+
+  NO_RECOVERY_FAILURE_BY_30M
+    CASES             = 1
+    LATER PF BY +60M  = 0
+    NO PF BY +60M     = 1
+    LATER PF RATE     = 0.0000
+
+  WITHIN-STRATUM RATE DELTA = NA
+  STATUS = NOT COMPARABLE
+
+  EXACT CASES:
+    NVDA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+
+------------------------------------------------------------------------------------------------------------------------
+STRATUM: LONG +30M_STATE=DETERIORATING
+------------------------------------------------------------------------------------------------------------------------
+
+  RECOVERY_FAILED_BY_30M
+    CASES             = 3
+    LATER PF BY +60M  = 2
+    NO PF BY +60M     = 1
+    LATER PF RATE     = 0.6667
+
+  NO_RECOVERY_FAILURE_BY_30M
+    CASES             = 5
+    LATER PF BY +60M  = 1
+    NO PF BY +60M     = 4
+    LATER PF RATE     = 0.2000
+
+  WITHIN-STRATUM RATE DELTA (FAILED - CLEAN) = +0.4667
+  STATUS = COMPARABLE DESCRIPTIVELY
+
+  EXACT CASES:
+    AMZN   FAILED OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+    GOOGL  CLEAN  OUTCOME=LATE_PF_BY_60      FIRST_PF=+60m
+    NVDA   FAILED OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+    AMZN   FAILED OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    AMZN   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    GOOGL  CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    NVDA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    TSLA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+
+------------------------------------------------------------------------------------------------------------------------
+STRATUM: SHORT +30M_STATE=RECOVERING
+------------------------------------------------------------------------------------------------------------------------
+
+  RECOVERY_FAILED_BY_30M
+    CASES             = 0
+    LATER PF BY +60M  = 0
+    NO PF BY +60M     = 0
+    LATER PF RATE     = NA
+
+  NO_RECOVERY_FAILURE_BY_30M
+    CASES             = 5
+    LATER PF BY +60M  = 0
+    NO PF BY +60M     = 5
+    LATER PF RATE     = 0.0000
+
+  WITHIN-STRATUM RATE DELTA = NA
+  STATUS = NOT COMPARABLE
+
+  EXACT CASES:
+    MSFT   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    NVDA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    NVDA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    NVDA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    SPY    CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+
+------------------------------------------------------------------------------------------------------------------------
+STRATUM: SHORT +30M_STATE=NEUTRAL
+------------------------------------------------------------------------------------------------------------------------
+
+  RECOVERY_FAILED_BY_30M
+    CASES             = 0
+    LATER PF BY +60M  = 0
+    NO PF BY +60M     = 0
+    LATER PF RATE     = NA
+
+  NO_RECOVERY_FAILURE_BY_30M
+    CASES             = 3
+    LATER PF BY +60M  = 1
+    NO PF BY +60M     = 2
+    LATER PF RATE     = 0.3333
+
+  WITHIN-STRATUM RATE DELTA = NA
+  STATUS = NOT COMPARABLE
+
+  EXACT CASES:
+    MSFT   CLEAN  OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+    AMZN   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    QQQ    CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+
+------------------------------------------------------------------------------------------------------------------------
+STRATUM: SHORT +30M_STATE=DETERIORATING
+------------------------------------------------------------------------------------------------------------------------
+
+  RECOVERY_FAILED_BY_30M
+    CASES             = 3
+    LATER PF BY +60M  = 1
+    NO PF BY +60M     = 2
+    LATER PF RATE     = 0.3333
+
+  NO_RECOVERY_FAILURE_BY_30M
+    CASES             = 0
+    LATER PF BY +60M  = 0
+    NO PF BY +60M     = 0
+    LATER PF RATE     = NA
+
+  WITHIN-STRATUM RATE DELTA = NA
+  STATUS = NOT COMPARABLE
+
+  EXACT CASES:
+    GOOGL  FAILED OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+    AMZN   FAILED OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+    QQQ    FAILED OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+
+========================================================================================================================
+CONTROL SUMMARY
+========================================================================================================================
+
+TOTAL NONEMPTY STRATA = 6
+COMPARABLE STRATA     = 1
+NONCOMPARABLE STRATA  = 5
+
+COMPARABLE STRATA:
+  LONG  DETERIORATING          FAILED_N=3 CLEAN_N=5 DELTA=+0.4667
+
+NONCOMPARABLE STRATA:
+  LONG  RECOVERING             FAILED_N=0 CLEAN_N=1
+  LONG  NEUTRAL                FAILED_N=0 CLEAN_N=1
+  SHORT RECOVERING             FAILED_N=0 CLEAN_N=5
+  SHORT NEUTRAL                FAILED_N=0 CLEAN_N=3
+  SHORT DETERIORATING          FAILED_N=3 CLEAN_N=0
+
+========================================================================================================================
+V13.17 STATE-CONTROLLED PF PREDECESSOR — INTERPRETATION
+========================================================================================================================
+
+COMPARABLE DIRECTION+STATE STRATA = 1
+
+LONG / DETERIORATING: FAILED_N=3, CLEAN_N=5, DELTA=+0.4667
+
+These are within-stratum descriptive comparisons only.
+
+The +30m predictor is measured before the post-+30m outcome.
+No future information is used to define RECOVERY_FAILED_BY_30M.
+The sample remains small.
+No result becomes an entry, warning, rescue, hold, or exit rule.
+No production code changed.
+
+========================================================================================================================
+V13.17 PF PREDECESSOR STATE-CONTROLLED AUDIT COMPLETE
+========================================================================================================================

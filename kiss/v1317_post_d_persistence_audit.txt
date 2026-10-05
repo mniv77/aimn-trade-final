@@ -1,0 +1,821 @@
+========================================================================================================================
+AIMn / KISS V13.17 POST-FIRST-DETERIORATION PERSISTENCE AUDIT
+========================================================================================================================
+
+RESEARCH ONLY
+NO ORDERS | NO PRODUCTION CHANGES | NO AI TRAINING | NO THRESHOLD PROMOTION
+
+QUESTION:
+When deterioration begins, how long does the direction of return change persist before the trajectory reverses?
+
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+TOTAL TRAJECTORY CASES = 28
+
+========================================================================================================================
+CASE #01  NVDA   LONG  LATER_PF_BY_60
+opposite_time=2026-06-05 10:20:00 official_time=2026-06-05 14:00:00 warning_lead=265.0
+FIRST D = +20m return=-0.471997 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 20     DETERIORATING             -0.471997       --          --
+ 25     PERSISTENT_FAILURE        -0.523659   -0.051661      -
+ 30     PERSISTENT_FAILURE        -0.866033   -0.342374      -
+ 45     PERSISTENT_FAILURE        -1.002700   -0.136668      -
+ 60     PERSISTENT_FAILURE        -1.662557   -0.659857      -
+
+PERSISTENCE SUMMARY
+  delta signs             = - - - -
+  longest negative run    = 4
+  longest positive run    = 0
+  first positive reversal = NONE
+  first negative interval  = +25m dRETURN=-0.051661 state=PERSISTENT_FAILURE
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.394035
+  +45m = -0.530703
+  +60m = -1.190560
+
+========================================================================================================================
+CASE #02  NVDA   LONG  NO_PF_BY_60
+opposite_time=2026-06-09 10:20:00 official_time=2026-06-09 14:30:00 warning_lead=295.0
+FIRST D = +45m return=+0.000000 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 45     DETERIORATING             +0.000000       --          --
+ 60     DETERIORATING             -0.029080   -0.029080      -
+
+PERSISTENCE SUMMARY
+  delta signs             = -
+  longest negative run    = 1
+  longest positive run    = 0
+  first positive reversal = NONE
+  first negative interval  = +60m dRETURN=-0.029080 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.029080
+  +45m = -0.029080
+  +60m = -0.029080
+
+========================================================================================================================
+CASE #03  NVDA   SHORT NO_PF_BY_60
+opposite_time=2026-07-07 10:20:00 official_time=2026-07-07 16:30:00 warning_lead=415.0
+FIRST D = +45m return=-0.124786 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 45     DETERIORATING             -0.124786       --          --
+ 60     DETERIORATING             -0.377996   -0.253211      -
+
+PERSISTENCE SUMMARY
+  delta signs             = -
+  longest negative run    = 1
+  longest positive run    = 0
+  first positive reversal = NONE
+  first negative interval  = +60m dRETURN=-0.253211 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.253211
+  +45m = -0.253211
+  +60m = -0.253211
+
+========================================================================================================================
+CASE #04  NVDA   LONG  LATER_PF_BY_60
+opposite_time=2026-07-16 10:20:00 official_time=2026-07-16 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.205978 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.205978       --          --
+ 15     RECOVERING                +0.100594   +0.306572      +
+ 20     NEUTRAL                   +0.026346   -0.074248      -
+ 25     DETERIORATING             -0.225139   -0.251485      -
+ 30     DETERIORATING             -0.438302   -0.213163      -
+ 45     PERSISTENT_FAILURE        -1.089768   -0.651466      -
+ 60     PERSISTENT_FAILURE        -1.307722   -0.217954      -
+
+PERSISTENCE SUMMARY
+  delta signs             = + - - - - -
+  longest negative run    = 5
+  longest positive run    = 1
+  first positive reversal = +15m dRETURN=+0.306572 state=RECOVERING
+  first negative interval  = +20m dRETURN=-0.074248 state=NEUTRAL
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.232324
+  +45m = -0.883790
+  +60m = -1.101744
+
+========================================================================================================================
+CASE #05  NVDA   SHORT NO_PF_BY_60
+opposite_time=2026-07-30 10:35:00 official_time=2026-07-30 14:00:00 warning_lead=265.0
+FIRST D = NONE
+No post-D persistence analysis.
+
+========================================================================================================================
+CASE #06  NVDA   LONG  NO_PF_BY_60
+opposite_time=2026-08-06 10:35:00 official_time=2026-08-06 15:30:00 warning_lead=355.0
+FIRST D = +10m return=-0.345848 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.345848       --          --
+ 15     DETERIORATING             -0.241183   +0.104664      +
+ 20     NEUTRAL                   -0.160182   +0.081001      +
+ 25     NEUTRAL                   -0.154721   +0.005461      +
+ 30     DETERIORATING             -0.286689   -0.131968      -
+ 45     DETERIORATING             -0.639363   -0.352673      -
+ 60     DETERIORATING             -0.703527   -0.064164      -
+
+PERSISTENCE SUMMARY
+  delta signs             = + + + - - -
+  longest negative run    = 3
+  longest positive run    = 3
+  first positive reversal = +15m dRETURN=+0.104664 state=DETERIORATING
+  first negative interval  = +30m dRETURN=-0.131968 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = +0.059158
+  +45m = -0.293515
+  +60m = -0.357679
+
+========================================================================================================================
+CASE #07  NVDA   SHORT NO_PF_BY_60
+opposite_time=2026-08-12 10:35:00 official_time=2026-08-12 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.287953 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.287953       --          --
+ 15     DETERIORATING             -0.363847   -0.075895      -
+ 20     DETERIORATING             -0.212058   +0.151789      +
+ 25     DETERIORATING             +0.028126   +0.240184      +
+ 30     RECOVERING                +0.111610   +0.083484      +
+ 45     RECOVERING                +0.256702   +0.145093      +
+ 60     DETERIORATING             +0.069198   -0.187504      -
+
+PERSISTENCE SUMMARY
+  delta signs             = - + + + + -
+  longest negative run    = 1
+  longest positive run    = 4
+  first positive reversal = +20m dRETURN=+0.151789 state=DETERIORATING
+  first negative interval  = +15m dRETURN=-0.075895 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = +0.399562
+  +45m = +0.544655
+  +60m = +0.357151
+
+========================================================================================================================
+CASE #08  AAPL   LONG  NO_PF_BY_60
+opposite_time=2026-06-12 10:20:00 official_time=2026-06-12 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.211734 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.211734       --          --
+ 15     DETERIORATING             -0.281743   -0.070009      -
+ 20     DETERIORATING             -0.341507   -0.059764      -
+ 25     DETERIORATING             -0.476402   -0.134895      -
+ 30     PERSISTENT_FAILURE        -0.583977   -0.107575      -
+ 45     DETERIORATING             -0.368827   +0.215149      +
+ 60     DETERIORATING             -0.018783   +0.350044      +
+
+PERSISTENCE SUMMARY
+  delta signs             = - - - - + +
+  longest negative run    = 4
+  longest positive run    = 2
+  first positive reversal = +45m dRETURN=+0.215149 state=DETERIORATING
+  first negative interval  = +15m dRETURN=-0.070009 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.372242
+  +45m = -0.157093
+  +60m = +0.192951
+
+========================================================================================================================
+CASE #09  AAPL   LONG  NO_PF_BY_60
+opposite_time=2026-07-22 10:35:00 official_time=2026-07-22 14:00:00 warning_lead=265.0
+FIRST D = +45m return=-0.069327 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 45     DETERIORATING             -0.069327       --          --
+ 60     RECOVERING                +0.385149   +0.454475      +
+
+PERSISTENCE SUMMARY
+  delta signs             = +
+  longest negative run    = 0
+  longest positive run    = 1
+  first positive reversal = +60m dRETURN=+0.454475 state=RECOVERING
+  first negative interval  = NONE
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = +0.454475
+  +45m = +0.454475
+  +60m = +0.454475
+
+========================================================================================================================
+CASE #10  MSFT   SHORT LATER_PF_BY_60
+opposite_time=2026-06-26 10:35:00 official_time=2026-06-26 14:00:00 warning_lead=265.0
+FIRST D = +20m return=-0.373084 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 20     DETERIORATING             -0.373084       --          --
+ 25     DETERIORATING             -0.473843   -0.100760      -
+ 30     PERSISTENT_FAILURE        -0.721658   -0.247815      -
+ 45     DETERIORATING             -0.476567   +0.245091      +
+ 60     PERSISTENT_FAILURE        -0.875521   -0.398954      -
+
+PERSISTENCE SUMMARY
+  delta signs             = - - + -
+  longest negative run    = 2
+  longest positive run    = 1
+  first positive reversal = +45m dRETURN=+0.245091 state=DETERIORATING
+  first negative interval  = +25m dRETURN=-0.100760 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.348574
+  +45m = -0.103483
+  +60m = -0.502437
+
+========================================================================================================================
+CASE #11  MSFT   SHORT LATER_PF_BY_60
+opposite_time=2026-07-27 10:35:00 official_time=2026-07-27 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.236049 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.236049       --          --
+ 15     NEUTRAL                   +0.002566   +0.238614      +
+ 20     RECOVERING                +0.109044   +0.106479      +
+ 25     NEUTRAL                   +0.001283   -0.107761      -
+ 30     NEUTRAL                   +0.033355   +0.032072      +
+ 45     PERSISTENT_FAILURE        -0.841565   -0.874920      -
+ 60     PERSISTENT_FAILURE        -0.967287   -0.125722      -
+
+PERSISTENCE SUMMARY
+  delta signs             = + + - + - -
+  longest negative run    = 2
+  longest positive run    = 2
+  first positive reversal = +15m dRETURN=+0.238614 state=NEUTRAL
+  first negative interval  = +25m dRETURN=-0.107761 state=NEUTRAL
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = +0.269403
+  +45m = -0.605516
+  +60m = -0.731238
+
+========================================================================================================================
+CASE #12  MSFT   SHORT NO_PF_BY_60
+opposite_time=2026-08-13 10:20:00 official_time=2026-08-13 14:00:00 warning_lead=265.0
+FIRST D = NONE
+No post-D persistence analysis.
+
+========================================================================================================================
+CASE #13  AMZN   SHORT NO_PF_BY_60
+opposite_time=2026-06-04 11:45:00 official_time=2026-06-04 14:00:00 warning_lead=165.0
+FIRST D = +10m return=-0.019677 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.019677       --          --
+ 15     RECOVERING                +0.139709   +0.159386      +
+ 20     NEUTRAL                   +0.039355   -0.100354      -
+ 25     NEUTRAL                   +0.045258   +0.005903      +
+ 30     NEUTRAL                   -0.059032   -0.104290      -
+ 45     DETERIORATING             -0.031484   +0.027548      +
+ 60     DETERIORATING             +0.082645   +0.114128      +
+
+PERSISTENCE SUMMARY
+  delta signs             = + - + - + +
+  longest negative run    = 1
+  longest positive run    = 2
+  first positive reversal = +15m dRETURN=+0.159386 state=RECOVERING
+  first negative interval  = +20m dRETURN=-0.100354 state=NEUTRAL
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.039355
+  +45m = -0.011806
+  +60m = +0.102322
+
+========================================================================================================================
+CASE #14  AMZN   LONG  NO_PF_BY_60
+opposite_time=2026-06-12 10:05:00 official_time=2026-06-12 14:00:00 warning_lead=265.0
+FIRST D = +30m return=+0.236466 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 30     DETERIORATING             +0.236466       --          --
+ 45     DETERIORATING             -0.362327   -0.598792      -
+ 60     DETERIORATING             +0.561500   +0.923827      +
+
+PERSISTENCE SUMMARY
+  delta signs             = - +
+  longest negative run    = 1
+  longest positive run    = 1
+  first positive reversal = +60m dRETURN=+0.923827 state=DETERIORATING
+  first negative interval  = +45m dRETURN=-0.598792 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.598792
+  +45m = -0.598792
+  +60m = +0.325034
+
+========================================================================================================================
+CASE #15  AMZN   LONG  LATER_PF_BY_60
+opposite_time=2026-06-22 10:35:00 official_time=2026-06-22 14:00:00 warning_lead=265.0
+FIRST D = +20m return=-0.155128 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 20     DETERIORATING             -0.155128       --          --
+ 25     DETERIORATING             -0.391007   -0.235879      -
+ 30     DETERIORATING             -0.429258   -0.038251      -
+ 45     PERSISTENT_FAILURE        -0.718263   -0.289005      -
+ 60     PERSISTENT_FAILURE        -0.958392   -0.240129      -
+
+PERSISTENCE SUMMARY
+  delta signs             = - - - -
+  longest negative run    = 4
+  longest positive run    = 0
+  first positive reversal = NONE
+  first negative interval  = +25m dRETURN=-0.235879 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.274130
+  +45m = -0.563135
+  +60m = -0.803264
+
+========================================================================================================================
+CASE #16  AMZN   SHORT NO_PF_BY_60
+opposite_time=2026-07-30 10:05:00 official_time=2026-07-30 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.056973 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.056973       --          --
+ 15     DETERIORATING             -0.481104   -0.424131      -
+ 20     DETERIORATING             -0.052753   +0.428351      +
+ 25     RECOVERING                +0.124496   +0.177249      +
+ 30     DETERIORATING             -0.149817   -0.274314      -
+ 45     DETERIORATING             -0.143065   +0.006752      +
+ 60     DETERIORATING             -0.027431   +0.115634      +
+
+PERSISTENCE SUMMARY
+  delta signs             = - + + - + +
+  longest negative run    = 1
+  longest positive run    = 2
+  first positive reversal = +20m dRETURN=+0.428351 state=DETERIORATING
+  first negative interval  = +15m dRETURN=-0.424131 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.092845
+  +45m = -0.086092
+  +60m = +0.029541
+
+========================================================================================================================
+CASE #17  AMZN   LONG  NO_PF_BY_60
+opposite_time=2026-08-11 10:05:00 official_time=2026-08-11 14:00:00 warning_lead=265.0
+FIRST D = +25m return=-0.334266 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 25     DETERIORATING             -0.334266       --          --
+ 30     DETERIORATING             -0.178033   +0.156233      +
+ 45     DETERIORATING             -0.265233   -0.087200      -
+ 60     DETERIORATING             -0.248883   +0.016350      +
+
+PERSISTENCE SUMMARY
+  delta signs             = + - +
+  longest negative run    = 1
+  longest positive run    = 1
+  first positive reversal = +30m dRETURN=+0.156233 state=DETERIORATING
+  first negative interval  = +45m dRETURN=-0.087200 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = +0.156233
+  +45m = +0.069033
+  +60m = +0.085383
+
+========================================================================================================================
+CASE #18  TSLA   LONG  LATER_PF_BY_60
+opposite_time=2026-07-02 10:35:00 official_time=2026-07-02 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.092709 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.092709       --          --
+ 15     DETERIORATING             -0.359559   -0.266850      -
+ 20     PERSISTENT_FAILURE        -0.528690   -0.169131      -
+ 25     PERSISTENT_FAILURE        -0.701579   -0.172889      -
+ 30     DETERIORATING             -0.319469   +0.382110      +
+ 45     PERSISTENT_FAILURE        -0.686545   -0.367076      -
+ 60     PERSISTENT_FAILURE        -0.543723   +0.142821      +
+
+PERSISTENCE SUMMARY
+  delta signs             = - - - + - +
+  longest negative run    = 3
+  longest positive run    = 1
+  first positive reversal = +30m dRETURN=+0.382110 state=DETERIORATING
+  first negative interval  = +15m dRETURN=-0.266850 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.226760
+  +45m = -0.593836
+  +60m = -0.451015
+
+========================================================================================================================
+CASE #19  TSLA   LONG  NO_PF_BY_60
+opposite_time=2026-07-31 10:05:00 official_time=2026-07-31 14:30:00 warning_lead=295.0
+FIRST D = +10m return=-0.200516 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.200516       --          --
+ 15     DETERIORATING             -0.399389   -0.198873      -
+ 20     DETERIORATING             -0.248180   +0.151209      +
+ 25     DETERIORATING             +0.001644   +0.249823      +
+ 30     DETERIORATING             +0.042733   +0.041089      +
+ 45     RECOVERING                +0.598261   +0.555528      +
+ 60     RECOVERING                +1.525237   +0.926976      +
+
+PERSISTENCE SUMMARY
+  delta signs             = - + + + + +
+  longest negative run    = 1
+  longest positive run    = 5
+  first positive reversal = +20m dRETURN=+0.151209 state=DETERIORATING
+  first negative interval  = +15m dRETURN=-0.198873 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = +0.243249
+  +45m = +0.798777
+  +60m = +1.725753
+
+========================================================================================================================
+CASE #20  TSLA   SHORT LATER_PF_BY_60
+opposite_time=2026-08-07 10:05:00 official_time=2026-08-07 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.125015 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.125015       --          --
+ 15     RECOVERING                +0.250031   +0.375046      +
+ 20     DETERIORATING             -0.296333   -0.546364      -
+ 25     PERSISTENT_FAILURE        -0.759353   -0.463020      -
+ 30     PERSISTENT_FAILURE        -1.006297   -0.246944      -
+ 45     PERSISTENT_FAILURE        -1.472404   -0.466107      -
+ 60     PERSISTENT_FAILURE        -1.864428   -0.392024      -
+
+PERSISTENCE SUMMARY
+  delta signs             = + - - - - -
+  longest negative run    = 5
+  longest positive run    = 1
+  first positive reversal = +15m dRETURN=+0.375046 state=RECOVERING
+  first negative interval  = +20m dRETURN=-0.546364 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.881282
+  +45m = -1.347389
+  +60m = -1.739412
+
+========================================================================================================================
+CASE #21  SPY    SHORT NO_PF_BY_60
+opposite_time=2026-06-09 10:05:00 official_time=2026-06-09 14:00:00 warning_lead=265.0
+FIRST D = NONE
+No post-D persistence analysis.
+
+========================================================================================================================
+CASE #22  QQQ    SHORT NO_PF_BY_60
+opposite_time=2026-06-11 10:20:00 official_time=2026-06-11 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.421754 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.421754       --          --
+ 15     DETERIORATING             -0.381008   +0.040746      +
+ 20     DETERIORATING             -0.250193   +0.130815      +
+ 25     DETERIORATING             -0.374575   -0.124382      -
+ 30     NEUTRAL                   -0.195865   +0.178709      +
+ 45     RECOVERING                +0.387442   +0.583307      +
+ 60     DETERIORATING             -0.008578   -0.396020      -
+
+PERSISTENCE SUMMARY
+  delta signs             = + + - + + -
+  longest negative run    = 1
+  longest positive run    = 2
+  first positive reversal = +15m dRETURN=+0.040746 state=DETERIORATING
+  first negative interval  = +25m dRETURN=-0.124382 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = +0.225889
+  +45m = +0.809196
+  +60m = +0.413176
+
+========================================================================================================================
+CASE #23  QQQ    SHORT NO_PF_BY_60
+opposite_time=2026-07-30 10:05:00 official_time=2026-07-30 14:00:00 warning_lead=265.0
+FIRST D = +20m return=+0.178959 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 20     DETERIORATING             +0.178959       --          --
+ 25     DETERIORATING             -0.007334   -0.186293      -
+ 30     DETERIORATING             -0.220032   -0.212697      -
+ 45     DETERIORATING             -0.045473   +0.174558      +
+ 60     DETERIORATING             +0.321246   +0.366719      +
+
+PERSISTENCE SUMMARY
+  delta signs             = - - + +
+  longest negative run    = 2
+  longest positive run    = 2
+  first positive reversal = +45m dRETURN=+0.174558 state=DETERIORATING
+  first negative interval  = +25m dRETURN=-0.186293 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.398991
+  +45m = -0.224432
+  +60m = +0.142287
+
+========================================================================================================================
+CASE #24  GOOGL  SHORT LATER_PF_BY_60
+opposite_time=2026-06-04 11:45:00 official_time=2026-06-04 14:00:00 warning_lead=165.0
+FIRST D = +20m return=-0.248855 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 20     DETERIORATING             -0.248855       --          --
+ 25     DETERIORATING             -0.458131   -0.209276      -
+ 30     PERSISTENT_FAILURE        -0.818672   -0.360541      -
+ 45     PERSISTENT_FAILURE        -0.814606   +0.004066      +
+ 60     PERSISTENT_FAILURE        -0.844425   -0.029819      -
+
+PERSISTENCE SUMMARY
+  delta signs             = - - + -
+  longest negative run    = 2
+  longest positive run    = 1
+  first positive reversal = +45m dRETURN=+0.004066 state=PERSISTENT_FAILURE
+  first negative interval  = +25m dRETURN=-0.209276 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.569818
+  +45m = -0.565751
+  +60m = -0.595570
+
+========================================================================================================================
+CASE #25  GOOGL  LONG  LATER_PF_BY_60
+opposite_time=2026-06-22 10:20:00 official_time=2026-06-22 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.189908 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.189908       --          --
+ 15     DETERIORATING             -0.382671   -0.192764      -
+ 20     PERSISTENT_FAILURE        -0.653968   -0.271297      -
+ 25     DETERIORATING             -0.285576   +0.368392      +
+ 30     PERSISTENT_FAILURE        -0.733929   -0.448354      -
+ 45     PERSISTENT_FAILURE        -1.371334   -0.637405      -
+ 60     PERSISTENT_FAILURE        -2.036154   -0.664820      -
+
+PERSISTENCE SUMMARY
+  delta signs             = - - + - - -
+  longest negative run    = 3
+  longest positive run    = 1
+  first positive reversal = +25m dRETURN=+0.368392 state=DETERIORATING
+  first negative interval  = +15m dRETURN=-0.192764 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.544021
+  +45m = -1.181426
+  +60m = -1.846246
+
+========================================================================================================================
+CASE #26  GOOGL  LONG  NO_PF_BY_60
+opposite_time=2026-07-06 10:35:00 official_time=2026-07-06 14:00:00 warning_lead=265.0
+FIRST D = +10m return=-0.085718 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.085718       --          --
+ 15     DETERIORATING             -0.098438   -0.012719      -
+ 20     DETERIORATING             +0.026268   +0.124706      +
+ 25     DETERIORATING             -0.011060   -0.037329      -
+ 30     DETERIORATING             -0.024886   -0.013826      -
+ 45     DETERIORATING             +0.196322   +0.221208      +
+ 60     DETERIORATING             +0.326282   +0.129960      +
+
+PERSISTENCE SUMMARY
+  delta signs             = - + - - + +
+  longest negative run    = 2
+  longest positive run    = 2
+  first positive reversal = +20m dRETURN=+0.124706 state=DETERIORATING
+  first negative interval  = +15m dRETURN=-0.012719 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = +0.060832
+  +45m = +0.282041
+  +60m = +0.412001
+
+========================================================================================================================
+CASE #27  GOOGL  SHORT LATER_PF_BY_60
+opposite_time=2026-07-24 10:35:00 official_time=2026-07-24 17:30:00 warning_lead=475.0
+FIRST D = +25m return=+0.015677 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 25     DETERIORATING             +0.015677       --          --
+ 30     DETERIORATING             -0.344892   -0.360569      -
+ 45     PERSISTENT_FAILURE        -0.592588   -0.247695      -
+ 60     PERSISTENT_FAILURE        -0.881043   -0.288456      -
+
+PERSISTENCE SUMMARY
+  delta signs             = - - -
+  longest negative run    = 3
+  longest positive run    = 0
+  first positive reversal = NONE
+  first negative interval  = +30m dRETURN=-0.360569 state=DETERIORATING
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.360569
+  +45m = -0.608265
+  +60m = -0.896720
+
+========================================================================================================================
+CASE #28  GOOGL  LONG  LATER_PF_BY_60
+opposite_time=2026-08-05 10:35:00 official_time=2026-08-05 16:00:00 warning_lead=385.0
+FIRST D = +10m return=-0.045050 state=DETERIORATING
+
+MIN     STATE                    RETURN       dRETURN       SIGN
+ 10     DETERIORATING             -0.045050       --          --
+ 15     NEUTRAL                   +0.034049   +0.079099      +
+ 20     NEUTRAL                   +0.064170   +0.030120      +
+ 25     NEUTRAL                   -0.120482   -0.184652      -
+ 30     DETERIORATING             -0.230487   -0.110005      -
+ 45     DETERIORATING             -0.374542   -0.144054      -
+ 60     PERSISTENT_FAILURE        -0.797538   -0.422996      -
+
+PERSISTENCE SUMMARY
+  delta signs             = + + - - - -
+  longest negative run    = 4
+  longest positive run    = 2
+  first positive reversal = +15m dRETURN=+0.079099 state=NEUTRAL
+  first negative interval  = +25m dRETURN=-0.184652 state=NEUTRAL
+
+FIXED-HORIZON CHANGE FROM FIRST D
+  +30m = -0.185437
+  +45m = -0.329492
+  +60m = -0.752488
+
+------------------------------------------------------------------------------------------------------------------------
+LATER_PF_BY_60
+------------------------------------------------------------------------------------------------------------------------
+N = 11
+avg longest negative run = 3.364
+avg longest positive run = 0.909
+avg positive intervals    = 1.091
+avg negative intervals    = 3.909
+positive persistence 1        8/11
+positive persistence 2        2/11
+positive persistence 3        0/11
+negative persistence 1       11/11
+negative persistence 2       11/11
+negative persistence 3        8/11
+avg cumulative +30  = -0.340686
+avg cumulative +45  = -0.664799
+avg cumulative +60  = -0.964609
+
+------------------------------------------------------------------------------------------------------------------------
+NO_PF_BY_60
+------------------------------------------------------------------------------------------------------------------------
+N = 17
+avg longest negative run = 1.176
+avg longest positive run = 1.588
+avg positive intervals    = 2.059
+avg negative intervals    = 1.471
+positive persistence 1       12/17
+positive persistence 2        9/17
+positive persistence 3        3/17
+negative persistence 1       13/17
+negative persistence 2        4/17
+negative persistence 3        2/17
+avg cumulative +30  = -0.013223
+avg cumulative +45  = +0.093154
+avg cumulative +60  = +0.257150
+
+========================================================================================================================
+DIRECT OUTCOME COMPARISON
+========================================================================================================================
+
+METRIC                         PF        NO_PF
+--------------------------------------------------------
+N                                      11         17
+avg longest negative run       3.3636363636363638 1.1764705882352942
+avg longest positive run       0.9090909090909091 1.588235294117647
+avg positive intervals         1.0909090909090908 2.0588235294117645
+avg negative intervals         3.909090909090909 1.4705882352941178
+positive persistence >=2                2          9
+positive persistence >=3                0          3
+negative persistence >=2               11          4
+negative persistence >=3                8          2
+avg D->+30                     -0.34068618649122473 -0.013222568814930101
+avg D->+45                     -0.6647987688773723 0.09315394016003274
+avg D->+60                     -0.9646086612485728 0.25715041683191164
+
+========================================================================================================================
+FIRST POSITIVE REVERSAL AFTER FIRST D
+========================================================================================================================
+
+LATER_PF_BY_60: 8 cases with positive reversal
+  +15m = 4
+  +25m = 1
+  +30m = 1
+  +45m = 2
+
+NO_PF_BY_60: 12 cases with positive reversal
+  +15m = 3
+  +20m = 4
+  +30m = 1
+  +45m = 2
+  +60m = 2
+
+========================================================================================================================
+ALL CASE PERSISTENCE TABLE
+========================================================================================================================
+CASE  SYMBOL DIR  OUTCOME        D    FIRST+  NEG_RUN POS_RUN D30       D45       D60
+------------------------------------------------------------------------------------------------------------------------
+   1  NVDA   LONG LATER_PF_BY_60  20      --       4       0 -0.394035 -0.530703 -1.190560
+   2  NVDA   LONG NO_PF_BY_60     45      --       1       0 -0.029080 -0.029080 -0.029080
+   3  NVDA   SHORT NO_PF_BY_60     45      --       1       0 -0.253211 -0.253211 -0.253211
+   4  NVDA   LONG LATER_PF_BY_60  10      15       5       1 -0.232324 -0.883790 -1.101744
+   5  NVDA   SHORT NO_PF_BY_60    None      --       0       0        NA        NA        NA
+   6  NVDA   LONG NO_PF_BY_60     10      15       3       3 +0.059158 -0.293515 -0.357679
+   7  NVDA   SHORT NO_PF_BY_60     10      20       1       4 +0.399562 +0.544655 +0.357151
+   8  AAPL   LONG NO_PF_BY_60     10      45       4       2 -0.372242 -0.157093 +0.192951
+   9  AAPL   LONG NO_PF_BY_60     45      60       0       1 +0.454475 +0.454475 +0.454475
+  10  MSFT   SHORT LATER_PF_BY_60  20      45       2       1 -0.348574 -0.103483 -0.502437
+  11  MSFT   SHORT LATER_PF_BY_60  10      15       2       2 +0.269403 -0.605516 -0.731238
+  12  MSFT   SHORT NO_PF_BY_60    None      --       0       0        NA        NA        NA
+  13  AMZN   SHORT NO_PF_BY_60     10      15       1       2 -0.039355 -0.011806 +0.102322
+  14  AMZN   LONG NO_PF_BY_60     30      60       1       1 -0.598792 -0.598792 +0.325034
+  15  AMZN   LONG LATER_PF_BY_60  20      --       4       0 -0.274130 -0.563135 -0.803264
+  16  AMZN   SHORT NO_PF_BY_60     10      20       1       2 -0.092845 -0.086092 +0.029541
+  17  AMZN   LONG NO_PF_BY_60     25      30       1       1 +0.156233 +0.069033 +0.085383
+  18  TSLA   LONG LATER_PF_BY_60  10      30       3       1 -0.226760 -0.593836 -0.451015
+  19  TSLA   LONG NO_PF_BY_60     10      20       1       5 +0.243249 +0.798777 +1.725753
+  20  TSLA   SHORT LATER_PF_BY_60  10      15       5       1 -0.881282 -1.347389 -1.739412
+  21  SPY    SHORT NO_PF_BY_60    None      --       0       0        NA        NA        NA
+  22  QQQ    SHORT NO_PF_BY_60     10      15       1       2 +0.225889 +0.809196 +0.413176
+  23  QQQ    SHORT NO_PF_BY_60     20      45       2       2 -0.398991 -0.224432 +0.142287
+  24  GOOGL  SHORT LATER_PF_BY_60  20      45       2       1 -0.569818 -0.565751 -0.595570
+  25  GOOGL  LONG LATER_PF_BY_60  10      25       3       1 -0.544021 -1.181426 -1.846246
+  26  GOOGL  LONG NO_PF_BY_60     10      20       2       2 +0.060832 +0.282041 +0.412001
+  27  GOOGL  SHORT LATER_PF_BY_60  25      --       3       0 -0.360569 -0.608265 -0.896720
+  28  GOOGL  LONG LATER_PF_BY_60  10      15       4       2 -0.185437 -0.329492 -0.752488
+
+========================================================================================================================
+CASES WITH NO DETERIORATING CHECKPOINT
+========================================================================================================================
+NO_D_COUNT = 3
+  NVDA SHORT NO_PF_BY_60
+  MSFT SHORT NO_PF_BY_60
+  SPY SHORT NO_PF_BY_60
+
+========================================================================================================================
+RESEARCH INTERPRETATION
+========================================================================================================================
+
+1. This audit does NOT establish a trading rule.
+
+2. A single positive return change after D is treated only as
+   an inflection observation.
+
+3. The important question is whether positive or negative change
+   persists across multiple consecutive checkpoints.
+
+4. Fixed-horizon D->+30 / +45 / +60 measurements are descriptive.
+   They contain future information and therefore cannot be used
+   as causal triggers at first D.
+
+5. PF cases that recover temporarily remain important counterexamples.
+   A temporary positive interval does not automatically mean recovery.
+
+6. NO_PF cases that deteriorate repeatedly before recovering are also
+   important counterexamples.
+
+7. The next research question should therefore be:
+
+       FIRST D
+          |
+          +-- negative persistence
+          |
+          +-- first positive inflection
+          |
+          +-- positive persistence
+          |
+          +-- state at inflection
+          |
+          +-- eventual trajectory
+
+8. Only if the pattern survives direction-controlled and
+   symbol-controlled analysis should we investigate whether
+   it has operational value.
+

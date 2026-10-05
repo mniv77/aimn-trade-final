@@ -1,0 +1,204 @@
+
+========================================================================================================================
+V13.17 FAILED-RECOVERY TIMING AUDIT
+========================================================================================================================
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+FAILED-RECOVERY CASES BUILT = 6
+
+========================================================================================================================
+EXACT FAILED-RECOVERY CASES
+========================================================================================================================
+
+DIRECTION = LONG
+
+AMZN   LATER_PF_BY_60  FIRST_PF=+45m
+  FIRST RECOVERY            = +10m
+  LAST RECOVERY             = +10m
+  FIRST DETERIORATION       = +20m
+  RECOVERY->DETERIORATION   = 10m
+  DETERIORATION->+30m       = 10m
+  DETERIORATING POINTS      = 3
+  LAST RECOVERY RETURN      = 0.418632326065712
+  FIRST DETERIORATION RETURN = -0.15512771473499964
+  RETURN AT +30M             = -0.42925751200645623
+  PEAK RETURN                = 0.418632326065712 @+10m
+  GIVEBACK FROM PEAK         = 0.8478898380721682
+  MFE AT +30M                = 0.418632326065712
+  PATH                       = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+NVDA   LATER_PF_BY_60  FIRST_PF=+45m
+  FIRST RECOVERY            = +15m
+  LAST RECOVERY             = +15m
+  FIRST DETERIORATION       = +25m
+  RECOVERY->DETERIORATION   = 10m
+  DETERIORATION->+30m       = 5m
+  DETERIORATING POINTS      = 2
+  LAST RECOVERY RETURN      = 0.10059398352175128
+  FIRST DETERIORATION RETURN = -0.2251389155010533
+  RETURN AT +30M             = -0.4383023567733244
+  PEAK RETURN                = 0.10059398352175128 @+15m
+  GIVEBACK FROM PEAK         = 0.5388963402950757
+  MFE AT +30M                = 0.10059398352175128
+  PATH                       = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+AMZN   NO_PF_BY_60     FIRST_PF=NONE
+  FIRST RECOVERY            = +10m
+  LAST RECOVERY             = +25m
+  FIRST DETERIORATION       = +30m
+  RECOVERY->DETERIORATION   = 5m
+  DETERIORATION->+30m       = 0m
+  DETERIORATING POINTS      = 1
+  LAST RECOVERY RETURN      = 0.3284246212522537
+  FIRST DETERIORATION RETURN = 0.23646572730161788
+  RETURN AT +30M             = 0.23646572730161788
+  PEAK RETURN                = 0.4449623900837001 @+20m
+  GIVEBACK FROM PEAK         = 0.2084966627820822
+  MFE AT +30M                = 0.4449623900837001
+  PATH                       = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:DETERIORATING
+
+DIRECTION = SHORT
+
+GOOGL  LATER_PF_BY_60  FIRST_PF=+45m
+  FIRST RECOVERY            = +10m
+  LAST RECOVERY             = +20m
+  FIRST DETERIORATION       = +25m
+  RECOVERY->DETERIORATION   = 5m
+  DETERIORATION->+30m       = 5m
+  DETERIORATING POINTS      = 2
+  LAST RECOVERY RETURN      = 0.29159089483915684
+  FIRST DETERIORATION RETURN = 0.015676929830065647
+  RETURN AT +30M             = -0.3448924562613729
+  PEAK RETURN                = 0.31824167555025595 @+15m
+  GIVEBACK FROM PEAK         = 0.6631341318116288
+  MFE AT +30M                = 0.31824167555025595
+  PATH                       = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+AMZN   NO_PF_BY_60     FIRST_PF=NONE
+  FIRST RECOVERY            = +25m
+  LAST RECOVERY             = +25m
+  FIRST DETERIORATION       = +30m
+  RECOVERY->DETERIORATION   = 5m
+  DETERIORATION->+30m       = 0m
+  DETERIORATING POINTS      = 1
+  LAST RECOVERY RETURN      = 0.12449621236100353
+  FIRST DETERIORATION RETURN = -0.1498174758920427
+  RETURN AT +30M             = -0.1498174758920427
+  PEAK RETURN                = 0.12449621236100353 @+25m
+  GIVEBACK FROM PEAK         = 0.27431368825304625
+  MFE AT +30M                = 0.12449621236100353
+  PATH                       = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:RECOVERING -> +30m:DETERIORATING
+
+QQQ    NO_PF_BY_60     FIRST_PF=NONE
+  FIRST RECOVERY            = +10m
+  LAST RECOVERY             = +15m
+  FIRST DETERIORATION       = +20m
+  RECOVERY->DETERIORATION   = 5m
+  DETERIORATION->+30m       = 10m
+  DETERIORATING POINTS      = 3
+  LAST RECOVERY RETURN      = 0.1921610045179926
+  FIRST DETERIORATION RETURN = 0.1789591034442333
+  RETURN AT +30M             = -0.220031684562577
+  PEAK RETURN                = 0.2728392888575975 @+10m
+  GIVEBACK FROM PEAK         = 0.4928709734201745
+  MFE AT +30M                = 0.2728392888575975
+  PATH                       = +10m:RECOVERING -> +15m:RECOVERING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+========================================================================================================================
+FAILED-RECOVERY OUTCOME BY DIRECTION
+========================================================================================================================
+
+LONG: CASES=3 LATER_PF=2 NO_PF=1
+
+SHORT: CASES=3 LATER_PF=1 NO_PF=2
+
+========================================================================================================================
+FAILED-RECOVERY: LATER PF vs NO PF
+========================================================================================================================
+
+========================================================================================================================
+SUMMARY — LATER_PF_BY_60
+========================================================================================================================
+
+CASES = 3
+LATER PF BY +60M = 3
+NO PF BY +60M    = 0
+RECOVERY_TO_DETERIORATION_GAP      N=3 AVG=+8.333333 MEDIAN=+10.000000 MIN=+5.000000 MAX=+10.000000
+DETERIORATION_TO_30M_DURATION      N=3 AVG=+6.666667 MEDIAN=+5.000000 MIN=+5.000000 MAX=+10.000000
+LAST_RECOVERY_RETURN               N=3 AVG=+0.270272 MEDIAN=+0.291591 MIN=+0.100594 MAX=+0.418632
+FIRST_DETERIORATION_RETURN         N=3 AVG=-0.121530 MEDIAN=-0.155128 MIN=-0.225139 MAX=+0.015677
+RETURN_AT_30M                      N=3 AVG=-0.404151 MEDIAN=-0.429258 MIN=-0.438302 MAX=-0.344892
+PEAK_SIGNED_RETURN                 N=3 AVG=+0.279156 MEDIAN=+0.318242 MIN=+0.100594 MAX=+0.418632
+GIVEBACK_FROM_PEAK                 N=3 AVG=+0.683307 MEDIAN=+0.663134 MIN=+0.538896 MAX=+0.847890
+MFE_AT_30M                         N=3 AVG=+0.279156 MEDIAN=+0.318242 MIN=+0.100594 MAX=+0.418632
+DETERIORATING_POINTS               N=3 AVG=2.333 MEDIAN=2.000 MIN=2 MAX=3
+
+========================================================================================================================
+SUMMARY — NO_PF_BY_60
+========================================================================================================================
+
+CASES = 3
+LATER PF BY +60M = 0
+NO PF BY +60M    = 3
+RECOVERY_TO_DETERIORATION_GAP      N=3 AVG=+5.000000 MEDIAN=+5.000000 MIN=+5.000000 MAX=+5.000000
+DETERIORATION_TO_30M_DURATION      N=3 AVG=+3.333333 MEDIAN=+0.000000 MIN=+0.000000 MAX=+10.000000
+LAST_RECOVERY_RETURN               N=3 AVG=+0.215027 MEDIAN=+0.192161 MIN=+0.124496 MAX=+0.328425
+FIRST_DETERIORATION_RETURN         N=3 AVG=+0.088536 MEDIAN=+0.178959 MIN=-0.149817 MAX=+0.236466
+RETURN_AT_30M                      N=3 AVG=-0.044461 MEDIAN=-0.149817 MIN=-0.220032 MAX=+0.236466
+PEAK_SIGNED_RETURN                 N=3 AVG=+0.280766 MEDIAN=+0.272839 MIN=+0.124496 MAX=+0.444962
+GIVEBACK_FROM_PEAK                 N=3 AVG=+0.325227 MEDIAN=+0.274314 MIN=+0.208497 MAX=+0.492871
+MFE_AT_30M                         N=3 AVG=+0.280766 MEDIAN=+0.272839 MIN=+0.124496 MAX=+0.444962
+DETERIORATING_POINTS               N=3 AVG=1.667 MEDIAN=1.000 MIN=1 MAX=3
+
+DIRECTION BREAKDOWN
+
+LONG
+  LATER_PF = 2
+  NO_PF    = 1
+
+SHORT
+  LATER_PF = 1
+  NO_PF    = 2
+
+========================================================================================================================
+V13.17 FAILED-RECOVERY TIMING — INTERPRETATION
+========================================================================================================================
+
+This audit is restricted to cases where recovery already failed before +30m.
+FAILED-RECOVERY CASES = 6
+LATER PF = 3
+NO PF    = 3
+
+The measurements describe when and how the recovery failure unfolded before +30m.
+They do not use post-+30m information.
+No timing threshold is derived.
+No composite score is constructed.
+The sample is extremely small.
+LONG and SHORT are reported separately.
+No result becomes an entry, warning, rescue, hold, or exit rule.
+No production code changed.
+
+========================================================================================================================
+V13.17 FAILED-RECOVERY TIMING AUDIT COMPLETE
+========================================================================================================================

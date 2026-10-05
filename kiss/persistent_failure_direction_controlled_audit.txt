@@ -1,0 +1,297 @@
+
+===================================================================================================================
+V13.17 PERSISTENT FAILURE DIRECTION-CONTROLLED PREDECESSOR AUDIT
+===================================================================================================================
+
+PRIMARY COHORT A:
+  DIRECT_FROM_DETERIORATING
+
+PRIMARY COHORT B:
+  RECOVERY_FAILED_THEN_DETERIORATING
+
+CONTROL:
+  LONG compared only with LONG
+  SHORT compared only with SHORT
+
+Future returns are measured FROM FIRST PF ONSET.
+No future information is used for cohort assignment.
+No production code changed.
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+PRIMARY COHORT CASES = 10
+
+===================================================================================================================
+DIRECTION-CONTROLLED POPULATION
+===================================================================================================================
+
+DIRECTION = LONG
+  DIRECT_FROM_DETERIORATING                  = 5
+  RECOVERY_FAILED_THEN_DETERIORATING         = 1
+  WITHIN-DIRECTION COMPARISON AVAILABLE = True
+DIRECTION = SHORT
+  DIRECT_FROM_DETERIORATING                  = 1
+  RECOVERY_FAILED_THEN_DETERIORATING         = 3
+  WITHIN-DIRECTION COMPARISON AVAILABLE = True
+
+===================================================================================================================
+DIRECTION-CONTROLLED RETURN SUMMARY
+===================================================================================================================
+
+DIRECTION = LONG
+
+  DIRECT_FROM_DETERIORATING N_CASES = 5
+  RECOVERY_FAILED_THEN_DETERIORATING N_CASES = 1
+
+  WITHIN-DIRECTION FUTURE RETURNS
+
+  +5m
+    DIRECT N=2 AVG=+0.098505% MEDIAN=+0.098505% POS=1 NEG=1
+    FAILED N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    DELTA (FAILED - DIRECT) = NA
+
+  +10m
+    DIRECT N=2 AVG=+0.064923% MEDIAN=+0.064923% POS=1 NEG=1
+    FAILED N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    DELTA (FAILED - DIRECT) = NA
+
+  +15m
+    DIRECT N=2 AVG=-0.012727% MEDIAN=-0.012727% POS=1 NEG=1
+    FAILED N=1 AVG=-0.220355% MEDIAN=-0.220355% POS=0 NEG=1
+    DELTA (FAILED - DIRECT) = -0.207628%
+
+  +20m
+    DIRECT N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    FAILED N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    DELTA (FAILED - DIRECT) = NA
+
+  +30m
+    DIRECT N=1 AVG=+0.568514% MEDIAN=+0.568514% POS=1 NEG=0
+    FAILED N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    DELTA (FAILED - DIRECT) = NA
+
+DIRECTION = SHORT
+
+  DIRECT_FROM_DETERIORATING N_CASES = 1
+  RECOVERY_FAILED_THEN_DETERIORATING N_CASES = 3
+
+  WITHIN-DIRECTION FUTURE RETURNS
+
+  +5m
+    DIRECT N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    FAILED N=1 AVG=-0.245083% MEDIAN=-0.245083% POS=0 NEG=1
+    DELTA (FAILED - DIRECT) = NA
+
+  +10m
+    DIRECT N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    FAILED N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    DELTA (FAILED - DIRECT) = NA
+
+  +15m
+    DIRECT N=1 AVG=+0.004033% MEDIAN=+0.004033% POS=1 NEG=0
+    FAILED N=2 AVG=-0.021710% MEDIAN=-0.021710% POS=1 NEG=1
+    DELTA (FAILED - DIRECT) = -0.025744%
+
+  +20m
+    DIRECT N=0 AVG=NA MEDIAN=NA POS=0 NEG=0
+    FAILED N=1 AVG=-0.707677% MEDIAN=-0.707677% POS=0 NEG=1
+    DELTA (FAILED - DIRECT) = NA
+
+  +30m
+    DIRECT N=1 AVG=-0.025544% MEDIAN=-0.025544% POS=0 NEG=1
+    FAILED N=1 AVG=-0.152761% MEDIAN=-0.152761% POS=0 NEG=1
+    DELTA (FAILED - DIRECT) = -0.127217%
+
+===================================================================================================================
+DIRECTION-CONTROLLED EXACT CASE MATRIX
+===================================================================================================================
+
+DIRECTION = LONG
+
+  COHORT = DIRECT_FROM_DETERIORATING
+
+    GOOGL  LONG  PF_ONSET=+20m GROUP=EARLY_PF
+      ONSET_RETURN=-0.6539680726504327
+      +5m = +0.370818%
+      +10m = -0.080488%
+      +15m = NA
+      +20m = NA
+      +30m = NA
+
+    TSLA   LONG  PF_ONSET=+20m GROUP=EARLY_PF
+      ONSET_RETURN=-0.5286895514908578
+      +5m = -0.173808%
+      +10m = +0.210333%
+      +15m = NA
+      +20m = NA
+      +30m = NA
+
+    AAPL   LONG  PF_ONSET=+30m GROUP=EARLY_PF
+      ONSET_RETURN=-0.5839765043371286
+      +5m = NA
+      +10m = NA
+      +15m = +0.216413%
+      +20m = NA
+      +30m = +0.568514%
+
+    AMZN   LONG  PF_ONSET=+45m GROUP=LATE_PF
+      ONSET_RETURN=-0.718262569594967
+      +5m = NA
+      +10m = NA
+      +15m = -0.241866%
+      +20m = NA
+      +30m = NA
+
+    GOOGL  LONG  PF_ONSET=+60m GROUP=LATE_PF
+      ONSET_RETURN=-0.7975379779989565
+      +5m = NA
+      +10m = NA
+      +15m = NA
+      +20m = NA
+      +30m = NA
+
+  COHORT = RECOVERY_FAILED_THEN_DETERIORATING
+
+    NVDA   LONG  PF_ONSET=+45m GROUP=LATE_PF
+      ONSET_RETURN=-1.08976815481892
+      +5m = NA
+      +10m = NA
+      +15m = -0.220355%
+      +20m = NA
+      +30m = NA
+
+DIRECTION = SHORT
+
+  COHORT = DIRECT_FROM_DETERIORATING
+
+    GOOGL  SHORT PF_ONSET=+30m GROUP=EARLY_PF
+      ONSET_RETURN=-0.8186722329149717
+      +5m = NA
+      +10m = NA
+      +15m = +0.004033%
+      +20m = NA
+      +30m = -0.025544%
+
+  COHORT = RECOVERY_FAILED_THEN_DETERIORATING
+
+    TSLA   SHORT PF_ONSET=+25m GROUP=EARLY_PF
+      ONSET_RETURN=-0.759353006544029
+      +5m = -0.245083%
+      +10m = NA
+      +15m = NA
+      +20m = -0.707677%
+      +30m = NA
+
+    MSFT   SHORT PF_ONSET=+30m GROUP=EARLY_PF
+      ONSET_RETURN=-0.7216579069197555
+      +5m = NA
+      +10m = NA
+      +15m = +0.243335%
+      +20m = NA
+      +30m = -0.152761%
+
+    GOOGL  SHORT PF_ONSET=+45m GROUP=LATE_PF
+      ONSET_RETURN=-0.5925879475763424
+      +5m = NA
+      +10m = NA
+      +15m = -0.286756%
+      +20m = NA
+      +30m = NA
+
+===================================================================================================================
+DIRECTION + PF TIMING CROSSCHECK
+===================================================================================================================
+
+DIRECTION = LONG
+  DIRECT_FROM_DETERIORATING                  TOTAL=5 EARLY=3 LATE=2 UNKNOWN=0
+  RECOVERY_FAILED_THEN_DETERIORATING         TOTAL=1 EARLY=0 LATE=1 UNKNOWN=0
+
+DIRECTION = SHORT
+  DIRECT_FROM_DETERIORATING                  TOTAL=1 EARLY=1 LATE=0 UNKNOWN=0
+  RECOVERY_FAILED_THEN_DETERIORATING         TOTAL=3 EARLY=2 LATE=1 UNKNOWN=0
+
+===================================================================================================================
+DIRECTION-CONTROLLED ASSESSMENT
+===================================================================================================================
+
+LONG:
+  DIRECT cases = 5
+  FAILED-RECOVERY cases = 1
+  RESULT = WITHIN-DIRECTION COMPARISON POSSIBLE
+
+SHORT:
+  DIRECT cases = 1
+  FAILED-RECOVERY cases = 3
+  RESULT = WITHIN-DIRECTION COMPARISON POSSIBLE
+
+LONG contains both primary cohorts.
+A within-LONG descriptive comparison is possible.
+SHORT contains both primary cohorts.
+A within-SHORT descriptive comparison is possible.
+
+IMPORTANT:
+The presence of a directional comparison does not make the sample large enough for validation.
+A descriptive difference does not establish causality.
+No result becomes an entry, warning, rescue, hold, or exit rule.
+No production code changed.
+
+===================================================================================================================
+V13.17 DIRECTION-CONTROLLED PF PREDECESSOR — INTERPRETATION
+===================================================================================================================
+
+PRIMARY COHORT CASES = 10
+DIRECT_FROM_DETERIORATING = 6
+RECOVERY_FAILED_THEN_DETERIORATING = 4
+
+This audit controls direction before comparing the predecessor cohorts.
+Any direction with no cases in one cohort is not treated as comparable.
+Any observed delta is descriptive only.
+The current sample remains small.
+No result becomes a trading rule.
+No production code changed.
+
+===================================================================================================================
+V13.17 PERSISTENT FAILURE DIRECTION-CONTROLLED AUDIT COMPLETE
+===================================================================================================================

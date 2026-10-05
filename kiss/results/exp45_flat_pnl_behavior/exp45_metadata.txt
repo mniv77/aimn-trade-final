@@ -1,0 +1,13 @@
+Experiment #45 — Flat Peak + P&L Behavior
+Pure observation only.
+
+Source: /home/MeirNiv/aimn-trade-final/kiss/results/exp42_v_peak_divergence/nvda_v_peak_divergence_transitions.csv
+Source rows: 61
+PEAK_FLAT rows: 27
+Flat episodes: 17
+Flat trades: 16
+
+P&L behavior is descriptive only.
+No numeric threshold was introduced.
+No trading rule was created.
+No production logic was changed.

@@ -1,0 +1,226 @@
+
+========================================================================================================================
+V13.17 RECOVERY ATTEMPT OUTCOME AUDIT
+========================================================================================================================
+
+PRIMARY COMPARISON:
+  RECOVERY_FAILED
+  RECOVERY_HELD
+
+NO-RECOVERY CASES ARE EXCLUDED.
+
+PF BY +30m IS EXCLUDED.
+
+OUTCOME = PF AFTER +30m AND BY +60m.
+
+LONG and SHORT are reported separately.
+No future information is used to classify recovery outcome.
+No production code changed.
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+RECOVERY ATTEMPT CASES BUILT = 15
+
+========================================================================================================================
+RECOVERY ATTEMPT POPULATION
+========================================================================================================================
+
+TOTAL RECOVERY ATTEMPT CASES = 15
+RECOVERY_FAILED              = 6
+RECOVERY_HELD                = 9
+
+LONG: FAILED=3 HELD=2
+SHORT: FAILED=3 HELD=7
+
+========================================================================================================================
+EXACT RECOVERY ATTEMPT CASES
+========================================================================================================================
+
+DIRECTION = LONG
+
+  AMZN   RECOVERY_FAILED  OUTCOME=LATER_PF_BY_60  FIRST_PF=+45m
+    +30M STATE        = DETERIORATING
+    LAST RECOVERY     = +10m
+    DETERIORATION     = +20m
+    PATH              = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+  AMZN   RECOVERY_FAILED  OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = DETERIORATING
+    LAST RECOVERY     = +25m
+    DETERIORATION     = +30m
+    PATH              = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:DETERIORATING
+
+  NVDA   RECOVERY_FAILED  OUTCOME=LATER_PF_BY_60  FIRST_PF=+45m
+    +30M STATE        = DETERIORATING
+    LAST RECOVERY     = +15m
+    DETERIORATION     = +25m
+    PATH              = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+  AAPL   RECOVERY_HELD    OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = RECOVERING
+    LAST RECOVERY     = +30m
+    DETERIORATION     = NONE
+    PATH              = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+
+  NVDA   RECOVERY_HELD    OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = NEUTRAL
+    LAST RECOVERY     = +25m
+    DETERIORATION     = NONE
+    PATH              = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:NEUTRAL
+
+DIRECTION = SHORT
+
+  AMZN   RECOVERY_FAILED  OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = DETERIORATING
+    LAST RECOVERY     = +25m
+    DETERIORATION     = +30m
+    PATH              = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:RECOVERING -> +30m:DETERIORATING
+
+  GOOGL  RECOVERY_FAILED  OUTCOME=LATER_PF_BY_60  FIRST_PF=+45m
+    +30M STATE        = DETERIORATING
+    LAST RECOVERY     = +20m
+    DETERIORATION     = +25m
+    PATH              = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+  QQQ    RECOVERY_FAILED  OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = DETERIORATING
+    LAST RECOVERY     = +15m
+    DETERIORATION     = +20m
+    PATH              = +10m:RECOVERING -> +15m:RECOVERING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+  AMZN   RECOVERY_HELD    OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = NEUTRAL
+    LAST RECOVERY     = +15m
+    DETERIORATION     = NONE
+    PATH              = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:NEUTRAL
+
+  MSFT   RECOVERY_HELD    OUTCOME=LATER_PF_BY_60  FIRST_PF=+45m
+    +30M STATE        = NEUTRAL
+    LAST RECOVERY     = +20m
+    DETERIORATION     = NONE
+    PATH              = +10m:DETERIORATING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:NEUTRAL -> +30m:NEUTRAL
+
+  MSFT   RECOVERY_HELD    OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = RECOVERING
+    LAST RECOVERY     = +30m
+    DETERIORATION     = NONE
+    PATH              = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+
+  NVDA   RECOVERY_HELD    OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = RECOVERING
+    LAST RECOVERY     = +30m
+    DETERIORATION     = NONE
+    PATH              = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+
+  NVDA   RECOVERY_HELD    OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = RECOVERING
+    LAST RECOVERY     = +30m
+    DETERIORATION     = NONE
+    PATH              = +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+
+  NVDA   RECOVERY_HELD    OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = RECOVERING
+    LAST RECOVERY     = +30m
+    DETERIORATION     = NONE
+    PATH              = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:RECOVERING
+
+  SPY    RECOVERY_HELD    OUTCOME=NO_PF_BY_60     FIRST_PF=NONE
+    +30M STATE        = RECOVERING
+    LAST RECOVERY     = +30m
+    DETERIORATION     = NONE
+    PATH              = +10m:NEUTRAL -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:RECOVERING
+
+========================================================================================================================
+POOLED RECOVERY OUTCOME COMPARISON
+========================================================================================================================
+
+GROUP = RECOVERY_FAILED
+  CASES             = 6
+  LATER PF BY +60M  = 3
+  NO PF BY +60M     = 3
+  LATER PF RATE     = 0.5000
+
+GROUP = RECOVERY_HELD
+  CASES             = 9
+  LATER PF BY +60M  = 1
+  NO PF BY +60M     = 8
+  LATER PF RATE     = 0.1111
+
+DESCRIPTIVE RATE DELTA (FAILED - HELD) = +0.3889
+
+========================================================================================================================
+DIRECTION-CONTROLLED RECOVERY OUTCOME
+========================================================================================================================
+
+DIRECTION = LONG
+  FAILED N=3 PF=2 RATE=0.6667
+  HELD   N=2 PF=0 RATE=0.0000
+  DELTA (FAILED - HELD) = +0.6667
+
+DIRECTION = SHORT
+  FAILED N=3 PF=1 RATE=0.3333
+  HELD   N=7 PF=1 RATE=0.1429
+  DELTA (FAILED - HELD) = +0.1905
+
+========================================================================================================================
+RECOVERY OUTCOME x +30M STATE
+========================================================================================================================
+
+STATE = DETERIORATING
+  FAILED N=6 PF=3
+  HELD   N=0 PF=0
+  WITHIN-STATE DELTA = NA (one cohort absent)
+
+STATE = NEUTRAL
+  FAILED N=0 PF=0
+  HELD   N=3 PF=1
+  WITHIN-STATE DELTA = NA (one cohort absent)
+
+STATE = RECOVERING
+  FAILED N=0 PF=0
+  HELD   N=6 PF=0
+  WITHIN-STATE DELTA = NA (one cohort absent)
+
+========================================================================================================================
+V13.17 RECOVERY ATTEMPT OUTCOME — INTERPRETATION
+========================================================================================================================
+
+This audit compares only trajectories that actually attempted recovery before +30m.
+RECOVERY_FAILED CASES = 6
+RECOVERY_HELD CASES   = 9
+
+FAILED LATER-PF RATE = 0.5000
+HELD LATER-PF RATE   = 0.1111
+DESCRIPTIVE DELTA    = +0.3889
+
+LONG and SHORT are kept separate because direction can otherwise confound the comparison.
+The +30m state is reported as a secondary crosscheck.
+
+A descriptive difference does not establish causality.
+The sample remains small.
+No result becomes an entry, warning, rescue, hold, or exit rule.
+No production code changed.
+
+========================================================================================================================
+V13.17 RECOVERY ATTEMPT OUTCOME AUDIT COMPLETE
+========================================================================================================================

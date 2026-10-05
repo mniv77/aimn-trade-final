@@ -1,0 +1,177 @@
+==============================================================================================================
+V13.17 PERSISTENT FAILURE CLEARANCE / RECOVERY PATH AUDIT
+==============================================================================================================
+RESEARCH ONLY
+NO ORDERS
+NO PRODUCTION ENGINE CHANGES
+NO AI TRAINING
+
+===== BUILD V13.17 RESEARCH PATHS =====
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+RAW PATH OBJECTS = 28
+UNIQUE TRAJECTORY CASES = 28
+NVDA   CASES=7
+AAPL   CASES=2
+MSFT   CASES=3
+AMZN   CASES=5
+TSLA   CASES=3
+SPY    CASES=1
+QQQ    CASES=2
+GOOGL  CASES=5
+
+===== FIND FIRST FAILURE-CLEARANCE OBSERVATIONS =====
+FIRST CLEARANCE OBSERVATIONS = 3
+
+==============================================================================================================
+FIRST PERSISTENT-FAILURE CLEARANCE OBSERVATIONS
+==============================================================================================================
+
+CASE 1
+  SYMBOL              = AAPL
+  DIRECTION           = LONG
+  OPPOSITE_TIME       = 2026-06-12 10:20:00
+  CLEARANCE CP        = +45m
+  CURRENT STATE       = DETERIORATING
+  CURRENT RETURN      = -0.3688272658971327
+  NEXT CP             = 60
+  NEXT STATE          = DETERIORATING
+  POST-FAILURE PATH   = CONTINUED_FAILURE_PATH
+  PRIOR STATES        = DETERIORATING -> DETERIORATING -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m     = +0.351%
+  FUTURE +30m     = NA
+  FUTURE +45m     = NA
+
+CASE 2
+  SYMBOL              = MSFT
+  DIRECTION           = SHORT
+  OPPOSITE_TIME       = 2026-06-26 10:35:00
+  CLEARANCE CP        = +45m
+  CURRENT STATE       = DETERIORATING
+  CURRENT RETURN      = -0.4765665423054928
+  NEXT CP             = 60
+  NEXT STATE          = PERSISTENT_FAILURE
+  POST-FAILURE PATH   = CONTINUED_FAILURE_PATH
+  PRIOR STATES        = RECOVERING -> NEUTRAL -> DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE
+  FUTURE +15m     = -0.397%
+  FUTURE +30m     = NA
+  FUTURE +45m     = NA
+
+CASE 3
+  SYMBOL              = TSLA
+  DIRECTION           = LONG
+  OPPOSITE_TIME       = 2026-07-02 10:35:00
+  CLEARANCE CP        = +30m
+  CURRENT STATE       = DETERIORATING
+  CURRENT RETURN      = -0.3194688048108329
+  NEXT CP             = 45
+  NEXT STATE          = PERSISTENT_FAILURE
+  POST-FAILURE PATH   = CONTINUED_FAILURE_PATH
+  PRIOR STATES        = DETERIORATING -> DETERIORATING -> PERSISTENT_FAILURE -> PERSISTENT_FAILURE
+  FUTURE +15m     = -0.368%
+  FUTURE +30m     = -0.225%
+  FUTURE +45m     = NA
+
+==============================================================================================================
+POST-FAILURE PATH SUMMARY
+==============================================================================================================
+RECOVERY_PATH            = 0
+CONTINUED_FAILURE_PATH  = 3
+OTHER_PATH              = 0
+
+==============================================================================================================
+POST-FAILURE NEXT-STATE SUMMARY
+==============================================================================================================
+DETERIORATING          -> DETERIORATING          N=1
+DETERIORATING          -> PERSISTENT_FAILURE     N=2
+
+==============================================================================================================
+RESIDUAL CLEARANCE CASES BY SYMBOL
+==============================================================================================================
+NVDA   CASES=0
+AAPL   CASES=1
+MSFT   CASES=1
+AMZN   CASES=0
+TSLA   CASES=1
+SPY    CASES=0
+QQQ    CASES=0
+GOOGL  CASES=0
+
+==============================================================================================================
+FULL POST-FAILURE CHECKPOINT PATHS
+==============================================================================================================
+
+AAPL   LONG  CP=+45m PATH=CONTINUED_FAILURE_PATH
+  +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:DETERIORATING -> +60m:DETERIORATING
+
+MSFT   SHORT CP=+45m PATH=CONTINUED_FAILURE_PATH
+  +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:DETERIORATING -> +60m:PERSISTENT_FAILURE
+
+TSLA   LONG  CP=+30m PATH=CONTINUED_FAILURE_PATH
+  +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:PERSISTENT_FAILURE -> +25m:PERSISTENT_FAILURE -> +30m:DETERIORATING -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+==============================================================================================================
+MATCHED POST-FAILURE PATH CONTROL
+==============================================================================================================
+MATCH KEY = DIRECTION + CURRENT STATE + CLEARANCE CHECKPOINT
+
+CONTROL: DIRECTION=LONG CURRENT_STATE=DETERIORATING CLEARANCE_CP=+30m CASES=1
+  PATH=CONTINUED_FAILURE_PATH N=1
+    +15m N=1 AVG=-0.368%
+    +30m N=1 AVG=-0.225%
+    +45m N=0
+  PATH DIFFERENCE: RECOVERY_PATH - CONTINUED_FAILURE_PATH
+    +15m NO TWO-SIDED COMPARISON
+    +30m NO TWO-SIDED COMPARISON
+    +45m NO TWO-SIDED COMPARISON
+
+CONTROL: DIRECTION=LONG CURRENT_STATE=DETERIORATING CLEARANCE_CP=+45m CASES=1
+  PATH=CONTINUED_FAILURE_PATH N=1
+    +15m N=1 AVG=+0.351%
+    +30m N=0
+    +45m N=0
+  PATH DIFFERENCE: RECOVERY_PATH - CONTINUED_FAILURE_PATH
+    +15m NO TWO-SIDED COMPARISON
+    +30m NO TWO-SIDED COMPARISON
+    +45m NO TWO-SIDED COMPARISON
+
+CONTROL: DIRECTION=SHORT CURRENT_STATE=DETERIORATING CLEARANCE_CP=+45m CASES=1
+  PATH=CONTINUED_FAILURE_PATH N=1
+    +15m N=1 AVG=-0.397%
+    +30m N=0
+    +45m N=0
+  PATH DIFFERENCE: RECOVERY_PATH - CONTINUED_FAILURE_PATH
+    +15m NO TWO-SIDED COMPARISON
+    +30m NO TWO-SIDED COMPARISON
+    +45m NO TWO-SIDED COMPARISON
+
+==============================================================================================================
+V13.17 PERSISTENT FAILURE CLEARANCE — INTERPRETATION
+==============================================================================================================
+The audit asks whether the path AFTER Persistent Failure contains information beyond the current state.
+A single case, symbol, or horizon does NOT validate a rule.
+No result from this audit becomes an entry, hold, warning, rescue, or exit rule.
+V13.17 remains research only.
+NO PRODUCTION CODE CHANGED.
+
+V13.17 PERSISTENT FAILURE CLEARANCE AUDIT COMPLETE

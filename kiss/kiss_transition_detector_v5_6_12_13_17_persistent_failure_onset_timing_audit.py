@@ -1,0 +1,1091 @@
+"""
+AIMn / KISS V13.17 COMPANION RESEARCH
+PERSISTENT FAILURE ONSET TIMING AUDIT
+
+RESEARCH ONLY
+NO ORDERS
+NO PRODUCTION ENGINE CHANGES
+NO AI TRAINING
+
+QUESTION
+--------
+Does the meaning of PERSISTENT_FAILURE depend on WHEN it first appears?
+
+The previous persistence audit found:
+
+    12 unique trajectory cases reached PERSISTENT_FAILURE
+    16 total PF episodes
+    5 episodes cleared
+    11 episodes remained terminal
+    every cleared episode cleared into DETERIORATING
+    no cleared episode reached RECOVERING
+
+This audit focuses on the FIRST Persistent-Failure onset for each
+unique trajectory case.
+
+TIMING GROUPS
+-------------
+EARLY:
+    first PF onset <= +30m
+
+LATE:
+    first PF onset >= +45m
+
+The audit is descriptive.
+
+It does NOT claim that early PF is better or worse.
+It does NOT create an entry, hold, warning, rescue, or exit rule.
+
+CASE KEY
+--------
+(symbol, direction, opposite_time)
+
+IMPORTANT
+---------
+One FIRST PF onset is used per unique trajectory case.
+Checkpoint observations are NOT treated as independent cases.
+"""
+
+from __future__ import annotations
+
+from collections import Counter
+from dataclasses import dataclass
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+
+from kiss import (
+    kiss_transition_detector_v5_6_12_13_17_case_aware_validation as base
+)
+
+
+SYMBOLS = (
+    "NVDA",
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "TSLA",
+    "SPY",
+    "QQQ",
+    "GOOGL",
+)
+
+PERSISTENT = "PERSISTENT_FAILURE"
+DETERIORATING = "DETERIORATING"
+RECOVERING = "RECOVERING"
+NEUTRAL = "NEUTRAL"
+
+EARLY = "EARLY_PF"
+LATE = "LATE_PF"
+UNKNOWN = "UNKNOWN_TIMING"
+
+
+@dataclass
+class PFOnsetCase:
+    case_key: Tuple[Any, Any, Any]
+
+    symbol: str
+    direction: str
+    opposite_time: Any
+
+    onset_minutes: int
+    timing_group: str
+
+    onset_return_pct: Optional[float]
+
+    clearance_minutes: Optional[int]
+    clearance_state: Optional[str]
+
+    later_reentered: bool
+    later_recovery: bool
+
+    final_state: Optional[str]
+    final_minutes: Optional[int]
+
+    state_path: Tuple[Tuple[int, str], ...]
+
+    points: Tuple[Any, ...]
+
+
+def attr(obj: Any, *names: str, default: Any = None) -> Any:
+    for name in names:
+        if hasattr(obj, name):
+            return getattr(obj, name)
+    return default
+
+
+def point_minutes(point: Any) -> Optional[int]:
+    value = attr(
+        point,
+        "minutes",
+        "minute",
+        "offset_minutes",
+        default=None,
+    )
+
+    if value is None:
+        return None
+
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def point_state(point: Any) -> Optional[str]:
+    value = attr(
+        point,
+        "state",
+        "current_state",
+        default=None,
+    )
+
+    if value is None:
+        return None
+
+    return str(value)
+
+
+def point_return(point: Any) -> Optional[float]:
+    value = attr(
+        point,
+        "return_pct",
+        "signed_return_pct",
+        default=None,
+    )
+
+    if value is None:
+        return None
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def path_symbol(path: Any) -> str:
+    return str(
+        attr(path, "symbol", default="")
+    )
+
+
+def path_direction(path: Any) -> str:
+    return str(
+        attr(path, "direction", default="")
+    ).upper()
+
+
+def path_opposite_time(path: Any) -> Any:
+    return attr(
+        path,
+        "opposite_time",
+        "transition_time",
+        default=None,
+    )
+
+
+def path_points(path: Any) -> List[Any]:
+    points = attr(
+        path,
+        "points",
+        "state_points",
+        default=None,
+    )
+
+    if points is None:
+        return []
+
+    return list(points)
+
+
+def dedup_case_paths(
+    paths: Iterable[Any],
+) -> List[Any]:
+
+    seen = set()
+    result = []
+
+    for path in paths:
+
+        key = (
+            path_symbol(path),
+            path_direction(path),
+            path_opposite_time(path),
+        )
+
+        if key in seen:
+            continue
+
+        seen.add(key)
+        result.append(path)
+
+    return result
+
+
+def sorted_points(
+    points: Sequence[Any],
+) -> List[Any]:
+
+    valid = []
+
+    for point in points:
+
+        minute = point_minutes(point)
+        state = point_state(point)
+
+        if minute is None or state is None:
+            continue
+
+        valid.append(point)
+
+    return sorted(
+        valid,
+        key=lambda point: point_minutes(point),
+    )
+
+
+def classify_timing(
+    onset_minutes: int,
+) -> str:
+
+    if onset_minutes <= 30:
+        return EARLY
+
+    if onset_minutes >= 45:
+        return LATE
+
+    return UNKNOWN
+
+
+def future_return_from_checkpoint(
+    direction: str,
+    current_return_pct: Optional[float],
+    future_return_pct: Optional[float],
+) -> Optional[float]:
+    """
+    Reconstruct return FROM the PF-onset checkpoint.
+
+    LONG:
+        current price factor = 1 + current_return
+        future price factor  = 1 + future_return
+
+    SHORT:
+        current price factor = 1 - current_return
+        future price factor  = 1 - future_return
+    """
+
+    if (
+        current_return_pct is None
+        or future_return_pct is None
+    ):
+        return None
+
+    current = current_return_pct / 100.0
+    future = future_return_pct / 100.0
+
+    direction = direction.upper()
+
+    if direction == "LONG":
+
+        current_factor = 1.0 + current
+        future_factor = 1.0 + future
+
+        if current_factor == 0:
+            return None
+
+        return (
+            future_factor / current_factor - 1.0
+        ) * 100.0
+
+    if direction == "SHORT":
+
+        current_factor = 1.0 - current
+        future_factor = 1.0 - future
+
+        if current_factor == 0:
+            return None
+
+        return (
+            1.0 - future_factor / current_factor
+        ) * 100.0
+
+    return None
+
+
+def first_pf_onset(
+    path: Any,
+) -> Optional[PFOnsetCase]:
+
+    points = sorted_points(
+        path_points(path)
+    )
+
+    if not points:
+        return None
+
+    case_key = (
+        path_symbol(path),
+        path_direction(path),
+        path_opposite_time(path),
+    )
+
+    for index, point in enumerate(points):
+
+        state = point_state(point)
+        minute = point_minutes(point)
+
+        if state != PERSISTENT:
+            continue
+
+        if minute is None:
+            continue
+
+        # FIRST PF STATEPOINT OF THIS CASE.
+        previous_states = [
+            point_state(previous)
+            for previous in points[:index]
+        ]
+
+        if PERSISTENT in previous_states:
+            continue
+
+        next_non_pf = None
+
+        for candidate in points[index + 1:]:
+
+            candidate_state = point_state(
+                candidate
+            )
+
+            if candidate_state != PERSISTENT:
+                next_non_pf = candidate
+                break
+
+        if next_non_pf is None:
+
+            clearance_minutes = None
+            clearance_state = None
+
+        else:
+
+            clearance_minutes = point_minutes(
+                next_non_pf
+            )
+
+            clearance_state = point_state(
+                next_non_pf
+            )
+
+        # A TRUE re-entry requires:
+        #   1. PF appears first.
+        #   2. PF clears to a non-PF state.
+        #   3. PF appears again AFTER that clearance.
+        #
+        # Continuing PF without a clearance is NOT a re-entry.
+
+        later_states = [
+            point_state(candidate)
+            for candidate in points[index + 1:]
+        ]
+
+        if next_non_pf is None:
+            later_reentered = False
+        else:
+            clearance_index = None
+
+            for candidate_index, candidate in enumerate(
+                points[index + 1:],
+                start=index + 1,
+            ):
+                if point_state(candidate) != PERSISTENT:
+                    clearance_index = candidate_index
+                    break
+
+            if clearance_index is None:
+                later_reentered = False
+            else:
+                states_after_clearance = [
+                    point_state(candidate)
+                    for candidate in points[clearance_index + 1:]
+                ]
+
+                later_reentered = (
+                    PERSISTENT in states_after_clearance
+                )
+
+        later_recovery = (
+            RECOVERING in later_states
+        )
+
+        final_point = points[-1]
+
+        final_state = point_state(
+            final_point
+        )
+
+        final_minutes = point_minutes(
+            final_point
+        )
+
+        state_path = tuple(
+            (
+                point_minutes(candidate),
+                point_state(candidate),
+            )
+            for candidate in points
+            if (
+                point_minutes(candidate)
+                is not None
+                and point_state(candidate)
+                is not None
+            )
+        )
+
+        return PFOnsetCase(
+            case_key=case_key,
+
+            symbol=path_symbol(path),
+            direction=path_direction(path),
+            opposite_time=path_opposite_time(path),
+
+            onset_minutes=minute,
+            timing_group=classify_timing(minute),
+
+            onset_return_pct=point_return(point),
+
+            clearance_minutes=clearance_minutes,
+            clearance_state=clearance_state,
+
+            later_reentered=later_reentered,
+            later_recovery=later_recovery,
+
+            final_state=final_state,
+            final_minutes=final_minutes,
+
+            state_path=state_path,
+            points=tuple(points),
+        )
+
+    return None
+
+
+def build_cases(
+    paths: Sequence[Any],
+) -> List[PFOnsetCase]:
+
+    cases = []
+
+    for path in dedup_case_paths(paths):
+
+        case = first_pf_onset(path)
+
+        if case is not None:
+            cases.append(case)
+
+    return cases
+
+
+def exact_future_point(
+    points: Sequence[Any],
+    target_minutes: int,
+) -> Optional[Any]:
+
+    for point in points:
+
+        if point_minutes(point) == target_minutes:
+            return point
+
+    return None
+
+
+def future_return(
+    case: PFOnsetCase,
+    horizon: int,
+) -> Optional[float]:
+
+    target = case.onset_minutes + horizon
+
+    future_point = exact_future_point(
+        case.points,
+        target,
+    )
+
+    if future_point is None:
+        return None
+
+    return future_return_from_checkpoint(
+        direction=case.direction,
+        current_return_pct=case.onset_return_pct,
+        future_return_pct=point_return(
+            future_point
+        ),
+    )
+
+
+def print_population_summary(
+    paths: Sequence[Any],
+    cases: Sequence[PFOnsetCase],
+) -> None:
+
+    print()
+    print("=" * 110)
+    print("PERSISTENT FAILURE ONSET TIMING POPULATION")
+    print("=" * 110)
+
+    unique_paths = dedup_case_paths(
+        paths
+    )
+
+    print(
+        f"UNIQUE TRAJECTORY CASES = "
+        f"{len(unique_paths)}"
+    )
+
+    print(
+        f"CASES REACHING PF       = "
+        f"{len(cases)}"
+    )
+
+    print(
+        f"EARLY PF CASES          = "
+        f"{sum(c.timing_group == EARLY for c in cases)}"
+    )
+
+    print(
+        f"LATE PF CASES           = "
+        f"{sum(c.timing_group == LATE for c in cases)}"
+    )
+
+    print(
+        f"UNKNOWN-TIMING CASES    = "
+        f"{sum(c.timing_group == UNKNOWN for c in cases)}"
+    )
+
+
+def print_case_detail(
+    cases: Sequence[PFOnsetCase],
+) -> None:
+
+    print()
+    print("=" * 110)
+    print("FIRST PF ONSET BY UNIQUE CASE")
+    print("=" * 110)
+
+    ordered = sorted(
+        cases,
+        key=lambda case: (
+            case.timing_group,
+            case.onset_minutes,
+            case.symbol,
+            case.direction,
+        ),
+    )
+
+    for number, case in enumerate(
+        ordered,
+        start=1,
+    ):
+
+        print()
+        print(
+            f"CASE {number}"
+        )
+
+        print(
+            f"  SYMBOL             = "
+            f"{case.symbol}"
+        )
+
+        print(
+            f"  DIRECTION          = "
+            f"{case.direction}"
+        )
+
+        print(
+            f"  OPPOSITE_TIME      = "
+            f"{case.opposite_time}"
+        )
+
+        print(
+            f"  FIRST PF ONSET     = "
+            f"+{case.onset_minutes}m"
+        )
+
+        print(
+            f"  TIMING GROUP       = "
+            f"{case.timing_group}"
+        )
+
+        print(
+            f"  ONSET RETURN       = "
+            f"{case.onset_return_pct}"
+        )
+
+        print(
+            f"  FIRST CLEARANCE    = "
+            f"{case.clearance_state}"
+            f" @+{case.clearance_minutes}m"
+            if case.clearance_minutes is not None
+            else
+            "  FIRST CLEARANCE    = TERMINAL"
+        )
+
+        print(
+            f"  LATER PF RE-ENTRY  = "
+            f"{case.later_reentered}"
+        )
+
+        print(
+            f"  LATER RECOVERY     = "
+            f"{case.later_recovery}"
+        )
+
+        print(
+            f"  FINAL STATE        = "
+            f"{case.final_state}"
+            f" @+{case.final_minutes}m"
+        )
+
+        for horizon in (
+            5,
+            10,
+            15,
+            20,
+            30,
+        ):
+
+            value = future_return(
+                case,
+                horizon,
+            )
+
+            if value is None:
+
+                print(
+                    f"  FUTURE +{horizon:<2}m    = "
+                    f"NA"
+                )
+
+            else:
+
+                print(
+                    f"  FUTURE +{horizon:<2}m    = "
+                    f"{value:+.3f}%"
+                )
+
+
+def print_group_summary(
+    cases: Sequence[PFOnsetCase],
+) -> None:
+
+    print()
+    print("=" * 110)
+    print("EARLY VS LATE PF STRUCTURAL SUMMARY")
+    print("=" * 110)
+
+    groups = (
+        EARLY,
+        LATE,
+        UNKNOWN,
+    )
+
+    for group in groups:
+
+        group_cases = [
+            case
+            for case in cases
+            if case.timing_group == group
+        ]
+
+        if not group_cases:
+            continue
+
+        print()
+        print(
+            f"GROUP = {group}"
+        )
+
+        count = len(group_cases)
+
+        cleared = sum(
+            case.clearance_state is not None
+            for case in group_cases
+        )
+
+        cleared_to_deteriorating = sum(
+            case.clearance_state
+            == DETERIORATING
+            for case in group_cases
+        )
+
+        cleared_to_recovering = sum(
+            case.clearance_state
+            == RECOVERING
+            for case in group_cases
+        )
+
+        reentered = sum(
+            case.later_reentered
+            for case in group_cases
+        )
+
+        recovered_later = sum(
+            case.later_recovery
+            for case in group_cases
+        )
+
+        terminal = sum(
+            case.clearance_state is None
+            for case in group_cases
+        )
+
+        print(
+            f"  CASES                = "
+            f"{count}"
+        )
+
+        print(
+            f"  CLEARED              = "
+            f"{cleared}"
+        )
+
+        print(
+            f"  TERMINAL             = "
+            f"{terminal}"
+        )
+
+        print(
+            f"  CLEAR->DETERIORATING = "
+            f"{cleared_to_deteriorating}"
+        )
+
+        print(
+            f"  CLEAR->RECOVERING    = "
+            f"{cleared_to_recovering}"
+        )
+
+        print(
+            f"  LATER PF RE-ENTRY    = "
+            f"{reentered}"
+        )
+
+        print(
+            f"  LATER RECOVERY       = "
+            f"{recovered_later}"
+        )
+
+
+def print_future_return_summary(
+    cases: Sequence[PFOnsetCase],
+) -> None:
+
+    print()
+    print("=" * 110)
+    print("FUTURE RETURN FROM FIRST PF ONSET")
+    print("=" * 110)
+
+    for group in (
+        EARLY,
+        LATE,
+        UNKNOWN,
+    ):
+
+        group_cases = [
+            case
+            for case in cases
+            if case.timing_group == group
+        ]
+
+        if not group_cases:
+            continue
+
+        print()
+        print(
+            f"GROUP = {group}"
+        )
+
+        for horizon in (
+            5,
+            10,
+            15,
+            20,
+            30,
+        ):
+
+            values = [
+                value
+                for case in group_cases
+                for value in [
+                    future_return(
+                        case,
+                        horizon,
+                    )
+                ]
+                if value is not None
+            ]
+
+            if not values:
+
+                print(
+                    f"  +{horizon}m "
+                    f"N=0"
+                )
+
+                continue
+
+            average = (
+                sum(values)
+                / len(values)
+            )
+
+            negative = sum(
+                value < 0
+                for value in values
+            )
+
+            positive = sum(
+                value > 0
+                for value in values
+            )
+
+            print(
+                f"  +{horizon}m "
+                f"N={len(values)} "
+                f"AVG={average:+.3f}% "
+                f"NEG={negative} "
+                f"POS={positive}"
+            )
+
+
+def print_onset_timing_counts(
+    cases: Sequence[PFOnsetCase],
+) -> None:
+
+    print()
+    print("=" * 110)
+    print("EXACT FIRST PF ONSET TIMING")
+    print("=" * 110)
+
+    counts = Counter(
+        case.onset_minutes
+        for case in cases
+    )
+
+    for minute, count in sorted(
+        counts.items()
+    ):
+
+        print(
+            f"+{minute}m "
+            f"CASES={count}"
+        )
+
+
+def print_symbol_summary(
+    cases: Sequence[PFOnsetCase],
+) -> None:
+
+    print()
+    print("=" * 110)
+    print("FIRST PF CASES BY SYMBOL")
+    print("=" * 110)
+
+    counts = Counter(
+        case.symbol
+        for case in cases
+    )
+
+    for symbol in SYMBOLS:
+
+        print(
+            f"{symbol:6s} "
+            f"CASES={counts.get(symbol, 0)}"
+        )
+
+
+def print_direction_summary(
+    cases: Sequence[PFOnsetCase],
+) -> None:
+
+    print()
+    print("=" * 110)
+    print("FIRST PF CASES BY DIRECTION")
+    print("=" * 110)
+
+    counts = Counter(
+        case.direction
+        for case in cases
+    )
+
+    print(
+        f"LONG   CASES={counts.get('LONG', 0)}"
+    )
+
+    print(
+        f"SHORT  CASES={counts.get('SHORT', 0)}"
+    )
+
+
+def print_paths(
+    cases: Sequence[PFOnsetCase],
+) -> None:
+
+    print()
+    print("=" * 110)
+    print("FIRST PF CASE STATE PATHS")
+    print("=" * 110)
+
+    for case in sorted(
+        cases,
+        key=lambda item: (
+            item.timing_group,
+            item.onset_minutes,
+            item.symbol,
+        ),
+    ):
+
+        text_path = " -> ".join(
+            f"+{minute}m:{state}"
+            for minute, state
+            in case.state_path
+        )
+
+        print()
+        print(
+            f"{case.symbol:6s} "
+            f"{case.direction:5s} "
+            f"PF_ONSET=+{case.onset_minutes}m "
+            f"GROUP={case.timing_group}"
+        )
+
+        print(
+            "  "
+            + text_path
+        )
+
+
+def print_interpretation() -> None:
+
+    print()
+    print("=" * 110)
+    print("V13.17 PERSISTENT FAILURE ONSET TIMING — INTERPRETATION")
+    print("=" * 110)
+
+    print(
+        "This audit asks whether the timing of FIRST "
+        "Persistent-Failure onset is structurally different."
+    )
+
+    print(
+        "Early PF is defined as first onset <= +30m."
+    )
+
+    print(
+        "Late PF is defined as first onset >= +45m."
+    )
+
+    print(
+        "The groups are descriptive and are not ranked."
+    )
+
+    print(
+        "A small sample does NOT establish a general rule."
+    )
+
+    print(
+        "No result becomes an entry, hold, warning, "
+        "rescue, or exit rule."
+    )
+
+    print(
+        "NO PRODUCTION CODE CHANGED."
+    )
+
+
+def main() -> None:
+
+    print("=" * 110)
+    print(
+        "V13.17 PERSISTENT FAILURE ONSET TIMING AUDIT"
+    )
+    print("=" * 110)
+
+    print("RESEARCH ONLY")
+    print("NO ORDERS")
+    print("NO PRODUCTION ENGINE CHANGES")
+    print("NO AI TRAINING")
+
+    print()
+    print(
+        "===== BUILD V13.17 RESEARCH PATHS ====="
+    )
+
+    all_paths = (
+        base.build_v1317_research_paths()
+    )
+
+    print(
+        f"RAW PATH OBJECTS = "
+        f"{len(all_paths)}"
+    )
+
+    unique_paths = dedup_case_paths(
+        all_paths
+    )
+
+    print(
+        f"UNIQUE TRAJECTORY CASES = "
+        f"{len(unique_paths)}"
+    )
+
+    cases = build_cases(
+        unique_paths
+    )
+
+    print(
+        f"FIRST PF ONSET CASES = "
+        f"{len(cases)}"
+    )
+
+    print_population_summary(
+        unique_paths,
+        cases,
+    )
+
+    print_case_detail(
+        cases
+    )
+
+    print_group_summary(
+        cases
+    )
+
+    print_future_return_summary(
+        cases
+    )
+
+    print_onset_timing_counts(
+        cases
+    )
+
+    print_symbol_summary(
+        cases
+    )
+
+    print_direction_summary(
+        cases
+    )
+
+    print_paths(
+        cases
+    )
+
+    print_interpretation()
+
+    print()
+    print(
+        "V13.17 PERSISTENT FAILURE "
+        "ONSET TIMING AUDIT COMPLETE"
+    )
+
+
+if __name__ == "__main__":
+    main()

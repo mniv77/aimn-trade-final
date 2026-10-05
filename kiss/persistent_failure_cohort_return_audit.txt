@@ -1,0 +1,307 @@
+
+==============================================================================================================
+V13.17 PERSISTENT FAILURE COHORT RETURN AUDIT
+==============================================================================================================
+
+PRIMARY COHORT A:
+  DIRECT_FROM_DETERIORATING
+  DETERIORATING -> PERSISTENT_FAILURE
+
+PRIMARY COHORT B:
+  RECOVERY_FAILED_THEN_DETERIORATING
+  RECOVERING -> ... -> DETERIORATING -> PERSISTENT_FAILURE
+
+Future returns are measured FROM FIRST PF ONSET.
+Only exact StatePoints are used.
+No production code changed.
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+PRIMARY COHORT CASES = 10
+
+==============================================================================================================
+PRIMARY COHORT CASE DETAILS
+==============================================================================================================
+
+--------------------------------------------------------------------------------------------------------------
+CASE 1
+--------------------------------------------------------------------------------------------------------------
+  GOOGL  LONG  PF_ONSET=+20m GROUP=EARLY_PF
+  COHORT             = DIRECT_FROM_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.6539680726504327
+  FUTURE +5 m    = +0.370818%
+  FUTURE +10m    = -0.080488%
+  FUTURE +15m    = NA
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+--------------------------------------------------------------------------------------------------------------
+CASE 2
+--------------------------------------------------------------------------------------------------------------
+  TSLA   LONG  PF_ONSET=+20m GROUP=EARLY_PF
+  COHORT             = DIRECT_FROM_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.5286895514908578
+  FUTURE +5 m    = -0.173808%
+  FUTURE +10m    = +0.210333%
+  FUTURE +15m    = NA
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+--------------------------------------------------------------------------------------------------------------
+CASE 3
+--------------------------------------------------------------------------------------------------------------
+  AAPL   LONG  PF_ONSET=+30m GROUP=EARLY_PF
+  COHORT             = DIRECT_FROM_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.5839765043371286
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = +0.216413%
+  FUTURE +20m    = NA
+  FUTURE +30m    = +0.568514%
+
+--------------------------------------------------------------------------------------------------------------
+CASE 4
+--------------------------------------------------------------------------------------------------------------
+  GOOGL  SHORT PF_ONSET=+30m GROUP=EARLY_PF
+  COHORT             = DIRECT_FROM_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.8186722329149717
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = +0.004033%
+  FUTURE +20m    = NA
+  FUTURE +30m    = -0.025544%
+
+--------------------------------------------------------------------------------------------------------------
+CASE 5
+--------------------------------------------------------------------------------------------------------------
+  AMZN   LONG  PF_ONSET=+45m GROUP=LATE_PF
+  COHORT             = DIRECT_FROM_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.718262569594967
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = -0.241866%
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+--------------------------------------------------------------------------------------------------------------
+CASE 6
+--------------------------------------------------------------------------------------------------------------
+  GOOGL  LONG  PF_ONSET=+60m GROUP=LATE_PF
+  COHORT             = DIRECT_FROM_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.7975379779989565
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = NA
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+--------------------------------------------------------------------------------------------------------------
+CASE 7
+--------------------------------------------------------------------------------------------------------------
+  TSLA   SHORT PF_ONSET=+25m GROUP=EARLY_PF
+  COHORT             = RECOVERY_FAILED_THEN_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.759353006544029
+  FUTURE +5 m    = -0.245083%
+  FUTURE +10m    = NA
+  FUTURE +15m    = NA
+  FUTURE +20m    = -0.707677%
+  FUTURE +30m    = NA
+
+--------------------------------------------------------------------------------------------------------------
+CASE 8
+--------------------------------------------------------------------------------------------------------------
+  MSFT   SHORT PF_ONSET=+30m GROUP=EARLY_PF
+  COHORT             = RECOVERY_FAILED_THEN_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.7216579069197555
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = +0.243335%
+  FUTURE +20m    = NA
+  FUTURE +30m    = -0.152761%
+
+--------------------------------------------------------------------------------------------------------------
+CASE 9
+--------------------------------------------------------------------------------------------------------------
+  GOOGL  SHORT PF_ONSET=+45m GROUP=LATE_PF
+  COHORT             = RECOVERY_FAILED_THEN_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -0.5925879475763424
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = -0.286756%
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+--------------------------------------------------------------------------------------------------------------
+CASE 10
+--------------------------------------------------------------------------------------------------------------
+  NVDA   LONG  PF_ONSET=+45m GROUP=LATE_PF
+  COHORT             = RECOVERY_FAILED_THEN_DETERIORATING
+  PRIOR STATE        = DETERIORATING
+  ONSET RETURN       = -1.08976815481892
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = -0.220355%
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+==============================================================================================================
+RETURN SUMMARY — DIRECT_FROM_DETERIORATING
+==============================================================================================================
+
+CASES = 6
+
+DIRECTION = LONG
+  CASES = 5
+  +5 m N=2 AVG=+0.098505% MEDIAN=+0.098505% POS=1 NEG=1 ZERO=0
+  +10m N=2 AVG=+0.064923% MEDIAN=+0.064923% POS=1 NEG=1 ZERO=0
+  +15m N=2 AVG=-0.012727% MEDIAN=-0.012727% POS=1 NEG=1 ZERO=0
+  +20m N=0
+  +30m N=1 AVG=+0.568514% MEDIAN=+0.568514% POS=1 NEG=0 ZERO=0
+
+DIRECTION = SHORT
+  CASES = 1
+  +5 m N=0
+  +10m N=0
+  +15m N=1 AVG=+0.004033% MEDIAN=+0.004033% POS=1 NEG=0 ZERO=0
+  +20m N=0
+  +30m N=1 AVG=-0.025544% MEDIAN=-0.025544% POS=0 NEG=1 ZERO=0
+
+==============================================================================================================
+RETURN SUMMARY — RECOVERY_FAILED_THEN_DETERIORATING
+==============================================================================================================
+
+CASES = 4
+
+DIRECTION = LONG
+  CASES = 1
+  +5 m N=0
+  +10m N=0
+  +15m N=1 AVG=-0.220355% MEDIAN=-0.220355% POS=0 NEG=1 ZERO=0
+  +20m N=0
+  +30m N=0
+
+DIRECTION = SHORT
+  CASES = 3
+  +5 m N=1 AVG=-0.245083% MEDIAN=-0.245083% POS=0 NEG=1 ZERO=0
+  +10m N=0
+  +15m N=2 AVG=-0.021710% MEDIAN=-0.021710% POS=1 NEG=1 ZERO=0
+  +20m N=1 AVG=-0.707677% MEDIAN=-0.707677% POS=0 NEG=1 ZERO=0
+  +30m N=1 AVG=-0.152761% MEDIAN=-0.152761% POS=0 NEG=1 ZERO=0
+
+==============================================================================================================
+POOLED PRIMARY COHORT RETURN SUMMARY
+==============================================================================================================
+
+COHORT = DIRECT_FROM_DETERIORATING
+  CASES = 6
+  +5 m N=2 AVG=+0.098505% MEDIAN=+0.098505% POS=1 NEG=1
+  +10m N=2 AVG=+0.064923% MEDIAN=+0.064923% POS=1 NEG=1
+  +15m N=3 AVG=-0.007140% MEDIAN=+0.004033% POS=2 NEG=1
+  +20m N=0
+  +30m N=2 AVG=+0.271485% MEDIAN=+0.271485% POS=1 NEG=1
+
+COHORT = RECOVERY_FAILED_THEN_DETERIORATING
+  CASES = 4
+  +5 m N=1 AVG=-0.245083% MEDIAN=-0.245083% POS=0 NEG=1
+  +10m N=0
+  +15m N=3 AVG=-0.087925% MEDIAN=-0.220355% POS=1 NEG=2
+  +20m N=1 AVG=-0.707677% MEDIAN=-0.707677% POS=0 NEG=1
+  +30m N=1 AVG=-0.152761% MEDIAN=-0.152761% POS=0 NEG=1
+
+==============================================================================================================
+PRIMARY COHORTS BY PF ONSET TIMING
+==============================================================================================================
+
+COHORT = DIRECT_FROM_DETERIORATING
+  EARLY_PF   CASES=4
+  LATE_PF    CASES=2
+
+COHORT = RECOVERY_FAILED_THEN_DETERIORATING
+  EARLY_PF   CASES=2
+  LATE_PF    CASES=2
+
+==============================================================================================================
+DIRECT VS FAILED-RECOVERY — EXACT CASE LIST
+==============================================================================================================
+
+COHORT = DIRECT_FROM_DETERIORATING
+GOOGL  LONG  PF_ONSET=+20m EARLY_PF   +5m=+0.3708% +10m=-0.0805% +15m=NA +20m=NA +30m=NA
+TSLA   LONG  PF_ONSET=+20m EARLY_PF   +5m=-0.1738% +10m=+0.2103% +15m=NA +20m=NA +30m=NA
+AAPL   LONG  PF_ONSET=+30m EARLY_PF   +5m=NA +10m=NA +15m=+0.2164% +20m=NA +30m=+0.5685%
+GOOGL  SHORT PF_ONSET=+30m EARLY_PF   +5m=NA +10m=NA +15m=+0.0040% +20m=NA +30m=-0.0255%
+AMZN   LONG  PF_ONSET=+45m LATE_PF    +5m=NA +10m=NA +15m=-0.2419% +20m=NA +30m=NA
+GOOGL  LONG  PF_ONSET=+60m LATE_PF    +5m=NA +10m=NA +15m=NA +20m=NA +30m=NA
+
+COHORT = RECOVERY_FAILED_THEN_DETERIORATING
+TSLA   SHORT PF_ONSET=+25m EARLY_PF   +5m=-0.2451% +10m=NA +15m=NA +20m=-0.7077% +30m=NA
+MSFT   SHORT PF_ONSET=+30m EARLY_PF   +5m=NA +10m=NA +15m=+0.2433% +20m=NA +30m=-0.1528%
+GOOGL  SHORT PF_ONSET=+45m LATE_PF    +5m=NA +10m=NA +15m=-0.2868% +20m=NA +30m=NA
+NVDA   LONG  PF_ONSET=+45m LATE_PF    +5m=NA +10m=NA +15m=-0.2204% +20m=NA +30m=NA
+
+==============================================================================================================
+V13.17 PF COHORT RETURN — INTERPRETATION
+==============================================================================================================
+
+DIRECT_FROM_DETERIORATING CASES = 6
+FAILED_RECOVERY CASES            = 4
+
+The comparison is descriptive.
+It does NOT establish that failed recovery causes a different future.
+The sample is small and direction is separated.
+No result becomes an entry, warning, rescue, hold, or exit rule.
+No production code changed.
+
+==============================================================================================================
+V13.17 PERSISTENT FAILURE COHORT RETURN AUDIT COMPLETE
+==============================================================================================================

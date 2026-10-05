@@ -1,0 +1,34 @@
+EXPERIMENT #41 — NVDA V SEQUENCE OBSERVATION
+
+Question:
+Does the sequence of V events inside one trade reveal whether the original trade continues or deteriorates?
+
+Research status:
+PURE OBSERVATION ONLY
+
+No entry rule.
+No exit rule.
+No V threshold.
+No minor/medium/major classification.
+No optimization.
+No parameter promotion.
+No production changes.
+No orders.
+No AI training.
+
+Source:
+kiss/results/exp40_giveback_trajectory/nvda_giveback_trajectory_events.csv
+
+V event count: 100
+Unique trades: 39
+Unique cases: 39
+
+Events are grouped chronologically within each trade to study V-to-V sequence behavior.
+
+P&L change from previous V is descriptive.
+Giveback change from previous V is descriptive.
+Prior peak change from previous V is descriptive.
+
+No threshold is selected from the observations.
+
+Experiment #41 does not change AIMn.

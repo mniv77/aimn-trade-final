@@ -1,0 +1,31 @@
+Experiment #37 — NVDA Causal Price + P&L + Costs
+====================================================================
+
+Purpose
+Walk forward through completed 5-minute candles and record causal price behavior and actual trade P&L.
+
+Research rules
+- Completed candles only.
+- No future information for causal fields.
+- No minor/medium/major V classification imposed.
+- No exit rule tested.
+- No EXIT + RE-ENTER simulation.
+- Eventual trade result is hindsight/reference only.
+- Round-trip cost is an explicit scenario parameter.
+
+Inputs
+- kiss/results/exp32_raw_candle_v_geometry/raw_v_trajectory.csv
+- kiss/results/exp32_raw_candle_v_geometry/raw_v_geometry.csv
+- kiss/results/exp30_nvda_transition_match/nvda_trades_entry_025.csv
+
+Outputs
+- kiss/results/exp37_nvda_causal/nvda_causal_path.csv
+- kiss/results/exp37_nvda_causal/nvda_causal_summary.csv
+- kiss/results/exp37_nvda_causal/exp37_metadata.txt
+
+Round-trip cost assumption: 0.000000%
+NVDA transition cases: 73
+Causal path rows: 829
+Summary cases: 73
+
+No production files were modified by this experiment.

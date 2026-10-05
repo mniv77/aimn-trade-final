@@ -1,0 +1,24 @@
+AIMn KISS — Experiment #46
+NOT-YET-PROFITABLE V: STAY vs EXIT
+
+RESEARCH ONLY
+No production strategy changes.
+No orders.
+No AI training.
+No threshold promotion.
+No re-entry simulation.
+
+Raw trajectory: /home/MeirNiv/aimn-trade-final/kiss/results/exp32_raw_candle_v_geometry/raw_v_trajectory.csv
+Trade metadata: /home/MeirNiv/aimn-trade-final/kiss/results/exp42_v_peak_divergence/nvda_v_peak_divergence_transitions.csv
+
+Profitability level: 0.000000%
+
+Events: 5
+Unique cases: 5
+
+Causal V:
+previous P&L change > 0
+current P&L change < 0
+
+EXIT NOW = P&L at causal V reversal candle.
+STAY = actual eventual trade result when available.

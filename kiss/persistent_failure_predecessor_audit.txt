@@ -1,0 +1,320 @@
+
+==============================================================================================================
+V13.17 PERSISTENT FAILURE PREDECESSOR TRAJECTORY AUDIT
+==============================================================================================================
+
+Question: what trajectory immediately precedes FIRST PERSISTENT_FAILURE?
+
+Lookback window = 30 minutes
+No future information is used.
+No production code changed.
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+RAW PATH OBJECTS = 28
+UNIQUE TRAJECTORY CASES = 28
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+FIRST PF ONSET CASES = 12
+
+--------------------------------------------------------------------------------------------------------------
+CASE 1
+--------------------------------------------------------------------------------------------------------------
+  NVDA   LONG  PF_ONSET=+10m GROUP=EARLY_PF
+  ONSET RETURN       = -0.5189620758483119
+  PRIOR STATE        = NONE
+  HAD RECOVERING     = False
+  HAD NEUTRAL        = False
+  HAD DETERIORATING  = False
+  RECOVERY FAILED    = False
+  LAST RECOVERING    = NONE
+  DETERIORATING AFTER RECOVERY = NONE
+  PREDECESSOR PATTERN = OTHER_OR_UNKNOWN
+
+--------------------------------------------------------------------------------------------------------------
+CASE 2
+--------------------------------------------------------------------------------------------------------------
+  NVDA   LONG  PF_ONSET=+45m GROUP=LATE_PF
+  ONSET RETURN       = -1.08976815481892
+  PRIOR STATE        = DETERIORATING @+30m
+  HAD RECOVERING     = True
+  HAD NEUTRAL        = True
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = True
+  LAST RECOVERING    = +15m
+  DETERIORATING AFTER RECOVERY = +25m
+  PREDECESSOR PATTERN = RECOVERY_FAILED_THEN_DETERIORATING
+  PRE-PF PATH        = +15m:RECOVERING -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 3
+--------------------------------------------------------------------------------------------------------------
+  AAPL   LONG  PF_ONSET=+30m GROUP=EARLY_PF
+  ONSET RETURN       = -0.5839765043371286
+  PRIOR STATE        = DETERIORATING @+25m
+  HAD RECOVERING     = False
+  HAD NEUTRAL        = False
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = False
+  LAST RECOVERING    = NONE
+  DETERIORATING AFTER RECOVERY = NONE
+  PREDECESSOR PATTERN = DIRECT_FROM_DETERIORATING
+  PRE-PF PATH        = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 4
+--------------------------------------------------------------------------------------------------------------
+  MSFT   SHORT PF_ONSET=+30m GROUP=EARLY_PF
+  ONSET RETURN       = -0.7216579069197555
+  PRIOR STATE        = DETERIORATING @+25m
+  HAD RECOVERING     = True
+  HAD NEUTRAL        = True
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = True
+  LAST RECOVERING    = +10m
+  DETERIORATING AFTER RECOVERY = +20m
+  PREDECESSOR PATTERN = RECOVERY_FAILED_THEN_DETERIORATING
+  PRE-PF PATH        = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 5
+--------------------------------------------------------------------------------------------------------------
+  MSFT   SHORT PF_ONSET=+45m GROUP=LATE_PF
+  ONSET RETURN       = -0.8415651058370681
+  PRIOR STATE        = NEUTRAL @+30m
+  HAD RECOVERING     = True
+  HAD NEUTRAL        = True
+  HAD DETERIORATING  = False
+  RECOVERY FAILED    = False
+  LAST RECOVERING    = +20m
+  DETERIORATING AFTER RECOVERY = NONE
+  PREDECESSOR PATTERN = DIRECT_FROM_NEUTRAL
+  PRE-PF PATH        = +15m:NEUTRAL -> +20m:RECOVERING -> +25m:NEUTRAL -> +30m:NEUTRAL
+
+--------------------------------------------------------------------------------------------------------------
+CASE 6
+--------------------------------------------------------------------------------------------------------------
+  AMZN   LONG  PF_ONSET=+45m GROUP=LATE_PF
+  ONSET RETURN       = -0.718262569594967
+  PRIOR STATE        = DETERIORATING @+30m
+  HAD RECOVERING     = False
+  HAD NEUTRAL        = True
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = False
+  LAST RECOVERING    = NONE
+  DETERIORATING AFTER RECOVERY = NONE
+  PREDECESSOR PATTERN = DIRECT_FROM_DETERIORATING
+  PRE-PF PATH        = +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 7
+--------------------------------------------------------------------------------------------------------------
+  TSLA   LONG  PF_ONSET=+20m GROUP=EARLY_PF
+  ONSET RETURN       = -0.5286895514908578
+  PRIOR STATE        = DETERIORATING @+15m
+  HAD RECOVERING     = False
+  HAD NEUTRAL        = False
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = False
+  LAST RECOVERING    = NONE
+  DETERIORATING AFTER RECOVERY = NONE
+  PREDECESSOR PATTERN = DIRECT_FROM_DETERIORATING
+  PRE-PF PATH        = +10m:DETERIORATING -> +15m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 8
+--------------------------------------------------------------------------------------------------------------
+  TSLA   SHORT PF_ONSET=+25m GROUP=EARLY_PF
+  ONSET RETURN       = -0.759353006544029
+  PRIOR STATE        = DETERIORATING @+20m
+  HAD RECOVERING     = True
+  HAD NEUTRAL        = False
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = True
+  LAST RECOVERING    = +15m
+  DETERIORATING AFTER RECOVERY = +20m
+  PREDECESSOR PATTERN = RECOVERY_FAILED_THEN_DETERIORATING
+  PRE-PF PATH        = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 9
+--------------------------------------------------------------------------------------------------------------
+  GOOGL  SHORT PF_ONSET=+30m GROUP=EARLY_PF
+  ONSET RETURN       = -0.8186722329149717
+  PRIOR STATE        = DETERIORATING @+25m
+  HAD RECOVERING     = False
+  HAD NEUTRAL        = True
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = False
+  LAST RECOVERING    = NONE
+  DETERIORATING AFTER RECOVERY = NONE
+  PREDECESSOR PATTERN = DIRECT_FROM_DETERIORATING
+  PRE-PF PATH        = +10m:NEUTRAL -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 10
+--------------------------------------------------------------------------------------------------------------
+  GOOGL  LONG  PF_ONSET=+20m GROUP=EARLY_PF
+  ONSET RETURN       = -0.6539680726504327
+  PRIOR STATE        = DETERIORATING @+15m
+  HAD RECOVERING     = False
+  HAD NEUTRAL        = False
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = False
+  LAST RECOVERING    = NONE
+  DETERIORATING AFTER RECOVERY = NONE
+  PREDECESSOR PATTERN = DIRECT_FROM_DETERIORATING
+  PRE-PF PATH        = +10m:DETERIORATING -> +15m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 11
+--------------------------------------------------------------------------------------------------------------
+  GOOGL  SHORT PF_ONSET=+45m GROUP=LATE_PF
+  ONSET RETURN       = -0.5925879475763424
+  PRIOR STATE        = DETERIORATING @+30m
+  HAD RECOVERING     = True
+  HAD NEUTRAL        = False
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = True
+  LAST RECOVERING    = +20m
+  DETERIORATING AFTER RECOVERY = +25m
+  PREDECESSOR PATTERN = RECOVERY_FAILED_THEN_DETERIORATING
+  PRE-PF PATH        = +15m:RECOVERING -> +20m:RECOVERING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+--------------------------------------------------------------------------------------------------------------
+CASE 12
+--------------------------------------------------------------------------------------------------------------
+  GOOGL  LONG  PF_ONSET=+60m GROUP=LATE_PF
+  ONSET RETURN       = -0.7975379779989565
+  PRIOR STATE        = DETERIORATING @+45m
+  HAD RECOVERING     = False
+  HAD NEUTRAL        = False
+  HAD DETERIORATING  = True
+  RECOVERY FAILED    = False
+  LAST RECOVERING    = NONE
+  DETERIORATING AFTER RECOVERY = NONE
+  PREDECESSOR PATTERN = DIRECT_FROM_DETERIORATING
+  PRE-PF PATH        = +30m:DETERIORATING -> +45m:DETERIORATING
+
+==============================================================================================================
+EARLY VS LATE PF PREDECESSOR SUMMARY
+==============================================================================================================
+
+GROUP = EARLY_PF
+  CASES                    = 7
+  HAD RECOVERING           = 2
+  HAD NEUTRAL              = 2
+  HAD DETERIORATING        = 6
+  RECOVERY FAILED          = 2
+
+  PREDECESSOR PATTERNS:
+    DIRECT_FROM_DETERIORATING                  = 4
+    OTHER_OR_UNKNOWN                           = 1
+    RECOVERY_FAILED_THEN_DETERIORATING         = 2
+
+GROUP = LATE_PF
+  CASES                    = 5
+  HAD RECOVERING           = 3
+  HAD NEUTRAL              = 3
+  HAD DETERIORATING        = 4
+  RECOVERY FAILED          = 2
+
+  PREDECESSOR PATTERNS:
+    DIRECT_FROM_DETERIORATING                  = 2
+    DIRECT_FROM_NEUTRAL                        = 1
+    RECOVERY_FAILED_THEN_DETERIORATING         = 2
+
+==============================================================================================================
+EXACT PF ONSET + PREDECESSOR PATTERN
+==============================================================================================================
+NVDA   LONG  PF_ONSET=+10m GROUP=EARLY_PF   PRIOR=None               RECOVERY_FAILED=False PATTERN=OTHER_OR_UNKNOWN
+GOOGL  LONG  PF_ONSET=+20m GROUP=EARLY_PF   PRIOR=DETERIORATING      RECOVERY_FAILED=False PATTERN=DIRECT_FROM_DETERIORATING
+TSLA   LONG  PF_ONSET=+20m GROUP=EARLY_PF   PRIOR=DETERIORATING      RECOVERY_FAILED=False PATTERN=DIRECT_FROM_DETERIORATING
+TSLA   SHORT PF_ONSET=+25m GROUP=EARLY_PF   PRIOR=DETERIORATING      RECOVERY_FAILED=True  PATTERN=RECOVERY_FAILED_THEN_DETERIORATING
+AAPL   LONG  PF_ONSET=+30m GROUP=EARLY_PF   PRIOR=DETERIORATING      RECOVERY_FAILED=False PATTERN=DIRECT_FROM_DETERIORATING
+GOOGL  SHORT PF_ONSET=+30m GROUP=EARLY_PF   PRIOR=DETERIORATING      RECOVERY_FAILED=False PATTERN=DIRECT_FROM_DETERIORATING
+MSFT   SHORT PF_ONSET=+30m GROUP=EARLY_PF   PRIOR=DETERIORATING      RECOVERY_FAILED=True  PATTERN=RECOVERY_FAILED_THEN_DETERIORATING
+AMZN   LONG  PF_ONSET=+45m GROUP=LATE_PF    PRIOR=DETERIORATING      RECOVERY_FAILED=False PATTERN=DIRECT_FROM_DETERIORATING
+GOOGL  SHORT PF_ONSET=+45m GROUP=LATE_PF    PRIOR=DETERIORATING      RECOVERY_FAILED=True  PATTERN=RECOVERY_FAILED_THEN_DETERIORATING
+MSFT   SHORT PF_ONSET=+45m GROUP=LATE_PF    PRIOR=NEUTRAL            RECOVERY_FAILED=False PATTERN=DIRECT_FROM_NEUTRAL
+NVDA   LONG  PF_ONSET=+45m GROUP=LATE_PF    PRIOR=DETERIORATING      RECOVERY_FAILED=True  PATTERN=RECOVERY_FAILED_THEN_DETERIORATING
+GOOGL  LONG  PF_ONSET=+60m GROUP=LATE_PF    PRIOR=DETERIORATING      RECOVERY_FAILED=False PATTERN=DIRECT_FROM_DETERIORATING
+
+==============================================================================================================
+PF PREDECESSOR SUMMARY BY SYMBOL
+==============================================================================================================
+AAPL   CASES=1 HAD_RECOVERING=0 RECOVERY_FAILED=0
+AMZN   CASES=1 HAD_RECOVERING=0 RECOVERY_FAILED=0
+GOOGL  CASES=4 HAD_RECOVERING=1 RECOVERY_FAILED=1
+MSFT   CASES=2 HAD_RECOVERING=2 RECOVERY_FAILED=1
+NVDA   CASES=2 HAD_RECOVERING=1 RECOVERY_FAILED=1
+TSLA   CASES=2 HAD_RECOVERING=1 RECOVERY_FAILED=1
+
+==============================================================================================================
+PF PREDECESSOR SUMMARY BY DIRECTION
+==============================================================================================================
+LONG   CASES=7 HAD_RECOVERING=1 RECOVERY_FAILED=1
+SHORT  CASES=5 HAD_RECOVERING=4 RECOVERY_FAILED=3
+
+==============================================================================================================
+V13.17 PF PREDECESSOR TRAJECTORY — INTERPRETATION
+==============================================================================================================
+
+EARLY PF:
+  cases = 7
+  had prior RECOVERING = 2
+  recovery attempt failed before PF = 2
+
+LATE PF:
+  cases = 5
+  had prior RECOVERING = 3
+  recovery attempt failed before PF = 2
+
+These counts are descriptive only.
+They do not establish that one predecessor pattern causes PF.
+They do not create an entry, hold, warning, rescue, or exit rule.
+No production code changed.
+
+==============================================================================================================
+V13.17 PERSISTENT FAILURE PREDECESSOR TRAJECTORY AUDIT COMPLETE
+==============================================================================================================

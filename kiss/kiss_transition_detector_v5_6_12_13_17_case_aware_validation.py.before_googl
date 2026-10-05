@@ -5367,7 +5367,6 @@ def build_v1317_research_paths():
         "TSLA",
         "SPY",
         "QQQ",
-        "GOOGL",
     )
 
     all_paths = []

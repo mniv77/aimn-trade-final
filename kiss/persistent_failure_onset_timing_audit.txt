@@ -1,0 +1,372 @@
+==============================================================================================================
+V13.17 PERSISTENT FAILURE ONSET TIMING AUDIT
+==============================================================================================================
+RESEARCH ONLY
+NO ORDERS
+NO PRODUCTION ENGINE CHANGES
+NO AI TRAINING
+
+===== BUILD V13.17 RESEARCH PATHS =====
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+RAW PATH OBJECTS = 28
+UNIQUE TRAJECTORY CASES = 28
+FIRST PF ONSET CASES = 12
+
+==============================================================================================================
+PERSISTENT FAILURE ONSET TIMING POPULATION
+==============================================================================================================
+UNIQUE TRAJECTORY CASES = 28
+CASES REACHING PF       = 12
+EARLY PF CASES          = 7
+LATE PF CASES           = 5
+UNKNOWN-TIMING CASES    = 0
+
+==============================================================================================================
+FIRST PF ONSET BY UNIQUE CASE
+==============================================================================================================
+
+CASE 1
+  SYMBOL             = NVDA
+  DIRECTION          = LONG
+  OPPOSITE_TIME      = 2026-06-05 10:20:00
+  FIRST PF ONSET     = +10m
+  TIMING GROUP       = EARLY_PF
+  ONSET RETURN       = -0.5189620758483119
+  FIRST CLEARANCE    = DETERIORATING @+20m
+  LATER PF RE-ENTRY  = True
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = -0.267%
+  FUTURE +10m    = +0.047%
+  FUTURE +15m    = -0.005%
+  FUTURE +20m    = -0.349%
+  FUTURE +30m    = NA
+
+CASE 2
+  SYMBOL             = GOOGL
+  DIRECTION          = LONG
+  OPPOSITE_TIME      = 2026-06-22 10:20:00
+  FIRST PF ONSET     = +20m
+  TIMING GROUP       = EARLY_PF
+  ONSET RETURN       = -0.6539680726504327
+  FIRST CLEARANCE    = DETERIORATING @+25m
+  LATER PF RE-ENTRY  = True
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = +0.371%
+  FUTURE +10m    = -0.080%
+  FUTURE +15m    = NA
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+CASE 3
+  SYMBOL             = TSLA
+  DIRECTION          = LONG
+  OPPOSITE_TIME      = 2026-07-02 10:35:00
+  FIRST PF ONSET     = +20m
+  TIMING GROUP       = EARLY_PF
+  ONSET RETURN       = -0.5286895514908578
+  FIRST CLEARANCE    = DETERIORATING @+30m
+  LATER PF RE-ENTRY  = True
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = -0.174%
+  FUTURE +10m    = +0.210%
+  FUTURE +15m    = NA
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+CASE 4
+  SYMBOL             = TSLA
+  DIRECTION          = SHORT
+  OPPOSITE_TIME      = 2026-08-07 10:05:00
+  FIRST PF ONSET     = +25m
+  TIMING GROUP       = EARLY_PF
+  ONSET RETURN       = -0.759353006544029
+  FIRST CLEARANCE    = TERMINAL
+  LATER PF RE-ENTRY  = False
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = -0.245%
+  FUTURE +10m    = NA
+  FUTURE +15m    = NA
+  FUTURE +20m    = -0.708%
+  FUTURE +30m    = NA
+
+CASE 5
+  SYMBOL             = AAPL
+  DIRECTION          = LONG
+  OPPOSITE_TIME      = 2026-06-12 10:20:00
+  FIRST PF ONSET     = +30m
+  TIMING GROUP       = EARLY_PF
+  ONSET RETURN       = -0.5839765043371286
+  FIRST CLEARANCE    = DETERIORATING @+45m
+  LATER PF RE-ENTRY  = False
+  LATER RECOVERY     = False
+  FINAL STATE        = DETERIORATING @+60m
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = +0.216%
+  FUTURE +20m    = NA
+  FUTURE +30m    = +0.569%
+
+CASE 6
+  SYMBOL             = GOOGL
+  DIRECTION          = SHORT
+  OPPOSITE_TIME      = 2026-06-04 11:45:00
+  FIRST PF ONSET     = +30m
+  TIMING GROUP       = EARLY_PF
+  ONSET RETURN       = -0.8186722329149717
+  FIRST CLEARANCE    = TERMINAL
+  LATER PF RE-ENTRY  = False
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = +0.004%
+  FUTURE +20m    = NA
+  FUTURE +30m    = -0.026%
+
+CASE 7
+  SYMBOL             = MSFT
+  DIRECTION          = SHORT
+  OPPOSITE_TIME      = 2026-06-26 10:35:00
+  FIRST PF ONSET     = +30m
+  TIMING GROUP       = EARLY_PF
+  ONSET RETURN       = -0.7216579069197555
+  FIRST CLEARANCE    = DETERIORATING @+45m
+  LATER PF RE-ENTRY  = True
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = +0.243%
+  FUTURE +20m    = NA
+  FUTURE +30m    = -0.153%
+
+CASE 8
+  SYMBOL             = AMZN
+  DIRECTION          = LONG
+  OPPOSITE_TIME      = 2026-06-22 10:35:00
+  FIRST PF ONSET     = +45m
+  TIMING GROUP       = LATE_PF
+  ONSET RETURN       = -0.718262569594967
+  FIRST CLEARANCE    = TERMINAL
+  LATER PF RE-ENTRY  = False
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = -0.242%
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+CASE 9
+  SYMBOL             = GOOGL
+  DIRECTION          = SHORT
+  OPPOSITE_TIME      = 2026-07-24 10:35:00
+  FIRST PF ONSET     = +45m
+  TIMING GROUP       = LATE_PF
+  ONSET RETURN       = -0.5925879475763424
+  FIRST CLEARANCE    = TERMINAL
+  LATER PF RE-ENTRY  = False
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = -0.287%
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+CASE 10
+  SYMBOL             = MSFT
+  DIRECTION          = SHORT
+  OPPOSITE_TIME      = 2026-07-27 10:35:00
+  FIRST PF ONSET     = +45m
+  TIMING GROUP       = LATE_PF
+  ONSET RETURN       = -0.8415651058370681
+  FIRST CLEARANCE    = TERMINAL
+  LATER PF RE-ENTRY  = False
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = -0.125%
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+CASE 11
+  SYMBOL             = NVDA
+  DIRECTION          = LONG
+  OPPOSITE_TIME      = 2026-07-16 10:20:00
+  FIRST PF ONSET     = +45m
+  TIMING GROUP       = LATE_PF
+  ONSET RETURN       = -1.08976815481892
+  FIRST CLEARANCE    = TERMINAL
+  LATER PF RE-ENTRY  = False
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = -0.220%
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+CASE 12
+  SYMBOL             = GOOGL
+  DIRECTION          = LONG
+  OPPOSITE_TIME      = 2026-08-05 10:35:00
+  FIRST PF ONSET     = +60m
+  TIMING GROUP       = LATE_PF
+  ONSET RETURN       = -0.7975379779989565
+  FIRST CLEARANCE    = TERMINAL
+  LATER PF RE-ENTRY  = False
+  LATER RECOVERY     = False
+  FINAL STATE        = PERSISTENT_FAILURE @+60m
+  FUTURE +5 m    = NA
+  FUTURE +10m    = NA
+  FUTURE +15m    = NA
+  FUTURE +20m    = NA
+  FUTURE +30m    = NA
+
+==============================================================================================================
+EARLY VS LATE PF STRUCTURAL SUMMARY
+==============================================================================================================
+
+GROUP = EARLY_PF
+  CASES                = 7
+  CLEARED              = 5
+  TERMINAL             = 2
+  CLEAR->DETERIORATING = 5
+  CLEAR->RECOVERING    = 0
+  LATER PF RE-ENTRY    = 4
+  LATER RECOVERY       = 0
+
+GROUP = LATE_PF
+  CASES                = 5
+  CLEARED              = 0
+  TERMINAL             = 5
+  CLEAR->DETERIORATING = 0
+  CLEAR->RECOVERING    = 0
+  LATER PF RE-ENTRY    = 0
+  LATER RECOVERY       = 0
+
+==============================================================================================================
+FUTURE RETURN FROM FIRST PF ONSET
+==============================================================================================================
+
+GROUP = EARLY_PF
+  +5m N=4 AVG=-0.079% NEG=3 POS=1
+  +10m N=3 AVG=+0.059% NEG=1 POS=2
+  +15m N=4 AVG=+0.115% NEG=1 POS=3
+  +20m N=2 AVG=-0.528% NEG=2 POS=0
+  +30m N=3 AVG=+0.130% NEG=2 POS=1
+
+GROUP = LATE_PF
+  +5m N=0
+  +10m N=0
+  +15m N=4 AVG=-0.218% NEG=4 POS=0
+  +20m N=0
+  +30m N=0
+
+==============================================================================================================
+EXACT FIRST PF ONSET TIMING
+==============================================================================================================
++10m CASES=1
++20m CASES=2
++25m CASES=1
++30m CASES=3
++45m CASES=4
++60m CASES=1
+
+==============================================================================================================
+FIRST PF CASES BY SYMBOL
+==============================================================================================================
+NVDA   CASES=2
+AAPL   CASES=1
+MSFT   CASES=2
+AMZN   CASES=1
+TSLA   CASES=2
+SPY    CASES=0
+QQQ    CASES=0
+GOOGL  CASES=4
+
+==============================================================================================================
+FIRST PF CASES BY DIRECTION
+==============================================================================================================
+LONG   CASES=7
+SHORT  CASES=5
+
+==============================================================================================================
+FIRST PF CASE STATE PATHS
+==============================================================================================================
+
+NVDA   LONG  PF_ONSET=+10m GROUP=EARLY_PF
+  +10m:PERSISTENT_FAILURE -> +15m:PERSISTENT_FAILURE -> +20m:DETERIORATING -> +25m:PERSISTENT_FAILURE -> +30m:PERSISTENT_FAILURE -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+GOOGL  LONG  PF_ONSET=+20m GROUP=EARLY_PF
+  +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:PERSISTENT_FAILURE -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+TSLA   LONG  PF_ONSET=+20m GROUP=EARLY_PF
+  +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:PERSISTENT_FAILURE -> +25m:PERSISTENT_FAILURE -> +30m:DETERIORATING -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+TSLA   SHORT PF_ONSET=+25m GROUP=EARLY_PF
+  +10m:DETERIORATING -> +15m:RECOVERING -> +20m:DETERIORATING -> +25m:PERSISTENT_FAILURE -> +30m:PERSISTENT_FAILURE -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+AAPL   LONG  PF_ONSET=+30m GROUP=EARLY_PF
+  +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:DETERIORATING -> +60m:DETERIORATING
+
+GOOGL  SHORT PF_ONSET=+30m GROUP=EARLY_PF
+  +10m:NEUTRAL -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+MSFT   SHORT PF_ONSET=+30m GROUP=EARLY_PF
+  +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:PERSISTENT_FAILURE -> +45m:DETERIORATING -> +60m:PERSISTENT_FAILURE
+
+AMZN   LONG  PF_ONSET=+45m GROUP=LATE_PF
+  +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+GOOGL  SHORT PF_ONSET=+45m GROUP=LATE_PF
+  +10m:RECOVERING -> +15m:RECOVERING -> +20m:RECOVERING -> +25m:DETERIORATING -> +30m:DETERIORATING -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+MSFT   SHORT PF_ONSET=+45m GROUP=LATE_PF
+  +10m:DETERIORATING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:NEUTRAL -> +30m:NEUTRAL -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+NVDA   LONG  PF_ONSET=+45m GROUP=LATE_PF
+  +10m:DETERIORATING -> +15m:RECOVERING -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING -> +45m:PERSISTENT_FAILURE -> +60m:PERSISTENT_FAILURE
+
+GOOGL  LONG  PF_ONSET=+60m GROUP=LATE_PF
+  +10m:DETERIORATING -> +15m:NEUTRAL -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:DETERIORATING -> +45m:DETERIORATING -> +60m:PERSISTENT_FAILURE
+
+==============================================================================================================
+V13.17 PERSISTENT FAILURE ONSET TIMING — INTERPRETATION
+==============================================================================================================
+This audit asks whether the timing of FIRST Persistent-Failure onset is structurally different.
+Early PF is defined as first onset <= +30m.
+Late PF is defined as first onset >= +45m.
+The groups are descriptive and are not ranked.
+A small sample does NOT establish a general rule.
+No result becomes an entry, hold, warning, rescue, or exit rule.
+NO PRODUCTION CODE CHANGED.
+
+V13.17 PERSISTENT FAILURE ONSET TIMING AUDIT COMPLETE

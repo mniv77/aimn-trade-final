@@ -1,0 +1,204 @@
+
+========================================================================================================================
+V13.17 RECOVERY PEAK / GIVEBACK AUDIT
+========================================================================================================================
+
+TARGET = LONG +30M DETERIORATING
+CASES WITH PF BY +30M ARE EXCLUDED.
+========================================================================
+V13.17 CASE-AWARE RESEARCH PATH BUILDER
+RESEARCH ONLY - NO ORDERS - NO PRODUCTION ENGINE CHANGES
+========================================================================
+NVDA: transitions=32 assignments=24 trajectory_cases=7
+NVDA: trajectory_cases=7
+AAPL: transitions=20 assignments=14 trajectory_cases=2
+AAPL: trajectory_cases=2
+MSFT: transitions=18 assignments=14 trajectory_cases=3
+MSFT: trajectory_cases=3
+AMZN: transitions=18 assignments=13 trajectory_cases=5
+AMZN: trajectory_cases=5
+TSLA: transitions=20 assignments=17 trajectory_cases=3
+TSLA: trajectory_cases=3
+SPY: transitions=5 assignments=4 trajectory_cases=1
+SPY: trajectory_cases=1
+QQQ: transitions=15 assignments=12 trajectory_cases=2
+QQQ: trajectory_cases=2
+GOOGL: transitions=22 assignments=21 trajectory_cases=5
+GOOGL: trajectory_cases=5
+
+TOTAL TRAJECTORY CASE RECORDS = 28
+
+TARGET CASES = 8
+
+========================================================================================================================
+EXACT +30M RECOVERY / GIVEBACK CASES
+========================================================================================================================
+
+GROUP = FAILED
+
+AMZN   FAILED OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+  HAD RECOVERING          = True
+  LAST RECOVERING         = +10m
+  LAST RECOVERY RETURN    = 0.418632326065712
+  PEAK RETURN             = 0.418632326065712 @+10m
+  RETURN AT +30M          = -0.42925751200645623
+  MFE AT +30M             = 0.418632326065712
+  GIVEBACK FROM PEAK      = 0.8478898380721682
+  PATH                    = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+NVDA   FAILED OUTCOME=LATE_PF_BY_60      FIRST_PF=+45m
+  HAD RECOVERING          = True
+  LAST RECOVERING         = +15m
+  LAST RECOVERY RETURN    = 0.10059398352175128
+  PEAK RETURN             = 0.10059398352175128 @+15m
+  RETURN AT +30M          = -0.4383023567733244
+  MFE AT +30M             = 0.10059398352175128
+  GIVEBACK FROM PEAK      = 0.5388963402950757
+  PATH                    = +10m:DETERIORATING -> +15m:RECOVERING -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+AMZN   FAILED OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  HAD RECOVERING          = True
+  LAST RECOVERING         = +25m
+  LAST RECOVERY RETURN    = 0.3284246212522537
+  PEAK RETURN             = 0.4449623900837001 @+20m
+  RETURN AT +30M          = 0.23646572730161788
+  MFE AT +30M             = 0.4449623900837001
+  GIVEBACK FROM PEAK      = 0.2084966627820822
+  PATH                    = +10m:RECOVERING -> +15m:NEUTRAL -> +20m:RECOVERING -> +25m:RECOVERING -> +30m:DETERIORATING
+
+GROUP = CLEAN
+
+GOOGL  CLEAN  OUTCOME=LATE_PF_BY_60      FIRST_PF=+60m
+  HAD RECOVERING          = False
+  LAST RECOVERING         = NONE
+  LAST RECOVERY RETURN    = None
+  PEAK RETURN             = 0.064169722367733 @+20m
+  RETURN AT +30M          = -0.23048716605552524
+  MFE AT +30M             = 0.064169722367733
+  GIVEBACK FROM PEAK      = 0.2946568884232582
+  PATH                    = +10m:DETERIORATING -> +15m:NEUTRAL -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:DETERIORATING
+
+AMZN   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  HAD RECOVERING          = False
+  LAST RECOVERING         = NONE
+  LAST RECOVERY RETURN    = None
+  PEAK RETURN             = 0.07266649711150261 @+15m
+  RETURN AT +30M          = -0.1780329179231948
+  MFE AT +30M             = 0.07266649711150261
+  GIVEBACK FROM PEAK      = 0.2506994150346974
+  PATH                    = +10m:NEUTRAL -> +15m:NEUTRAL -> +20m:NEUTRAL -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+GOOGL  CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  HAD RECOVERING          = False
+  LAST RECOVERING         = NONE
+  LAST RECOVERY RETURN    = None
+  PEAK RETURN             = 0.026268491635566788 @+20m
+  RETURN AT +30M          = -0.024885939444207104
+  MFE AT +30M             = 0.026268491635566788
+  GIVEBACK FROM PEAK      = 0.051154431079773896
+  PATH                    = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+NVDA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  HAD RECOVERING          = False
+  LAST RECOVERING         = NONE
+  LAST RECOVERY RETURN    = None
+  PEAK RETURN             = -0.15472127417520065 @+25m
+  RETURN AT +30M          = -0.2866894197952198
+  MFE AT +30M             = 0.0
+  GIVEBACK FROM PEAK      = 0.13196814562001913
+  PATH                    = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:NEUTRAL -> +25m:NEUTRAL -> +30m:DETERIORATING
+
+TSLA   CLEAN  OUTCOME=NO_PF_BY_60        FIRST_PF=NONE
+  HAD RECOVERING          = False
+  LAST RECOVERING         = NONE
+  LAST RECOVERY RETURN    = None
+  PEAK RETURN             = 0.042732935588334665 @+30m
+  RETURN AT +30M          = 0.042732935588334665
+  MFE AT +30M             = 0.042732935588334665
+  GIVEBACK FROM PEAK      = 0.0
+  PATH                    = +10m:DETERIORATING -> +15m:DETERIORATING -> +20m:DETERIORATING -> +25m:DETERIORATING -> +30m:DETERIORATING
+
+========================================================================================================================
+RECOVERY / GIVEBACK BY PREDICTOR
+========================================================================================================================
+
+========================================================================================================================
+SUMMARY — FAILED
+========================================================================================================================
+
+CASES = 3
+LATER PF BY +60M = 2
+NO PF BY +60M    = 1
+LAST_RECOVERY_RETURN     N=3 AVG=+0.282550 MEDIAN=+0.328425 MIN=+0.100594 MAX=+0.418632
+PEAK_SIGNED_RETURN       N=3 AVG=+0.321396 MEDIAN=+0.418632 MIN=+0.100594 MAX=+0.444962
+RETURN_AT_30M            N=3 AVG=-0.210365 MEDIAN=-0.429258 MIN=-0.438302 MAX=+0.236466
+MFE_AT_30M               N=3 AVG=+0.321396 MEDIAN=+0.418632 MIN=+0.100594 MAX=+0.444962
+GIVEBACK_FROM_PEAK       N=3 AVG=+0.531761 MEDIAN=+0.538896 MIN=+0.208497 MAX=+0.847890
+
+========================================================================================================================
+SUMMARY — CLEAN
+========================================================================================================================
+
+CASES = 5
+LATER PF BY +60M = 1
+NO PF BY +60M    = 4
+LAST_RECOVERY_RETURN     N=0
+PEAK_SIGNED_RETURN       N=5 AVG=+0.010223 MEDIAN=+0.042733 MIN=-0.154721 MAX=+0.072666
+RETURN_AT_30M            N=5 AVG=-0.135473 MEDIAN=-0.178033 MIN=-0.286689 MAX=+0.042733
+MFE_AT_30M               N=5 AVG=+0.041168 MEDIAN=+0.042733 MIN=+0.000000 MAX=+0.072666
+GIVEBACK_FROM_PEAK       N=5 AVG=+0.145696 MEDIAN=+0.131968 MIN=+0.000000 MAX=+0.294657
+
+========================================================================================================================
+RECOVERY / GIVEBACK BY OUTCOME
+========================================================================================================================
+
+========================================================================================================================
+SUMMARY — LATE_PF_BY_60
+========================================================================================================================
+
+CASES = 3
+LATER PF BY +60M = 3
+NO PF BY +60M    = 0
+LAST_RECOVERY_RETURN     N=2 AVG=+0.259613 MEDIAN=+0.259613 MIN=+0.100594 MAX=+0.418632
+PEAK_SIGNED_RETURN       N=3 AVG=+0.194465 MEDIAN=+0.100594 MIN=+0.064170 MAX=+0.418632
+RETURN_AT_30M            N=3 AVG=-0.366016 MEDIAN=-0.429258 MIN=-0.438302 MAX=-0.230487
+MFE_AT_30M               N=3 AVG=+0.194465 MEDIAN=+0.100594 MIN=+0.064170 MAX=+0.418632
+GIVEBACK_FROM_PEAK       N=3 AVG=+0.560481 MEDIAN=+0.538896 MIN=+0.294657 MAX=+0.847890
+
+========================================================================================================================
+SUMMARY — NO_PF_BY_60
+========================================================================================================================
+
+CASES = 5
+LATER PF BY +60M = 0
+NO PF BY +60M    = 5
+LAST_RECOVERY_RETURN     N=1 AVG=+0.328425 MEDIAN=+0.328425 MIN=+0.328425 MAX=+0.328425
+PEAK_SIGNED_RETURN       N=5 AVG=+0.086382 MEDIAN=+0.042733 MIN=-0.154721 MAX=+0.444962
+RETURN_AT_30M            N=5 AVG=-0.042082 MEDIAN=-0.024886 MIN=-0.286689 MAX=+0.236466
+MFE_AT_30M               N=5 AVG=+0.117326 MEDIAN=+0.042733 MIN=+0.000000 MAX=+0.444962
+GIVEBACK_FROM_PEAK       N=5 AVG=+0.128464 MEDIAN=+0.131968 MIN=+0.000000 MAX=+0.250699
+
+========================================================================================================================
+V13.17 RECOVERY PEAK / GIVEBACK — INTERPRETATION
+========================================================================================================================
+
+This audit examines the trajectory shape before +30m.
+The failed-recovery label is determined from states only.
+Peak return, MFE, and giveback are independent measurements.
+
+FAILED GIVEBACK RANGE = +0.208497 to +0.847890
+CLEAN GIVEBACK RANGE  = +0.000000 to +0.294657
+
+FAILED MFE RANGE = +0.100594 to +0.444962
+CLEAN MFE RANGE  = +0.000000 to +0.072666
+
+This is descriptive trajectory research.
+No threshold is derived.
+No composite score is created.
+No result becomes an entry, warning, rescue, hold, or exit rule.
+The sample remains very small.
+No production code changed.
+
+========================================================================================================================
+V13.17 RECOVERY PEAK / GIVEBACK AUDIT COMPLETE
+========================================================================================================================

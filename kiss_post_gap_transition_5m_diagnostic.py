@@ -237,13 +237,32 @@ def report_group(events: List[Dict[str, Any]], state: str, b: str) -> None:
         all_sig = [e for e in xs if getter(e) is not None]
         real = [e for e in opp if getter(e) is not None and getter(e) <= e["transition_min"]]
         false = [e for e in xs if e["transition_min"] is None and getter(e) is not None]
-        print(f"  {name:22} seen={100*len(all_sig)/len(xs):5.1f}% | real-before-transition={100*len(real)/len(opp):5.1f}% | false(no120)={100*len(false)/len([e for e in xs if e['transition_min'] is None]) if any(e['transition_min'] is None for e in xs) else 0:5.1f}% | timing={fmt_timing([getter(e) for e in real])}")
-    for threshold in THRESHOLDS:
-        getter = lambda e, x=threshold: e["evidence"]["thresholds"][x]
-        real = [e for e in opp if getter(e) is not None and getter(e) <= e["transition_min"]]
-        false = [e for e in xs if e["transition_min"] is None and getter(e) is not None]
-        no_change = sum(e["transition_min"] is None for e in xs)
-        print(f"  adverse >= {threshold:.2f}%       real-before-transition={100*len(real)/len(opp):5.1f}% | false(no120)={100*len(false)/no_change if no_change else 0:5.1f}% | timing={fmt_timing([getter(e) for e in real])}")
+        opp_pct = 100 * len(real) / len(opp) if opp else 0.0
+        no120 = [e for e in xs if e["transition_min"] is None]
+        false_pct = 100 * len(false) / len(no120) if no120 else 0.0
+
+        print(
+            f"  {name:22} "
+            f"seen={100*len(all_sig)/len(xs):5.1f}% | "
+            f"real-before-transition={opp_pct:5.1f}% | "
+            f"false(no120)={false_pct:5.1f}% | "
+            f"timing={fmt_timing([getter(e) for e in real])}"
+        )
+        for threshold in THRESHOLDS:
+                getter = lambda e, x=threshold: e["evidence"]["thresholds"][x]
+                real = [e for e in opp if getter(e) is not None and getter(e) <= e["transition_min"]]
+                false = [e for e in xs if e["transition_min"] is None and getter(e) is not None]
+                no_change = sum(e["transition_min"] is None for e in xs)
+                opp_pct = 100 * len(real) / len(opp) if opp else 0.0
+                false_pct = 100 * len(false) / no_change if no_change else 0.0
+
+                print(
+                    f"  adverse >= {threshold:.2f}%       "
+                    f"real-before-transition={opp_pct:5.1f}% | "
+                    f"false(no120)={false_pct:5.1f}% | "
+                    f"timing={fmt_timing([getter(e) for e in real])}"
+                )
+
 
 
 def main() -> None:
