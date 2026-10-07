@@ -27,7 +27,7 @@ body{background:#080d18;color:#c8d8f0;font-family:Arial,sans-serif}.panel{backgr
 </div>
 <script>
 const q=new URLSearchParams(location.search);let result=null;
-const symbol=q.get('symbol')||'';const direction=q.get('direction')||'LONG';const timeframe='5m';const broker=q.get('broker_id')||'';const rsiRescueLong=q.get('rsi_rescue_long')||'20';const rsiRescueShort=q.get('rsi_rescue_short')||'80';const trailMinus=q.get('trailing_minus_pct')||'1.5';const commissionPct=q.get('commission_pct')||'0';
+const symbol=q.get('symbol')||'';const direction=q.get('direction')||'LONG';const timeframe='5m';const broker=q.get('broker_id')||'';const rsiRescueLong=q.get('rsi_rescue_long')||'20';const rsiRescueShort=q.get('rsi_rescue_short')||'80';const trailMinus=q.get('trailing_minus_pct')||'0.5';const commissionPct=q.get('commission_pct')||'0';
 function setText(id,v){document.getElementById(id).textContent=v??'—'}
 function fmt(v){return Number(v).toFixed(3)}
 async function run(){
