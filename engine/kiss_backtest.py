@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence
 import math
 
-TRAIL_PCT = 0.015
+TRAIL_PCT = 0.005
 TREND_WINDOW = 20
 TREND_BAND = 0.002
 CONFIRM_BARS = 3
