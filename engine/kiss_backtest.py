@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence
 import math
 
-TRAIL_PCT = 0.005
+TRAIL_PCT = 0.015
 TREND_WINDOW = 20
 TREND_BAND = 0.002
 CONFIRM_BARS = 3
@@ -131,9 +131,6 @@ class KISSResult:
     rsi_rescue_short: float = RSI_SHORT_EMERGENCY
     total_commission_pct: float = 0.0
     total_net_pnl_pct: float = 0.0
-    avg_net_pnl_pct: float = 0.0
-    best_net_pnl_pct: float = 0.0
-    worst_net_pnl_pct: float = 0.0
     data_warning: Optional[str] = None
 
 
@@ -342,9 +339,6 @@ def run_kiss_backtest(
         rsi_rescue_short=round(float(rsi_rescue_short), 6),
         total_commission_pct=round(total_commission, 6),
         total_net_pnl_pct=round(total_net, 6),
-        avg_net_pnl_pct=round((total_net / len(payload)) if payload else 0.0, 6),
-        best_net_pnl_pct=round(max((t["net_pnl_pct"] for t in payload), default=0.0), 6),
-        worst_net_pnl_pct=round(min((t["net_pnl_pct"] for t in payload), default=0.0), 6),
         data_warning=(
             "Commission model is 0.0% unless a broker-specific commission is supplied."
             if float(commission_pct) == 0.0 else None
