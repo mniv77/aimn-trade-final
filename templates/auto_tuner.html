@@ -120,6 +120,39 @@
     </div>
 
     <div class="panel">
+        <div class="title">🤖 AutoTuner — Controlled Research Sweep</div>
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
+            <div>
+                <label for="sweep_long">RSI Rescue LONG values</label>
+                <input id="sweep_long" type="text" value="15,20,25"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">Comma-separated. Example: 15,20,25</div>
+            </div>
+            <div>
+                <label for="sweep_short">RSI Rescue SHORT values</label>
+                <input id="sweep_short" type="text" value="75,80,85"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">Comma-separated. Example: 75,80,85</div>
+            </div>
+            <div>
+                <label for="sweep_trailing">Trailing Minus values</label>
+                <input id="sweep_trailing" type="text" value="0.25,0.50,0.75"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">Comma-separated %. Maximum 100 combinations.</div>
+            </div>
+        </div>
+        <div class="actions" style="margin-top:14px;">
+            <button id="autotune_btn" type="button"
+                    style="padding:10px 24px;background:#1d4ed8;border:1px solid #60a5fa;border-radius:4px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;">
+                🤖 RUN AUTOTUNER
+            </button>
+            <span id="autotune_status" class="hint"></span>
+        </div>
+        <div id="autotune_results" style="margin-top:16px;overflow:auto;"></div>
+        <div class="hint" style="margin-top:10px;">Research only: every combination is reported. Nothing is written to production strategy parameters.</div>
+    </div>
+
+    <div class="panel">
         <div class="title">📈 Review</div>
         <a class="feedback-link" href="/tuner_chart" target="_blank">📈 Open Feedback Chart (Working)</a>
     </div>
@@ -202,6 +235,123 @@ runButton.addEventListener('click', function(){
         + '&trailing_minus_pct=' + encodeURIComponent(trail);
     window.open(u, '_blank');
 });
+function parseSweep(id) {
+    return document.getElementById(id).value
+        .split(',')
+        .map(v => Number(v.trim()))
+        .filter(v => Number.isFinite(v));
+}
+
+function fmtTune(v) {
+    return Number(v).toFixed(3);
+}
+
+function inspectTune(row) {
+    const broker = brokerSelect.value;
+    const symbol = symbolSelect.value;
+    const dir = direction || 'LONG';
+    const u = '/kiss_backtest?broker_id=' + encodeURIComponent(broker)
+        + '&symbol=' + encodeURIComponent(symbol)
+        + '&direction=' + encodeURIComponent(dir)
+        + '&timeframe=5m'
+        + '&rsi_rescue_long=' + encodeURIComponent(row.rsi_rescue_long)
+        + '&rsi_rescue_short=' + encodeURIComponent(row.rsi_rescue_short)
+        + '&trailing_minus_pct=' + encodeURIComponent(row.trailing_minus_pct);
+    window.open(u, '_blank');
+}
+
+function renderAutoTuner(data) {
+    const box = document.getElementById('autotune_results');
+    const rows = data.ranked || [];
+    if (!rows.length) {
+        box.innerHTML = '<div class="hint">No valid AutoTuner results.</div>';
+        return;
+    }
+
+    let html = '<table style="width:100%;border-collapse:collapse;font-family:monospace;font-size:12px;">';
+    html += '<thead><tr>';
+    ['Rank','LONG RSI','SHORT RSI','Trail %','Trades','Wins','Losers','Win %','Gross %','Net %','Avg Net %','Worst %','Inspect']
+      .forEach(h => html += '<th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);color:var(--label);white-space:nowrap;">'+h+'</th>');
+    html += '</tr></thead><tbody>';
+
+    rows.forEach((r, i) => {
+        html += '<tr>';
+        const vals = [
+            i + 1,
+            fmtTune(r.rsi_rescue_long),
+            fmtTune(r.rsi_rescue_short),
+            fmtTune(r.trailing_minus_pct),
+            r.trades,
+            r.winners,
+            r.losers,
+            fmtTune(r.win_rate_pct),
+            fmtTune(r.gross_pnl_pct),
+            fmtTune(r.net_pnl_pct),
+            fmtTune(r.avg_net_pnl_pct),
+            fmtTune(r.worst_net_pnl_pct)
+        ];
+        vals.forEach(v => html += '<td style="padding:7px;border-bottom:1px solid #142238;white-space:nowrap;">'+v+'</td>');
+        html += '<td style="padding:7px;border-bottom:1px solid #142238;"><button type="button" data-row="'+i+'" style="padding:4px 8px;background:#2563eb;border:0;border-radius:4px;color:white;cursor:pointer;">Losers</button></td>';
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    box.innerHTML = html;
+
+    box.querySelectorAll('button[data-row]').forEach(btn => {
+        btn.addEventListener('click', () => inspectTune(rows[Number(btn.dataset.row)]));
+    });
+}
+
+document.getElementById('autotune_btn').addEventListener('click', async function() {
+    const broker = brokerSelect.value;
+    const symbol = symbolSelect.value;
+    const dir = direction || 'LONG';
+    const btn = this;
+    const status = document.getElementById('autotune_status');
+
+    if (!broker) { alert('Please choose a broker first.'); return; }
+    if (!symbol) { alert('Please choose a symbol first.'); return; }
+
+    const longVals = parseSweep('sweep_long');
+    const shortVals = parseSweep('sweep_short');
+    const trailVals = parseSweep('sweep_trailing');
+    const combinations = longVals.length * shortVals.length * trailVals.length;
+
+    if (!longVals.length || !shortVals.length || !trailVals.length) {
+        alert('Enter at least one value in every AutoTuner field.');
+        return;
+    }
+    if (combinations > 100) {
+        alert('Please keep the sweep at 100 combinations or fewer.');
+        return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Running ' + combinations + ' combinations on the same 5m candles...';
+    document.getElementById('autotune_results').innerHTML = '';
+
+    try {
+        const u = '/api/kiss_autotune?broker_id=' + encodeURIComponent(broker)
+            + '&symbol=' + encodeURIComponent(symbol)
+            + '&direction=' + encodeURIComponent(dir)
+            + '&rsi_long_values=' + encodeURIComponent(longVals.join(','))
+            + '&rsi_short_values=' + encodeURIComponent(shortVals.join(','))
+            + '&trailing_values=' + encodeURIComponent(trailVals.join(','));
+
+        const r = await fetch(u);
+        const data = await r.json();
+        if (data.status !== 'success') throw new Error(data.message || 'AutoTuner failed');
+
+        status.textContent = 'Completed ' + data.combinations + ' combinations. Results are ranked by net P&L for research only.';
+        renderAutoTuner(data);
+    } catch (e) {
+        status.textContent = 'ERROR: ' + e.message;
+    } finally {
+        btn.disabled = false;
+    }
+});
+
 window.__aimnKissDirection = function() { return direction || 'LONG'; };
 </script>
 </body>
