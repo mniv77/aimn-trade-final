@@ -12,6 +12,9 @@ from typing import Any, Dict, Iterable, List, Sequence
 
 from engine.kiss_backtest import run_kiss_backtest
 
+RSI_LONG_DEFAULT = 20.0
+RSI_SHORT_DEFAULT = 80.0
+
 
 def _clean_values(values: Iterable[float]) -> List[float]:
     out: List[float] = []
@@ -39,16 +42,28 @@ def run_kiss_autotune(
     if not long_values or not short_values or not trail_values:
         raise ValueError("AutoTuner requires at least one value for every parameter")
 
-    combinations = len(long_values) * len(short_values) * len(trail_values)
+    direction = direction.upper()
+    if direction not in {"LONG", "SHORT"}:
+        raise ValueError("Direction must be LONG or SHORT")
+
+    # The selected direction is the only side whose RSI rescue can fire.
+    # Keep the opposite-side value visible, but do not create redundant runs.
+    if direction == "LONG":
+        active_pairs = [(rsi_long, RSI_SHORT_DEFAULT) for rsi_long in long_values]
+        active_parameter = "rsi_rescue_long"
+    else:
+        active_pairs = [(RSI_LONG_DEFAULT, rsi_short) for rsi_short in short_values]
+        active_parameter = "rsi_rescue_short"
+
+    combinations = len(active_pairs) * len(trail_values)
     if combinations > 100:
         raise ValueError("AutoTuner sweep is limited to 100 combinations per run")
 
     results: List[Dict[str, Any]] = []
     run_no = 0
 
-    for rsi_long in long_values:
-        for rsi_short in short_values:
-            for trailing_minus in trail_values:
+    for rsi_long, rsi_short in active_pairs:
+        for trailing_minus in trail_values:
                 run_no += 1
                 result = run_kiss_backtest(
                     rows,
@@ -104,8 +119,11 @@ def run_kiss_autotune(
         "combinations": combinations,
         "results": results,
         "ranked": ranked,
+        "active_parameter": active_parameter,
         "research_note": (
-            "Ranking is descriptive only. No combination is automatically promoted "
-            "to production and no strategy_params row is changed."
+            "Ranking is descriptive only. The RSI Rescue parameter for the selected "
+            "direction is tuned; the opposite-side RSI is held at its baseline value. "
+            "No combination is automatically promoted to production and no "
+            "strategy_params row is changed."
         ),
     }
