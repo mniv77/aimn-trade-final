@@ -111,6 +111,27 @@ def run_kiss_autotune(
         reverse=True,
     )
 
+    # Locate the standard 20/80/0.50 research baseline when it was included.
+    baseline = next(
+        (
+            r for r in results
+            if abs(r["rsi_rescue_long"] - RSI_LONG_DEFAULT) < 1e-9
+            and abs(r["rsi_rescue_short"] - RSI_SHORT_DEFAULT) < 1e-9
+            and abs(r["trailing_minus_pct"] - 0.50) < 1e-9
+        ),
+        None,
+    )
+
+    if baseline is not None:
+        for r in results:
+            r["delta_net_vs_baseline_pct"] = round(
+                r["net_pnl_pct"] - baseline["net_pnl_pct"], 6
+            )
+            r["delta_losers_vs_baseline"] = r["losers"] - baseline["losers"]
+            r["delta_win_rate_vs_baseline_pct"] = round(
+                r["win_rate_pct"] - baseline["win_rate_pct"], 4
+            )
+
     return {
         "status": "success",
         "symbol": symbol,
@@ -119,6 +140,7 @@ def run_kiss_autotune(
         "combinations": combinations,
         "results": results,
         "ranked": ranked,
+        "baseline": baseline,
         "active_parameter": active_parameter,
         "research_note": (
             "Ranking is descriptive only. The RSI Rescue parameter for the selected "
