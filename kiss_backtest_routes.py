@@ -1,7 +1,7 @@
 """Routes for the independent KISS backtest.
 
-The normal KISS path remains available. When the selected decision timeframe is
-30m, this route uses the isolated 30m-trend / 5m-execution experiment.
+The research baseline runs on 5m candles and accepts independent LONG/SHORT
+RSI rescue thresholds plus a programmable trailing-minus percentage.
 """
 from flask import jsonify, render_template, request
 
@@ -67,7 +67,7 @@ def _row_dicts(rows):
     return normalized
 
 
-def _run_selected(symbol, direction, broker_id, rsi_rescue, trailing_minus_pct, commission_pct):
+def _run_selected(symbol, direction, broker_id, rsi_rescue_long, rsi_rescue_short, trailing_minus_pct, commission_pct):
     """Run the research baseline: 5m candles only."""
     from engine.kiss_backtest import run_kiss_backtest
     rows = _row_dicts(_db_rows(symbol, "5m", broker_id=broker_id))
@@ -76,7 +76,8 @@ def _run_selected(symbol, direction, broker_id, rsi_rescue, trailing_minus_pct, 
         symbol,
         direction,
         "5m",
-        rsi_rescue=rsi_rescue,
+        rsi_rescue_long=rsi_rescue_long,
+        rsi_rescue_short=rsi_rescue_short,
         trailing_minus_pct=trailing_minus_pct,
         commission_pct=commission_pct,
     )
@@ -94,17 +95,23 @@ def register_kiss_backtest_routes(app):
             direction = (request.args.get("direction") or "LONG").strip().upper()
             timeframe = "5m"
             broker_id = request.args.get("broker_id") or ""
-            rsi_rescue = float(request.args.get("rsi_rescue") or 20.0)
+            rsi_rescue_long = float(request.args.get("rsi_rescue_long") or 20.0)
+            rsi_rescue_short = float(request.args.get("rsi_rescue_short") or 80.0)
             trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 1.5)
             commission_pct = float(request.args.get("commission_pct") or 0.0)
             if not symbol:
                 return jsonify({"status": "error", "message": "Symbol is required"}), 400
 
-            result = _run_selected(symbol, direction, broker_id, rsi_rescue, trailing_minus_pct, commission_pct)
+            result = _run_selected(
+                symbol, direction, broker_id,
+                rsi_rescue_long, rsi_rescue_short,
+                trailing_minus_pct, commission_pct
+            )
             result["broker_id"] = broker_id
             result["timeframe"] = "5m"
             result["parameters"] = {
-                "rsi_rescue": rsi_rescue,
+                "rsi_rescue_long": rsi_rescue_long,
+                "rsi_rescue_short": rsi_rescue_short,
                 "trailing_minus_pct": trailing_minus_pct,
                 "commission_pct_one_side": commission_pct,
             }
@@ -123,7 +130,8 @@ def register_kiss_backtest_routes(app):
             broker_id = request.args.get("broker_id") or ""
             trade_id = (request.args.get("trade_id") or "").strip()
             direction = (request.args.get("direction") or "LONG").strip().upper()
-            rsi_rescue = float(request.args.get("rsi_rescue") or 20.0)
+            rsi_rescue_long = float(request.args.get("rsi_rescue_long") or 20.0)
+            rsi_rescue_short = float(request.args.get("rsi_rescue_short") or 80.0)
             trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 1.5)
             commission_pct = float(request.args.get("commission_pct") or 0.0)
             if not symbol or not trade_id:
@@ -133,7 +141,8 @@ def register_kiss_backtest_routes(app):
             rows = _row_dicts(_db_rows(symbol, "5m", broker_id=broker_id))
             result = run_kiss_backtest(
                 rows, symbol, direction, "5m",
-                rsi_rescue=rsi_rescue,
+                rsi_rescue_long=rsi_rescue_long,
+                rsi_rescue_short=rsi_rescue_short,
                 trailing_minus_pct=trailing_minus_pct,
                 commission_pct=commission_pct,
             )
