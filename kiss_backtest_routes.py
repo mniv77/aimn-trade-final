@@ -6,7 +6,7 @@ The normal KISS path remains available. When the selected decision timeframe is
 from flask import jsonify, render_template, request
 
 
-def _db_rows(symbol: str, timeframe: str, limit: int = 5000):
+def _db_rows(symbol: str, timeframe: str, broker_id: str = "", limit: int = 5000):
     from db import get_db_connection
     tf_map = {"5m": "5m", "15m": "15m", "30m": "30m", "1hr": "1h", "1h": "1h", "6hr": "6h", "6h": "6h"}
     db_tf = tf_map.get(timeframe, timeframe)
@@ -14,6 +14,21 @@ def _db_rows(symbol: str, timeframe: str, limit: int = 5000):
     if not conn:
         raise RuntimeError("Database connection failed")
     try:
+        if broker_id:
+            try:
+                cursor.execute(
+                    """SELECT timestamp, open, high, low, close, volume
+                       FROM candles
+                       WHERE symbol=%s AND broker_id=%s AND timeframe=%s
+                       ORDER BY timestamp ASC
+                       LIMIT %s""",
+                    (symbol, broker_id, db_tf, int(limit)),
+                )
+                rows = cursor.fetchall()
+                if rows:
+                    return rows
+            except Exception:
+                pass
         cursor.execute(
             """SELECT timestamp, open, high, low, close, volume
                FROM candles
@@ -57,17 +72,19 @@ def _row_dicts(rows):
     return normalized
 
 
-def _run_selected(symbol, direction, timeframe):
-    """Run KISS without changing broker/symbol/direction selection."""
-    if timeframe == "30m":
-        from engine.kiss_execution_5m import run_kiss_30m_5m
-        trend_rows = _row_dicts(_db_rows(symbol, "30m"))
-        execution_rows = _row_dicts(_db_rows(symbol, "5m"))
-        return run_kiss_30m_5m(trend_rows, execution_rows, symbol, direction)
-
+def _run_selected(symbol, direction, broker_id, rsi_rescue, trailing_minus_pct, commission_pct):
+    """Run the research baseline: 5m candles only."""
     from engine.kiss_backtest import run_kiss_backtest
-    rows = _row_dicts(_db_rows(symbol, timeframe))
-    return run_kiss_backtest(rows, symbol, direction, timeframe)
+    rows = _row_dicts(_db_rows(symbol, "5m", broker_id=broker_id))
+    return run_kiss_backtest(
+        rows,
+        symbol,
+        direction,
+        "5m",
+        rsi_rescue=rsi_rescue,
+        trailing_minus_pct=trailing_minus_pct,
+        commission_pct=commission_pct,
+    )
 
 
 def register_kiss_backtest_routes(app):
@@ -80,19 +97,24 @@ def register_kiss_backtest_routes(app):
         try:
             symbol = (request.args.get("symbol") or "").strip().upper()
             direction = (request.args.get("direction") or "LONG").strip().upper()
-            timeframe = (request.args.get("timeframe") or "1hr").strip()
+            timeframe = "5m"
             broker_id = request.args.get("broker_id") or ""
+            rsi_rescue = float(request.args.get("rsi_rescue") or 20.0)
+            trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 1.5)
+            commission_pct = float(request.args.get("commission_pct") or 0.0)
             if not symbol:
                 return jsonify({"status": "error", "message": "Symbol is required"}), 400
 
-            result = _run_selected(symbol, direction, timeframe)
+            result = _run_selected(symbol, direction, broker_id, rsi_rescue, trailing_minus_pct, commission_pct)
             result["broker_id"] = broker_id
-            result["losers"] = [t for t in result["trades"] if t["pnl_pct"] <= 0]
+            result["timeframe"] = "5m"
+            result["parameters"] = {
+                "rsi_rescue": rsi_rescue,
+                "trailing_minus_pct": trailing_minus_pct,
+                "commission_pct_one_side": commission_pct,
+            }
+            result["losers"] = [t for t in result["trades"] if t["net_pnl_pct"] <= 0]
             result["winners_hidden"] = True
-            if timeframe == "30m":
-                result["timeframe"] = "30m trend → 5m execution"
-                result["candle_count"] = result["candle_count_5m"]
-                result["execution_experiment"] = "30m trend decision / 5m execution"
             return jsonify({"status": "success", **result})
         except Exception as exc:
             import traceback
@@ -102,21 +124,24 @@ def register_kiss_backtest_routes(app):
     def kiss_backtest_chart():
         try:
             symbol = (request.args.get("symbol") or "").strip().upper()
-            timeframe = (request.args.get("timeframe") or "1hr").strip()
+            timeframe = "5m"
+            broker_id = request.args.get("broker_id") or ""
             trade_id = (request.args.get("trade_id") or "").strip()
             direction = (request.args.get("direction") or "LONG").strip().upper()
+            rsi_rescue = float(request.args.get("rsi_rescue") or 20.0)
+            trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 1.5)
+            commission_pct = float(request.args.get("commission_pct") or 0.0)
             if not symbol or not trade_id:
                 return jsonify({"status": "error", "message": "symbol and trade_id are required"}), 400
 
-            if timeframe == "30m":
-                from engine.kiss_execution_5m import run_kiss_30m_5m
-                trend_rows = _row_dicts(_db_rows(symbol, "30m"))
-                rows = _row_dicts(_db_rows(symbol, "5m"))
-                result = run_kiss_30m_5m(trend_rows, rows, symbol, direction)
-            else:
-                from engine.kiss_backtest import run_kiss_backtest
-                rows = _row_dicts(_db_rows(symbol, timeframe))
-                result = run_kiss_backtest(rows, symbol, direction, timeframe)
+            from engine.kiss_backtest import run_kiss_backtest
+            rows = _row_dicts(_db_rows(symbol, "5m", broker_id=broker_id))
+            result = run_kiss_backtest(
+                rows, symbol, direction, "5m",
+                rsi_rescue=rsi_rescue,
+                trailing_minus_pct=trailing_minus_pct,
+                commission_pct=commission_pct,
+            )
 
             trade = next((t for t in result["trades"] if t["trade_id"] == trade_id), None)
             if not trade:
@@ -134,8 +159,8 @@ def register_kiss_backtest_routes(app):
                 })
             return jsonify({
                 "status": "success", "trade": trade, "candles": candles,
-                "decision_timeframe": "30m" if timeframe == "30m" else timeframe,
-                "execution_timeframe": "5m" if timeframe == "30m" else timeframe,
+                "decision_timeframe": "5m",
+                "execution_timeframe": "5m",
             })
         except Exception as exc:
             import traceback
