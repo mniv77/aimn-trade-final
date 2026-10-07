@@ -127,6 +127,8 @@ class KISSResult:
     loser_count: int
     winner_count: int
     transition_count: int
+    total_commission_pct: float = 0.0
+    total_net_pnl_pct: float = 0.0
     data_warning: Optional[str] = None
 
 
