@@ -145,8 +145,24 @@ def _confirmed_reverse(states: Sequence[str], start_i: int, new_state: str) -> b
     return len(checked) >= CONFIRM_BARS and sum(s == new_state for s in checked) >= MIN_CONFIRM
 
 
-def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: str, timeframe: str) -> Dict[str, Any]:
+def run_kiss_backtest(
+    rows: Sequence[Dict[str, Any]],
+    symbol: str,
+    direction: str,
+    timeframe: str,
+    rsi_rescue: float = RSI_LONG_EMERGENCY,
+    trailing_minus_pct: float = TRAIL_PCT * 100.0,
+    commission_pct: float = 0.0,
+) -> Dict[str, Any]:
     """Run the independent KISS strategy on chronological candle dictionaries."""
+    if str(timeframe).lower() not in {"5m", "5min"}:
+        raise ValueError("AIMn research baseline uses 5m candles only")
+    if not (0.0 <= float(rsi_rescue) <= 50.0):
+        raise ValueError("RSI rescue threshold must be between 0 and 50")
+    if float(trailing_minus_pct) <= 0:
+        raise ValueError("Trailing minus percentage must be greater than zero")
+    if float(commission_pct) < 0:
+        raise ValueError("Commission percentage cannot be negative")
     rows = list(rows)
     if not rows:
         raise ValueError("No candles available for this symbol/timeframe")
@@ -220,8 +236,8 @@ def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: st
                 trough = min(trough, lows[i])
                 max_fav = max(max_fav, (peak / entry - 1.0) * 100.0)
                 max_adv = min(max_adv, (lows[i] / entry - 1.0) * 100.0)
-                trail_hit = price < peak * (1.0 - TRAIL_PCT)
-                emergency = rsis[i] is not None and rsis[i] < RSI_LONG_EMERGENCY
+                trail_hit = price < peak * (1.0 - float(trailing_minus_pct) / 100.0)
+                emergency = rsis[i] is not None and rsis[i] < float(rsi_rescue)
                 stop_hit = STOP_LOSS_PCT > 0 and price <= entry * (1.0 - STOP_LOSS_PCT)
                 opposite = "SHORT"
             else:
@@ -229,8 +245,8 @@ def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: st
                 peak = max(peak, highs[i])
                 max_fav = max(max_fav, (entry / trough - 1.0) * 100.0)
                 max_adv = min(max_adv, (entry / highs[i] - 1.0) * 100.0)
-                trail_hit = price > trough * (1.0 + TRAIL_PCT)
-                emergency = rsis[i] is not None and rsis[i] > RSI_SHORT_EMERGENCY
+                trail_hit = price > trough * (1.0 + float(trailing_minus_pct) / 100.0)
+                emergency = rsis[i] is not None and rsis[i] > (100.0 - float(rsi_rescue))
                 stop_hit = STOP_LOSS_PCT > 0 and price >= entry * (1.0 + STOP_LOSS_PCT)
                 opposite = "LONG"
 
@@ -300,13 +316,24 @@ def run_kiss_backtest(rows: Sequence[Dict[str, Any]], symbol: str, direction: st
         ))
 
     payload = [asdict(t) for t in trades]
+    for t in payload:
+        t["commission_pct"] = round(float(commission_pct) * 2.0, 6)
+        t["net_pnl_pct"] = round(float(t["pnl_pct"]) - t["commission_pct"], 6)
     total = sum(t["pnl_pct"] for t in payload)
-    winners = sum(1 for t in payload if t["pnl_pct"] > 0)
+    total_commission = sum(t["commission_pct"] for t in payload)
+    total_net = sum(t["net_pnl_pct"] for t in payload)
+    winners = sum(1 for t in payload if t["net_pnl_pct"] > 0)
     losers = len(payload) - winners
     return asdict(KISSResult(
-        symbol=symbol, direction=direction, timeframe=timeframe, candle_count=len(rows),
+        symbol=symbol, direction=direction, timeframe="5m", candle_count=len(rows),
         trades=payload, total_pnl_pct=round(total, 6),
         win_rate_pct=round((winners / len(payload) * 100.0) if payload else 0.0, 4),
         avg_pnl_pct=round((total / len(payload)) if payload else 0.0, 6),
         loser_count=losers, winner_count=winners, transition_count=transitions,
+        total_commission_pct=round(total_commission, 6),
+        total_net_pnl_pct=round(total_net, 6),
+        data_warning=(
+            "Commission model is 0.0% unless a broker-specific commission is supplied."
+            if float(commission_pct) == 0.0 else None
+        ),
     ))
