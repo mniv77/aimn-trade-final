@@ -122,62 +122,6 @@ def register_kiss_backtest_routes(app):
             import traceback
             return jsonify({"status": "error", "message": str(exc), "trace": traceback.format_exc()}), 500
 
-    @app.route("/api/kiss_autotune", methods=["GET"])
-    def kiss_autotune_api():
-        """Run a small research-only parameter sweep on one fixed candle set."""
-        try:
-            symbol = (request.args.get("symbol") or "").strip().upper()
-            direction = (request.args.get("direction") or "LONG").strip().upper()
-            broker_id = request.args.get("broker_id") or ""
-            commission_pct = float(request.args.get("commission_pct") or 0.0)
-
-            def parse_values(name, default):
-                raw = request.args.get(name)
-                if raw is None or not raw.strip():
-                    raw = default
-                values = []
-                for part in raw.split(","):
-                    part = part.strip()
-                    if part:
-                        values.append(float(part))
-                return values
-
-            rsi_long_values = parse_values("rsi_long_values", "15,20,25")
-            rsi_short_values = parse_values("rsi_short_values", "75,80,85")
-            trailing_values = parse_values("trailing_values", "0.25,0.50,0.75")
-
-            if not symbol:
-                return jsonify({"status": "error", "message": "Symbol is required"}), 400
-            if direction not in {"LONG", "SHORT"}:
-                return jsonify({"status": "error", "message": "Direction must be LONG or SHORT"}), 400
-
-            from engine.kiss_autotuner import run_kiss_autotune
-            rows = _row_dicts(_db_rows(symbol, "5m", broker_id=broker_id))
-            result = run_kiss_autotune(
-                rows,
-                symbol,
-                direction,
-                rsi_long_values=rsi_long_values,
-                rsi_short_values=rsi_short_values,
-                trailing_minus_values=trailing_values,
-                commission_pct=commission_pct,
-            )
-            result["broker_id"] = broker_id
-            result["sweep"] = {
-                "rsi_long_values": rsi_long_values,
-                "rsi_short_values": rsi_short_values,
-                "trailing_minus_values": trailing_values,
-                "commission_pct_one_side": commission_pct,
-            }
-            return jsonify(result)
-        except Exception as exc:
-            import traceback
-            return jsonify({
-                "status": "error",
-                "message": str(exc),
-                "trace": traceback.format_exc(),
-            }), 500
-
     @app.route("/api/kiss_backtest/chart", methods=["GET"])
     def kiss_backtest_chart():
         try:
