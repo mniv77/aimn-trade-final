@@ -15,20 +15,15 @@ def _db_rows(symbol: str, timeframe: str, broker_id: str = "", limit: int = 5000
         raise RuntimeError("Database connection failed")
     try:
         if broker_id:
-            try:
-                cursor.execute(
-                    """SELECT timestamp, open, high, low, close, volume
-                       FROM candles
-                       WHERE symbol=%s AND broker_id=%s AND timeframe=%s
-                       ORDER BY timestamp ASC
-                       LIMIT %s""",
-                    (symbol, broker_id, db_tf, int(limit)),
-                )
-                rows = cursor.fetchall()
-                if rows:
-                    return rows
-            except Exception:
-                pass
+            cursor.execute(
+                """SELECT timestamp, open, high, low, close, volume
+                   FROM candles
+                   WHERE symbol=%s AND broker_id=%s AND timeframe=%s
+                   ORDER BY timestamp ASC
+                   LIMIT %s""",
+                (symbol, broker_id, db_tf, int(limit)),
+            )
+            return cursor.fetchall()
         cursor.execute(
             """SELECT timestamp, open, high, low, close, volume
                FROM candles
