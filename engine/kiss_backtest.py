@@ -127,6 +127,8 @@ class KISSResult:
     loser_count: int
     winner_count: int
     transition_count: int
+    rsi_rescue_long: float = RSI_LONG_EMERGENCY
+    rsi_rescue_short: float = RSI_SHORT_EMERGENCY
     total_commission_pct: float = 0.0
     total_net_pnl_pct: float = 0.0
     data_warning: Optional[str] = None
@@ -150,15 +152,18 @@ def run_kiss_backtest(
     symbol: str,
     direction: str,
     timeframe: str,
-    rsi_rescue: float = RSI_LONG_EMERGENCY,
+    rsi_rescue_long: float = RSI_LONG_EMERGENCY,
+    rsi_rescue_short: float = RSI_SHORT_EMERGENCY,
     trailing_minus_pct: float = TRAIL_PCT * 100.0,
     commission_pct: float = 0.0,
 ) -> Dict[str, Any]:
     """Run the independent KISS strategy on chronological candle dictionaries."""
     if str(timeframe).lower() not in {"5m", "5min"}:
         raise ValueError("AIMn research baseline uses 5m candles only")
-    if not (0.0 <= float(rsi_rescue) <= 50.0):
-        raise ValueError("RSI rescue threshold must be between 0 and 50")
+    if not (0.0 <= float(rsi_rescue_long) <= 50.0):
+        raise ValueError("LONG RSI rescue threshold must be between 0 and 50")
+    if not (50.0 <= float(rsi_rescue_short) <= 100.0):
+        raise ValueError("SHORT RSI rescue threshold must be between 50 and 100")
     if float(trailing_minus_pct) <= 0:
         raise ValueError("Trailing minus percentage must be greater than zero")
     if float(commission_pct) < 0:
@@ -237,7 +242,7 @@ def run_kiss_backtest(
                 max_fav = max(max_fav, (peak / entry - 1.0) * 100.0)
                 max_adv = min(max_adv, (lows[i] / entry - 1.0) * 100.0)
                 trail_hit = price < peak * (1.0 - float(trailing_minus_pct) / 100.0)
-                emergency = rsis[i] is not None and rsis[i] < float(rsi_rescue)
+                emergency = rsis[i] is not None and rsis[i] < float(rsi_rescue_long)
                 stop_hit = STOP_LOSS_PCT > 0 and price <= entry * (1.0 - STOP_LOSS_PCT)
                 opposite = "SHORT"
             else:
@@ -246,7 +251,7 @@ def run_kiss_backtest(
                 max_fav = max(max_fav, (entry / trough - 1.0) * 100.0)
                 max_adv = min(max_adv, (entry / highs[i] - 1.0) * 100.0)
                 trail_hit = price > trough * (1.0 + float(trailing_minus_pct) / 100.0)
-                emergency = rsis[i] is not None and rsis[i] > (100.0 - float(rsi_rescue))
+                emergency = rsis[i] is not None and rsis[i] > float(rsi_rescue_short)
                 stop_hit = STOP_LOSS_PCT > 0 and price >= entry * (1.0 + STOP_LOSS_PCT)
                 opposite = "LONG"
 
@@ -330,6 +335,8 @@ def run_kiss_backtest(
         win_rate_pct=round((winners / len(payload) * 100.0) if payload else 0.0, 4),
         avg_pnl_pct=round((total / len(payload)) if payload else 0.0, 6),
         loser_count=losers, winner_count=winners, transition_count=transitions,
+        rsi_rescue_long=round(float(rsi_rescue_long), 6),
+        rsi_rescue_short=round(float(rsi_rescue_short), 6),
         total_commission_pct=round(total_commission, 6),
         total_net_pnl_pct=round(total_net, 6),
         data_warning=(
