@@ -268,9 +268,19 @@ function renderAutoTuner(data) {
         return;
     }
 
+    if (data.baseline) {
+        const b = data.baseline;
+        box.innerHTML = '<div class="panel" style="margin-bottom:12px;background:#0a1220;">' +
+            '<div class="hint">BASELINE (20 / 80 / 0.50%)</div>' +
+            '<div class="mono" style="margin-top:6px;">' +
+            'Trades: <b>'+b.trades+'</b> &nbsp; Wins: <b>'+b.winners+'</b> &nbsp; Losers: <b>'+b.losers+'</b> &nbsp; ' +
+            'Win Rate: <b>'+fmtTune(b.win_rate_pct)+'%</b> &nbsp; Net P&amp;L: <b>'+fmtTune(b.net_pnl_pct)+'%</b>' +
+            '</div></div>';
+    }
+
     let html = '<table style="width:100%;border-collapse:collapse;font-family:monospace;font-size:12px;">';
     html += '<thead><tr>';
-    ['Rank','LONG RSI','SHORT RSI','Trail %','Trades','Wins','Losers','Win %','Gross %','Net %','Avg Net %','Worst %','Inspect']
+    ['Rank','LONG RSI','SHORT RSI','Trail %','Trades','Wins','Losers','Win %','Gross %','Net %','Δ Net','Δ Losers','Worst %','Inspect']
       .forEach(h => html += '<th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);color:var(--label);white-space:nowrap;">'+h+'</th>');
     html += '</tr></thead><tbody>';
 
@@ -288,6 +298,8 @@ function renderAutoTuner(data) {
             fmtTune(r.gross_pnl_pct),
             fmtTune(r.net_pnl_pct),
             fmtTune(r.avg_net_pnl_pct),
+            fmtTune(r.delta_net_vs_baseline_pct ?? 0),
+            (r.delta_losers_vs_baseline ?? 0),
             fmtTune(r.worst_net_pnl_pct)
         ];
         vals.forEach(v => html += '<td style="padding:7px;border-bottom:1px solid #142238;white-space:nowrap;">'+v+'</td>');
@@ -343,7 +355,7 @@ document.getElementById('autotune_btn').addEventListener('click', async function
         const data = await r.json();
         if (data.status !== 'success') throw new Error(data.message || 'AutoTuner failed');
 
-        status.textContent = 'Completed ' + data.combinations + ' combinations. Results are ranked by net P&L for research only.';
+        status.textContent = 'Completed ' + data.combinations + ' combinations. Δ Net and Δ Losers are measured against the 20/80/0.50% baseline.';
         renderAutoTuner(data);
     } catch (e) {
         status.textContent = 'ERROR: ' + e.message;
