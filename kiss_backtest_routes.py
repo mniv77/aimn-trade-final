@@ -132,7 +132,7 @@ def register_kiss_backtest_routes(app):
             direction = (request.args.get("direction") or "LONG").strip().upper()
             rsi_rescue_long = float(request.args.get("rsi_rescue_long") or 20.0)
             rsi_rescue_short = float(request.args.get("rsi_rescue_short") or 80.0)
-            trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 1.5)
+            trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 0.5)
             commission_pct = float(request.args.get("commission_pct") or 0.0)
             if not symbol or not trade_id:
                 return jsonify({"status": "error", "message": "symbol and trade_id are required"}), 400
