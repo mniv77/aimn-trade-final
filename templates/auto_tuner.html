@@ -127,7 +127,6 @@
 <script>
 let direction = null;
 const brokerSelect = document.getElementById('broker_select');
-const runButton = document.getElementById('kiss_backtest_btn');
 const symbolSelect = document.getElementById('symbol_select');
 
 function setDirection(dir) {
@@ -136,22 +135,27 @@ function setDirection(dir) {
     document.getElementById('btn_short').className = 'dir-btn' + (dir === 'SHORT' ? ' active-short' : '');
 }
 
-brokerSelect.addEventListener('change', function() {
-    const brokerId = this.value;
+function loadSymbolsForBroker(brokerId) {
     if (!brokerId) {
         symbolSelect.disabled = true;
         symbolSelect.innerHTML = '<option value="">-- Choose Broker First --</option>';
         return;
     }
+
     symbolSelect.disabled = true;
     symbolSelect.innerHTML = '<option value="">-- Loading Symbols --</option>';
+
     fetch('/get_symbols?broker_id=' + encodeURIComponent(brokerId))
         .then(r => r.json())
         .then(data => {
             const symbols = Array.isArray(data) ? data : (data.symbols || data.data || []);
             symbolSelect.innerHTML = '<option value="">-- Choose Symbol --</option>';
+
             symbols.forEach(sym => {
-                const value = (typeof sym === 'object' && sym !== null) ? (sym.symbol || sym.name || sym.ticker) : sym;
+                const value = (typeof sym === 'object' && sym !== null)
+                    ? (sym.symbol || sym.name || sym.ticker)
+                    : sym;
+
                 if (value) {
                     const option = document.createElement('option');
                     option.value = value;
@@ -159,14 +163,24 @@ brokerSelect.addEventListener('change', function() {
                     symbolSelect.appendChild(option);
                 }
             });
+
             symbolSelect.disabled = false;
             updateChartLink();
         })
-        .catch(() => {
+        .catch((error) => {
+            console.error('AIMn symbol load failed:', error);
             symbolSelect.innerHTML = '<option value="">-- Error Loading Symbols --</option>';
             symbolSelect.disabled = true;
         });
+}
+
+brokerSelect.addEventListener('change', function() {
+    loadSymbolsForBroker(this.value);
 });
+
+if (brokerSelect.value) {
+    loadSymbolsForBroker(brokerSelect.value);
+}
 
 symbolSelect.addEventListener('change', updateChartLink);
 
@@ -184,15 +198,21 @@ async function updateChartLink() {
     }
 }
 
-runButton.addEventListener('click', function(){
+document.addEventListener('click', function(event) {
+    const runButton = event.target.closest('#kiss_backtest_btn');
+    if (!runButton) return;
+
     const broker = brokerSelect.value;
     const symbol = symbolSelect.value;
     const dir = direction || 'LONG';
+
     if(!broker){ alert('Please choose a broker first.'); return; }
     if(!symbol){ alert('Please choose a symbol first.'); return; }
+
     const rsiLong = document.getElementById('rsi_rescue_long').value || '20';
     const rsiShort = document.getElementById('rsi_rescue_short').value || '80';
     const trail = document.getElementById('trailing_minus').value || '0.50';
+
     const u = '/kiss_backtest?broker_id=' + encodeURIComponent(broker)
         + '&symbol=' + encodeURIComponent(symbol)
         + '&direction=' + encodeURIComponent(dir)
@@ -200,6 +220,7 @@ runButton.addEventListener('click', function(){
         + '&rsi_rescue_long=' + encodeURIComponent(rsiLong)
         + '&rsi_rescue_short=' + encodeURIComponent(rsiShort)
         + '&trailing_minus_pct=' + encodeURIComponent(trail);
+
     window.open(u, '_blank');
 });
 window.__aimnKissDirection = function() { return direction || 'LONG'; };
