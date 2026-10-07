@@ -101,7 +101,7 @@
             </div>
             <div>
                 <label for="trailing_minus">Trailing Minus %</label>
-                <input id="trailing_minus" type="number" min="0.01" step="0.05" value="1.50"
+                <input id="trailing_minus" type="number" min="0.01" step="0.05" value="0.50"
                        style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
                 <div class="hint" style="margin-top:5px;">Peak/trough retracement used by the trailing exit.</div>
             </div>
@@ -192,7 +192,7 @@ runButton.addEventListener('click', function(){
     if(!symbol){ alert('Please choose a symbol first.'); return; }
     const rsiLong = document.getElementById('rsi_rescue_long').value || '20';
     const rsiShort = document.getElementById('rsi_rescue_short').value || '80';
-    const trail = document.getElementById('trailing_minus').value || '1.50';
+    const trail = document.getElementById('trailing_minus').value || '0.50';
     const u = '/kiss_backtest?broker_id=' + encodeURIComponent(broker)
         + '&symbol=' + encodeURIComponent(symbol)
         + '&direction=' + encodeURIComponent(dir)
