@@ -316,7 +316,7 @@ document.getElementById('autotune_btn').addEventListener('click', async function
     const longVals = parseSweep('sweep_long');
     const shortVals = parseSweep('sweep_short');
     const trailVals = parseSweep('sweep_trailing');
-    const combinations = longVals.length * shortVals.length * trailVals.length;
+    const combinations = (dir === 'LONG' ? longVals.length : shortVals.length) * trailVals.length;
 
     if (!longVals.length || !shortVals.length || !trailVals.length) {
         alert('Enter at least one value in every AutoTuner field.');
