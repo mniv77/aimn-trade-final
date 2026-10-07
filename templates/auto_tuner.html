@@ -86,12 +86,18 @@
 
     <div class="panel">
         <div class="title">⚙ Research Parameters</div>
-        <div class="grid" style="grid-template-columns:1fr 1fr;">
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
             <div>
-                <label for="rsi_rescue">RSI Rescue</label>
-                <input id="rsi_rescue" type="number" min="0" max="50" step="1" value="20"
+                <label for="rsi_rescue_long">RSI Rescue LONG</label>
+                <input id="rsi_rescue_long" type="number" min="0" max="50" step="1" value="20"
                        style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
-                <div class="hint" style="margin-top:5px;">LONG exits below this RSI; SHORT exits above the symmetric level.</div>
+                <div class="hint" style="margin-top:5px;">LONG emergency exit when RSI falls below this level.</div>
+            </div>
+            <div>
+                <label for="rsi_rescue_short">RSI Rescue SHORT</label>
+                <input id="rsi_rescue_short" type="number" min="50" max="100" step="1" value="80"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">SHORT emergency exit when RSI rises above this level.</div>
             </div>
             <div>
                 <label for="trailing_minus">Trailing Minus %</label>
@@ -110,7 +116,7 @@
                 ▶ RUN 5m BACKTEST
             </button>
         </div>
-        <p class="hint" style="margin-top:10px;">Controlled research baseline: real 5-minute candles. Select broker, symbol and direction, adjust only the two research parameters, then inspect every net loser.</p>
+        <p class="hint" style="margin-top:10px;">Controlled research baseline: real 5-minute candles. Select broker, symbol and direction, adjust the three research parameters, then inspect every net loser.</p>
     </div>
 
     <div class="panel">
@@ -184,13 +190,15 @@ runButton.addEventListener('click', function(){
     const dir = direction || 'LONG';
     if(!broker){ alert('Please choose a broker first.'); return; }
     if(!symbol){ alert('Please choose a symbol first.'); return; }
-    const rsi = document.getElementById('rsi_rescue').value || '20';
+    const rsiLong = document.getElementById('rsi_rescue_long').value || '20';
+    const rsiShort = document.getElementById('rsi_rescue_short').value || '80';
     const trail = document.getElementById('trailing_minus').value || '1.50';
     const u = '/kiss_backtest?broker_id=' + encodeURIComponent(broker)
         + '&symbol=' + encodeURIComponent(symbol)
         + '&direction=' + encodeURIComponent(dir)
         + '&timeframe=5m'
-        + '&rsi_rescue=' + encodeURIComponent(rsi)
+        + '&rsi_rescue_long=' + encodeURIComponent(rsiLong)
+        + '&rsi_rescue_short=' + encodeURIComponent(rsiShort)
         + '&trailing_minus_pct=' + encodeURIComponent(trail);
     window.open(u, '_blank');
 });
