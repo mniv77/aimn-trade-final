@@ -268,9 +268,10 @@ function renderAutoTuner(data) {
         return;
     }
 
+    let html = '';
     if (data.baseline) {
         const b = data.baseline;
-        box.innerHTML = '<div class="panel" style="margin-bottom:12px;background:#0a1220;">' +
+        html += '<div class="panel" style="margin-bottom:12px;background:#0a1220;">' +
             '<div class="hint">BASELINE (20 / 80 / 0.50%)</div>' +
             '<div class="mono" style="margin-top:6px;">' +
             'Trades: <b>'+b.trades+'</b> &nbsp; Wins: <b>'+b.winners+'</b> &nbsp; Losers: <b>'+b.losers+'</b> &nbsp; ' +
@@ -278,7 +279,7 @@ function renderAutoTuner(data) {
             '</div></div>';
     }
 
-    let html = '<table style="width:100%;border-collapse:collapse;font-family:monospace;font-size:12px;">';
+    html += '<table style="width:100%;border-collapse:collapse;font-family:monospace;font-size:12px;">';
     html += '<thead><tr>';
     ['Rank','LONG RSI','SHORT RSI','Trail %','Trades','Wins','Losers','Win %','Gross %','Net %','Δ Net','Δ Losers','Worst %','Inspect']
       .forEach(h => html += '<th style="text-align:left;padding:8px;border-bottom:1px solid var(--border);color:var(--label);white-space:nowrap;">'+h+'</th>');
