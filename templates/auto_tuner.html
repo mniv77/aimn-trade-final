@@ -77,22 +77,40 @@
                 </div>
             </div>
             <div>
-                <label for="timeframe_select">Timeframe</label>
-                <select id="timeframe_select">
-                    <option value="5m">5m</option>
-                    <option value="15m">15m</option>
-                    <option value="30m">30m</option>
-                    <option value="1hr" selected>1hr</option>
-                    <option value="6hr">6hr</option>
-                </select>
+                <label>Candle</label>
+                <div style="padding:10px 12px;background:#052e16;border:1px solid var(--green);border-radius:4px;color:var(--green);font-family:monospace;font-weight:bold;text-align:center;">5 MINUTES</div>
+                <input type="hidden" id="timeframe_select" value="5m">
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="title">⚙ Research Parameters</div>
+        <div class="grid" style="grid-template-columns:1fr 1fr;">
+            <div>
+                <label for="rsi_rescue">RSI Rescue</label>
+                <input id="rsi_rescue" type="number" min="0" max="50" step="1" value="20"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">LONG exits below this RSI; SHORT exits above the symmetric level.</div>
+            </div>
+            <div>
+                <label for="trailing_minus">Trailing Minus %</label>
+                <input id="trailing_minus" type="number" min="0.01" step="0.05" value="1.50"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">Peak/trough retracement used by the trailing exit.</div>
             </div>
         </div>
     </div>
 
     <div class="panel">
         <div class="title">▶ KISS Backtest</div>
-        <div id="kiss_button_anchor" class="actions"></div>
-        <p class="hint" style="margin-top:10px;">Uses the selected broker, symbol, direction and timeframe. The KISS backtest is independent of the retired Auto Tuner.</p>
+        <div id="kiss_button_anchor" class="actions">
+            <button id="kiss_backtest_btn" type="button"
+                    style="padding:10px 24px;background:#7f1d1d;border:1px solid #ef4444;border-radius:4px;color:#fff;font-family:Arial,sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;">
+                ▶ RUN 5m BACKTEST
+            </button>
+        </div>
+        <p class="hint" style="margin-top:10px;">Controlled research baseline: real 5-minute candles. Select broker, symbol and direction, adjust only the two research parameters, then inspect every net loser.</p>
     </div>
 
     <div class="panel">
@@ -103,6 +121,7 @@
 <script>
 let direction = null;
 const brokerSelect = document.getElementById('broker_select');
+const runButton = document.getElementById('kiss_backtest_btn');
 const symbolSelect = document.getElementById('symbol_select');
 
 function setDirection(dir) {
@@ -159,6 +178,22 @@ async function updateChartLink() {
     }
 }
 
+runButton.addEventListener('click', function(){
+    const broker = brokerSelect.value;
+    const symbol = symbolSelect.value;
+    const dir = direction || 'LONG';
+    if(!broker){ alert('Please choose a broker first.'); return; }
+    if(!symbol){ alert('Please choose a symbol first.'); return; }
+    const rsi = document.getElementById('rsi_rescue').value || '20';
+    const trail = document.getElementById('trailing_minus').value || '1.50';
+    const u = '/kiss_backtest?broker_id=' + encodeURIComponent(broker)
+        + '&symbol=' + encodeURIComponent(symbol)
+        + '&direction=' + encodeURIComponent(dir)
+        + '&timeframe=5m'
+        + '&rsi_rescue=' + encodeURIComponent(rsi)
+        + '&trailing_minus_pct=' + encodeURIComponent(trail);
+    window.open(u, '_blank');
+});
 window.__aimnKissDirection = function() { return direction || 'LONG'; };
 </script>
 </body>
