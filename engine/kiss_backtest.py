@@ -14,6 +14,14 @@ import math
 TRAIL_PCT = 0.015
 TREND_WINDOW = 20
 TREND_BAND = 0.002
+
+# SHORT tactic V3:
+# A swing high is confirmed by the FIRST candle that turns down after the
+# candidate peak. This deliberately uses only candles available at entry time.
+# It is not an exact top detector; it is a "near the high, first turn down"
+# entry tactic.
+SHORT_SWING_LOOKBACK = 4
+
 CONFIRM_BARS = 3
 MIN_CONFIRM = 2
 RSI_PERIOD = 14
@@ -77,6 +85,52 @@ def is_v_long(closes: Sequence[float], idx: int) -> bool:
 
 def is_v_short(closes: Sequence[float], idx: int) -> bool:
     return idx >= 2 and closes[idx - 2] < closes[idx - 1] > closes[idx]
+
+
+def is_short_peak_reversal(
+    highs: Sequence[float],
+    closes: Sequence[float],
+    states: Sequence[str],
+    idx: int,
+    lookback: int = SHORT_SWING_LOOKBACK,
+) -> bool:
+    """True on the first down candle after a meaningful local high.
+
+    The candidate peak is idx-1. We only use data through idx, so there is no
+    future-looking confirmation. The candidate must:
+      1) have been in LONG state,
+      2) have the highest high over the preceding lookback bars,
+      3) not be exceeded by the current candle,
+      4) turn down now (lower close and lower/equal low).
+
+    This is the tactical SHORT entry: HIGH -> FIRST MOVE DOWN -> ENTER.
+    """
+    if idx < lookback + 1 or idx >= len(highs):
+        return False
+
+    peak_i = idx - 1
+    prior_highs = highs[peak_i - lookback:peak_i]
+    if len(prior_highs) < lookback:
+        return False
+
+    if states[peak_i] != "LONG":
+        return False
+
+    peak_high = highs[peak_i]
+    if peak_high < max(prior_highs):
+        return False
+
+    # The current candle confirms that the peak is not being exceeded.
+    if highs[idx] > peak_high:
+        return False
+
+    # First actual move down from the peak.
+    if closes[idx] >= closes[peak_i]:
+        return False
+    if lows[idx] > lows[peak_i]:
+        return False
+
+    return True
 
 
 def find_transition(closes: Sequence[float], idx: int) -> Optional[Dict[str, Any]]:
@@ -202,19 +256,21 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V2:
-        # Enter on the FIRST down candle of a fresh V-SHORT while the
-        # immediately preceding market state is LONG.
+        # SHORT tactic V3:
+        # Enter on the FIRST down candle after a confirmed local swing high
+        # that was formed while the market was LONG.
         #
-        # This replaces the old MA-state entry (waiting until the whole
-        # LONG->SHORT state change was already underway). The tactical goal
-        # is to sell near the high, as price first turns down.
+        # This is intentionally different from V2:
+        #   V2 = any 3-candle V-SHORT (too noisy)
+        #   V3 = meaningful local HIGH + first move DOWN
         #
-        # Do NOT carry an old SHORT idea forward. No 2-of-3 entry delay.
+        # No stale signal and no 2-of-3 entry delay.
         if direction == "SHORT":
             pending_entry = None
 
-            if position is None and prev_state == "LONG" and is_v_short(closes, i):
+            if position is None and is_short_peak_reversal(
+                highs, closes, states, i
+            ):
                 entry_i = i
                 entry = closes[i]
                 position = {
