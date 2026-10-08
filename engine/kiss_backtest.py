@@ -15,7 +15,7 @@ TRAIL_PCT = 0.015
 TREND_WINDOW = 20
 TREND_BAND = 0.002
 
-# SHORT tactic V9 entry parameters:
+# SHORT tactic V12 entry parameters:
 # The entry should react close to the high-side reversal, while the existing
 # trailing-minus value remains the EXIT distance. Do not use the exit distance
 # as the entry delay.
@@ -23,7 +23,8 @@ SHORT_SWING_LOOKBACK = 30
 SHORT_ENTRY_PULLBACK_PCT = 0.20
 SHORT_ENTRY_MAX_PEAK_AGE = 1
 SHORT_ENTRY_RSI_MIN = 70.0
-SHORT_ENTRY_PEAK_MAX_AGE = 2
+SHORT_ENTRY_PEAK_MAX_AGE = 1
+SHORT_MAJOR_HILL_MULTIPLE = 2.0
 
 CONFIRM_BARS = 3
 MIN_CONFIRM = 2
@@ -257,7 +258,15 @@ def run_kiss_backtest(
     pending_entry = None
     pending_exit = None
 
-    # SHORT tactic V6 state:
+    # SHORT tactic V12 state:
+    # Remember the complete current LONG move (hill): its floor, highest
+    # price, peak time, and peak RSI. This prevents a small local bump inside
+    # a longer move from becoming the SHORT entry.
+    long_run_peak = None
+    long_run_peak_i = None
+    long_run_floor = None
+    long_run_bars = 0
+    long_run_peak_rsi = None
     # Entry is based on a recent price high, not on the lagging MA state.
     # We look for a high in the recent 20-candle window and require the
     # current candle to give back the configured trailing-minus amount.
@@ -269,41 +278,76 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V11:
-        # The previous versions tied the entry to the lagging MA-state.
-        # That allowed the system to arrive too far down the move.
+        # SHORT tactic V12:
+        #   1) Build the CURRENT LONG "hill".
+        #   2) Keep its highest peak and lowest point.
+        #   3) Require the hill to be materially larger than normal noise.
+        #   4) When price first turns down from the major peak, enter SHORT.
         #
-        # V6 uses PRICE only for the entry:
-        #   1) Find the highest high in the recent 20-candle context.
-        #   2) That high must be very recent (within the last 3 candles).
-        #   3) The current candle must be down from that high by the small
-        #      entry-specific pullback threshold (0.10%). The exit trail is
-        #      intentionally NOT reused here.
-        #
-        # Tactic:
-        #   RECENT HIGH -> FIRST SMALL MOVE DOWN -> ENTER SHORT
-        #
-        # No future candles are used. The SHORT exit remains unchanged.
+        # The entry is deliberately fast. We do not wait for a delayed
+        # 3-candle state confirmation.
         if direction == "SHORT":
             pending_entry = None
 
-            # V11: keep the meaningful-high + RSI filter, but do not
-            # require the slower MA state to flip on the exact same candle.
-            # The price peak and RSI reversal determine the entry timing.
-            recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK)
-            peak_candidates = list(range(recent_start, i))
-            peak_i = max(peak_candidates, key=lambda j: highs[j]) if peak_candidates else None
+            if state == "LONG":
+                if prev_state != "LONG" or long_run_peak is None:
+                    long_run_peak = highs[i]
+                    long_run_peak_i = i
+                    long_run_floor = lows[i]
+                    long_run_bars = 1
+                    long_run_peak_rsi = rsis[i]
+                else:
+                    long_run_bars += 1
+                    long_run_floor = min(long_run_floor, lows[i])
 
-            if peak_i is not None:
-                peak_high = highs[peak_i]
-                recent_high = max(highs[recent_start:i]) if i > recent_start else peak_high
+                    if highs[i] > long_run_peak:
+                        long_run_peak = highs[i]
+                        long_run_peak_i = i
+                        long_run_peak_rsi = rsis[i]
 
-                peak_is_highest = peak_high >= recent_high
-                peak_age = i - peak_i
-                trigger_price = peak_high * (1.0 - SHORT_ENTRY_PULLBACK_PCT / 100.0)
-                down_trigger_hit = lows[i] <= trigger_price
+            elif prev_state == "LONG" and state == "SHORT":
+                # Keep the completed LONG hill for this first SHORT candle.
+                pass
+            elif state == "FLAT":
+                long_run_peak = None
+                long_run_peak_i = None
+                long_run_floor = None
+                long_run_bars = 0
+                long_run_peak_rsi = None
 
-                peak_rsi = rsis[peak_i]
+            if long_run_peak is not None and long_run_floor not in (None, 0):
+                peak_age = i - long_run_peak_i
+                hill_rise_pct = (
+                    (long_run_peak / long_run_floor) - 1.0
+                ) * 100.0
+
+                # "Big hill" = at least two trailing-minus distances.
+                # With the current 0.50% trailing-minus this is 1.00%.
+                major_hill = (
+                    hill_rise_pct
+                    >= SHORT_MAJOR_HILL_MULTIPLE * float(trailing_minus_pct)
+                )
+
+                trigger_price = long_run_peak * (
+                    1.0 - SHORT_ENTRY_PULLBACK_PCT / 100.0
+                )
+
+                # Fast reversal from the major peak. We allow the current
+                # candle to cross the trigger intrabar; this is the earliest
+                # causal signal available from OHLC data.
+                turn_down = (
+                    lows[i] <= trigger_price
+                    and closes[i] < closes[i - 1]
+                    and i > long_run_peak_i
+                )
+
+                same_bar_reversal = (
+                    i == long_run_peak_i
+                    and lows[i] <= trigger_price
+                    and closes[i] < closes[i - 1]
+                )
+
+                peak_rsi = long_run_peak_rsi
                 current_rsi = rsis[i]
                 rsi_supports_reversal = (
                     peak_rsi is not None
@@ -314,15 +358,17 @@ def run_kiss_backtest(
 
                 if (
                     position is None
-                    and peak_is_highest
+                    and long_run_bars >= 3
                     and peak_age <= SHORT_ENTRY_PEAK_MAX_AGE
-                    and down_trigger_hit
+                    and major_hill
                     and rsi_supports_reversal
+                    and (turn_down or same_bar_reversal)
                 ):
                     entry_i = i
-                    # Enter on the trigger, not the later close. If the bar
-                    # opened below the trigger, use the opening price.
-                    entry = min(float(rows[i]["open"]), float(trigger_price))
+                    entry = min(
+                        float(rows[i]["open"]),
+                        float(trigger_price),
+                    )
 
                     position = {
                         "direction": direction,
@@ -330,15 +376,21 @@ def run_kiss_backtest(
                         "entry": entry,
                         "entry_transition": "LONG->SHORT",
                         "shape": "V-SHORT" if is_v_short(closes, i) else None,
-                        "entry_reference_high": peak_high,
+                        "entry_reference_high": long_run_peak,
                         "entry_trigger_price": trigger_price,
-                        "entry_peak_i": peak_i,
+                        "entry_peak_i": long_run_peak_i,
                     }
                     peak = entry
                     trough = entry
                     max_fav = 0.0
                     max_adv = 0.0
                     pending_exit = None
+
+                    long_run_peak = None
+                    long_run_peak_i = None
+                    long_run_floor = None
+                    long_run_bars = 0
+                    long_run_peak_rsi = None
 
         else:
             # LONG side remains unchanged for this controlled SHORT-only test.
