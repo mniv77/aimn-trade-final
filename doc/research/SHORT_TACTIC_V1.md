@@ -79,7 +79,7 @@ The current implementation refines the entry to avoid the V2 mistake of taking e
 
 Entry now requires:
 - the candidate peak candle was in LONG state,
-- that candidate peak has the highest high over the preceding 4 candles,
+- that candidate peak has the highest high over the preceding 20 candles,
 - the next candle does not make a higher high,
 - the next candle closes lower and its low is at or below the peak candle's low.
 
@@ -100,3 +100,15 @@ This V3 is intentionally a tactical correction only. The LONG tactic remains unc
 Change one tactic at a time.
 Keep the existing KISS strategy and UI intact.
 Compare the revised SHORT results against the prior baseline and inspect the remaining big losers.
+
+
+## SHORT Tactic V4 — Current Entry Context
+
+V3 still produced entries at local highs inside continuing LONG moves.
+V4 widens the recent-high context from 4 candles to 20 candles.
+
+The intended tactic remains:
+
+> HIGH / meaningful recent peak -> FIRST MOVE DOWN -> ENTER SHORT.
+
+Only the entry context changed in V4. The SHORT trailing-reversal exit remains unchanged. The LONG side remains untouched.
