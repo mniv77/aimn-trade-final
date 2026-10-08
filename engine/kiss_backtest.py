@@ -15,12 +15,12 @@ TRAIL_PCT = 0.015
 TREND_WINDOW = 20
 TREND_BAND = 0.002
 
-# SHORT tactic V3:
-# A swing high is confirmed by the FIRST candle that turns down after the
-# candidate peak. This deliberately uses only candles available at entry time.
-# It is not an exact top detector; it is a "near the high, first turn down"
-# entry tactic.
+# SHORT tactic V7 entry parameters:
+# The entry should react close to the high-side reversal, while the existing
+# trailing-minus value remains the EXIT distance. Do not use the exit distance
+# as the entry delay.
 SHORT_SWING_LOOKBACK = 20
+SHORT_ENTRY_PULLBACK_PCT = 0.10
 
 CONFIRM_BARS = 3
 MIN_CONFIRM = 2
@@ -268,11 +268,12 @@ def run_kiss_backtest(
         # V6 uses PRICE only for the entry:
         #   1) Find the highest high in the recent 20-candle context.
         #   2) That high must be very recent (within the last 3 candles).
-        #   3) The current candle must be down from that high by at least the
-        #      configured trailing-minus amount.
+        #   3) The current candle must be down from that high by the small
+        #      entry-specific pullback threshold (0.10%). The exit trail is
+        #      intentionally NOT reused here.
         #
         # Tactic:
-        #   RECENT HIGH -> FIRST MEANINGFUL PULLBACK -> ENTER SHORT
+        #   RECENT HIGH -> FIRST SMALL MOVE DOWN -> ENTER SHORT
         #
         # No future candles are used. The SHORT exit remains unchanged.
         if direction == "SHORT":
@@ -287,7 +288,7 @@ def run_kiss_backtest(
             peak_age = i - recent_high_i
 
             meaningful_pullback = (
-                closes[i] < recent_high * (1.0 - float(trailing_minus_pct) / 100.0)
+                closes[i] < recent_high * (1.0 - SHORT_ENTRY_PULLBACK_PCT / 100.0)
                 and closes[i] < closes[i - 1]
             )
 
