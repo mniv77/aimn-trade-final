@@ -33,7 +33,7 @@ RSI_LONG_EMERGENCY = 20.0
 RSI_SHORT_EMERGENCY = 80.0
 # Document 2 specifies a stop-loss but does not specify its percentage.
 # It is therefore disabled for the clean baseline rather than invented.
-STOP_LOSS_PCT = 0.0
+STOP_LOSS_PCT = 0.015
 
 
 def _num(v: Any) -> float:
@@ -348,7 +348,8 @@ def run_kiss_backtest(
                 max_adv = min(max_adv, (lows[i] / entry - 1.0) * 100.0)
                 trail_hit = price < peak * (1.0 - float(trailing_minus_pct) / 100.0)
                 emergency = rsis[i] is not None and rsis[i] < float(rsi_rescue_long)
-                stop_hit = STOP_LOSS_PCT > 0 and price <= entry * (1.0 - STOP_LOSS_PCT)
+                stop_level = entry * (1.0 - STOP_LOSS_PCT)
+                stop_hit = STOP_LOSS_PCT > 0 and lows[i] <= stop_level
                 opposite = "SHORT"
             else:
                 trough = min(trough, lows[i])
@@ -357,7 +358,8 @@ def run_kiss_backtest(
                 max_adv = min(max_adv, (entry / highs[i] - 1.0) * 100.0)
                 trail_hit = price > trough * (1.0 + float(trailing_minus_pct) / 100.0)
                 emergency = rsis[i] is not None and rsis[i] > float(rsi_rescue_short)
-                stop_hit = STOP_LOSS_PCT > 0 and price >= entry * (1.0 + STOP_LOSS_PCT)
+                stop_level = entry * (1.0 + STOP_LOSS_PCT)
+                stop_hit = STOP_LOSS_PCT > 0 and highs[i] >= stop_level
                 opposite = "LONG"
 
             if position["direction"] == "SHORT":
@@ -441,13 +443,18 @@ def run_kiss_backtest(
                     reason = pending_exit["reason"]
 
             if reason:
-                if position["direction"] == "SHORT" and reason == "TRAILING_REVERSE" and short_trail_level is not None:
+                if position["direction"] == "SHORT" and reason == "STOP_LOSS":
+                    # Intrabar protective stop; gap through the stop fills at open.
+                    exit_price = max(float(rows[i]["open"]), float(stop_level))
+                elif position["direction"] == "LONG" and reason == "STOP_LOSS":
+                    # Intrabar protective stop; gap through the stop fills at open.
+                    exit_price = min(float(rows[i]["open"]), float(stop_level))
+                elif position["direction"] == "SHORT" and reason == "TRAILING_REVERSE" and short_trail_level is not None:
                     # Model the trailing stop fill at the trigger level unless
                     # the candle opened through it, in which case use the open.
                     exit_price = max(float(rows[i]["open"]), float(short_trail_level))
                 else:
-                    # For the structural SHORT->FLAT->LONG exit, exit on this
-                    # actual reversal candle at the available close price.
+                    # Structural exits use the actual reversal candle close.
                     exit_price = price
                 pnl = ((exit_price / entry) - 1.0) * 100.0 if position["direction"] == "LONG" else ((entry / exit_price) - 1.0) * 100.0
                 trades.append(KISSTrade(
