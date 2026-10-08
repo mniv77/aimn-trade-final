@@ -19,7 +19,7 @@ TREND_BAND = 0.002
 # The entry should react close to the high-side reversal, while the existing
 # trailing-minus value remains the EXIT distance. Do not use the exit distance
 # as the entry delay.
-SHORT_SWING_LOOKBACK = 20
+SHORT_SWING_LOOKBACK = 30
 SHORT_ENTRY_PULLBACK_PCT = 0.20
 SHORT_ENTRY_MAX_PEAK_AGE = 1
 SHORT_ENTRY_RSI_MIN = 70.0
@@ -269,7 +269,7 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V10:
+        # SHORT tactic V11:
         # The previous versions tied the entry to the lagging MA-state.
         # That allowed the system to arrive too far down the move.
         #
@@ -287,12 +287,9 @@ def run_kiss_backtest(
         if direction == "SHORT":
             pending_entry = None
 
-            # V10: entry requires the ACTUAL LONG -> SHORT transition
-            # on the current candle, while price/RSI confirm that this is
-            # happening near a meaningful high. This prevents ordinary
-            # pullbacks inside a continuing LONG trend from becoming shorts.
-            state_turning_short = prev_state == "LONG" and state == "SHORT"
-
+            # V11: keep the meaningful-high + RSI filter, but do not
+            # require the slower MA state to flip on the exact same candle.
+            # The price peak and RSI reversal determine the entry timing.
             recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK)
             peak_candidates = list(range(recent_start, i))
             peak_i = max(peak_candidates, key=lambda j: highs[j]) if peak_candidates else None
@@ -317,7 +314,6 @@ def run_kiss_backtest(
 
                 if (
                     position is None
-                    and state_turning_short
                     and peak_is_highest
                     and peak_age <= SHORT_ENTRY_PEAK_MAX_AGE
                     and down_trigger_hit
