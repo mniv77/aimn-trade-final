@@ -283,7 +283,7 @@ def run_kiss_backtest(
             # Use the PREVIOUS completed candle as the candidate high.
             # V8 keeps the high context tighter and reacts on the CURRENT
             # candle's intrabar reversal. We do not wait for a MA transition.
-            recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK + 1)
+            recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK)
             peak_i = i - 1
             recent_prior_highs = highs[recent_start:peak_i]
 
