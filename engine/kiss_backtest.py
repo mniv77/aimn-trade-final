@@ -279,37 +279,38 @@ def run_kiss_backtest(
         if direction == "SHORT":
             pending_entry = None
 
+            # Use the PREVIOUS completed candle as the candidate high.
+            # We then watch the CURRENT candle intrabar for the first real
+            # move down. This removes the multi-candle MA-state lag that was
+            # making SHORT entries arrive well below the top.
             recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK + 1)
-            recent_high = max(highs[recent_start:i + 1])
-            recent_high_i = max(
-                j for j in range(recent_start, i + 1)
-                if highs[j] == recent_high
-            )
-            peak_age = i - recent_high_i
+            peak_i = i - 1
+            recent_prior_highs = highs[recent_start:peak_i]
 
-            # A SHORT entry is allowed only when the MA-state confirms that
-            # the market is actually crossing from LONG into SHORT NOW.
-            # The recent-high test chooses the price location; the transition
-            # test prevents us from treating an ordinary pullback inside a
-            # continuing LONG trend as a reversal.
-            state_turning_short = prev_state == "LONG" and state == "SHORT"
+            if len(recent_prior_highs) >= SHORT_SWING_LOOKBACK - 1:
+                recent_prior_high = max(recent_prior_highs)
+                peak_high = highs[peak_i]
 
-            meaningful_pullback = (
-                closes[i] < recent_high * (1.0 - SHORT_ENTRY_PULLBACK_PCT / 100.0)
-                and closes[i] < closes[i - 1]
-            )
+                # Previous completed candle is the recent high. Current
+                # candle must trade down through the small entry trigger.
+                peak_is_meaningful = peak_high >= recent_prior_high
+                trigger_price = peak_high * (1.0 - SHORT_ENTRY_PULLBACK_PCT / 100.0)
+                down_trigger_hit = lows[i] <= trigger_price
 
-            # Require BOTH:
-            #   1) a very recent meaningful high, and
-            #   2) the actual LONG -> SHORT transition on this candle.
-            if (
-                position is None
-                and peak_age <= 2
-                and state_turning_short
-                and meaningful_pullback
-            ):
-                entry_i = i
-                entry = closes[i]
+                # Avoid the old error: wait for a full LONG->SHORT state
+                # transition. Price itself tells us the first turn down.
+                if (
+                    position is None
+                    and peak_is_meaningful
+                    and down_trigger_hit
+                    and i > peak_i
+                ):
+                    entry_i = i
+                    # Model a sell trigger on the first 0.10% pullback from
+                    # the prior candle's high. If the bar opens through the
+                    # trigger, use the opening price instead.
+                    entry = min(float(rows[i]["open"]), float(trigger_price))
+
                 position = {
                     "direction": direction,
                     "entry_i": entry_i,
