@@ -202,35 +202,61 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        if pending_entry is not None:
-            if state == pending_entry["to"]:
-                pending_entry["hits"] += 1
-            pending_entry["checked"] += 1
-            if pending_entry["checked"] >= CONFIRM_BARS:
-                if pending_entry["hits"] >= MIN_CONFIRM and position is None and pending_entry["to"] == direction:
-                    entry_i = i
-                    entry = closes[i]
-                    position = {
-                        "direction": direction,
-                        "entry_i": entry_i,
-                        "entry": entry,
-                        "entry_transition": f"{pending_entry['from']}->{direction}",
-                        "shape": pending_entry.get("shape"),
-                    }
-                    peak = entry
-                    trough = entry
-                    max_fav = 0.0
-                    max_adv = 0.0
-                pending_entry = None
+        # SHORT tactic V1:
+        # Enter immediately on a fresh LONG -> SHORT transition.
+        # Do NOT carry a SHORT signal through a 2-of-3 confirmation delay.
+        # This is the first tactical correction from the loser review:
+        # an old SHORT idea must not survive until the market has already moved.
+        if direction == "SHORT":
+            pending_entry = None
 
-        if position is None and state != prev_state and state in {"LONG", "SHORT"}:
-            pending_entry = {
-                "from": prev_state,
-                "to": state,
-                "hits": 0,
-                "checked": 0,
-                "shape": "V-LONG" if is_v_long(closes, i) else ("V-SHORT" if is_v_short(closes, i) else None),
-            }
+            if position is None and prev_state == "LONG" and state == "SHORT":
+                entry_i = i
+                entry = closes[i]
+                position = {
+                    "direction": direction,
+                    "entry_i": entry_i,
+                    "entry": entry,
+                    "entry_transition": "LONG->SHORT",
+                    "shape": "V-SHORT" if is_v_short(closes, i) else None,
+                }
+                peak = entry
+                trough = entry
+                max_fav = 0.0
+                max_adv = 0.0
+                pending_exit = None
+
+        else:
+            # LONG side remains unchanged for this controlled SHORT-only test.
+            if pending_entry is not None:
+                if state == pending_entry["to"]:
+                    pending_entry["hits"] += 1
+                pending_entry["checked"] += 1
+                if pending_entry["checked"] >= CONFIRM_BARS:
+                    if pending_entry["hits"] >= MIN_CONFIRM and position is None and pending_entry["to"] == direction:
+                        entry_i = i
+                        entry = closes[i]
+                        position = {
+                            "direction": direction,
+                            "entry_i": entry_i,
+                            "entry": entry,
+                            "entry_transition": f"{pending_entry['from']}->{direction}",
+                            "shape": pending_entry.get("shape"),
+                        }
+                        peak = entry
+                        trough = entry
+                        max_fav = 0.0
+                        max_adv = 0.0
+                    pending_entry = None
+
+            if position is None and state != prev_state and state in {"LONG", "SHORT"}:
+                pending_entry = {
+                    "from": prev_state,
+                    "to": state,
+                    "hits": 0,
+                    "checked": 0,
+                    "shape": "V-LONG" if is_v_long(closes, i) else ("V-SHORT" if is_v_short(closes, i) else None),
+                }
 
         # ---------------- Open position ----------------
         if position is not None:
@@ -255,29 +281,42 @@ def run_kiss_backtest(
                 stop_hit = STOP_LOSS_PCT > 0 and price >= entry * (1.0 + STOP_LOSS_PCT)
                 opposite = "LONG"
 
-            # A trailing retracement is a warning, not an immediate exit.
-            # The exit must pass the same 2-of-3 confirmation zone.
-            if pending_exit is None and (trail_hit or state == opposite):
-                pending_exit = {
-                    "to": opposite,
-                    "started": i,
-                    "hits": 0,
-                    "checked": 0,
-                    "reason": "TRAILING_TREND_CHANGE" if trail_hit else "TREND_CHANGE",
-                }
+            if position["direction"] == "SHORT":
+                # SHORT tactic V1:
+                # A trailing reversal exits immediately. No candle-count confirmation.
+                # RSI remains emergency protection, not the normal exit mechanism.
+                reason = None
+                if emergency:
+                    reason = "RSI_EMERGENCY"
+                elif stop_hit:
+                    reason = "STOP_LOSS"
+                elif trail_hit:
+                    reason = "TRAILING_REVERSE"
+            else:
+                # LONG side remains unchanged for this controlled SHORT-only test.
+                # A trailing retracement is still followed by the existing 2-of-3
+                # confirmation logic on LONG.
+                if pending_exit is None and (trail_hit or state == opposite):
+                    pending_exit = {
+                        "to": opposite,
+                        "started": i,
+                        "hits": 0,
+                        "checked": 0,
+                        "reason": "TRAILING_TREND_CHANGE" if trail_hit else "TREND_CHANGE",
+                    }
 
-            if pending_exit is not None:
-                if state == pending_exit["to"]:
-                    pending_exit["hits"] += 1
-                pending_exit["checked"] += 1
+                if pending_exit is not None:
+                    if state == pending_exit["to"]:
+                        pending_exit["hits"] += 1
+                    pending_exit["checked"] += 1
 
-            reason = None
-            if emergency:
-                reason = "RSI_EMERGENCY"
-            elif stop_hit:
-                reason = "STOP_LOSS"
-            elif pending_exit is not None and pending_exit["checked"] >= CONFIRM_BARS and pending_exit["hits"] >= MIN_CONFIRM:
-                reason = pending_exit["reason"]
+                reason = None
+                if emergency:
+                    reason = "RSI_EMERGENCY"
+                elif stop_hit:
+                    reason = "STOP_LOSS"
+                elif pending_exit is not None and pending_exit["checked"] >= CONFIRM_BARS and pending_exit["hits"] >= MIN_CONFIRM:
+                    reason = pending_exit["reason"]
 
             if reason:
                 exit_price = price
