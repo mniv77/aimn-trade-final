@@ -73,6 +73,28 @@ After the SHORT tactic is tested and understood, apply the same core ideas symme
 - trailing reversal for faster LONG exit
 - investigate end-of-day reversal separately
 
+## SHORT Tactic V3 — Current Entry Implementation
+
+The current implementation refines the entry to avoid the V2 mistake of taking every tiny V-SHORT.
+
+Entry now requires:
+- the candidate peak candle was in LONG state,
+- that candidate peak has the highest high over the preceding 4 candles,
+- the next candle does not make a higher high,
+- the next candle closes lower and its low is at or below the peak candle's low.
+
+That means the live/backtest decision is:
+
+> HIGH / local swing peak -> FIRST MOVE DOWN -> ENTER SHORT.
+
+The algorithm uses only data available through the entry candle. It does not look into future candles to confirm the pivot.
+
+The SHORT trailing-reversal exit remains unchanged from V1:
+
+> SHORT -> favorable move down -> price reverses upward through trailing-minus -> EXIT.
+
+This V3 is intentionally a tactical correction only. The LONG tactic remains unchanged.
+
 ## Test discipline
 
 Change one tactic at a time.
