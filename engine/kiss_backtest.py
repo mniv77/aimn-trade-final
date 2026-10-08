@@ -311,18 +311,18 @@ def run_kiss_backtest(
                     # trigger, use the opening price instead.
                     entry = min(float(rows[i]["open"]), float(trigger_price))
 
-                position = {
-                    "direction": direction,
-                    "entry_i": entry_i,
-                    "entry": entry,
-                    "entry_transition": "LONG->SHORT",
-                    "shape": "V-SHORT" if is_v_short(closes, i) else None,
-                }
-                peak = entry
-                trough = entry
-                max_fav = 0.0
-                max_adv = 0.0
-                pending_exit = None
+                    position = {
+                        "direction": direction,
+                        "entry_i": entry_i,
+                        "entry": entry,
+                        "entry_transition": "LONG->SHORT",
+                        "shape": "V-SHORT" if is_v_short(closes, i) else None,
+                    }
+                    peak = entry
+                    trough = entry
+                    max_fav = 0.0
+                    max_adv = 0.0
+                    pending_exit = None
 
         else:
             # LONG side remains unchanged for this controlled SHORT-only test.
