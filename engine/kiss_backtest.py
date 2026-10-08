@@ -15,12 +15,13 @@ TRAIL_PCT = 0.015
 TREND_WINDOW = 20
 TREND_BAND = 0.002
 
-# SHORT tactic V7 entry parameters:
+# SHORT tactic V8 entry parameters:
 # The entry should react close to the high-side reversal, while the existing
 # trailing-minus value remains the EXIT distance. Do not use the exit distance
 # as the entry delay.
-SHORT_SWING_LOOKBACK = 20
-SHORT_ENTRY_PULLBACK_PCT = 0.10
+SHORT_SWING_LOOKBACK = 8
+SHORT_ENTRY_PULLBACK_PCT = 0.20
+SHORT_ENTRY_MAX_PEAK_AGE = 1
 
 CONFIRM_BARS = 3
 MIN_CONFIRM = 2
@@ -261,7 +262,7 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V6:
+        # SHORT tactic V8:
         # The previous versions tied the entry to the lagging MA-state.
         # That allowed the system to arrive too far down the move.
         #
@@ -280,9 +281,8 @@ def run_kiss_backtest(
             pending_entry = None
 
             # Use the PREVIOUS completed candle as the candidate high.
-            # We then watch the CURRENT candle intrabar for the first real
-            # move down. This removes the multi-candle MA-state lag that was
-            # making SHORT entries arrive well below the top.
+            # V8 keeps the high context tighter and reacts on the CURRENT
+            # candle's intrabar reversal. We do not wait for a MA transition.
             recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK + 1)
             peak_i = i - 1
             recent_prior_highs = highs[recent_start:peak_i]
@@ -291,24 +291,20 @@ def run_kiss_backtest(
                 recent_prior_high = max(recent_prior_highs)
                 peak_high = highs[peak_i]
 
-                # Previous completed candle is the recent high. Current
-                # candle must trade down through the small entry trigger.
                 peak_is_meaningful = peak_high >= recent_prior_high
+                peak_age = i - peak_i
                 trigger_price = peak_high * (1.0 - SHORT_ENTRY_PULLBACK_PCT / 100.0)
                 down_trigger_hit = lows[i] <= trigger_price
 
-                # Avoid the old error: wait for a full LONG->SHORT state
-                # transition. Price itself tells us the first turn down.
                 if (
                     position is None
                     and peak_is_meaningful
+                    and peak_age <= SHORT_ENTRY_MAX_PEAK_AGE
                     and down_trigger_hit
-                    and i > peak_i
                 ):
                     entry_i = i
-                    # Model a sell trigger on the first 0.10% pullback from
-                    # the prior candle's high. If the bar opens through the
-                    # trigger, use the opening price instead.
+                    # Enter on the trigger, not the later close. If the bar
+                    # opened below the trigger, use the opening price.
                     entry = min(float(rows[i]["open"]), float(trigger_price))
 
                     position = {
