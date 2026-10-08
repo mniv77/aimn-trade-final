@@ -278,25 +278,30 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V13:
-        # Enter SHORT on the actual LONG -> SHORT state transition.
-        # Do not enter during the middle of a still-LONG move merely because
-        # price has pulled back from a local high.
+        # SHORT tactic V14:
+        # Enter on the first causal reversal candle after a meaningful local
+        # LONG peak, rather than waiting for the lagging LONG -> SHORT state
+        # transition.  This is tactical only; the KISS direction/state engine
+        # is unchanged.
         if direction == "SHORT":
             pending_entry = None
 
-            if position is None and prev_state == "LONG" and state == "SHORT":
+            if position is None and is_short_peak_reversal(
+                highs, lows, closes, states, i
+            ):
                 entry_i = i
                 entry = closes[i]
+                peak_i = i - 1
+                peak_high = highs[peak_i]
                 position = {
                     "direction": direction,
                     "entry_i": entry_i,
                     "entry": entry,
-                    "entry_transition": "LONG->SHORT",
-                    "shape": "V-SHORT" if is_v_short(closes, i) else None,
-                    "entry_reference_high": float(max(highs[max(0, i - SHORT_SWING_LOOKBACK):i + 1])),
+                    "entry_transition": "LONG->SHORT_TACTICAL",
+                    "shape": "V-SHORT" if is_v_short(closes, i) else "PEAK-REVERSAL",
+                    "entry_reference_high": float(peak_high),
                     "entry_trigger_price": entry,
-                    "entry_peak_i": i,
+                    "entry_peak_i": peak_i,
                     "short_reversal_pending": False,
                 }
                 peak = entry
