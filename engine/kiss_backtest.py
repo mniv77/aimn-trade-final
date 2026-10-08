@@ -448,16 +448,19 @@ def run_kiss_backtest(
                 opposite = "LONG"
 
             if position["direction"] == "SHORT":
-                # SHORT tactic V1:
-                # A trailing reversal exits immediately. No candle-count confirmation.
-                # RSI remains emergency protection, not the normal exit mechanism.
+                # SHORT EXIT V2:
+                # The normal exit is the actual SHORT -> LONG trend reversal.
+                # Do not let a small bounce inside the SHORT trend close the
+                # position early. RSI and the final stop remain emergency
+                # protection.
                 reason = None
+                short_to_long = prev_state == "SHORT" and state == "LONG"
                 if emergency:
                     reason = "RSI_EMERGENCY"
                 elif stop_hit:
                     reason = "STOP_LOSS"
-                elif trail_hit:
-                    reason = "TRAILING_REVERSE"
+                elif short_to_long:
+                    reason = "TREND_CHANGE"
             else:
                 # LONG side remains unchanged for this controlled SHORT-only test.
                 # A trailing retracement is still followed by the existing 2-of-3
