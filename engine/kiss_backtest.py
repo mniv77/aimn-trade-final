@@ -89,6 +89,7 @@ def is_v_short(closes: Sequence[float], idx: int) -> bool:
 
 def is_short_peak_reversal(
     highs: Sequence[float],
+    lows: Sequence[float],
     closes: Sequence[float],
     states: Sequence[str],
     idx: int,
@@ -269,7 +270,7 @@ def run_kiss_backtest(
             pending_entry = None
 
             if position is None and is_short_peak_reversal(
-                highs, closes, states, i
+                highs, lows, closes, states, i
             ):
                 entry_i = i
                 entry = closes[i]
