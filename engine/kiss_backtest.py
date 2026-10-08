@@ -23,6 +23,7 @@ SHORT_SWING_LOOKBACK = 20
 SHORT_ENTRY_PULLBACK_PCT = 0.20
 SHORT_ENTRY_MAX_PEAK_AGE = 1
 SHORT_ENTRY_RSI_MIN = 70.0
+SHORT_ENTRY_PEAK_MAX_AGE = 2
 
 CONFIRM_BARS = 3
 MIN_CONFIRM = 2
@@ -268,7 +269,7 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V8:
+        # SHORT tactic V10:
         # The previous versions tied the entry to the lagging MA-state.
         # That allowed the system to arrive too far down the move.
         #
@@ -286,17 +287,19 @@ def run_kiss_backtest(
         if direction == "SHORT":
             pending_entry = None
 
-            # Use the PREVIOUS completed candle as the candidate high.
-            # V9 requires that candle to be the HIGHEST price peak in the
-            # recent 20-candle context, then uses RSI as a second piece of
-            # evidence that momentum was stretched and has started turning.
-            recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK)
-            peak_i = i - 1
-            recent_highs = highs[recent_start:i]
+            # V10: entry requires the ACTUAL LONG -> SHORT transition
+            # on the current candle, while price/RSI confirm that this is
+            # happening near a meaningful high. This prevents ordinary
+            # pullbacks inside a continuing LONG trend from becoming shorts.
+            state_turning_short = prev_state == "LONG" and state == "SHORT"
 
-            if len(recent_highs) >= SHORT_SWING_LOOKBACK:
+            recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK)
+            peak_candidates = list(range(recent_start, i))
+            peak_i = max(peak_candidates, key=lambda j: highs[j]) if peak_candidates else None
+
+            if peak_i is not None:
                 peak_high = highs[peak_i]
-                recent_high = max(recent_highs)
+                recent_high = max(highs[recent_start:i]) if i > recent_start else peak_high
 
                 peak_is_highest = peak_high >= recent_high
                 peak_age = i - peak_i
@@ -314,8 +317,9 @@ def run_kiss_backtest(
 
                 if (
                     position is None
+                    and state_turning_short
                     and peak_is_highest
-                    and peak_age <= SHORT_ENTRY_MAX_PEAK_AGE
+                    and peak_age <= SHORT_ENTRY_PEAK_MAX_AGE
                     and down_trigger_hit
                     and rsi_supports_reversal
                 ):
