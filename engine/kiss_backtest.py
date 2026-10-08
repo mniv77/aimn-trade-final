@@ -249,14 +249,10 @@ def run_kiss_backtest(
     pending_entry = None
     pending_exit = None
 
-    # SHORT tactic V5 state:
-    # Track the highest favorable price reached during the current LONG
-    # state. A SHORT entry is triggered by a trailing reversal from that
-    # peak, so we react to the actual price turn rather than waiting for
-    # the market-state transition to become SHORT.
-    long_peak = None
-    long_peak_i = None
-
+    # SHORT tactic V6 state:
+    # Entry is based on a recent price high, not on the lagging MA state.
+    # We look for a high in the recent 20-candle window and require the
+    # current candle to give back the configured trailing-minus amount.
     i = TREND_WINDOW + 1
     while i < len(rows):
         state = states[i]
@@ -265,44 +261,42 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V5:
-        # Do not wait for the MA-based state to finally become SHORT and do
-        # not use a tiny 3-candle V as an entry by itself.
+        # SHORT tactic V6:
+        # The previous versions tied the entry to the lagging MA-state.
+        # That allowed the system to arrive too far down the move.
         #
-        # While the market is LONG, track the highest price reached.
-        # Enter SHORT on the FIRST trailing reversal from that LONG peak.
+        # V6 uses PRICE only for the entry:
+        #   1) Find the highest high in the recent 20-candle context.
+        #   2) That high must be very recent (within the last 3 candles).
+        #   3) The current candle must be down from that high by at least the
+        #      configured trailing-minus amount.
         #
         # Tactic:
-        #   LONG -> HIGH/PEAK -> price gives back trailing-minus -> ENTER SHORT
+        #   RECENT HIGH -> FIRST MEANINGFUL PULLBACK -> ENTER SHORT
         #
-        # This uses only candles available through the current bar. It is
-        # designed to place the entry near the high-side reversal rather than
-        # in the middle/bottom of a mature SHORT move.
+        # No future candles are used. The SHORT exit remains unchanged.
         if direction == "SHORT":
             pending_entry = None
 
-            if state == "LONG":
-                if long_peak is None or highs[i] > long_peak:
-                    long_peak = highs[i]
-                    long_peak_i = i
-            elif prev_state == "LONG" and state != "LONG":
-                # Keep the last LONG peak for the first reversal candle out
-                # of the LONG state. It will be cleared after an entry.
-                pass
-            else:
-                if state not in {"LONG", "FLAT"}:
-                    # A fresh SHORT state with no position means the
-                    # high-to-down opportunity has already passed.
-                    long_peak = None
-                    long_peak_i = None
+            recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK + 1)
+            recent_high = max(highs[recent_start:i + 1])
+            recent_high_i = max(
+                j for j in range(recent_start, i + 1)
+                if highs[j] == recent_high
+            )
+            peak_age = i - recent_high_i
 
+            meaningful_pullback = (
+                closes[i] < recent_high * (1.0 - float(trailing_minus_pct) / 100.0)
+                and closes[i] < closes[i - 1]
+            )
+
+            # The high must be recent. If it is old, we do not sell into a
+            # mature decline that has already happened.
             if (
                 position is None
-                and long_peak is not None
-                and long_peak_i is not None
-                and i > long_peak_i
-                and closes[i] < long_peak * (1.0 - float(trailing_minus_pct) / 100.0)
-                and (prev_state == "LONG" or state == "SHORT")
+                and peak_age <= 2
+                and meaningful_pullback
             ):
                 entry_i = i
                 entry = closes[i]
@@ -318,8 +312,6 @@ def run_kiss_backtest(
                 max_fav = 0.0
                 max_adv = 0.0
                 pending_exit = None
-                long_peak = None
-                long_peak_i = None
 
         else:
             # LONG side remains unchanged for this controlled SHORT-only test.
@@ -352,13 +344,6 @@ def run_kiss_backtest(
                     "checked": 0,
                     "shape": "V-LONG" if is_v_long(closes, i) else ("V-SHORT" if is_v_short(closes, i) else None),
                 }
-
-        # If we are flat and the market has moved into a new SHORT state
-        # without triggering an entry, the old LONG peak is no longer a
-        # valid SHORT-entry reference.
-        if position is None and state == "SHORT" and prev_state != "LONG":
-            long_peak = None
-            long_peak_i = None
 
         # ---------------- Open position ----------------
         if position is not None:
