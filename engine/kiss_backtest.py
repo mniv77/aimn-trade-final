@@ -258,40 +258,52 @@ def run_kiss_backtest(
     pending_entry = None
     pending_exit = None
 
-    # SHORT tactic V13:
-    # Enter SHORT at the actual LONG -> SHORT market-state transition.
-    # Do NOT enter merely because price pulled back from a local high while
-    # the market is still LONG. The transition is the strategy signal.
-    #
-    # This keeps the tactic symbol-independent:
-    #   LONG -> SHORT = enter SHORT at the transition candle close.
-    if direction == "SHORT":
-        pending_entry = None
+    # SHORT tactic V12 state:
+    # Remember the complete current LONG move (hill): its floor, highest
+    # price, peak time, and peak RSI. This prevents a small local bump inside
+    # a longer move from becoming the SHORT entry.
+    long_run_peak = None
+    long_run_peak_i = None
+    long_run_floor = None
+    long_run_bars = 0
+    long_run_peak_rsi = None
+    # Entry is based on a recent price high, not on the lagging MA state.
+    # We look for a high in the recent 20-candle window and require the
+    # current candle to give back the configured trailing-minus amount.
+    i = TREND_WINDOW + 1
+    while i < len(rows):
+        state = states[i]
+        prev_state = states[i - 1]
+        if state != prev_state:
+            transitions += 1
 
-        if (
-            position is None
-            and prev_state == "LONG"
-            and state == "SHORT"
-        ):
-            entry_i = i
-            entry = closes[i]
+        # ---------------- Entry ----------------
+        # SHORT tactic V13:
+        # Enter SHORT on the actual LONG -> SHORT state transition.
+        # Do not enter during the middle of a still-LONG move merely because
+        # price has pulled back from a local high.
+        if direction == "SHORT":
+            pending_entry = None
 
-            position = {
-                "direction": direction,
-                "entry_i": entry_i,
-                "entry": entry,
-                "entry_transition": "LONG->SHORT",
-                "shape": "V-SHORT" if is_v_short(closes, i) else None,
-                "entry_reference_high": float(max(highs[max(0, i - SHORT_SWING_LOOKBACK):i + 1])),
-                "entry_trigger_price": entry,
-                "entry_peak_i": i,
-                "short_reversal_pending": False,
-            }
-            peak = entry
-            trough = entry
-            max_fav = 0.0
-            max_adv = 0.0
-            pending_exit = None
+            if position is None and prev_state == "LONG" and state == "SHORT":
+                entry_i = i
+                entry = closes[i]
+                position = {
+                    "direction": direction,
+                    "entry_i": entry_i,
+                    "entry": entry,
+                    "entry_transition": "LONG->SHORT",
+                    "shape": "V-SHORT" if is_v_short(closes, i) else None,
+                    "entry_reference_high": float(max(highs[max(0, i - SHORT_SWING_LOOKBACK):i + 1])),
+                    "entry_trigger_price": entry,
+                    "entry_peak_i": i,
+                    "short_reversal_pending": False,
+                }
+                peak = entry
+                trough = entry
+                max_fav = 0.0
+                max_adv = 0.0
+                pending_exit = None
 
         else:
             # LONG side remains unchanged for this controlled SHORT-only test.
@@ -381,11 +393,10 @@ def run_kiss_backtest(
                 ) and flat_to_long
 
                 # V-LONG profit protection for SHORT:
-                # If price makes a causal V-Long (down -> up) while the
-                # SHORT is already profitable enough to cover the full
-                # round-trip commission, protect the profit immediately.
-                # If the SHORT is not profitable enough, do NOT exit merely
-                # because of the V; allow the market to prove the reversal.
+                # Exit only when the V occurs while the SHORT has enough
+                # profit to cover the full round-trip commission.
+                # An unprofitable V is deliberately ignored; the market must
+                # prove the reversal with the normal SHORT -> LONG transition.
                 current_short_pnl_pct = ((entry / price) - 1.0) * 100.0
                 round_trip_commission_pct = float(commission_pct) * 2.0
                 profitable_v_long = (
