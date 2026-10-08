@@ -168,6 +168,11 @@ class KISSTrade:
     max_adverse_pct: float
     entry_rsi: Optional[float]
     exit_rsi: Optional[float]
+    entry_reference_high: Optional[float] = None
+    entry_trigger_price: Optional[float] = None
+    entry_peak_time: Optional[str] = None
+    entry_peak_age_candles: Optional[int] = None
+    entry_pullback_from_peak_pct: Optional[float] = None
 
 
 @dataclass
@@ -313,6 +318,9 @@ def run_kiss_backtest(
                         "entry": entry,
                         "entry_transition": "LONG->SHORT",
                         "shape": "V-SHORT" if is_v_short(closes, i) else None,
+                        "entry_reference_high": peak_high,
+                        "entry_trigger_price": trigger_price,
+                        "entry_peak_i": peak_i,
                     }
                     peak = entry
                     trough = entry
@@ -431,6 +439,11 @@ def run_kiss_backtest(
                     max_adverse_pct=round(max_adv, 6),
                     entry_rsi=rsis[position["entry_i"]],
                     exit_rsi=rsis[i],
+                    entry_reference_high=round(position.get("entry_reference_high"), 8) if position.get("entry_reference_high") is not None else None,
+                    entry_trigger_price=round(position.get("entry_trigger_price"), 8) if position.get("entry_trigger_price") is not None else None,
+                    entry_peak_time=_ts(rows[position["entry_peak_i"]].get("timestamp")) if position.get("entry_peak_i") is not None else None,
+                    entry_peak_age_candles=(position["entry_i"] - position["entry_peak_i"]) if position.get("entry_peak_i") is not None else None,
+                    entry_pullback_from_peak_pct=round(((entry / position["entry_reference_high"]) - 1.0) * 100.0, 6) if position.get("entry_reference_high") not in (None, 0) else None,
                 ))
                 position = None
                 peak = trough = None
