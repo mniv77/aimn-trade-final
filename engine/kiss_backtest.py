@@ -287,16 +287,25 @@ def run_kiss_backtest(
             )
             peak_age = i - recent_high_i
 
+            # A SHORT entry is allowed only when the MA-state confirms that
+            # the market is actually crossing from LONG into SHORT NOW.
+            # The recent-high test chooses the price location; the transition
+            # test prevents us from treating an ordinary pullback inside a
+            # continuing LONG trend as a reversal.
+            state_turning_short = prev_state == "LONG" and state == "SHORT"
+
             meaningful_pullback = (
                 closes[i] < recent_high * (1.0 - SHORT_ENTRY_PULLBACK_PCT / 100.0)
                 and closes[i] < closes[i - 1]
             )
 
-            # The high must be recent. If it is old, we do not sell into a
-            # mature decline that has already happened.
+            # Require BOTH:
+            #   1) a very recent meaningful high, and
+            #   2) the actual LONG -> SHORT transition on this candle.
             if (
                 position is None
                 and peak_age <= 2
+                and state_turning_short
                 and meaningful_pullback
             ):
                 entry_i = i
