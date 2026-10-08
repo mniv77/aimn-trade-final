@@ -249,6 +249,14 @@ def run_kiss_backtest(
     pending_entry = None
     pending_exit = None
 
+    # SHORT tactic V5 state:
+    # Track the highest favorable price reached during the current LONG
+    # state. A SHORT entry is triggered by a trailing reversal from that
+    # peak, so we react to the actual price turn rather than waiting for
+    # the market-state transition to become SHORT.
+    long_peak = None
+    long_peak_i = None
+
     i = TREND_WINDOW + 1
     while i < len(rows):
         state = states[i]
@@ -257,20 +265,44 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V3:
-        # Enter on the FIRST down candle after a confirmed local swing high
-        # that was formed while the market was LONG.
+        # SHORT tactic V5:
+        # Do not wait for the MA-based state to finally become SHORT and do
+        # not use a tiny 3-candle V as an entry by itself.
         #
-        # This is intentionally different from V2:
-        #   V2 = any 3-candle V-SHORT (too noisy)
-        #   V3 = meaningful local HIGH + first move DOWN
+        # While the market is LONG, track the highest price reached.
+        # Enter SHORT on the FIRST trailing reversal from that LONG peak.
         #
-        # No stale signal and no 2-of-3 entry delay.
+        # Tactic:
+        #   LONG -> HIGH/PEAK -> price gives back trailing-minus -> ENTER SHORT
+        #
+        # This uses only candles available through the current bar. It is
+        # designed to place the entry near the high-side reversal rather than
+        # in the middle/bottom of a mature SHORT move.
         if direction == "SHORT":
             pending_entry = None
 
-            if position is None and is_short_peak_reversal(
-                highs, lows, closes, states, i
+            if state == "LONG":
+                if long_peak is None or highs[i] > long_peak:
+                    long_peak = highs[i]
+                    long_peak_i = i
+            elif prev_state == "LONG" and state != "LONG":
+                # Keep the last LONG peak for the first reversal candle out
+                # of the LONG state. It will be cleared after an entry.
+                pass
+            else:
+                if state not in {"LONG", "FLAT"}:
+                    # A fresh SHORT state with no position means the
+                    # high-to-down opportunity has already passed.
+                    long_peak = None
+                    long_peak_i = None
+
+            if (
+                position is None
+                and long_peak is not None
+                and long_peak_i is not None
+                and i > long_peak_i
+                and closes[i] < long_peak * (1.0 - float(trailing_minus_pct) / 100.0)
+                and (prev_state == "LONG" or state == "SHORT")
             ):
                 entry_i = i
                 entry = closes[i]
@@ -279,13 +311,15 @@ def run_kiss_backtest(
                     "entry_i": entry_i,
                     "entry": entry,
                     "entry_transition": "LONG->SHORT",
-                    "shape": "V-SHORT",
+                    "shape": "V-SHORT" if is_v_short(closes, i) else None,
                 }
                 peak = entry
                 trough = entry
                 max_fav = 0.0
                 max_adv = 0.0
                 pending_exit = None
+                long_peak = None
+                long_peak_i = None
 
         else:
             # LONG side remains unchanged for this controlled SHORT-only test.
@@ -318,6 +352,13 @@ def run_kiss_backtest(
                     "checked": 0,
                     "shape": "V-LONG" if is_v_long(closes, i) else ("V-SHORT" if is_v_short(closes, i) else None),
                 }
+
+        # If we are flat and the market has moved into a new SHORT state
+        # without triggering an entry, the old LONG peak is no longer a
+        # valid SHORT-entry reference.
+        if position is None and state == "SHORT" and prev_state != "LONG":
+            long_peak = None
+            long_peak_i = None
 
         # ---------------- Open position ----------------
         if position is not None:
