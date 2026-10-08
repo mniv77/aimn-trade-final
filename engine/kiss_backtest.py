@@ -480,7 +480,22 @@ def run_kiss_backtest(
                     position.get("short_reversal_pending", False)
                 ) and flat_to_long
 
-                if pending_flat_to_long or short_to_long_direct:
+                # V-LONG profit protection for SHORT:
+                # If price makes a causal V-Long (down -> up) while the
+                # SHORT is already profitable enough to cover the full
+                # round-trip commission, protect the profit immediately.
+                # If the SHORT is not profitable enough, do NOT exit merely
+                # because of the V; allow the market to prove the reversal.
+                current_short_pnl_pct = ((entry / price) - 1.0) * 100.0
+                round_trip_commission_pct = float(commission_pct) * 2.0
+                profitable_v_long = (
+                    is_v_long(closes, i)
+                    and current_short_pnl_pct > round_trip_commission_pct
+                )
+
+                if profitable_v_long:
+                    reason = "V_PROFIT"
+                elif pending_flat_to_long or short_to_long_direct:
                     reason = "TREND_CHANGE"
                 elif emergency:
                     reason = "RSI_EMERGENCY"
