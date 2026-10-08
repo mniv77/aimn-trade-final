@@ -15,13 +15,14 @@ TRAIL_PCT = 0.015
 TREND_WINDOW = 20
 TREND_BAND = 0.002
 
-# SHORT tactic V8 entry parameters:
+# SHORT tactic V9 entry parameters:
 # The entry should react close to the high-side reversal, while the existing
 # trailing-minus value remains the EXIT distance. Do not use the exit distance
 # as the entry delay.
-SHORT_SWING_LOOKBACK = 8
+SHORT_SWING_LOOKBACK = 20
 SHORT_ENTRY_PULLBACK_PCT = 0.20
 SHORT_ENTRY_MAX_PEAK_AGE = 1
+SHORT_ENTRY_RSI_MIN = 70.0
 
 CONFIRM_BARS = 3
 MIN_CONFIRM = 2
@@ -286,26 +287,37 @@ def run_kiss_backtest(
             pending_entry = None
 
             # Use the PREVIOUS completed candle as the candidate high.
-            # V8 keeps the high context tighter and reacts on the CURRENT
-            # candle's intrabar reversal. We do not wait for a MA transition.
+            # V9 requires that candle to be the HIGHEST price peak in the
+            # recent 20-candle context, then uses RSI as a second piece of
+            # evidence that momentum was stretched and has started turning.
             recent_start = max(TREND_WINDOW + 1, i - SHORT_SWING_LOOKBACK)
             peak_i = i - 1
-            recent_prior_highs = highs[recent_start:peak_i]
+            recent_highs = highs[recent_start:i]
 
-            if len(recent_prior_highs) >= SHORT_SWING_LOOKBACK - 1:
-                recent_prior_high = max(recent_prior_highs)
+            if len(recent_highs) >= SHORT_SWING_LOOKBACK:
                 peak_high = highs[peak_i]
+                recent_high = max(recent_highs)
 
-                peak_is_meaningful = peak_high >= recent_prior_high
+                peak_is_highest = peak_high >= recent_high
                 peak_age = i - peak_i
                 trigger_price = peak_high * (1.0 - SHORT_ENTRY_PULLBACK_PCT / 100.0)
                 down_trigger_hit = lows[i] <= trigger_price
 
+                peak_rsi = rsis[peak_i]
+                current_rsi = rsis[i]
+                rsi_supports_reversal = (
+                    peak_rsi is not None
+                    and current_rsi is not None
+                    and peak_rsi >= SHORT_ENTRY_RSI_MIN
+                    and current_rsi < peak_rsi
+                )
+
                 if (
                     position is None
-                    and peak_is_meaningful
+                    and peak_is_highest
                     and peak_age <= SHORT_ENTRY_MAX_PEAK_AGE
                     and down_trigger_hit
+                    and rsi_supports_reversal
                 ):
                     entry_i = i
                     # Enter on the trigger, not the later close. If the bar
