@@ -202,15 +202,19 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V1:
-        # Enter immediately on a fresh LONG -> SHORT transition.
-        # Do NOT carry a SHORT signal through a 2-of-3 confirmation delay.
-        # This is the first tactical correction from the loser review:
-        # an old SHORT idea must not survive until the market has already moved.
+        # SHORT tactic V2:
+        # Enter on the FIRST down candle of a fresh V-SHORT while the
+        # immediately preceding market state is LONG.
+        #
+        # This replaces the old MA-state entry (waiting until the whole
+        # LONG->SHORT state change was already underway). The tactical goal
+        # is to sell near the high, as price first turns down.
+        #
+        # Do NOT carry an old SHORT idea forward. No 2-of-3 entry delay.
         if direction == "SHORT":
             pending_entry = None
 
-            if position is None and prev_state == "LONG" and state == "SHORT":
+            if position is None and prev_state == "LONG" and is_v_short(closes, i):
                 entry_i = i
                 entry = closes[i]
                 position = {
@@ -218,7 +222,7 @@ def run_kiss_backtest(
                     "entry_i": entry_i,
                     "entry": entry,
                     "entry_transition": "LONG->SHORT",
-                    "shape": "V-SHORT" if is_v_short(closes, i) else None,
+                    "shape": "V-SHORT",
                 }
                 peak = entry
                 trough = entry
