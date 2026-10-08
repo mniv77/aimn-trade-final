@@ -20,7 +20,7 @@ TREND_BAND = 0.002
 # candidate peak. This deliberately uses only candles available at entry time.
 # It is not an exact top detector; it is a "near the high, first turn down"
 # entry tactic.
-SHORT_SWING_LOOKBACK = 4
+SHORT_SWING_LOOKBACK = 20
 
 CONFIRM_BARS = 3
 MIN_CONFIRM = 2
