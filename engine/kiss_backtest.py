@@ -379,6 +379,7 @@ def run_kiss_backtest(
                         "entry_reference_high": long_run_peak,
                         "entry_trigger_price": trigger_price,
                         "entry_peak_i": long_run_peak_i,
+                        "short_reversal_pending": False,
                     }
                     peak = entry
                     trough = entry
@@ -448,17 +449,15 @@ def run_kiss_backtest(
                 opposite = "LONG"
 
             if position["direction"] == "SHORT":
-                # SHORT EXIT V3:
-                # Use the trailing technique to detect the FIRST meaningful
-                # reversal away from the lowest price reached during the SHORT.
-                # We use the current candle's HIGH so an intrabar reversal is
-                # not missed merely because the candle closes back down.
+                # SHORT EXIT V4:
+                # A brief FLAT pause is part of the reversal and must not
+                # erase the SHORT position. Exit on the FIRST FLAT->LONG
+                # confirmation after the SHORT move, rather than waiting for
+                # a later LONG->... state transition.
                 #
-                # This is the behavior we want:
-                #   SHORT -> new low -> first 0.50% rebound -> EXIT
-                #
-                # The slower LONG-state transition remains a secondary
-                # structural exit. RSI and stop remain emergency protection.
+                # The trailing reversal remains available only as an
+                # emergency/protection mechanism; normal exit is the first
+                # causal SHORT -> FLAT -> LONG turn.
                 reason = None
                 short_trail_level = None
                 short_trail_hit = False
@@ -469,16 +468,26 @@ def run_kiss_backtest(
                     )
                     short_trail_hit = highs[i] >= short_trail_level
 
-                short_to_long = prev_state == "SHORT" and state == "LONG"
+                short_to_flat = prev_state == "SHORT" and state == "FLAT"
+                flat_to_long = prev_state == "FLAT" and state == "LONG"
+                short_to_long_direct = prev_state == "SHORT" and state == "LONG"
 
-                if short_trail_hit:
-                    reason = "TRAILING_REVERSE"
-                elif short_to_long:
+                # Preserve a pending SHORT reversal across the FLAT candle.
+                if state == "FLAT" and short_to_flat:
+                    position["short_reversal_pending"] = True
+
+                pending_flat_to_long = bool(
+                    position.get("short_reversal_pending", False)
+                ) and flat_to_long
+
+                if pending_flat_to_long or short_to_long_direct:
                     reason = "TREND_CHANGE"
                 elif emergency:
                     reason = "RSI_EMERGENCY"
                 elif stop_hit:
                     reason = "STOP_LOSS"
+                elif short_trail_hit:
+                    reason = "TRAILING_REVERSE"
             else:
                 # LONG side remains unchanged for this controlled SHORT-only test.
                 # A trailing retracement is still followed by the existing 2-of-3
@@ -511,6 +520,8 @@ def run_kiss_backtest(
                     # the candle opened through it, in which case use the open.
                     exit_price = max(float(rows[i]["open"]), float(short_trail_level))
                 else:
+                    # For the structural SHORT->FLAT->LONG exit, exit on this
+                    # actual reversal candle at the available close price.
                     exit_price = price
                 pnl = ((exit_price / entry) - 1.0) * 100.0 if position["direction"] == "LONG" else ((entry / exit_price) - 1.0) * 100.0
                 trades.append(KISSTrade(
