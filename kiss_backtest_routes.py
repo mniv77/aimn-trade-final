@@ -94,8 +94,8 @@ def register_kiss_backtest_routes(app):
             trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 0.5)
             commission_pct = float(request.args.get("commission_pct") or 0.0)
             entry_mode = (request.args.get("entry_mode") or "V15").strip().upper()
-            if entry_mode not in {"V15", "V16"}:
-                return jsonify({"status": "error", "message": "entry_mode must be V15 or V16"}), 400
+            if entry_mode not in {"V15", "V16", "V17"}:
+                return jsonify({"status": "error", "message": "entry_mode must be V15, V16 or V17"}), 400
             if not symbol:
                 return jsonify({"status": "error", "message": "Symbol is required"}), 400
 
