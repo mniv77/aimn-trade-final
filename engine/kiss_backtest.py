@@ -99,40 +99,44 @@ def is_short_peak_reversal(
     idx: int,
     lookback: int = SHORT_SWING_LOOKBACK,
 ) -> bool:
-    """True on the first down candle after a meaningful local high.
+    """True on a causal two-step reversal after a meaningful LONG peak.
 
-    The candidate peak is idx-1. We only use data through idx, so there is no
-    future-looking confirmation. The candidate must:
-      1) have been in LONG state,
-      2) have the highest high over the preceding lookback bars,
-      3) not be exceeded by the current candle,
-      4) turn down now (lower close and lower/equal low).
+    V15 deliberately does NOT enter on the first tiny red candle after a high.
+    The candidate peak is idx-2.  Candle idx-1 must begin the reversal, and
+    candle idx must confirm it by closing below the peak candle's low.
 
-    This is the tactical SHORT entry: HIGH -> FIRST MOVE DOWN -> ENTER.
+    No future candles are inspected.  The goal is to reject temporary
+    pullbacks inside a continuing LONG hill while keeping the entry much
+    earlier than the lagging formal LONG -> SHORT state transition.
     """
-    if idx < lookback + 1 or idx >= len(highs):
+    if idx < lookback + 2 or idx >= len(highs):
         return False
 
-    peak_i = idx - 1
+    peak_i = idx - 2
+    confirm_i = idx - 1
     prior_highs = highs[peak_i - lookback:peak_i]
     if len(prior_highs) < lookback:
         return False
 
+    # The candidate must be a genuine high reached while the strategy is LONG.
     if states[peak_i] != "LONG":
         return False
-
     peak_high = highs[peak_i]
     if peak_high < max(prior_highs):
         return False
 
-    # The current candle confirms that the peak is not being exceeded.
-    if highs[idx] > peak_high:
+    # The first candle must actually turn down from the peak.
+    if highs[confirm_i] > peak_high:
+        return False
+    if closes[confirm_i] >= closes[peak_i]:
+        return False
+    if lows[confirm_i] > lows[peak_i]:
         return False
 
-    # First actual move down from the peak.
-    if closes[idx] >= closes[peak_i]:
+    # The second candle must confirm the reversal, not merely pause it.
+    if closes[idx] >= closes[confirm_i]:
         return False
-    if lows[idx] > lows[peak_i]:
+    if closes[idx] >= lows[peak_i]:
         return False
 
     return True
@@ -278,11 +282,11 @@ def run_kiss_backtest(
             transitions += 1
 
         # ---------------- Entry ----------------
-        # SHORT tactic V14:
-        # Enter on the first causal reversal candle after a meaningful local
-        # LONG peak, rather than waiting for the lagging LONG -> SHORT state
-        # transition.  This is tactical only; the KISS direction/state engine
-        # is unchanged.
+        # SHORT tactic V15:
+        # Enter after a causal two-step reversal from a meaningful LONG peak.
+        # This rejects the tiny one-candle pullbacks that caused V14 false
+        # peaks, while still entering before the lagging LONG -> SHORT state
+        # transition.  The KISS direction/state engine is unchanged.
         if direction == "SHORT":
             pending_entry = None
 
@@ -297,7 +301,7 @@ def run_kiss_backtest(
                     "direction": direction,
                     "entry_i": entry_i,
                     "entry": entry,
-                    "entry_transition": "LONG->SHORT_TACTICAL",
+                    "entry_transition": "LONG->SHORT_TACTICAL_V15",
                     "shape": "V-SHORT" if is_v_short(closes, i) else "PEAK-REVERSAL",
                     "entry_reference_high": float(peak_high),
                     "entry_trigger_price": entry,
