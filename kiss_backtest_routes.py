@@ -109,7 +109,7 @@ def register_kiss_backtest_routes(app):
             result = _run_selected(
                 symbol, direction, broker_id,
                 rsi_rescue_long, rsi_rescue_short,
-                trailing_minus_pct, commission_pct
+                trailing_minus_pct, commission_pct, entry_mode
             )
             result["broker_id"] = broker_id
             result["timeframe"] = "5m"
