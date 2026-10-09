@@ -14,16 +14,9 @@ def _db_rows(symbol: str, timeframe: str, broker_id: str = "", limit: int = 5000
     if not conn:
         raise RuntimeError("Database connection failed")
     try:
-        if broker_id:
-            cursor.execute(
-                """SELECT timestamp, open, high, low, close, volume
-                   FROM candles
-                   WHERE symbol=%s AND broker_id=%s AND timeframe=%s
-                   ORDER BY timestamp ASC
-                   LIMIT %s""",
-                (symbol, broker_id, db_tf, int(limit)),
-            )
-            return cursor.fetchall()
+        # candles does not contain broker_id in this database schema.
+        # broker_id remains a UI/request parameter for compatibility, but
+        # candle selection is by symbol + timeframe.
         cursor.execute(
             """SELECT timestamp, open, high, low, close, volume
                FROM candles
