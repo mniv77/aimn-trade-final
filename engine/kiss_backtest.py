@@ -220,6 +220,51 @@ def is_short_peak_reversal(
     return True
 
 
+def is_early_v_short(
+    highs: Sequence[float],
+    opens: Sequence[float],
+    closes: Sequence[float],
+    states: Sequence[str],
+    idx: int,
+    lookback: int = SHORT_SWING_LOOKBACK,
+) -> Optional[Dict[str, Any]]:
+    """Causal V17: enter on the first two-candle major-top reversal.
+
+    The prior candle is the candidate major peak.  The current candle must
+    stay below that peak high and close below the peak close as a bearish
+    reversal candle.  This deliberately enters one candle earlier than V15,
+    without waiting for a full structural higher-low break.
+    """
+    if idx < lookback + 1 or idx >= len(highs):
+        return None
+
+    peak_i = idx - 1
+    if states[peak_i] != "LONG":
+        return None
+
+    prior_highs = highs[peak_i - lookback:peak_i]
+    if len(prior_highs) < lookback:
+        return None
+
+    peak_high = highs[peak_i]
+    if peak_high < max(prior_highs):
+        return None
+
+    # The second candle must not make a new high and must actually reverse.
+    if highs[idx] > peak_high:
+        return None
+    if closes[idx] >= closes[peak_i]:
+        return None
+    if closes[idx] >= opens[idx]:
+        return None
+
+    return {
+        "peak_i": peak_i,
+        "peak_high": float(peak_high),
+        "peak_age": 1,
+    }
+
+
 def find_transition(closes: Sequence[float], idx: int) -> Optional[Dict[str, Any]]:
     """Return a transition ending at idx; no future candles are inspected."""
     if idx < TREND_WINDOW + 1:
@@ -398,11 +443,18 @@ def run_kiss_backtest(
             pending_entry = None
 
             major_candidate = None
-            if str(entry_mode).upper() == "V16":
+            early_v17_candidate = None
+            mode = str(entry_mode).upper()
+            if mode == "V16":
                 major_candidate = is_major_long_to_short_reversal(
                     highs, lows, closes, states, i
                 )
                 entry_signal = major_candidate is not None
+            elif mode == "V17":
+                early_v17_candidate = is_early_v_short(
+                    highs, opens, closes, states, i
+                )
+                entry_signal = early_v17_candidate is not None
             else:
                 entry_signal = is_short_peak_reversal(
                     highs, lows, closes, states, i
@@ -415,15 +467,22 @@ def run_kiss_backtest(
                     peak_i = major_candidate["peak_i"]
                     peak_high = major_candidate["peak_high"]
                     entry_shape = "MAJOR-STRUCTURE-BREAK"
+                    entry_transition = "LONG->SHORT_MAJOR_V16"
+                elif early_v17_candidate is not None:
+                    peak_i = early_v17_candidate["peak_i"]
+                    peak_high = early_v17_candidate["peak_high"]
+                    entry_shape = "V-SHORT-EARLY"
+                    entry_transition = "LONG->SHORT_EARLY_V17"
                 else:
                     peak_i = i - 1
                     peak_high = highs[peak_i]
                     entry_shape = "V-SHORT" if is_v_short(closes, i) else "PEAK-REVERSAL"
+                    entry_transition = "LONG->SHORT_TACTICAL_V15"
                 position = {
                     "direction": direction,
                     "entry_i": entry_i,
                     "entry": entry,
-                    "entry_transition": "LONG->SHORT_MAJOR_V16" if major_candidate is not None else "LONG->SHORT_TACTICAL_V15",
+                    "entry_transition": entry_transition,
                     "shape": entry_shape,
                     "entry_reference_high": float(peak_high),
                     "entry_trigger_price": entry,
