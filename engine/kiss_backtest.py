@@ -208,6 +208,34 @@ def _ts(v: Any) -> str:
     return str(v)
 
 
+def _major_trend_context(closes: Sequence[float], idx: int, window: int) -> Dict[str, Any]:
+    """Research-only major-trend context at a trade entry; never affects decisions."""
+    if idx < window + 1:
+        return {
+            "trend": "INSUFFICIENT",
+            "ma": None,
+            "slope_pct": None,
+            "price_vs_ma_pct": None,
+        }
+    ma = sum(closes[idx - window:idx]) / window
+    prev_ma = sum(closes[idx - window - 1:idx - 1]) / window
+    price = closes[idx]
+    slope_pct = ((ma / prev_ma) - 1.0) * 100.0 if prev_ma else 0.0
+    price_vs_ma_pct = ((price / ma) - 1.0) * 100.0 if ma else 0.0
+    if slope_pct > 0 and price > ma:
+        trend = "BULLISH"
+    elif slope_pct < 0 and price < ma:
+        trend = "BEARISH"
+    else:
+        trend = "MIXED"
+    return {
+        "trend": trend,
+        "ma": round(ma, 8),
+        "slope_pct": round(slope_pct, 6),
+        "price_vs_ma_pct": round(price_vs_ma_pct, 6),
+    }
+
+
 def _confirmed_reverse(states: Sequence[str], start_i: int, new_state: str) -> bool:
     """Require at least 2 of the next 3 completed candles in the new state."""
     end = min(len(states), start_i + 1 + CONFIRM_BARS)
@@ -510,9 +538,32 @@ def run_kiss_backtest(
         ))
 
     payload = [asdict(t) for t in trades]
+    # Research-only major-trend context. These fields are descriptive only;
+    # they do NOT participate in entry, exit, stop, trailing, or state logic.
+    entry_index_by_time = {str(r.get("timestamp")): i for i, r in enumerate(rows)}
     for t in payload:
         t["commission_pct"] = round(float(commission_pct) * 2.0, 6)
         t["net_pnl_pct"] = round(float(t["pnl_pct"]) - t["commission_pct"], 6)
+        entry_idx = entry_index_by_time.get(str(t.get("entry_time")))
+        if entry_idx is not None:
+            ctx60 = _major_trend_context(closes, entry_idx, 60)
+            ctx120 = _major_trend_context(closes, entry_idx, 120)
+            t["major_trend_60"] = ctx60["trend"]
+            t["major_trend_60_slope_pct"] = ctx60["slope_pct"]
+            t["major_trend_60_price_vs_ma_pct"] = ctx60["price_vs_ma_pct"]
+            t["major_trend_120"] = ctx120["trend"]
+            t["major_trend_120_slope_pct"] = ctx120["slope_pct"]
+            t["major_trend_120_price_vs_ma_pct"] = ctx120["price_vs_ma_pct"]
+            t["major_trend_short_alignment_60"] = (
+                "FAVORABLE" if ctx60["trend"] == "BEARISH"
+                else "ADVERSE" if ctx60["trend"] == "BULLISH"
+                else "MIXED"
+            )
+            t["major_trend_short_alignment_120"] = (
+                "FAVORABLE" if ctx120["trend"] == "BEARISH"
+                else "ADVERSE" if ctx120["trend"] == "BULLISH"
+                else "MIXED"
+            )
     total = sum(t["pnl_pct"] for t in payload)
     total_commission = sum(t["commission_pct"] for t in payload)
     total_net = sum(t["net_pnl_pct"] for t in payload)
