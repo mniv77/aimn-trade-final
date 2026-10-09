@@ -67,7 +67,7 @@ def _row_dicts(rows):
     return normalized
 
 
-def _run_selected(symbol, direction, broker_id, rsi_rescue_long, rsi_rescue_short, trailing_minus_pct, commission_pct):
+def _run_selected(symbol, direction, broker_id, rsi_rescue_long, rsi_rescue_short, trailing_minus_pct, commission_pct, entry_mode):
     """Run the research baseline: 5m candles only."""
     from engine.kiss_backtest import run_kiss_backtest
     rows = _row_dicts(_db_rows(symbol, "5m", broker_id=broker_id))
@@ -80,6 +80,7 @@ def _run_selected(symbol, direction, broker_id, rsi_rescue_long, rsi_rescue_shor
         rsi_rescue_short=rsi_rescue_short,
         trailing_minus_pct=trailing_minus_pct,
         commission_pct=commission_pct,
+        entry_mode=entry_mode,
     )
 
 
@@ -99,6 +100,9 @@ def register_kiss_backtest_routes(app):
             rsi_rescue_short = float(request.args.get("rsi_rescue_short") or 80.0)
             trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 0.5)
             commission_pct = float(request.args.get("commission_pct") or 0.0)
+            entry_mode = (request.args.get("entry_mode") or "V15").strip().upper()
+            if entry_mode not in {"V15", "V16"}:
+                return jsonify({"status": "error", "message": "entry_mode must be V15 or V16"}), 400
             if not symbol:
                 return jsonify({"status": "error", "message": "Symbol is required"}), 400
 
@@ -114,6 +118,7 @@ def register_kiss_backtest_routes(app):
                 "rsi_rescue_short": rsi_rescue_short,
                 "trailing_minus_pct": trailing_minus_pct,
                 "commission_pct_one_side": commission_pct,
+                "entry_mode": entry_mode,
             }
             result["losers"] = [t for t in result["trades"] if t["net_pnl_pct"] <= 0]
             result["winners_hidden"] = True
@@ -134,6 +139,9 @@ def register_kiss_backtest_routes(app):
             rsi_rescue_short = float(request.args.get("rsi_rescue_short") or 80.0)
             trailing_minus_pct = float(request.args.get("trailing_minus_pct") or 0.5)
             commission_pct = float(request.args.get("commission_pct") or 0.0)
+            entry_mode = (request.args.get("entry_mode") or "V15").strip().upper()
+            if entry_mode not in {"V15", "V16"}:
+                return jsonify({"status": "error", "message": "entry_mode must be V15 or V16"}), 400
             if not symbol or not trade_id:
                 return jsonify({"status": "error", "message": "symbol and trade_id are required"}), 400
 
@@ -145,6 +153,7 @@ def register_kiss_backtest_routes(app):
                 rsi_rescue_short=rsi_rescue_short,
                 trailing_minus_pct=trailing_minus_pct,
                 commission_pct=commission_pct,
+                entry_mode=entry_mode,
             )
 
             trade = next((t for t in result["trades"] if t["trade_id"] == trade_id), None)
