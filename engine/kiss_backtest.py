@@ -91,6 +91,84 @@ def is_v_short(closes: Sequence[float], idx: int) -> bool:
     return idx >= 2 and closes[idx - 2] < closes[idx - 1] > closes[idx]
 
 
+def is_major_long_to_short_reversal(
+    highs: Sequence[float],
+    lows: Sequence[float],
+    closes: Sequence[float],
+    states: Sequence[str],
+    idx: int,
+    lookback: int = SHORT_SWING_LOOKBACK,
+    max_peak_age: int = 6,
+) -> Optional[Dict[str, Any]]:
+    """Causal V16 candidate: major LONG structure -> peak -> structural break.
+
+    The candidate peak must be a 30-bar high made while the market is LONG.
+    Before that peak we require a higher-low structure.  We then wait for the
+    first close below that higher-low, but only while the peak is still recent
+    (at most six 5m candles old).  No future candles beyond the entry candle
+    are inspected.
+    """
+    if idx < lookback + 5 or idx >= len(highs):
+        return None
+
+    for age in range(1, max_peak_age + 1):
+        peak_i = idx - age
+        if peak_i < lookback + 4:
+            continue
+        if states[peak_i] != "LONG":
+            continue
+
+        peak_high = highs[peak_i]
+        prior_highs = highs[peak_i - lookback:peak_i]
+        if len(prior_highs) < lookback or peak_high < max(prior_highs):
+            continue
+
+        # Peak must actually turn down; all candles needed here are already
+        # completed before the proposed entry candle.
+        if peak_i + 1 >= len(highs):
+            continue
+        if highs[peak_i + 1] > peak_high:
+            continue
+
+        # Find the most recent confirmed swing low before the peak, then the
+        # prior swing low.  The recent one must be higher: a genuine HL.
+        pivots = []
+        start = max(2, peak_i - 24)
+        end = peak_i - 2
+        for j in range(end, start - 1, -1):
+            if lows[j] <= lows[j - 1] and lows[j] <= lows[j + 1] and                lows[j] <= lows[j - 2] and lows[j] <= lows[j + 2]:
+                pivots.append(j)
+                if len(pivots) == 2:
+                    break
+        if len(pivots) < 2:
+            continue
+
+        recent_hl_i, prior_low_i = pivots[0], pivots[1]
+        recent_hl = lows[recent_hl_i]
+        prior_low = lows[prior_low_i]
+        if recent_hl <= prior_low:
+            continue
+
+        # The actual entry is the first causal close below the higher-low.
+        if closes[idx] >= recent_hl:
+            continue
+        if idx > recent_hl_i and closes[idx - 1] < recent_hl:
+            continue
+
+        return {
+            "peak_i": peak_i,
+            "peak_high": float(peak_high),
+            "peak_age": int(age),
+            "structure_low_i": recent_hl_i,
+            "structure_low": float(recent_hl),
+            "prior_low_i": prior_low_i,
+            "prior_low": float(prior_low),
+            "break_pct": round(((closes[idx] / recent_hl) - 1.0) * 100.0, 6),
+        }
+
+    return None
+
+
 def is_short_peak_reversal(
     highs: Sequence[float],
     lows: Sequence[float],
@@ -252,6 +330,7 @@ def run_kiss_backtest(
     rsi_rescue_short: float = RSI_SHORT_EMERGENCY,
     trailing_minus_pct: float = TRAIL_PCT * 100.0,
     commission_pct: float = 0.0,
+    entry_mode: str = "V15",
 ) -> Dict[str, Any]:
     """Run the independent KISS strategy on chronological candle dictionaries."""
     if str(timeframe).lower() not in {"5m", "5min"}:
@@ -318,24 +397,43 @@ def run_kiss_backtest(
         if direction == "SHORT":
             pending_entry = None
 
-            if position is None and is_short_peak_reversal(
-                highs, lows, closes, states, i
-            ):
+            major_candidate = None
+            if str(entry_mode).upper() == "V16":
+                major_candidate = is_major_long_to_short_reversal(
+                    highs, lows, closes, states, i
+                )
+                entry_signal = major_candidate is not None
+            else:
+                entry_signal = is_short_peak_reversal(
+                    highs, lows, closes, states, i
+                )
+
+            if position is None and entry_signal:
                 entry_i = i
                 entry = closes[i]
-                peak_i = i - 1
-                peak_high = highs[peak_i]
+                if major_candidate is not None:
+                    peak_i = major_candidate["peak_i"]
+                    peak_high = major_candidate["peak_high"]
+                    entry_shape = "MAJOR-STRUCTURE-BREAK"
+                else:
+                    peak_i = i - 1
+                    peak_high = highs[peak_i]
+                    entry_shape = "V-SHORT" if is_v_short(closes, i) else "PEAK-REVERSAL"
                 position = {
                     "direction": direction,
                     "entry_i": entry_i,
                     "entry": entry,
-                    "entry_transition": "LONG->SHORT_TACTICAL_V15",
-                    "shape": "V-SHORT" if is_v_short(closes, i) else "PEAK-REVERSAL",
+                    "entry_transition": "LONG->SHORT_MAJOR_V16" if major_candidate is not None else "LONG->SHORT_TACTICAL_V15",
+                    "shape": entry_shape,
                     "entry_reference_high": float(peak_high),
                     "entry_trigger_price": entry,
                     "entry_peak_i": peak_i,
                     "short_reversal_pending": False,
                 }
+                if major_candidate is not None:
+                    position["structure_low"] = major_candidate["structure_low"]
+                    position["structure_low_i"] = major_candidate["structure_low_i"]
+                    position["prior_structure_low"] = major_candidate["prior_low"]
                 peak = entry
                 trough = entry
                 max_fav = 0.0
