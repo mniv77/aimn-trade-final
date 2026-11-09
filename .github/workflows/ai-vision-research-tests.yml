@@ -10,6 +10,8 @@ on:
       - 'tests/test_ai_vision_independent.py'
       - 'kiss/ai_vision_major_trend_research.py'
       - 'tests/test_ai_vision_major_trend.py'
+      - 'kiss/ai_vision_major_trend_pilot.py'
+      - 'tests/test_ai_vision_major_trend_pilot.py'
       - '.github/workflows/ai-vision-research-tests.yml'
 
 jobs:
