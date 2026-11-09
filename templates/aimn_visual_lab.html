@@ -86,6 +86,7 @@ border:1px solid #34506e;border-radius:6px">
     <input type="file" id="aiPredictionFile" accept=".json,application/json" style="max-width:270px">
   </label>
   <div id="aiPredictionStatus" style="margin-top:8px;color:#9eacc1">No independent AI predictions loaded. Existing human research notes are separate.</div>
+  <div id="aiVisionLedger" style="margin-top:10px;white-space:pre-wrap;color:#c7d9e9">AI Vision trade ledger: not loaded.</div>
 </div>
 <div id="blindResearchControls" style="margin:10px 0;padding:12px;background:#172638;border:1px solid #34506e;border-radius:6px">
   <strong>AI Vision — Blind Chart Research</strong>
@@ -661,9 +662,15 @@ el('aiPredictionFile').addEventListener('change',async event=>{
   if(!file)return;
   try{
     const data=JSON.parse(await file.text());
-    if(!Array.isArray(data.predictions))throw Error('Expected a predictions array');
+    const isRunner = data.research_only===true && Array.isArray(data.decisions) && Array.isArray(data.trades);
+    const predictions = isRunner ? data.decisions
+      .filter(p=>p.decision!=='WAIT')
+      .map(p=>({symbol:p.symbol,time:p.last_visible_candle_unix,action:p.decision,
+                reason:p.reason,confidence:({Low:0.3,Moderate:0.6,High:0.9})[p.confidence],
+                source:'AI_INDEPENDENT'})) : data.predictions;
+    if(!Array.isArray(predictions))throw Error('Expected independent runner output or predictions array');
     const allowed=new Set(['WATCH LONG','WATCH SHORT','ENTER LONG','ENTER SHORT','EXIT LONG','EXIT SHORT']);
-    const parsed=data.predictions.map((p,i)=>{
+    const parsed=predictions.map((p,i)=>{
       if(!p || typeof p!=='object')throw Error('Invalid row '+(i+1));
       const symbol=String(p.symbol||'').toUpperCase();
       const action=String(p.action||'').toUpperCase();
@@ -677,10 +684,25 @@ el('aiPredictionFile').addEventListener('change',async event=>{
       return {symbol,action,time,reason:p.reason,confidence:p.confidence};
     });
     independentAiPredictions=parsed;
-    el('aiPredictionStatus').textContent=parsed.length+' independent AI predictions loaded (display only; independence not yet verified).';
+    el('aiPredictionStatus').textContent=parsed.length+' independent AI decisions loaded (research only).';
+    if(isRunner){
+      if(data.symbol!==el('symbol').value)throw Error('Select '+data.symbol+' before loading this research run');
+      const wins=data.trades.filter(t=>t.net_pnl_pct>0).length;
+      const lines=data.trades.map((t,i)=>(i+1)+'. '+new Date(t.entry_unix*1000).toISOString()+
+        ' entry '+t.entry_price+' → '+new Date(t.exit_unix*1000).toISOString()+
+        ' exit '+t.exit_price+' | gross '+t.gross_pnl_pct.toFixed(3)+'% | net '+t.net_pnl_pct.toFixed(3)+'%');
+      el('aiVisionLedger').textContent='AI Vision independent research | '+data.trades.length+
+        ' closed trades | '+wins+' winners | gross '+data.realized_gross_pnl_pct.toFixed(3)+
+        '% | net '+data.realized_net_pnl_pct.toFixed(3)+
+        '% (sum of per-trade returns, not portfolio equity)\\n'+lines.join('\\n')+
+        (data.open_position?'\\nOPEN PAPER POSITION (excluded from realized P&L)':'');
+    }else{
+      el('aiVisionLedger').textContent='Prediction markers only; no verified trade ledger in this file.';
+    }
     updateVisionMarkers();
   }catch(err){
     independentAiPredictions=[];
+    el('aiVisionLedger').textContent='AI Vision trade ledger: not loaded.';
     el('aiPredictionStatus').textContent='Prediction file rejected: '+err.message;
     updateVisionMarkers();
   }
