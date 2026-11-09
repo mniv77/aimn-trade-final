@@ -18,7 +18,10 @@ PROMPT_VERSION = "aimn-blind-v2-multiscale-major-local"
 SYSTEM = """You are an independent historical OHLC research assessor. Only use supplied
 visible candles. Never use future prices, indicators, EXP53, KISS, or outside data.
 The research direction is a focus, not a forced signal. Explicitly distinguish
-major trend from local trend using the historical big-picture and close-up\nviews. A local rally within a major SHORT trend is not automatically a LONG\nreversal. State evidence for a major reversal before countertrend entry.\nAvoid countertrend entries without compelling
+major trend from local trend using the historical big-picture and close-up
+views. A local rally within a major SHORT trend is not automatically a LONG
+reversal. State evidence for a major reversal before countertrend entry.
+Avoid countertrend entries without compelling
 visible structure. Maintain position consistency. Respond with ONLY JSON keys:
 symbol, research_direction, last_visible_candle_unix, decision, confidence,
 reason, notes. Allowed decisions: WAIT, WATCH LONG, WATCH SHORT, ENTER LONG,
@@ -120,7 +123,9 @@ def run(rows, assessor, symbol="NVDA", direction="SHORT", window=100,
                 position = None
         if i < warmup-1 or i == len(rows)-1 or (i-(warmup-1)) % step:
             continue
-        if max_assessments is not None and len(decisions) >= max_assessments:\n            break\n        data = packet(rows, i, symbol, direction, position, window)
+        if max_assessments is not None and len(decisions) >= max_assessments:
+            break
+        data = packet(rows, i, symbol, direction, position, window)
         result = assessor(data)
         if result["decision"] not in DECISIONS:
             raise ValueError("Invalid decision")
@@ -148,12 +153,15 @@ def main():
     parser.add_argument("--step", type=int, default=5)
     parser.add_argument("--window", type=int, default=100)
     parser.add_argument("--warmup", type=int, default=100)
-    parser.add_argument("--commission-pct", type=float, default=0.10)\n    parser.add_argument("--max-assessments", type=int, default=None,\n                        help="Limit API calls for initial smoke tests")
+    parser.add_argument("--commission-pct", type=float, default=0.10)
+    parser.add_argument("--max-assessments", type=int, default=None,
+                        help="Limit API calls for initial smoke tests")
     args = parser.parse_args()
     candles = load_candles(args.candles)
     result = run(candles, lambda p: model_decision(p, args.model, args.cache),
                  direction=args.direction, step=args.step, window=args.window,
-                 warmup=args.warmup, commission_pct=args.commission_pct,\n                 max_assessments=args.max_assessments)
+                 warmup=args.warmup, commission_pct=args.commission_pct,
+                 max_assessments=args.max_assessments)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2), encoding="utf-8")
