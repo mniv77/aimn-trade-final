@@ -44,6 +44,27 @@ class VisionRunnerTests(unittest.TestCase):
         self.assertFalse(any(x["end_unix"] > 20*300
                              for x in early["big_picture_older_5m_blocks"]))
 
+    def test_wrong_timestamp_rejected(self):
+        rows = [{"unix": i*300, "open": 100, "high": 101,
+                 "low": 99, "close": 100} for i in range(4)]
+        def wrong(p):
+            return {"symbol": "NVDA", "research_direction": "SHORT",
+                    "last_visible_candle_unix": p["last_visible_candle_unix"] + 300,
+                    "decision": "WAIT", "confidence": "High",
+                    "reason": "Test", "notes": "No live orders."}
+        with self.assertRaisesRegex(ValueError, "does not match"):
+            run(rows, wrong, warmup=1, step=1)
+
+    def test_no_future_in_older_blocks(self):
+        rows = [{"unix": i*300, "open": 100, "high": 101,
+                 "low": 99, "close": 100} for i in range(200)]
+        rows[150]["high"] = 999
+        early = packet(rows, 80, "NVDA", "SHORT", None, 20)
+        highs = [b["high"] for b in early["big_picture_older_5m_blocks"]]
+        self.assertNotIn(999, highs)
+        self.assertTrue(all(b["end_unix"] <= early["last_visible_candle_unix"]
+                            for b in early["big_picture_older_5m_blocks"]))
+
     def test_packet_never_sees_future(self):
         rows = [{"unix": i*300, "open": i+1, "high": i+2, "low": i, "close": i+1} for i in range(5)]
         p = packet(rows, 2, "NVDA", "SHORT", None, 2)
