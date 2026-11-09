@@ -40,7 +40,7 @@ class VisionRunnerTests(unittest.TestCase):
                             for x in p["big_picture_older_5m_blocks"]))
         early = packet(rows, 12, "NVDA", "SHORT", None, 5)
         self.assertEqual(early["last_visible_candle_unix"], 12*300)
-        self.assertEqual(early["big_picture_older_5m_blocks"][1]["low"], 50)
+        self.assertEqual(early["big_picture_older_5m_blocks"][2]["low"], 50)
         self.assertFalse(any(x["end_unix"] > 12*300
                              for x in early["big_picture_older_5m_blocks"]))
 
