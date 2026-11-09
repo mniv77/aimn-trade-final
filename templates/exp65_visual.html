@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIMn EXP65 — Visual Trade Research</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090f1c;color:#dbe7f8;font:14px Arial,sans-serif}
+header{padding:20px 24px;border-bottom:1px solid #24354e}
+h1{margin:0 0 8px;font-size:24px;color:#62c9ff}
+h2{margin:0 0 12px;font-size:17px}
+.muted{color:#91a3bd}
+main{padding:20px;max-width:1600px;margin:auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat,.panel{background:#101a2c;border:1px solid #263850;border-radius:10px;padding:16px}
+.stat strong{display:block;font-size:25px;margin-top:7px}
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px}
+.trade-list{max-height:730px;overflow:auto}
+.trade{display:block;width:100%;text-align:left;background:#14223a;color:#e0eafa;border:1px solid #29415d;border-radius:8px;padding:12px;margin:8px 0;cursor:pointer}
+.trade:hover,.trade.active{border-color:#62c9ff;background:#1c3350}
+.trade .line{display:flex;justify-content:space-between;gap:8px}
+.trade small{display:block;color:#91a3bd;margin-top:6px}
+.win{color:#4fd4a0}.loss{color:#ff8888}
+.filters{display:flex;gap:6px;margin:12px 0}
+.filters button{flex:1;background:#1b304d;border:1px solid #34506e;color:white;padding:9px;border-radius:6px;cursor:pointer}
+.filters button.selected{background:#235c83}
+#chart{height:470px;width:100%}
+#details{margin-top:16px;line-height:1.9}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.detail-grid div{background:#14223a;padding:12px;border-radius:7px;overflow-wrap:anywhere}
+.detail-grid span{display:block;color:#91a3bd;font-size:12px}
+.notice{padding:10px;border:1px solid #38526f;border-radius:7px;margin-bottom:16px}
+@media(max-width:850px){
+.stats{grid-template-columns:repeat(2,1fr)}
+.layout{grid-template-columns:1fr}
+.trade-list{max-height:260px}
+.detail-grid{grid-template-columns:repeat(2,1fr)}
+#chart{height:380px}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>AIMn — EXP65 Visual Trade Research</h1>
+<div class="muted">NVDA · SHORT · 5-minute · V18 · Research Only</div>
+</header>
+<main>
+<div class="notice" id="status">Loading historical backtest trades...</div>
+<div class="stats">
+<div class="stat"><span class="muted">Trades</span><strong id="total">—</strong></div>
+<div class="stat"><span class="muted">Winners</span><strong class="win" id="winners">—</strong></div>
+<div class="stat"><span class="muted">Losers</span><strong class="loss" id="losers">—</strong></div>
+<div class="stat"><span class="muted">Total net P&amp;L</span><strong id="net">—</strong></div>
+</div>
+<div class="layout">
+<section class="panel">
+<h2>Trade Navigator</h2>
+<div class="filters">
+<button data-filter="ALL" class="selected">All</button>
+<button data-filter="WIN">Winners</button>
+<button data-filter="LOSS">Losers</button>
+</div>
+<div class="trade-list" id="tradeList"></div>
+</section>
+<section class="panel">
+<h2 id="chartTitle">Select a trade</h2>
+<div class="muted" id="chartHint">
+Red down arrow = SHORT entry. Blue up arrow = SHORT exit.
+</div>
+<div id="chart"></div>
+<div id="details"></div>
+</section>
+</div>
+</main>
+<script>
+"use strict";
+
+let trades = [];
+let selected = null;
+let filter = "ALL";
+let chart = null;
+
+const $ = id => document.getElementById(id);
+const fmt = value => Number(value).toFixed(3);
+const number = value => value == null ? "—" : fmt(value);
+
+// Historical dataset ends October 16, 2026, entirely in New York daylight time.
+function timestamp(value){
+  return Math.floor(Date.parse(
+    String(value).replace(" ", "T") + "-04:00"
+  ) / 1000);
+}
+
+function showError(error){
+  $("status").textContent = "ERROR: " + error.message;
+}
+
+function renderList(){
+  const box = $("tradeList");
+  box.replaceChildren();
+
+  trades.forEach(t => {
+    const pnl = Number(t.net_pnl_pct);
+    const outcome = pnl > 0 ? "WIN" : "LOSS";
+    if(filter !== "ALL" && filter !== outcome) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "trade" +
+      (selected === t.trade_id ? " active" : "");
+
+    const line = document.createElement("div");
+    line.className = "line";
+
+    const name = document.createElement("strong");
+    name.textContent = t.trade_id;
+
+    const result = document.createElement("strong");
+    result.className = pnl > 0 ? "win" : "loss";
+    result.textContent = (pnl > 0 ? "+" : "") + fmt(pnl) + "%";
+
+    line.append(name, result);
+
+    const info = document.createElement("small");
+    info.textContent =
+      t.entry_time + " → " + t.exit_time;
+
+    const reason = document.createElement("small");
+    reason.textContent = "Exit: " + (t.exit_reason || "—");
+
+    button.append(line, info, reason);
+    button.onclick = () => openTrade(t.trade_id);
+    box.appendChild(button);
+  });
+}
+
+function detail(label,value){
+  const div = document.createElement("div");
+  const caption = document.createElement("span");
+  caption.textContent = label;
+  const content = document.createElement("strong");
+  content.textContent = String(value);
+  div.append(caption,content);
+  return div;
+}
+
+async function openTrade(id){
+  selected = id;
+  renderList();
+
+  $("chartTitle").textContent = "Loading " + id + "...";
+
+  try{
+    const response = await fetch(
+      "/api/exp65/visual/chart?trade_id=" + encodeURIComponent(id)
+    );
+    const data = await response.json();
+    if(!response.ok || data.status !== "success"){
+      throw new Error(data.message || "Chart request failed");
+    }
+
+    const t = data.trade;
+    const candles = data.candles;
+    const container = $("chart");
+
+    if(chart){
+      chart.remove();
+      chart = null;
+    }
+
+    container.replaceChildren();
+
+    chart = LightweightCharts.createChart(container,{
+      width:container.clientWidth,
+      height:container.clientHeight,
+      layout:{
+        background:{color:"#090f1c"},
+        textColor:"#dbe7f8"
+      },
+      grid:{
+        vertLines:{color:"#17243a"},
+        horzLines:{color:"#17243a"}
+      },
+      timeScale:{
+        timeVisible:true,
+        secondsVisible:false
+      }
+    });
+
+    const series = chart.addCandlestickSeries({
+      upColor:"#29c49a",
+      downColor:"#e66b70",
+      borderVisible:false,
+      wickUpColor:"#29c49a",
+      wickDownColor:"#e66b70"
+    });
+
+    series.setData(candles.map(c => ({
+      time:timestamp(c.time),
+      open:Number(c.open),
+      high:Number(c.high),
+      low:Number(c.low),
+      close:Number(c.close)
+    })));
+
+    const markers = [
+      {
+        time:timestamp(t.entry_time),
+        position:"aboveBar",
+        color:"#ff7777",
+        shape:"arrowDown",
+        text:"SHORT ENTRY"
+      },
+      {
+        time:timestamp(t.exit_time),
+        position:"belowBar",
+        color:"#55bbff",
+        shape:"arrowUp",
+        text:"EXIT"
+      }
+    ];
+
+
+    // EXP65 DIAGNOSTIC CHART MARKERS V1
+    // Observations only — never trading signals.
+    let diagnostic = null;
+
+    try {
+      const diagnosticResponse = await fetch(
+        "/api/exp65/visual/diagnostics"
+      );
+
+      if (!diagnosticResponse.ok) {
+        throw new Error("Diagnostic API unavailable");
+      }
+
+      const diagnosticData = await diagnosticResponse.json();
+
+      if (diagnosticData.status !== "success") {
+        throw new Error("Diagnostic research unavailable");
+      }
+
+      diagnostic = diagnosticData.diagnostics.find(
+        item => item.trade_id === id
+      ) || null;
+
+      if (diagnostic && diagnostic.warning_time) {
+        markers.push({
+          time:timestamp(diagnostic.warning_time),
+          position:"aboveBar",
+          color:"#ffad33",
+          shape:"circle",
+          text:"WARNING"
+        });
+      }
+
+      if (diagnostic && diagnostic.review_time) {
+        const recovered = diagnostic.status === "RECOVERED";
+
+        markers.push({
+          time:timestamp(diagnostic.review_time),
+          position:recovered ? "belowBar" : "aboveBar",
+          color:recovered ? "#4fd4a0" : "#ff5555",
+          shape:"circle",
+          text:recovered ? "RECOVERED" : "FAILED RECOVERY"
+        });
+      }
+    } catch (diagnosticError) {
+      console.warn("EXP65 research markers:", diagnosticError);
+    }
+
+    markers.sort((a,b) => a.time-b.time);
+    series.setMarkers(markers);
+    chart.timeScale().fitContent();
+
+    const pnl = Number(t.net_pnl_pct);
+    $("chartTitle").textContent =
+      id + " — " + (pnl > 0 ? "WIN " : "LOSS ") +
+      (pnl > 0 ? "+" : "") + fmt(pnl) + "%";
+
+    const details = document.createElement("div");
+    details.className = "detail-grid";
+    [
+      ["Entry time",t.entry_time],
+      ["Entry price",number(t.entry_price)],
+      ["Entry transition",t.entry_transition || "—"],
+      ["Exit time",t.exit_time],
+      ["Exit price",number(t.exit_price)],
+      ["Exit reason",t.exit_reason || "—"],
+      ["Net P&L",fmt(pnl) + "%"],
+      ["Maximum favorable",number(t.max_favorable_pct) + "%"],
+      ["Maximum adverse",number(t.max_adverse_pct) + "%"]
+    ].forEach(([label,value]) => {
+      details.appendChild(detail(label,value));
+    });
+
+
+    if (diagnostic) {
+      const statusLabels = {
+        "RECOVERED":"SHORT recovered within three candles",
+        "NOT_RECOVERED":"No new favorable close within three candles",
+        "EXITED_EARLY":"Original trade exited before review",
+        "NO_WARNING":"No deterioration warning observed"
+      };
+
+      details.appendChild(
+        detail(
+          "Research classification",
+          statusLabels[diagnostic.status] || diagnostic.status
+        )
+      );
+
+      if (diagnostic.warning_time) {
+        details.appendChild(
+          detail("First warning", diagnostic.warning_time)
+        );
+      }
+
+      if (diagnostic.review_time) {
+        details.appendChild(
+          detail("Three-candle review", diagnostic.review_time)
+        );
+      }
+
+      if (diagnostic.review_net_pct != null) {
+        details.appendChild(
+          detail(
+            "Hypothetical net at review",
+            fmt(diagnostic.review_net_pct) + "%"
+          )
+        );
+      }
+    }
+
+    $("details").replaceChildren(details);
+    $("status").textContent =
+      "EXP65 historical research — viewing " + id;
+
+  }catch(error){
+    $("chartTitle").textContent = id + " — chart error";
+    showError(error);
+  }
+}
+
+document.querySelectorAll("[data-filter]").forEach(button => {
+  button.onclick = () => {
+    filter = button.dataset.filter;
+    document.querySelectorAll("[data-filter]").forEach(b => {
+      b.classList.toggle("selected",b === button);
+    });
+    renderList();
+  };
+});
+
+async function initialize(){
+  try{
+    const response = await fetch("/api/exp65/visual/trades");
+    const data = await response.json();
+
+    if(!response.ok || data.status !== "success"){
+      throw new Error(data.message || "Backtest request failed");
+    }
+
+    trades = data.trades;
+    $("total").textContent = data.trade_count;
+    $("winners").textContent = data.winners;
+    $("losers").textContent = data.losers;
+    $("net").textContent =
+      (data.total_net_pct >= 0 ? "+" : "") +
+      fmt(data.total_net_pct) + "%";
+
+    $("status").textContent =
+      data.candle_count + " historical candles loaded · Research only";
+
+    renderList();
+
+    if(trades.length){
+      const firstLoss = trades.find(t => Number(t.net_pnl_pct) < 0);
+      openTrade((firstLoss || trades[0]).trade_id);
+    }
+  }catch(error){
+    showError(error);
+  }
+}
+
+initialize();
+</script>
+</body>
+</html>

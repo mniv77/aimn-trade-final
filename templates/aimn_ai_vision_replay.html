@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AIMn AI Vision — All-Symbol Blind Replay & Research Log</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,Segoe UI,Arial,sans-serif}body{margin:0;background:#0b1220;color:#e7edf7}header,main{max-width:1300px;margin:auto;padding:16px}header{border-bottom:1px solid #2d3a50}h1{font-size:23px;margin:0 0 5px}p{color:#afbed3}section{background:#111c2b;border:1px solid #314158;border-radius:12px;padding:16px;margin-bottom:14px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}button,input,select,textarea{background:#1d304a;color:#fff;border:1px solid #4c6684;border-radius:7px;padding:9px;font:inherit}button{cursor:pointer;background:#1d5bb4}button:disabled{opacity:.45;cursor:not-allowed}input[type=number]{width:100px}input[type=text]{min-width:130px}label{font-size:14px}small{color:#a9bbd0}#chart{height:510px;min-width:0}#status{font-weight:650}textarea{width:100%;min-height:65px;box-sizing:border-box}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:8px;border-bottom:1px solid #34465e;text-align:left}#logWrap{overflow:auto}.warning{color:#ffd37c}#fallback{display:none;color:#ffc78d}a{color:#8dc6ff}
+</style><script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script></head>
+<body><header><h1>AIMn AI Vision — All-Symbol Blind Replay & Research Log</h1><small>Independent research • All supported symbols • No KISS markers • No future candles on chart • No live orders • No automatic AI inference</small></header>
+<main>
+<section><div class="row"><label>Research direction <select id="direction"><option value="BOTH" selected>BOTH — AI chooses</option><option value="LONG">LONG only</option><option value="SHORT">SHORT only</option></select></label><label>Initial visible candles <input id="initial" type="number" value="100" min="20"></label><label>Step size <input id="step" type="number" value="5" min="1" max="100"></label><label>Optional local candle JSON <input id="file" type="file" accept=".json,application/json"></label><span id="selection"></span></div><p id="status">Loading historical candles from KISS Backtest Control selection…</p><div class="row"><button id="back" disabled>Earlier</button><button id="next" disabled>Reveal next step</button><button id="reset" disabled>Reset to beginning</button><button id="snapshot" disabled>Save chart PNG</button><span id="position"></span></div><p class="warning">Replay deliberately stops after each step for a new assessment. It cannot make ChatGPT decisions unattended.</p></section>
+<section><div id="chart"></div><p id="fallback">Chart library did not load. An internet connection is required to display candlesticks.</p></section>
+<section><h2>Record a blind AI assessment</h2><p>Use only the visible chart. Record the decision <strong>before</strong> revealing more candles. A decision can be copied into ChatGPT for review, then saved here manually.</p><div class="row"><label>Decision <select id="decision"><option>WAIT</option><option>WATCH LONG</option><option>WATCH SHORT</option><option>ENTER LONG</option><option>ENTER SHORT</option><option>EXIT LONG</option><option>EXIT SHORT</option></select></label><label>Confidence <select id="confidence"><option>Low</option><option selected>Moderate</option><option>High</option></select></label><label>Reason <input id="reason" type="text" placeholder="Visible chart evidence" size="55"></label></div><p><label>Paste AI assessment (JSON) <textarea id="aiResponse" placeholder="Paste the structured JSON assessment returned by ChatGPT, then click Apply AI assessment"></textarea></label></p><div class="row"><button id="applyAI">Apply AI assessment</button><small>Checks the symbol, direction, and last visible candle before filling the assessment. Record it before revealing more candles.</small></div><p><label>Additional observations<textarea id="notes" placeholder="Levels, invalidation, uncertainty; no future information"></textarea></label></p><div class="row"><button id="record" disabled>Record prediction at current candle</button><button id="copy" disabled>Copy blind AI assessment packet</button><button id="export" disabled>Export prediction log JSON</button><button id="import">Import previous prediction log</button><input id="logfile" type="file" accept=".json,application/json" hidden></div><p id="feedback"></p><div id="logWrap"><table><thead><tr><th>#</th><th>Last candle (UTC)</th><th>Close</th><th>Decision</th><th>Confidence</th><th>Reason</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+</main><script>
+'use strict';
+const $=id=>document.getElementById(id);let candles=[],visible=0,log=[],chart,series,sourceName='';
+const launchParams=new URLSearchParams(window.location.search);
+const selectedSymbol=(launchParams.get('symbol')||'').trim().toUpperCase();
+const selectedBroker=(launchParams.get('broker_id')||'').trim();
+const selectedTimeframe=(launchParams.get('timeframe')||'5m').trim();
+function symbolName(){return selectedSymbol}
+function researchDirection(){return $('direction').value}
+async function getJson(path){let r=await fetch(path,{credentials:'same-origin'});if(!r.ok)throw Error(path+' returned HTTP '+r.status);return r.json()}
+function stamp(t){return new Date(t*1000).toISOString().replace('.000Z',' UTC')}
+function setFeedback(s){$('feedback').textContent=s}
+function normalize(root){let arr=Array.isArray(root)?root:(root.candles||root.data||root.bars||root.results||root.items);if(!Array.isArray(arr))throw Error('Expected an array or object with candles/data/bars/results/items array.');
+const out=arr.map((x,i)=>{if(Array.isArray(x)){if(x.length<5)throw Error('Candle array needs [time,open,high,low,close]');x={time:x[0],open:x[1],high:x[2],low:x[3],close:x[4]}}
+let t=x.time??x.timestamp??x.datetime??x.date??x.t??x.ts;let n;if(typeof t==='number')n=t>1e12?Math.floor(t/1000):t;else if(typeof t==='string'&&/^\d+$/.test(t)){let v=Number(t);n=v>1e12?Math.floor(v/1000):v}else{let parsed=Date.parse(t);if(!Number.isFinite(parsed))throw Error('Invalid timestamp at candle '+i);n=Math.floor(parsed/1000)}
+let o=Number(x.open??x.o),h=Number(x.high??x.h),l=Number(x.low??x.l),c=Number(x.close??x.c);if(![n,o,h,l,c].every(Number.isFinite))throw Error('Invalid OHLC at candle '+i);if(h<Math.max(o,c)||l>Math.min(o,c))throw Error('OHLC inconsistent at candle '+i);return {time:n,open:o,high:h,low:l,close:c}}).sort((a,b)=>a.time-b.time);
+for(let i=1;i<out.length;i++)if(out[i].time===out[i-1].time)throw Error('Duplicate candle timestamp '+stamp(out[i].time));if(out.length<20)throw Error('At least 20 candles required');return out}
+function initChart(){if(!window.LightweightCharts){$('fallback').style.display='block';return}chart=LightweightCharts.createChart($('chart'),{layout:{background:{color:'#111c2b'},textColor:'#b9c8d8'},grid:{vertLines:{color:'#233347'},horzLines:{color:'#233347'}},rightPriceScale:{borderColor:'#34465e'},timeScale:{borderColor:'#34465e',timeVisible:true,secondsVisible:false},width:$('chart').clientWidth,height:510});series=chart.addCandlestickSeries({upColor:'#26a69a',downColor:'#ef5350',borderVisible:false,wickUpColor:'#26a69a',wickDownColor:'#ef5350'});new ResizeObserver(()=>chart.applyOptions({width:$('chart').clientWidth})).observe($('chart'))}
+function render(){if(!candles.length)return;let end=candles[visible-1];$('position').textContent=`${visible} of ${candles.length} candles • Last: ${stamp(end.time)} • Close: ${end.close.toFixed(2)}`;$('status').textContent=`${sourceName} / ${researchDirection()} loaded. Only candles through ${stamp(end.time)} are shown.`;if(series){series.setData(candles.slice(0,visible));chart.timeScale().fitContent();let from=Math.max(0,visible-95);chart.timeScale().setVisibleLogicalRange({from,to:visible+2})} $('back').disabled=visible<=20;$('next').disabled=visible>=candles.length;$('reset').disabled=false;$('snapshot').disabled=!chart;$('record').disabled=false;$('copy').disabled=false;$('export').disabled=log.length===0;renderLog()}
+function renderLog(){$('rows').replaceChildren();log.forEach((r,i)=>{let tr=document.createElement('tr');[i+1,r.candle_utc,r.close,r.decision,r.confidence,r.reason].forEach(v=>{let td=document.createElement('td');td.textContent=v;tr.append(td)});$('rows').append(tr)})}
+function saveBlob(name,blob){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
+$('direction').onchange=()=>{if(candles.length)render();setFeedback('Research direction: '+researchDirection()+'. Replay position unchanged. Existing recorded predictions keep their original direction.');};
+async function loadSelectedSymbol(){
+  let symbol=symbolName();
+  if(!symbol){$('status').textContent='No symbol was provided. Open this page from KISS Backtest Control.';return}
+  $('status').textContent='Loading '+symbol+' historical candles…';
+  try{
+    let params=new URLSearchParams({symbol});if(selectedBroker)params.set('broker_id',selectedBroker);
+    let root;
+    try{root=await getJson('/api/aimn_visual_lab/candles?'+params.toString());candles=normalize(root);sourceName='AIMn API / '+symbol}
+    catch(apiErr){
+      if(!['NVDA','AAPL'].includes(symbol))throw apiErr;
+      root=await getJson('/static/aimn_visual_lab/aimn_'+symbol.toLowerCase()+'_candles.json');
+      candles=normalize(root);sourceName='AIMn static archive / '+symbol;
+    }
+    visible=Math.max(20,Math.min(candles.length,Math.floor(Number($('initial').value)||100)));
+    log=[];setFeedback('Loaded '+candles.length+' candles for '+symbol+'. Predictions are stored locally until exported.');render();
+  }catch(e){candles=[];$('status').textContent='Load failed: '+e.message;setFeedback('Check the incoming symbol and broker in KISS Backtest Control. No KISS files were changed.')}
+}
+$('file').onchange=async e=>{try{let f=e.target.files[0];if(!f)return;let raw=JSON.parse(await f.text());candles=normalize(raw);sourceName=f.name;visible=Math.max(20,Math.min(candles.length,Math.floor(Number($('initial').value)||100)));log=[];setFeedback('New dataset loaded. Predictions reset.');render()}catch(err){candles=[];$('status').textContent='Error: '+err.message;setFeedback('')}};
+$('next').onclick=()=>{visible=Math.min(candles.length,visible+Math.max(1,Math.floor(Number($('step').value)||5)));render()};$('back').onclick=()=>{visible=Math.max(20,visible-Math.max(1,Math.floor(Number($('step').value)||5)));render()};$('reset').onclick=()=>{visible=Math.max(20,Math.min(candles.length,Math.floor(Number($('initial').value)||100)));render()};
+$('record').onclick=()=>{if(!candles.length)return;let end=candles[visible-1],reason=$('reason').value.trim();if(!reason){setFeedback('Please enter a reason before recording.');return}let decision=$('decision').value;let r={schema:'aimn-blind-prediction-v1',symbol:symbolName(),timeframe:selectedTimeframe,candle_utc:stamp(end.time),candle_unix:end.time,visible_candles:visible,close:end.close,research_direction:researchDirection(),decision:$('decision').value,confidence:$('confidence').value,reason,notes:$('notes').value.trim(),recorded_at_utc:new Date().toISOString(),source_file:sourceName};log.push(r);renderLog();$('export').disabled=false;setFeedback('Prediction recorded locally. Export the JSON to preserve it.');$('reason').value='';$('notes').value=''};
+$('copy').onclick=async()=>{
+  if(!candles.length)return;
+  const end=candles[visible-1];
+  // Only candles already revealed are included. No future observations or KISS trade markers.
+  const visibleBars=candles.slice(Math.max(0,visible-100),visible).map(c=>({utc:stamp(c.time),open:c.open,high:c.high,low:c.low,close:c.close}));
+  const packet={task:'AIMn blind chart assessment',symbol:symbolName(),timeframe:selectedTimeframe,research_direction:researchDirection(),last_visible_candle_unix:end.time,last_visible_candle_utc:stamp(end.time),visible_count:visible,visible_ohlc_last_100:visibleBars};
+  const instruction='Analyze ONLY the supplied visible OHLC candles. Do not use outside market data, future candles, hindsight, or KISS signals. Assess whether there is enough evidence for an entry, exit, watch, or wait. Do not force a trade. Reply with ONLY a JSON object using exactly these keys: symbol (string), research_direction (LONG/SHORT/BOTH), last_visible_candle_unix (number), decision (WAIT/WATCH LONG/WATCH SHORT/ENTER LONG/ENTER SHORT/EXIT LONG/EXIT SHORT), confidence (Low/Moderate/High), reason (specific visible evidence), notes (invalidation and uncertainty). The research direction is a focus, not a forced signal. No live orders.';
+  const s=instruction+'\n\nBLIND DATA PACKET:\n'+JSON.stringify(packet);
+  try{await navigator.clipboard.writeText(s);setFeedback('Blind AI packet copied with the last 100 revealed candles only. Paste into ChatGPT, then paste its JSON answer below.')}catch{setFeedback('Clipboard unavailable. Please enable clipboard permission and try again.')}
+};
+$('applyAI').onclick=()=>{
+  try{
+    if(!candles.length)throw Error('Load candles first');
+    let raw=$('aiResponse').value.trim();
+    if(raw.startsWith('```'))raw=raw.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+    const a=JSON.parse(raw),end=candles[visible-1];
+    if(a.symbol!==symbolName())throw Error('Symbol mismatch');
+    if(a.research_direction!==researchDirection())throw Error('Research direction changed since assessment');
+    if(Number(a.last_visible_candle_unix)!==end.time)throw Error('Replay has moved: assessment is for another candle');
+    const valid=['WAIT','WATCH LONG','WATCH SHORT','ENTER LONG','ENTER SHORT','EXIT LONG','EXIT SHORT'];
+    if(!valid.includes(a.decision))throw Error('Invalid decision');
+    if(!['Low','Moderate','High'].includes(a.confidence))throw Error('Invalid confidence');
+    if(typeof a.reason!=='string'||!a.reason.trim())throw Error('Missing reason');
+    $('decision').value=a.decision;$('confidence').value=a.confidence;$('reason').value=a.reason;
+    $('notes').value=typeof a.notes==='string'?a.notes:'';
+    setFeedback('AI assessment validated and filled in. Click Record prediction at current candle BEFORE revealing more candles.');
+  }catch(e){setFeedback('AI assessment not applied: '+e.message)}
+};
+$('export').onclick=()=>{let payload={schema:'aimn-blind-research-log-v1',symbol:symbolName(),timeframe:selectedTimeframe,research_direction:researchDirection(),source_file:sourceName,exported_at_utc:new Date().toISOString(),predictions:log};saveBlob(`aimn_${payload.symbol||'symbol'}_blind_predictions.json`,new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));setFeedback('Research log exported. Keep this file for future comparison.')};
+$('import').onclick=()=>$('logfile').click();$('logfile').onchange=async e=>{try{let obj=JSON.parse(await e.target.files[0].text());if(!Array.isArray(obj.predictions))throw Error('Not a prediction log');if(!candles.length)throw Error('Load the matching candle dataset first');if(obj.symbol!==symbolName()||obj.timeframe!==selectedTimeframe||(obj.research_direction&&obj.research_direction!==researchDirection()))throw Error('Symbol/timeframe/direction mismatch');if(obj.predictions.some(p=>!candles.some(c=>c.time===p.candle_unix&&c.close===p.close)))throw Error('Prediction log does not match loaded candle data');log=obj.predictions;renderLog();$('export').disabled=!log.length;setFeedback('Log imported. Review before continuing.')}catch(err){setFeedback('Import error: '+err.message)}e.target.value=''};
+$('snapshot').onclick=()=>{if(!chart)return;let canvas=chart.takeScreenshot();canvas.toBlob(blob=>{if(blob)saveBlob(`aimn_${symbolName()}_${candles[visible-1].time}_blind.png`,blob)},'image/png')};
+const urlDirection=launchParams.get('direction');
+if(['LONG','SHORT','BOTH'].includes((urlDirection||'').toUpperCase()))$('direction').value=urlDirection.toUpperCase();
+$('selection').textContent=selectedSymbol+' · '+selectedTimeframe;
+initChart();
+loadSelectedSymbol();
+</script></body></html>

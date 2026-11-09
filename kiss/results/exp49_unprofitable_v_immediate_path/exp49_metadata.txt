@@ -1,0 +1,11 @@
+AIMn KISS — Experiment #49
+QUESTION: At an unprofitable V, is price noise or a continuing reversal?
+RESEARCH ONLY — no production changes, no orders, no AI, no thresholds, no re-entry simulation.
+Raw source: /home/MeirNiv/aimn-trade-final/kiss/results/exp32_raw_candle_v_geometry/raw_v_trajectory.csv
+Event source: /home/MeirNiv/aimn-trade-final/kiss/results/exp46_not_yet_profitable_v/nvda_not_yet_profitable_v_events.csv
+Causal V timestamp field: v_reversal_candle_utc
+Raw price timestamp field: candle_utc
+Events analyzed: 5
+Unique trades: 5
+No threshold promoted.
+No trading rule created.

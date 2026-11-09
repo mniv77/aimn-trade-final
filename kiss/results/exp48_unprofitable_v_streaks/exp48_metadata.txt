@@ -1,0 +1,17 @@
+AIMn KISS — Experiment #48
+UNPROFITABLE V: NOISE vs CONTINUING REVERSAL
+
+RESEARCH ONLY
+No production strategy changes.
+No orders.
+No AI training.
+No threshold promotion.
+No re-entry simulation.
+
+Events source: /home/MeirNiv/aimn-trade-final/kiss/results/exp46_not_yet_profitable_v/nvda_not_yet_profitable_v_events.csv
+Raw source:    /home/MeirNiv/aimn-trade-final/kiss/results/exp32_raw_candle_v_geometry/raw_v_trajectory.csv
+Input events:  5
+Raw matches:   5
+
+The causal V timestamp is v_reversal_candle_utc from Experiment #46.
+Post-V behavior is descriptive only; it is not a trading rule.

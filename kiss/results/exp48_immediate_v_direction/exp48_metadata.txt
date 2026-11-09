@@ -1,0 +1,13 @@
+AIMn KISS — Experiment #48
+Question: immediate post-V direction at an unprofitable V
+Experiment #46 identifies qualifying events.
+Experiment #42 supplies exact V timestamp.
+Raw 5m trajectory supplies V + next two completed candles.
+Exact timestamp matching only.
+No timestamp guessing.
+No production changes.
+No orders.
+No AI.
+No threshold promotion.
+Events: 5
+Usable immediate paths: 5

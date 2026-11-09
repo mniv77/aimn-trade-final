@@ -236,8 +236,11 @@ def list_routes():
 import pandas as pd
 import numpy as np
 
+#--------------------------------------------------------
 
-
+@app.route("/aimn_ai_vision_replay")
+def aimn_ai_vision_replay():
+    return render_template("aimn_ai_vision_replay.html")
 
 #======================================================
 #     SYMBOLS FOR TUNER SELETCT SYAMBOL
@@ -2383,3 +2386,7 @@ def tuner_cache(symbol):
     if not p.exists():
         return {"error":"not found "+str(p)},404
     return json.loads(p.read_text())
+
+@app.route("/aimn_visual_lab")
+def aimn_visual_lab():
+    return render_template("aimn_visual_lab.html")

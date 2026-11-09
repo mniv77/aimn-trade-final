@@ -64,6 +64,9 @@ def register_backtest_routes(app, db):
     from kiss_backtest_routes import register_kiss_backtest_routes
     register_kiss_backtest_routes(app)
 
+    from exp65_visual_routes import register_exp65_visual_routes
+    register_exp65_visual_routes(app)
+
     @app.after_request
     def inject_kiss_button(response):
         # Add the independent KISS button to the clean Auto Tuner control page.

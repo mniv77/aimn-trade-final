@@ -45,3 +45,18 @@ CLAUDE_CONTEXT.md
 engine.log
 engine.pid
 core.*
+# AIMn Git synchronization safety
+instance/
+backups/
+*.backup_*
+*.BAD_HTML_*
+*.bak[0-9]*
+*.before_*
+*.backup_before_*
+
+# AIMn temporary files and Visual Lab backups
+/previous_high
+/round_trip_commission_pct
+templates/aimn_visual_lab_bak*.html
+templates/aimn_visual_lab_before_*.html
+templates/auto_tuner.html.bak_visual_lab

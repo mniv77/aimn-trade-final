@@ -39,7 +39,7 @@
 </head>
 <body>
     <div class="top-actions">
-        <a id="open_chart_link" class="chart-link" href="/tuner_chart" target="_blank">📊 Open Chart &amp; Feedback</a>
+        <a id="open_chart_link" class="chart-link aimn-vision-link" href="/aimn_ai_vision_replay" target="_blank">👁️ Open AI Vision Replay</a>
     </div>
 
     <div class="header">
@@ -77,27 +77,67 @@
                 </div>
             </div>
             <div>
-                <label for="timeframe_select">Timeframe</label>
-                <select id="timeframe_select">
-                    <option value="5m">5m</option>
-                    <option value="15m">15m</option>
-                    <option value="30m">30m</option>
-                    <option value="1hr" selected>1hr</option>
-                    <option value="6hr">6hr</option>
+                <label>Candle</label>
+                <div style="padding:10px 12px;background:#052e16;border:1px solid var(--green);border-radius:4px;color:var(--green);font-family:monospace;font-weight:bold;text-align:center;">5 MINUTES</div>
+                <input type="hidden" id="timeframe_select" value="5m">
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="title">⚙ Research Parameters</div>
+        <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:15px;">
+            <div>
+                <label for="entry_mode">Entry Strategy</label>
+                <select id="entry_mode" style="width:100%;padding:10px;background:#060c18;color:white;">
+                    <option value="V15">V15 — Baseline</option>
+                    <option value="V16">V16 — Major Reversal</option>
+                    <option value="V17" selected>V17 — Early SHORT Reversal</option>
                 </select>
+            </div>
+            <div>
+                <label for="commission_pct">Commission % per side</label>
+                <input id="commission_pct" type="number" min="0" step="0.01" value="0.10"
+                       style="width:100%;padding:10px;background:#060c18;color:white;">
+            </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
+            <div>
+                <label for="rsi_rescue_long">RSI Rescue LONG</label>
+                <input id="rsi_rescue_long" type="number" min="0" max="50" step="1" value="20"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">LONG emergency exit when RSI falls below this level.</div>
+            </div>
+            <div>
+                <label for="rsi_rescue_short">RSI Rescue SHORT</label>
+                <input id="rsi_rescue_short" type="number" min="50" max="100" step="1" value="80"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">SHORT emergency exit when RSI rises above this level.</div>
+            </div>
+            <div>
+                <label for="trailing_minus">Trailing Minus %</label>
+                <input id="trailing_minus" type="number" min="0.01" step="0.05" value="0.50"
+                       style="width:100%;padding:10px 12px;background:#060c18;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:monospace;">
+                <div class="hint" style="margin-top:5px;">Peak/trough retracement used by the trailing exit.</div>
             </div>
         </div>
     </div>
 
     <div class="panel">
         <div class="title">▶ KISS Backtest</div>
-        <div id="kiss_button_anchor" class="actions"></div>
-        <p class="hint" style="margin-top:10px;">Uses the selected broker, symbol, direction and timeframe. The KISS backtest is independent of the retired Auto Tuner.</p>
+        <div id="kiss_button_anchor" class="actions">
+            <button id="kiss_backtest_btn" type="button"
+                    style="padding:10px 24px;background:#7f1d1d;border:1px solid #ef4444;border-radius:4px;color:#fff;font-family:Arial,sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;">
+                ▶ RUN 5m BACKTEST
+            </button>
+        </div>
+        <p class="hint" style="margin-top:10px;">Controlled research baseline: real 5-minute candles. Select broker, symbol and direction, adjust the three research parameters, then inspect every net loser.</p>
     </div>
 
     <div class="panel">
         <div class="title">📈 Review</div>
-        <a class="feedback-link" href="/tuner_chart" target="_blank">📈 Open Feedback Chart (Working)</a>
+        <a class="feedback-link aimn-lab-link" href="/aimn_visual_lab" target="_blank">📈 Open Feedback Chart (Working)</a>
     </div>
 
 <script>
@@ -111,22 +151,27 @@ function setDirection(dir) {
     document.getElementById('btn_short').className = 'dir-btn' + (dir === 'SHORT' ? ' active-short' : '');
 }
 
-brokerSelect.addEventListener('change', function() {
-    const brokerId = this.value;
+function loadSymbolsForBroker(brokerId) {
     if (!brokerId) {
         symbolSelect.disabled = true;
         symbolSelect.innerHTML = '<option value="">-- Choose Broker First --</option>';
         return;
     }
+
     symbolSelect.disabled = true;
     symbolSelect.innerHTML = '<option value="">-- Loading Symbols --</option>';
+
     fetch('/get_symbols?broker_id=' + encodeURIComponent(brokerId))
         .then(r => r.json())
         .then(data => {
             const symbols = Array.isArray(data) ? data : (data.symbols || data.data || []);
             symbolSelect.innerHTML = '<option value="">-- Choose Symbol --</option>';
+
             symbols.forEach(sym => {
-                const value = (typeof sym === 'object' && sym !== null) ? (sym.symbol || sym.name || sym.ticker) : sym;
+                const value = (typeof sym === 'object' && sym !== null)
+                    ? (sym.symbol || sym.name || sym.ticker)
+                    : sym;
+
                 if (value) {
                     const option = document.createElement('option');
                     option.value = value;
@@ -134,31 +179,118 @@ brokerSelect.addEventListener('change', function() {
                     symbolSelect.appendChild(option);
                 }
             });
+
             symbolSelect.disabled = false;
             updateChartLink();
         })
-        .catch(() => {
+        .catch((error) => {
+            console.error('AIMn symbol load failed:', error);
             symbolSelect.innerHTML = '<option value="">-- Error Loading Symbols --</option>';
             symbolSelect.disabled = true;
         });
+}
+
+brokerSelect.addEventListener('change', function() {
+    loadSymbolsForBroker(this.value);
 });
+
+if (brokerSelect.value) {
+    loadSymbolsForBroker(brokerSelect.value);
+}
 
 symbolSelect.addEventListener('change', updateChartLink);
 
-async function updateChartLink() {
-    const sym = (symbolSelect.value || '').toUpperCase();
-    const chartLink = document.getElementById('open_chart_link');
-    if (!sym) { chartLink.href = '/tuner_chart'; return; }
-    try {
-        const r = await fetch('/api/trades_list');
-        const j = await r.json();
-        const trade = (j.trades || []).find(t => (t.symbol || '').toUpperCase() === sym);
-        chartLink.href = trade ? `/tuner_chart?trade_id=${encodeURIComponent(trade.id)}` : '/tuner_chart';
-    } catch (e) {
-        chartLink.href = '/tuner_chart';
-    }
+
+// AIMN_LAB_CONNECTION_V1
+// Auto Tuner sends research context; no trades are executed.
+function updateChartLink() {
+    const p = new URLSearchParams();
+
+    const values = {
+        symbol: (symbolSelect.value || '').toUpperCase(),
+        broker_id: brokerSelect.value || '',
+        direction: direction || 'SHORT',
+        timeframe: '5m',
+        entry_mode: document.getElementById('entry_mode').value,
+        commission_pct: document.getElementById('commission_pct').value,
+        rsi_rescue_long: document.getElementById('rsi_rescue_long').value,
+        rsi_rescue_short: document.getElementById('rsi_rescue_short').value,
+        trailing_minus_pct: document.getElementById('trailing_minus').value
+    };
+
+    Object.entries(values).forEach(([key,value]) => {
+        if(value !== '') p.set(key,value);
+    });
+
+    const url = '/aimn_visual_lab?' + p.toString();
+    const visionParams = new URLSearchParams({
+        broker_id: brokerSelect.value || '',
+        symbol: (symbolSelect.value || '').toUpperCase(),
+        direction: direction || 'LONG',
+        timeframe: '5m'
+    });
+    const visionLink = document.querySelector('.aimn-vision-link');
+    if (visionLink) visionLink.href = '/aimn_ai_vision_replay?' + visionParams.toString();
+
+    document.querySelectorAll('.aimn-lab-link')
+        .forEach(link => {
+            link.href = url;
+        });
 }
 
+[
+    'broker_select',
+    'symbol_select',
+    'entry_mode',
+    'commission_pct',
+    'rsi_rescue_long',
+    'rsi_rescue_short',
+    'trailing_minus'
+].forEach(id => {
+    document.getElementById(id)
+        .addEventListener('change',updateChartLink);
+});
+
+document.getElementById('btn_long')
+    .addEventListener('click',updateChartLink);
+
+document.getElementById('btn_short')
+    .addEventListener('click',updateChartLink);
+
+document.querySelectorAll('.aimn-lab-link, .aimn-vision-link')
+    .forEach(link => {
+        link.addEventListener('click',updateChartLink);
+    });
+
+updateChartLink();
+
+document.addEventListener('click', function(event) {
+    const runButton = event.target.closest('#kiss_backtest_btn');
+    if (!runButton) return;
+
+    const broker = brokerSelect.value;
+    const symbol = symbolSelect.value;
+    const dir = direction || 'LONG';
+
+    if(!broker){ alert('Please choose a broker first.'); return; }
+    if(!symbol){ alert('Please choose a symbol first.'); return; }
+
+    const rsiLong = document.getElementById('rsi_rescue_long').value || '20';
+    const rsiShort = document.getElementById('rsi_rescue_short').value || '80';
+    const trail = document.getElementById('trailing_minus').value || '0.50';
+
+    const u = '/kiss_backtest?broker_id=' + encodeURIComponent(broker)
+        + '&symbol=' + encodeURIComponent(symbol)
+        + '&direction=' + encodeURIComponent(dir)
+        + '&timeframe=5m'
+        + '&rsi_rescue_long=' + encodeURIComponent(rsiLong)
+        + '&rsi_rescue_short=' + encodeURIComponent(rsiShort)
+        + '&trailing_minus_pct=' + encodeURIComponent(trail)
+        + '&entry_mode=' + encodeURIComponent(document.getElementById('entry_mode').value)
+        + '&commission_pct=' + encodeURIComponent(document.getElementById('commission_pct').value);
+
+    window.open(u, '_blank');
+});
 window.__aimnKissDirection = function() { return direction || 'LONG'; };
 </script>
 </body>

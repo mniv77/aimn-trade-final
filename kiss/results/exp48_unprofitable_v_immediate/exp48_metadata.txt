@@ -1,0 +1,24 @@
+AIMn KISS Experiment #48
+Question: At an unprofitable V, is price noise or continuing reversal?
+
+Research only.
+No production strategy changes.
+No orders.
+No AI training.
+No threshold promotion.
+No re-entry simulation.
+
+Experiment #46 source: /home/MeirNiv/aimn-trade-final/kiss/results/exp46_not_yet_profitable_v/nvda_not_yet_profitable_v_events.csv
+Raw 5-minute source: /home/MeirNiv/aimn-trade-final/kiss/results/exp32_raw_candle_v_geometry/raw_v_trajectory.csv
+
+Events analyzed: 5
+Exact V matches: 5
+
+CRITICAL TIMING:
+V timestamp comes from v_reversal_candle_utc.
+Post-V checkpoints are calculated from V itself.
+minutes_after_known is NOT used for post-V timing.
+
+Behavior classification uses only the direction
+of the first two completed candles after the V.
+No percentage threshold is used.
