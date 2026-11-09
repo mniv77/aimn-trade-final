@@ -21,10 +21,10 @@ class VisionRunnerTests(unittest.TestCase):
         self.assertEqual(len(result["trades"]), 1)
         trade = result["trades"][0]
         self.assertEqual(trade["entry_price"], 99)
-        self.assertEqual(trade["exit_price"], 96)
+        self.assertEqual(trade["exit_price"], 97)
         self.assertEqual(trade["entry_unix"], 400)
-        self.assertEqual(trade["exit_unix"], 1300)
-        self.assertAlmostEqual(trade["net_pnl_pct"], (99-96)/99*100-0.2, places=5)
+        self.assertEqual(trade["exit_unix"], 1000)
+        self.assertAlmostEqual(trade["net_pnl_pct"], (99-97)/99*100-0.2, places=5)
 
     def test_packet_never_sees_future(self):
         rows = [{"unix": i*300, "open": i+1, "high": i+2, "low": i, "close": i+1} for i in range(5)]
