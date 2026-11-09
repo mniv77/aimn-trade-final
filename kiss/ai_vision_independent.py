@@ -149,6 +149,10 @@ def run(rows, assessor, symbol="NVDA", direction="SHORT", window=100,
         result = assessor(data)
         if result["decision"] not in DECISIONS:
             raise ValueError("Invalid decision")
+        if (result.get("symbol") != symbol or
+            result.get("research_direction") != direction or
+            result.get("last_visible_candle_unix") != candle["unix"]):
+            raise ValueError("AI decision does not match current historical candle")
         decisions.append(result)
         if (result["decision"] == "ENTER " + direction and position is None) or (
             result["decision"] == "EXIT " + direction and position is not None):
