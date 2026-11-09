@@ -32,7 +32,7 @@ def timestamp(row):
     if isinstance(value, str):
         value = value.replace(" UTC", "").replace("Z", "").replace("T", " ")
         parsed = dt.datetime.fromisoformat(value)
-        return int(parsed.replace(tzinfo=dt.timezone.utc).timestamp())
+        return int((parsed if parsed.tzinfo else parsed.replace(tzinfo=dt.timezone.utc)).timestamp())
     raise ValueError("Unsupported timestamp")
 
 def load_candles(path):
@@ -120,7 +120,7 @@ def run(rows, assessor, symbol="NVDA", direction="SHORT", window=100,
                 position = None
         if i < warmup-1 or i == len(rows)-1 or (i-(warmup-1)) % step:
             continue
-        data = packet(rows, i, symbol, direction, position, window)
+        if max_assessments is not None and len(decisions) >= max_assessments:\n            break\n        data = packet(rows, i, symbol, direction, position, window)
         result = assessor(data)
         if result["decision"] not in DECISIONS:
             raise ValueError("Invalid decision")
@@ -148,12 +148,12 @@ def main():
     parser.add_argument("--step", type=int, default=5)
     parser.add_argument("--window", type=int, default=100)
     parser.add_argument("--warmup", type=int, default=100)
-    parser.add_argument("--commission-pct", type=float, default=0.10)
+    parser.add_argument("--commission-pct", type=float, default=0.10)\n    parser.add_argument("--max-assessments", type=int, default=None,\n                        help="Limit API calls for initial smoke tests")
     args = parser.parse_args()
     candles = load_candles(args.candles)
     result = run(candles, lambda p: model_decision(p, args.model, args.cache),
                  direction=args.direction, step=args.step, window=args.window,
-                 warmup=args.warmup, commission_pct=args.commission_pct)
+                 warmup=args.warmup, commission_pct=args.commission_pct,\n                 max_assessments=args.max_assessments)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2), encoding="utf-8")
