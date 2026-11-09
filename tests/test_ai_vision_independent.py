@@ -26,6 +26,24 @@ class VisionRunnerTests(unittest.TestCase):
         self.assertEqual(trade["exit_unix"], 1000)
         self.assertAlmostEqual(trade["net_pnl_pct"], (99-97)/99*100-0.2, places=5)
 
+    def test_big_picture_preserves_extremes_and_cutoff(self):
+        rows = [{"unix": i*300, "open": 100, "high": 101,
+                 "low": 99, "close": 100} for i in range(520)]
+        rows[10]["high"] = 150
+        rows[12]["low"] = 50
+        rows[519]["close"] = 100
+        p = packet(rows, 519, "NVDA", "SHORT", None, 100)
+        self.assertEqual(len(p["visible_ohlc"]), 100)
+        self.assertEqual(p["visible_ohlc"][-1]["unix"], 519*300)
+        self.assertEqual(p["big_picture_older_5m_blocks"][0]["start_unix"], 20*300)
+        self.assertTrue(all(x["end_unix"] <= 419*300
+                            for x in p["big_picture_older_5m_blocks"]))
+        early = packet(rows, 12, "NVDA", "SHORT", None, 5)
+        self.assertEqual(early["last_visible_candle_unix"], 12*300)
+        self.assertEqual(early["big_picture_older_5m_blocks"][1]["low"], 50)
+        self.assertFalse(any(x["end_unix"] > 12*300
+                             for x in early["big_picture_older_5m_blocks"]))
+
     def test_packet_never_sees_future(self):
         rows = [{"unix": i*300, "open": i+1, "high": i+2, "low": i, "close": i+1} for i in range(5)]
         p = packet(rows, 2, "NVDA", "SHORT", None, 2)
