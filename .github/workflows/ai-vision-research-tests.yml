@@ -1,0 +1,24 @@
+name: AI Vision research offline checks
+
+on:
+  push:
+    branches:
+      - research/ai-vision-independent-v1
+  pull_request:
+    paths:
+      - 'kiss/ai_vision_independent.py'
+      - 'tests/test_ai_vision_independent.py'
+      - '.github/workflows/ai-vision-research-tests.yml'
+
+jobs:
+  causal-backtest-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Run isolated research tests
+        run: python -m unittest discover -s tests -p 'test_ai_vision_independent.py' -v
