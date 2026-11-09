@@ -26,3 +26,6 @@ jobs:
           python-version: '3.13'
       - name: Run independent research tests
         run: python -m unittest discover -s tests -p 'test_ai_vision*.py' -v
+
+      - name: Dry-run five historical NVDA assessments without API calls
+        run: python -m kiss.ai_vision_major_trend_pilot --dry-run --samples 5
