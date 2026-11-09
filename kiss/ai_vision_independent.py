@@ -14,11 +14,11 @@ from pathlib import Path
 import urllib.request
 
 DECISIONS = {"WAIT", "WATCH LONG", "WATCH SHORT", "ENTER LONG", "ENTER SHORT", "EXIT LONG", "EXIT SHORT"}
-PROMPT_VERSION = "aimn-blind-v1-major-local"
+PROMPT_VERSION = "aimn-blind-v2-multiscale-major-local"
 SYSTEM = """You are an independent historical OHLC research assessor. Only use supplied
 visible candles. Never use future prices, indicators, EXP53, KISS, or outside data.
 The research direction is a focus, not a forced signal. Explicitly distinguish
-major trend from local trend. Avoid countertrend entries without compelling
+major trend from local trend using the historical big-picture and close-up\nviews. A local rally within a major SHORT trend is not automatically a LONG\nreversal. State evidence for a major reversal before countertrend entry.\nAvoid countertrend entries without compelling
 visible structure. Maintain position consistency. Respond with ONLY JSON keys:
 symbol, research_direction, last_visible_candle_unix, decision, confidence,
 reason, notes. Allowed decisions: WAIT, WATCH LONG, WATCH SHORT, ENTER LONG,
