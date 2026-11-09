@@ -57,10 +57,28 @@ def load_candles(path):
     return rows
 
 def packet(rows, index, symbol, direction, position, window):
+    if not 0 <= index < len(rows) or window < 1:
+        raise ValueError("Invalid historical candle selection")
     visible = rows[max(0, index-window+1):index+1]
-    return {"symbol": symbol, "timeframe": "5m", "research_direction": direction,
+    history = rows[max(0, index-499):index+1]
+    older = history[:-len(visible)]
+    blocks = []
+    for start in range(0, len(older), 5):
+        group = older[start:start+5]
+        blocks.append({
+            "start_unix": group[0]["unix"],
+            "end_unix": group[-1]["unix"],
+            "open": group[0]["open"],
+            "high": max(x["high"] for x in group),
+            "low": min(x["low"] for x in group),
+            "close": group[-1]["close"],
+            "count": len(group)})
+    return {"symbol": symbol, "timeframe": "5m",
+            "research_direction": direction,
             "last_visible_candle_unix": rows[index]["unix"],
             "visible_count": index+1, "paper_position": position,
+            "big_picture_older_5m_blocks": blocks,
+            "big_picture_block_size": 5,
             "visible_ohlc": visible}
 
 def model_decision(data, model, cache_dir):
@@ -95,11 +113,13 @@ def model_decision(data, model, cache_dir):
     return result
 
 def run(rows, assessor, symbol="NVDA", direction="SHORT", window=100,
-        step=5, warmup=100, commission_pct=0.10):
+        step=5, warmup=100, commission_pct=0.10, max_assessments=None):
     if direction not in {"SHORT", "LONG"}:
         raise ValueError("Choose LONG or SHORT")
     if step < 1 or window < 1 or warmup < 1:
         raise ValueError("Invalid sampling")
+    if commission_pct < 0 or (max_assessments is not None and max_assessments < 1):
+        raise ValueError("Invalid commission or assessment limit")
     position = None
     pending = None
     decisions, trades = [], []
