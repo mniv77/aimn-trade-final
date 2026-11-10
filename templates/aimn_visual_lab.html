@@ -113,6 +113,20 @@ border:1px solid #34506e;border-radius:6px">
       <button type="button" id="blindClose">Close</button>
     </div>
     <div id="blindChart" style="width:100%;height:570px"></div>
+    <div style="margin:12px 0;padding:12px;border:1px solid #456;border-radius:6px">
+      <strong>Major trend — blind prediction and feedback</strong>
+      <p id="blindPrediction" style="color:#a7d8ef">No prediction frozen yet. The offline baseline sees only the candles shown above.</p>
+      <button type="button" id="blindFreeze">Freeze prediction at this candle</button>
+      <button type="button" id="blindReveal" disabled>Reveal next 20 candles</button>
+      <div id="blindFeedback" hidden style="margin-top:10px">
+        <p id="blindRevealInfo"></p>
+        <label>Your review: <select id="blindVerdict"><option value="CORRECT">Correct major trend</option><option value="INCORRECT">Incorrect major trend</option><option value="PARTIAL">Partially correct</option><option value="UNCERTAIN">Cannot judge fairly</option></select></label>
+        <label> Notes: <input id="blindReviewNote" style="background:#202a36;color:white;padding:7px;width:40%" placeholder="Why? Minor V or major reversal?"></label>
+        <button type="button" id="blindSaveReview">Save review</button>
+      </div>
+      <p id="blindReviewStatus" style="color:#a7d8ef"></p>
+      <button type="button" id="blindExportReviews">Export blind reviews JSON</button>
+    </div>
     <p style="color:#b3c1d3">Send the PNG to ChatGPT and request a prediction BEFORE revealing subsequent candles. This is a research snapshot, not an AI decision.</p>
   </div>
 </div>
@@ -1149,6 +1163,80 @@ el('blindDownload').addEventListener('click',()=>{
   a.download='AIMn_Blind_'+el('symbol').value+'_'+date+'.png';
   a.href=blindChart.takeScreenshot().toDataURL('image/png');
   a.click();
+});
+
+
+// AIMN_BLIND_MAJOR_REVIEW_V1 — freeze before reveal, no future information in prediction.
+let blindFrozen=null;
+let blindReviews=[];
+function blindShowEstimate(){
+  if(!candles.length||!blindCutoff)return;
+  const span=Number(el('majorTrendHorizon').value);
+  const trend=majorTrendAt(candles,blindCutoff-1,span);
+  el('blindPrediction').textContent=blindFrozen
+    ? 'FROZEN: '+blindFrozen.major_trend+' at '+new Date(blindFrozen.cutoff_unix*1000).toISOString()+
+      ' (window '+blindFrozen.major_span+'). Reveal and review this unchanged prediction.'
+    : 'Offline baseline at visible cutoff: '+trend+' ('+span+' candles/window). Freeze before revealing future.';
+}
+const oldDrawBlindSnapshot=drawBlindSnapshot;
+drawBlindSnapshot=function(){
+  oldDrawBlindSnapshot();
+  blindShowEstimate();
+  el('blindFreeze').disabled=!!blindFrozen;
+  el('blindReveal').disabled=!blindFrozen||blindFrozen.cutoff_index+20>candles.length;
+};
+el('blindFreeze').addEventListener('click',()=>{
+  if(!candles.length||!blindCutoff)return;
+  const span=Number(el('majorTrendHorizon').value);
+  const index=blindCutoff-1;
+  blindFrozen={
+    symbol:el('symbol').value,timeframe:'5m',
+    cutoff_index:index,cutoff_unix:candles[index].time,
+    major_span:span,major_trend:majorTrendAt(candles,index,span),
+    method:'deterministic_ohlc_structure_v1',research_only:true
+  };
+  el('blindFeedback').hidden=true;
+  el('blindReviewStatus').textContent='Prediction frozen. You may now reveal 20 subsequent candles.';
+  drawBlindSnapshot();
+});
+el('blindReveal').addEventListener('click',()=>{
+  if(!blindFrozen)return;
+  const end=Math.min(candles.length,blindFrozen.cutoff_index+21);
+  const visible=candles.slice(0,end);
+  blindSeries.setData(visible);
+  blindChart.timeScale().setVisibleLogicalRange({from:Math.max(0,end-110),to:end+3});
+  el('blindRevealInfo').textContent='Revealed '+(end-blindFrozen.cutoff_index-1)+
+    ' later candles. Frozen major trend: '+blindFrozen.major_trend+
+    '. Your assessment is qualitative, not an automatic accuracy label.';
+  el('blindFeedback').hidden=false;
+  el('blindFreeze').disabled=true;
+  el('blindReveal').disabled=true;
+});
+el('blindSaveReview').addEventListener('click',()=>{
+  if(!blindFrozen||el('blindFeedback').hidden)return;
+  blindReviews.push({...blindFrozen,review:el('blindVerdict').value,
+    review_note:el('blindReviewNote').value,
+    revealed_candles:Math.min(20,candles.length-blindFrozen.cutoff_index-1)});
+  el('blindReviewStatus').textContent='Saved '+blindReviews.length+
+    ' blind review(s) in this browser session. Export JSON to retain them.';
+  blindFrozen=null;
+  el('blindFeedback').hidden=true;
+  el('blindReviewNote').value='';
+  drawBlindSnapshot();
+});
+el('blindExportReviews').addEventListener('click',()=>{
+  const payload={research_only:true,source:'visual_lab_blind_major_trend_reviews_v1',
+    reviews:blindReviews};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='AIMn_Blind_Major_Trend_Reviews.json';a.click();
+  URL.revokeObjectURL(url);
+});
+el('blindEarlier').addEventListener('click',()=>{
+  if(blindFrozen){blindFrozen=null;el('blindFeedback').hidden=true;}
+});
+el('blindLater').addEventListener('click',()=>{
+  if(blindFrozen){blindFrozen=null;el('blindFeedback').hidden=true;}
 });
 
 // STEP64B: research context is initialized above, before the first chart load.
