@@ -24,6 +24,8 @@ on:
       - 'kiss/exp73_trailing_confirmation_audit.py'
       - 'kiss/exp74_kiss_hybrid_engine.py'
       - 'kiss/exp74_hybrid_trailing_audit.py'
+      - 'kiss/exp75_kiss_profit_lock_engine.py'
+      - 'kiss/exp75_profit_lock_audit.py'
       - 'tests/test_ai_vision_horizon_comparison.py'
       - '.github/workflows/ai-vision-research-tests.yml'
 
@@ -120,4 +122,15 @@ jobs:
             /tmp/exp72_peak_exit_audit.json
             /tmp/exp73_trailing_confirmation.json
             /tmp/exp74_hybrid_trailing.json
+          if-no-files-found: warn
+
+      - name: Run EXP75 profit-lock comparison
+        run: python -m kiss.exp75_profit_lock_audit --output /tmp/exp75_profit_lock.json
+
+      - name: Publish EXP75 research audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aimn-exp75-profit-lock-audit
+          path: /tmp/exp75_profit_lock.json
           if-no-files-found: warn
