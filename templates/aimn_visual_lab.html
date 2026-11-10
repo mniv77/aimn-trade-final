@@ -37,6 +37,15 @@ button{cursor:pointer;background:#185abc}
 </div>
 
 
+<section id="majorTrendPanel" style="margin:12px 0;padding:12px;background:#132538;border:1px solid #47718b;border-radius:8px">
+<strong>AI Vision Research — Major Trend (offline baseline)</strong>
+<p>Major-trend estimates on the chart. No entry or exit recommendations; no paid AI calls.</p>
+<label><input id="majorTrendToggle" type="checkbox" checked> Show major-trend markers</label>
+<label style="margin-left:12px">Major horizon <select id="majorTrendHorizon"><option>40</option><option>70</option><option selected>100</option><option>150</option><option>200</option></select> candles per window</label>
+<div id="majorTrendSummary" style="margin-top:9px;font-weight:bold">Load NVDA to calculate the historical trend.</div>
+<pre id="majorTrendAudit" style="max-height:155px;overflow:auto;color:#c6d6e6"></pre>
+<small style="color:#9fb4c7">Green LONG · Red SHORT · Grey UNCERTAIN. Uses only past OHLC. This is a rule-based baseline, not yet a validated AI model prediction. Supertrend is not an input.</small>
+</section>
 <!-- AIMN_SUPERTREND_OVERLAY_V1 -->
 <div style="margin:10px 0;padding:10px;background:#172638;
 border:1px solid #34506e;border-radius:6px">
@@ -393,6 +402,7 @@ async function loadLab(){
   series.setData(candles);
   installSupertrendOverlay();
   installVisionSelection();
+  refreshMajorTrendOverlay();
   el('status').textContent=symbol+' | '+requestedDirection+' | 5m | '+
     candles.length.toLocaleString()+' candles | Checking saved trades...';
   await loadSavedKissTrades(symbol);
@@ -650,8 +660,49 @@ function updateVisionMarkers(){
   const review=view==='ai'?[]:visionAnnotations
     .filter(a=>a.symbol===el('symbol').value && valid.has(a.time))
     .map(a=>({time:a.time,position:'aboveBar',color:'#c2b5f4',shape:'square',text:'REVIEW: '+a.type.replaceAll('_',' ')}));
-  series.setMarkers([...kiss,...ai,...review].sort((a,b)=>a.time-b.time));
+  const major=el('majorTrendToggle').checked ? majorTrendMarkers.filter(m=>valid.has(m.time)) : [];
+  series.setMarkers([...kiss,...ai,...review,...major].sort((a,b)=>a.time-b.time));
 }
+
+
+// AIMN_MAJOR_TREND_OFFLINE_V1: causal, OHLC-only, research display.
+let majorTrendMarkers=[];
+function majorTrendAt(rows,end,span){
+  if(end+1<2*span)return 'UNCERTAIN';
+  const a=rows.slice(end+1-2*span,end+1-span);
+  const b=rows.slice(end+1-span,end+1);
+  const ah=Math.max(...a.map(x=>x.high)),al=Math.min(...a.map(x=>x.low));
+  const bh=Math.max(...b.map(x=>x.high)),bl=Math.min(...b.map(x=>x.low));
+  return bh>ah&&bl>al?'LONG':bh<ah&&bl<al?'SHORT':'UNCERTAIN';
+}
+function refreshMajorTrendOverlay(){
+  if(!candles.length){
+    majorTrendMarkers=[];
+    el('majorTrendSummary').textContent='No historical candles loaded.';
+    el('majorTrendAudit').textContent='';
+    return;
+  }
+  const span=Number(el('majorTrendHorizon').value), changes=[];
+  let previous=null;
+  for(let i=2*span-1;i<candles.length;i+=5){
+    const trend=majorTrendAt(candles,i,span);
+    if(trend!==previous){
+      changes.push({time:candles[i].time,position:'aboveBar',shape:'square',
+        color:trend==='LONG'?'#20d69a':trend==='SHORT'?'#ff6868':'#9aa9b8',
+        text:'MAJOR '+trend});
+      previous=trend;
+    }
+  }
+  const latest=majorTrendAt(candles,candles.length-1,span);
+  majorTrendMarkers=changes;
+  el('majorTrendSummary').textContent='Latest '+el('symbol').value+' major trend: '+latest+
+    ' | '+span+' candles/window | '+changes.length+' observed classification changes';
+  el('majorTrendAudit').textContent=changes.slice(-12).reverse().map(m=>
+    new Date(m.time*1000).toISOString().slice(0,16)+' UTC  '+m.text).join('\n');
+  if(series)updateVisionMarkers();
+}
+el('majorTrendToggle').addEventListener('change',updateVisionMarkers);
+el('majorTrendHorizon').addEventListener('change',refreshMajorTrendOverlay);
 
 // Display-only loader: never creates AI predictions from KISS results.
 // Required schema: {predictions:[{symbol,time,action,reason,confidence,source}]}
