@@ -16,6 +16,7 @@ on:
       - 'tests/test_ai_vision_offline_structure.py'
       - 'kiss/ai_vision_offline_five.py'
       - 'kiss/ai_vision_horizon_comparison.py'
+      - 'templates/aimn_visual_lab.html'
       - 'tests/test_ai_vision_horizon_comparison.py'
       - '.github/workflows/ai-vision-research-tests.yml'
 
@@ -40,3 +41,47 @@ jobs:
 
       - name: Compare five major-trend horizons on NVDA
         run: python -m kiss.ai_vision_horizon_comparison
+
+      - name: Validate Visual Lab inline JavaScript syntax and research controls
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          import subprocess
+          import tempfile
+
+          class Extractor(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.scripts = []
+                  self.ids = set()
+                  self.inside_script = False
+              def handle_starttag(self, tag, attrs):
+                  attrs = dict(attrs)
+                  if 'id' in attrs:
+                      self.ids.add(attrs['id'])
+                  if tag == 'script':
+                      self.inside_script = not bool(attrs.get('src'))
+              def handle_endtag(self, tag):
+                  if tag == 'script':
+                      self.inside_script = False
+              def handle_data(self, data):
+                  if self.inside_script:
+                      self.scripts.append(data)
+
+          page = Path('templates/aimn_visual_lab.html').read_text(encoding='utf-8')
+          parser = Extractor()
+          parser.feed(page)
+          required = {
+              'majorTrendToggle', 'majorTrendHorizon', 'majorTrendSummary',
+              'blindFreeze', 'blindReveal', 'blindFeedback', 'blindSaveReview',
+              'blindExportReviews', 'blindPrediction', 'blindChart',
+          }
+          missing = required - parser.ids
+          assert not missing, f'Missing Visual Lab controls: {sorted(missing)}'
+          with tempfile.NamedTemporaryFile(mode='w', suffix='.js', encoding='utf-8') as js:
+              js.write('\n'.join(parser.scripts))
+              js.flush()
+              subprocess.run(['node', '--check', js.name], check=True)
+          print('Visual Lab inline JavaScript syntax and required controls: OK')
+          PY
