@@ -110,3 +110,14 @@ jobs:
 
       - name: Run EXP74 hybrid exit comparison
         run: python -m kiss.exp74_hybrid_trailing_audit --output /tmp/exp74_hybrid_trailing.json
+
+      - name: Publish EXP72-74 research trade audits
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aimn-exp72-74-research-audits
+          path: |
+            /tmp/exp72_peak_exit_audit.json
+            /tmp/exp73_trailing_confirmation.json
+            /tmp/exp74_hybrid_trailing.json
+          if-no-files-found: warn
