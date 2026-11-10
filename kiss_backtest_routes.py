@@ -318,7 +318,6 @@ def register_kiss_backtest_routes(app):
     def aimn_exp74_75_comparison():
         """Research-only historical NVDA comparison; no orders or persistence."""
         try:
-            from engine.kiss_backtest import run_kiss_backtest as baseline
             from kiss.exp74_kiss_hybrid_engine import run_kiss_backtest as hybrid
             from kiss.exp75_kiss_profit_lock_engine import run_kiss_backtest as profit_lock
             if request.args.get("symbol", "NVDA") != "NVDA":
@@ -339,6 +338,7 @@ def register_kiss_backtest_routes(app):
                 }
             return jsonify({"status":"success","symbol":"NVDA","direction":"SHORT",
                             "timeframe":"5m","source":"frozen_research_candles",
+                            "candle_timestamps":[str(row["timestamp"]) for row in rows],
                             "experiments":experiments})
         except Exception:
             app.logger.exception("EXP74/75 Visual Laboratory comparison failed")
