@@ -22,7 +22,7 @@ button{cursor:pointer;background:#185abc}
 <select id="symbol"><option value="NVDA">NVDA</option><option value="AAPL">AAPL</option></select>
 <details id="legacyResearch" style="margin:8px 0;color:#9eacc1"><summary style="cursor:pointer">Archived experiments (historical comparison only)</summary><select id="experiment"><option value="both">EXP53 + EXP56</option><option value="exp53">EXP53 benchmark</option><option value="exp56">EXP56 candidate</option>
 <option value="exp58">EXP58 — V18 Supertrend Entry</option><option value="exp58v3">EXP58-V3 — Opening Filter</option><option value="exp68">EXP68 — V18 Risk-Aware</option><option value="exp66">EXP66 Supertrend Flip</option><option value="exp67">AAPL candles — EXP67 pending</option></select></details>
-<select id="trade"><option>Select a trade</option></select>
+<section style="padding:12px;border:1px solid #34506e;margin:10px 0"><strong>EXP74 vs EXP75 — NVDA SHORT research</strong> <select id="expCompareMode" onchange="updateVisionMarkers()"><option value="both">Both</option><option value="EXP74">EXP74</option><option value="EXP75">EXP75</option><option value="off">Hide</option></select><span id="expCompareSummary">Load NVDA SHORT chart to compare.</span><div id="expCompareTrades" style="max-height:180px;overflow:auto"></div></section><select id="trade"><option>Select a trade</option></select>
 <button onclick="loadLab()">Load Chart</button>
 
 <!-- AIMN_UNIFIED_NAV_V1 -->
@@ -425,6 +425,7 @@ async function loadLab(){
   installSupertrendOverlay();
   installVisionSelection();
   refreshMajorTrendOverlay();
+  await loadExpCompare(symbol);
   el('status').textContent=symbol+' | '+requestedDirection+' | 5m | '+
     candles.length.toLocaleString()+' candles | Checking saved trades...';
   await loadSavedKissTrades(symbol);
@@ -663,6 +664,46 @@ function installVisionSelection(){
   });
 }
 
+
+let expCompareMarkers=[];
+async function loadExpCompare(symbol){
+  expCompareMarkers=[];
+  const summary=el('expCompareSummary'), details=el('expCompareTrades');
+  details.textContent='';
+  if(symbol!=='NVDA'||requestedDirection!=='SHORT'){
+    summary.textContent='NVDA SHORT only.'; updateVisionMarkers(); return;
+  }
+  try{
+    const res=await fetch('/api/aimn_visual_lab/exp74_75?symbol=NVDA',{cache:'no-store'});
+    if(!res.ok)throw Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.status!=='success'||data.source!=='frozen_research_candles')throw Error('Research data unavailable');
+    const valid=new Set(candles.map(c=>c.time)), labels=[];
+    for(const name of ['EXP74','EXP75']){
+      const g=data.experiments[name];
+      labels.push(name+': '+g.count+' trades, '+g.winners+' winners, net '+Number(g.net_pct_sum).toFixed(3)+'%');
+      for(const t of g.trades){
+        for(const kind of ['entry','exit']){
+          const time=stamp(t[kind+'_time']);
+          if(!valid.has(time))continue;
+          expCompareMarkers.push({time,experiment:name,position:kind==='entry'?'aboveBar':'belowBar',
+            color:name==='EXP74'?'#4dc9ff':'#ffc15e',shape:kind==='entry'?'arrowDown':'circle',
+            text:name+' '+(kind==='entry'?'IN':'OUT '+Number(t.net_pnl_pct).toFixed(2)+'%')});
+        }
+      }
+    }
+    summary.textContent=labels.join(' | ')+' — summed trade returns, research only.';
+    const map=new Map(data.experiments.EXP75.trades.map(t=>[t.entry_time,t]));
+    const changes=data.experiments.EXP74.trades.filter(t=>map.has(t.entry_time)&&
+      (map.get(t.entry_time).exit_time!==t.exit_time||
+       Math.abs(Number(map.get(t.entry_time).net_pnl_pct)-Number(t.net_pnl_pct))>0.0001));
+    details.textContent=changes.length+' changed matched-entry trades: '+
+      changes.slice(0,20).map(t=>t.entry_time+' EXP74 '+Number(t.net_pnl_pct).toFixed(2)+
+      '% / EXP75 '+Number(map.get(t.entry_time).net_pnl_pct).toFixed(2)+'%').join(' ; ');
+  }catch(err){summary.textContent='Comparison unavailable: '+err.message;}
+  updateVisionMarkers();
+}
+
 function updateVisionMarkers(){
   if(!series)return;
   const view=el('observerView').value;
@@ -684,7 +725,9 @@ function updateVisionMarkers(){
     .map(a=>({time:a.time,position:'aboveBar',color:'#c2b5f4',shape:'square',text:'REVIEW: '+a.type.replaceAll('_',' ')}));
   const major=el('majorTrendToggle').checked ? majorTrendMarkers.filter(m=>valid.has(m.time)) : [];
   const noise=el('noiseExitToggle').checked ? noiseExitMarkers.filter(m=>valid.has(m.time)) : [];
-  series.setMarkers([...kiss,...ai,...review,...major,...noise].sort((a,b)=>a.time-b.time));
+  const mode=el('expCompareMode').value;
+  const comparison=view==='ai'||mode==='off'?[]:expCompareMarkers.filter(m=>valid.has(m.time)&&(mode==='both'||m.experiment===mode));
+  series.setMarkers([...kiss,...ai,...review,...major,...noise,...comparison].sort((a,b)=>a.time-b.time));
 }
 
 
