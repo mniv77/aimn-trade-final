@@ -87,5 +87,8 @@ jobs:
           print('Visual Lab inline JavaScript syntax and required controls: OK')
           PY
 
+      - name: Install EXP70 research dependency
+        run: python -m pip install pandas
+
       - name: Run EXP70 conventional ST versus early plateau tactic
         run: python -m kiss.exp70_st_plateau_early_reversal --output /tmp/exp70_st_plateau_comparison.json
