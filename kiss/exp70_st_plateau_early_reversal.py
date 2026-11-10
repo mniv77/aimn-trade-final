@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """AIMn EXP70: Supertrend plateau + price reversal, research only.
 
-Compare conventional ST transitions with an earlier two-sided tactic.
+Compare ST transitions, early reversal, and early exit without immediate reentry.
 Signals use completed candle i; orders fill at candle i+1 OPEN.
 No AI, no broker connection, no live orders.
 """
@@ -59,14 +59,14 @@ def backtest(rows, mode, commission_pct=0.10, stop_pct=1.5):
         if pending is not None:
             desired, reason = pending
             pending = None
-            if position and position["side"] != desired:
+            if position and (desired == "FLAT" or position["side"] != desired):
                 direction = 1 if position["side"] == "LONG" else -1
                 gross = direction * (op / position["entry_price"] - 1) * 100
                 trades.append({**position, "exit_time":ts, "exit_price":op,
                                "exit_reason":reason, "gross_pct":round(gross, 5),
                                "net_pct":round(gross - 2 * commission_pct, 5)})
                 position = None
-            if position is None:
+            if position is None and desired in ("LONG", "SHORT"):
                 position = {"side":desired, "entry_time":ts, "entry_price":op}
         if position:
             direction = 1 if position["side"] == "LONG" else -1
@@ -94,9 +94,19 @@ def backtest(rows, mode, commission_pct=0.10, stop_pct=1.5):
                     position = None
                 pending = None
                 continue
-            request = signal(df, i, mode)
-            if request and (position is None or position["side"] != request):
-                pending = (request, "ST_TRANSITION" if mode == "transition" else "PLATEAU_OR_ST")
+            if mode == "exit_only":
+                # Plateau warning may CLOSE a position, but never initiates
+                # the opposite trade. New entries require an actual ST flip.
+                st_request = signal(df, i, "transition")
+                early_request = signal(df, i, "plateau")
+                if position and early_request and early_request != position["side"]:
+                    pending = ("FLAT", "EARLY_EXIT")
+                elif st_request and (position is None or position["side"] != st_request):
+                    pending = (st_request, "ST_TRANSITION")
+            else:
+                request = signal(df, i, mode)
+                if request and (position is None or position["side"] != request):
+                    pending = (request, "ST_TRANSITION" if mode == "transition" else "PLATEAU_OR_ST")
     return {"mode":mode, "trades":trades, "count":len(trades),
             "wins":sum(t["net_pct"] > 0 for t in trades),
             "net_pct_sum":round(sum(t["net_pct"] for t in trades), 5),
@@ -109,7 +119,7 @@ def main():
     parser.add_argument("--output", default="kiss/results/exp70_st_plateau_comparison.json")
     args = parser.parse_args()
     rows = json.loads(Path(args.candles).read_text(encoding="utf-8"))
-    result = {mode:backtest(rows, mode) for mode in ("transition", "plateau")}
+    result = {mode:backtest(rows, mode) for mode in ("transition", "plateau", "exit_only")}
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(result, indent=2), encoding="utf-8")
