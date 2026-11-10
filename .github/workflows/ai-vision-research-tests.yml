@@ -19,6 +19,7 @@ on:
       - 'templates/aimn_visual_lab.html'
       - 'kiss/exp70_st_plateau_early_reversal.py'
       - 'kiss/exp71_noise_exit_audit.py'
+      - 'kiss/exp72_peak_exit_audit.py'
       - 'tests/test_ai_vision_horizon_comparison.py'
       - '.github/workflows/ai-vision-research-tests.yml'
 
@@ -96,3 +97,6 @@ jobs:
 
       - name: Run EXP71 noise exit event audit
         run: python -m kiss.exp71_noise_exit_audit --output /tmp/exp71_noise_exit_event_audit.json
+
+      - name: Run EXP72 peak entry and exit audit
+        run: python -m kiss.exp72_peak_exit_audit --output /tmp/exp72_peak_exit_audit.json
