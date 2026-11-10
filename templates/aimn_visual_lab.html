@@ -1134,8 +1134,8 @@ function drawBlindSnapshot(){
   const last=historical[historical.length-1];
   const cutoffDate=new Date(last.time*1000).toISOString().replace('T',' ').slice(0,16)+' UTC';
   el('blindInfo').textContent=el('symbol').value+' · 5m · Last visible candle: '+cutoffDate+' · '+blindCutoff+' of '+candles.length+' candles visible. No future candles shown.';
-  el('blindEarlier').disabled=blindCutoff<=60;
-  el('blindLater').disabled=blindCutoff>=candles.length;
+  el('blindEarlier').disabled=blindCutoff<=60 || !!blindFrozen;
+  el('blindLater').disabled=blindCutoff>=candles.length || !!blindFrozen;
 }
 el('blindOpen').addEventListener('click',()=>{
   if(!candles.length){alert('Load a historical chart first.');return;}
@@ -1232,12 +1232,7 @@ el('blindExportReviews').addEventListener('click',()=>{
   a.href=url;a.download='AIMn_Blind_Major_Trend_Reviews.json';a.click();
   URL.revokeObjectURL(url);
 });
-el('blindEarlier').addEventListener('click',()=>{
-  if(blindFrozen){blindFrozen=null;el('blindFeedback').hidden=true;}
-});
-el('blindLater').addEventListener('click',()=>{
-  if(blindFrozen){blindFrozen=null;el('blindFeedback').hidden=true;}
-});
+
 
 // STEP64B: research context is initialized above, before the first chart load.
 
