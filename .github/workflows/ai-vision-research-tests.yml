@@ -12,6 +12,9 @@ on:
       - 'tests/test_ai_vision_major_trend.py'
       - 'kiss/ai_vision_major_trend_pilot.py'
       - 'tests/test_ai_vision_major_trend_pilot.py'
+      - 'kiss/ai_vision_offline_structure.py'
+      - 'tests/test_ai_vision_offline_structure.py'
+      - 'kiss/ai_vision_offline_five.py'
       - '.github/workflows/ai-vision-research-tests.yml'
 
 jobs:
@@ -29,3 +32,6 @@ jobs:
 
       - name: Dry-run five historical NVDA assessments without API calls
         run: python -m kiss.ai_vision_major_trend_pilot --dry-run --samples 5
+
+      - name: Run zero-cost NVDA major/local trend baseline
+        run: python -m kiss.ai_vision_offline_five
