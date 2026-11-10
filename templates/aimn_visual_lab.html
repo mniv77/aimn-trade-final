@@ -678,6 +678,12 @@ async function loadExpCompare(symbol){
     if(!res.ok)throw Error('HTTP '+res.status);
     const data=await res.json();
     if(data.status!=='success'||data.source!=='frozen_research_candles')throw Error('Research data unavailable');
+    // Never overlay trades on a different or incomplete candle dataset.
+    const expected=data.candle_timestamps;
+    if(!Array.isArray(expected)||expected.length!==candles.length||
+       expected.some((timestamp,i)=>stamp(timestamp)!==candles[i].time)){
+      throw Error('Chart candles differ from EXP74/75 research data; comparison disabled');
+    }
     const valid=new Set(candles.map(c=>c.time)), labels=[];
     for(const name of ['EXP74','EXP75']){
       const g=data.experiments[name];
