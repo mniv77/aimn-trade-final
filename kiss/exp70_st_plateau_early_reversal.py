@@ -33,7 +33,7 @@ def signal(df, i, mode, flat_bars=2, confirm_bars=2):
     flat = max(bands) - min(bands) <= tolerance
     earlier = float(df.iloc[i - flat_bars - 1]["supertrend"])
     if not flat or not (earlier == earlier):
-        return None
+        return state if state != prev["st_trend"] else None
     closes = [float(df.iloc[j]["close"]) for j in range(i - confirm_bars, i + 1)]
     # Reverse when price confirms against the current ST regime, before ST flips.
     if state == "SHORT" and earlier > bands[0] + tolerance:
