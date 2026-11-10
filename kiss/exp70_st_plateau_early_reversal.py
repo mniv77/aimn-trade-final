@@ -99,10 +99,10 @@ def backtest(rows, mode, commission_pct=0.10, stop_pct=1.5):
                 # the opposite trade. New entries require an actual ST flip.
                 st_request = signal(df, i, "transition")
                 early_request = signal(df, i, "plateau")
-                if position and early_request and early_request != position["side"]:
-                    pending = ("FLAT", "EARLY_EXIT")
-                elif st_request and (position is None or position["side"] != st_request):
+                if st_request and (position is None or position["side"] != st_request):
                     pending = (st_request, "ST_TRANSITION")
+                elif position and early_request and early_request != position["side"]:
+                    pending = ("FLAT", "EARLY_EXIT")
             else:
                 request = signal(df, i, mode)
                 if request and (position is None or position["side"] != request):
