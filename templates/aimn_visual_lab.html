@@ -43,6 +43,7 @@ button{cursor:pointer;background:#185abc}
 <label><input id="majorTrendToggle" type="checkbox" checked> Show major-trend markers</label>
 <label style="margin-left:12px">Major horizon <select id="majorTrendHorizon"><option>40</option><option>70</option><option selected>100</option><option>150</option><option>200</option></select> candles per window</label>
 <div id="majorTrendSummary" style="margin-top:9px;font-weight:bold">Load NVDA to calculate the historical trend.</div>
+<div id="majorTrendStability" style="margin:8px 0;color:#c6d6e6">Stability statistics will appear after loading.</div>
 <pre id="majorTrendAudit" style="max-height:155px;overflow:auto;color:#c6d6e6"></pre>
 <small style="color:#9fb4c7">Green LONG · Red SHORT · Grey UNCERTAIN. Uses only past OHLC. This is a rule-based baseline, not yet a validated AI model prediction. Supertrend is not an input.</small>
 </section>
@@ -694,6 +695,7 @@ function refreshMajorTrendOverlay(){
     majorTrendMarkers=[];
     el('majorTrendSummary').textContent='No historical candles loaded.';
     el('majorTrendAudit').textContent='';
+    el('majorTrendStability').textContent='No data for stability assessment.';
     return;
   }
   const span=Number(el('majorTrendHorizon').value), changes=[];
@@ -709,6 +711,14 @@ function refreshMajorTrendOverlay(){
   }
   const latest=majorTrendAt(candles,candles.length-1,span);
   majorTrendMarkers=changes;
+  const directional=changes.filter(m=>m.text==='MAJOR LONG'||m.text==='MAJOR SHORT');
+  const directFlips=directional.slice(1).filter((m,i)=>m.text!==directional[i].text).length;
+  const uncertainChanges=changes.filter(m=>m.text==='MAJOR UNCERTAIN').length;
+  const duration=candles.length>=2 ? (candles[candles.length-1].time-candles[0].time)/3600 : 0;
+  el('majorTrendStability').textContent='Standalone stability audit: '+directFlips+
+    ' directional changes (ignoring intervening UNCERTAIN states), '+uncertainChanges+
+    ' transitions into UNCERTAIN, over '+duration.toFixed(1)+' elapsed market-history hours. '+
+    'These are classification changes, NOT trades or proof of accuracy.';
   el('majorTrendSummary').textContent='Latest '+el('symbol').value+' major trend: '+latest+
     ' | '+span+' candles/window | '+changes.length+' observed classification changes';
   el('majorTrendAudit').textContent=changes.slice(-12).reverse().map(m=>
