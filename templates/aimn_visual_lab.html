@@ -47,6 +47,13 @@ button{cursor:pointer;background:#185abc}
 <pre id="majorTrendAudit" style="max-height:155px;overflow:auto;color:#c6d6e6"></pre>
 <small style="color:#9fb4c7">Green LONG · Red SHORT · Grey UNCERTAIN. Uses only past OHLC. This is a rule-based baseline, not yet a validated AI model prediction. Supertrend is not an input.</small>
 </section>
+<section id="noiseExitPanel" style="margin:12px 0;padding:12px;background:#1b2733;border:1px solid #6b7d8e;border-radius:8px">
+<strong>EXP71 — Supertrend noise-exit observation (research only)</strong>
+<p>WATCH: flat ST band with opposing price movement. HOLD: price resumes the original direction. EXIT CANDIDATE: opposing movement persists. Markers are observations, not executed trades.</p>
+<label><input type="checkbox" id="noiseExitToggle"> Show WATCH / HOLD / EXIT candidate markers</label>
+<div id="noiseExitSummary" style="margin-top:8px">Load historical candles to review candidate warnings.</div>
+<small>Uses completed candles only. The candidate exit rule is experimental; profit and accuracy are not validated.</small>
+</section>
 <!-- AIMN_SUPERTREND_OVERLAY_V1 -->
 <div style="margin:10px 0;padding:10px;background:#172638;
 border:1px solid #34506e;border-radius:6px">
@@ -676,9 +683,61 @@ function updateVisionMarkers(){
     .filter(a=>a.symbol===el('symbol').value && valid.has(a.time))
     .map(a=>({time:a.time,position:'aboveBar',color:'#c2b5f4',shape:'square',text:'REVIEW: '+a.type.replaceAll('_',' ')}));
   const major=el('majorTrendToggle').checked ? majorTrendMarkers.filter(m=>valid.has(m.time)) : [];
-  series.setMarkers([...kiss,...ai,...review,...major].sort((a,b)=>a.time-b.time));
+  const noise=el('noiseExitToggle').checked ? noiseExitMarkers.filter(m=>valid.has(m.time)) : [];
+  series.setMarkers([...kiss,...ai,...review,...major,...noise].sort((a,b)=>a.time-b.time));
 }
 
+
+// EXP71 candidate chart observations. No orders, no lookahead.
+let noiseExitMarkers=[];
+function refreshNoiseExitOverlay(){
+  noiseExitMarkers=[];
+  if(!candles.length){
+    el('noiseExitSummary').textContent='No candles loaded.';
+    return;
+  }
+  const st=calculateSupertrend(candles,10,3);
+  let watch=null, watches=0, holds=0, exits=0;
+  for(let i=15;i<candles.length;i++){
+    const c=candles[i], p=candles[i-1];
+    const red=st.downward[i]?.value, redPrev=st.downward[i-1]?.value;
+    const green=st.upward[i]?.value, greenPrev=st.upward[i-1]?.value;
+    const side=Number.isFinite(red)?'SHORT':Number.isFinite(green)?'LONG':null;
+    const band=side==='SHORT'?red:green;
+    const oldBand=side==='SHORT'?redPrev:greenPrev;
+    if(!side || !Number.isFinite(oldBand)){watch=null;continue;}
+    const tol=c.close*0.00015;
+    const flat=Math.abs(band-oldBand)<=tol;
+    const opposing=side==='SHORT'?c.close>p.close:c.close<p.close;
+    const favorable=side==='SHORT'?c.close<p.close:c.close>p.close;
+    if(watch && watch.side!==side){watch=null;}
+    if(!watch && flat && opposing){
+      watch={side,at:i,price:c.close};
+      watches++;
+      noiseExitMarkers.push({time:c.time,position:'aboveBar',shape:'circle',
+        color:'#eab65a',text:'WATCH '+side});
+    }else if(watch && i>watch.at){
+      // Require at least two later completed candles; do not label at the first bounce.
+      const elapsed=i-watch.at;
+      const reversal=watch.side==='SHORT'?c.close>watch.price:c.close<watch.price;
+      if(elapsed>=2 && reversal && opposing){
+        exits++;
+        noiseExitMarkers.push({time:c.time,position:'aboveBar',shape:'square',
+          color:'#f27b78',text:'EXIT? '+watch.side});
+        watch=null;
+      }else if(favorable && (side==='SHORT'?c.close<watch.price:c.close>watch.price)){
+        holds++;
+        noiseExitMarkers.push({time:c.time,position:'belowBar',shape:'circle',
+          color:'#49c6a1',text:'HOLD '+side});
+        watch=null;
+      }else if(elapsed>=5){watch=null;}
+    }
+  }
+  el('noiseExitSummary').textContent='Candidate chart events: '+watches+
+    ' WATCH, '+holds+' HOLD, '+exits+' EXIT? (not backtested trades).';
+  if(series)updateVisionMarkers();
+}
+el('noiseExitToggle').addEventListener('change',updateVisionMarkers);
 
 // AIMN_MAJOR_TREND_OFFLINE_V1: causal, OHLC-only, research display.
 let majorTrendMarkers=[];
@@ -711,6 +770,7 @@ function refreshMajorTrendOverlay(){
   }
   const latest=majorTrendAt(candles,candles.length-1,span);
   majorTrendMarkers=changes;
+  refreshNoiseExitOverlay();
   const directional=changes.filter(m=>m.text==='MAJOR LONG'||m.text==='MAJOR SHORT');
   const directFlips=directional.slice(1).filter((m,i)=>m.text!==directional[i].text).length;
   const uncertainChanges=changes.filter(m=>m.text==='MAJOR UNCERTAIN').length;
