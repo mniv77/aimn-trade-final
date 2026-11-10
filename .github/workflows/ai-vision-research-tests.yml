@@ -26,6 +26,8 @@ on:
       - 'kiss/exp74_hybrid_trailing_audit.py'
       - 'kiss/exp75_kiss_profit_lock_engine.py'
       - 'kiss/exp75_profit_lock_audit.py'
+      - 'kiss_backtest_routes.py'
+      - 'tests/test_exp75_visual_lab_integration.py'
       - 'tests/test_ai_vision_horizon_comparison.py'
       - '.github/workflows/ai-vision-research-tests.yml'
 
@@ -134,3 +136,9 @@ jobs:
           name: aimn-exp75-profit-lock-audit
           path: /tmp/exp75_profit_lock.json
           if-no-files-found: warn
+
+      - name: Install Flask for Visual Laboratory route integration test
+        run: python -m pip install flask
+
+      - name: Verify EXP74/75 Visual Laboratory API and candle alignment
+        run: python -m tests.test_exp75_visual_lab_integration
