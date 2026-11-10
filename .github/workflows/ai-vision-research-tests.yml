@@ -20,6 +20,8 @@ on:
       - 'kiss/exp70_st_plateau_early_reversal.py'
       - 'kiss/exp71_noise_exit_audit.py'
       - 'kiss/exp72_peak_exit_audit.py'
+      - 'kiss/exp73_kiss_two_close_engine.py'
+      - 'kiss/exp73_trailing_confirmation_audit.py'
       - 'tests/test_ai_vision_horizon_comparison.py'
       - '.github/workflows/ai-vision-research-tests.yml'
 
@@ -100,3 +102,6 @@ jobs:
 
       - name: Run EXP72 peak entry and exit audit
         run: python -m kiss.exp72_peak_exit_audit --output /tmp/exp72_peak_exit_audit.json
+
+      - name: Run EXP73 noise-filtered trailing comparison
+        run: python -m kiss.exp73_trailing_confirmation_audit --output /tmp/exp73_trailing_confirmation.json
