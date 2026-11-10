@@ -18,6 +18,7 @@ on:
       - 'kiss/ai_vision_horizon_comparison.py'
       - 'templates/aimn_visual_lab.html'
       - 'kiss/exp70_st_plateau_early_reversal.py'
+      - 'kiss/exp71_noise_exit_audit.py'
       - 'tests/test_ai_vision_horizon_comparison.py'
       - '.github/workflows/ai-vision-research-tests.yml'
 
@@ -92,3 +93,6 @@ jobs:
 
       - name: Run EXP70 conventional ST versus early plateau tactic
         run: python -m kiss.exp70_st_plateau_early_reversal --output /tmp/exp70_st_plateau_comparison.json
+
+      - name: Run EXP71 noise exit event audit
+        run: python -m kiss.exp71_noise_exit_audit --output /tmp/exp71_noise_exit_event_audit.json
