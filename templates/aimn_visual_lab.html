@@ -703,9 +703,36 @@ async function loadExpCompare(symbol){
     const changes=data.experiments.EXP74.trades.filter(t=>map.has(t.entry_time)&&
       (map.get(t.entry_time).exit_time!==t.exit_time||
        Math.abs(Number(map.get(t.entry_time).net_pnl_pct)-Number(t.net_pnl_pct))>0.0001));
-    details.textContent=changes.length+' changed matched-entry trades: '+
-      changes.slice(0,20).map(t=>t.entry_time+' EXP74 '+Number(t.net_pnl_pct).toFixed(2)+
-      '% / EXP75 '+Number(map.get(t.entry_time).net_pnl_pct).toFixed(2)+'%').join(' ; ');
+    details.replaceChildren();
+    const heading=document.createElement('p');
+    heading.textContent=changes.length+' matched-entry trades with changed exits or P&L. Select one to inspect its candles.';
+    details.appendChild(heading);
+    changes.sort((a,b)=>{
+      const delta=t=>Number(map.get(t.entry_time).net_pnl_pct)-Number(t.net_pnl_pct);
+      return delta(a)-delta(b);
+    });
+    for(const t of changes){
+      const other=map.get(t.entry_time);
+      const delta=Number(other.net_pnl_pct)-Number(t.net_pnl_pct);
+      const button=document.createElement('button');
+      button.type='button';
+      button.style.cssText='display:block;margin:4px 0;width:100%;text-align:left;background:#202a36';
+      button.textContent=t.entry_time+' | EXP74 '+Number(t.net_pnl_pct).toFixed(2)+
+        '% | EXP75 '+Number(other.net_pnl_pct).toFixed(2)+'% | Δ '+delta.toFixed(2)+'%';
+      button.addEventListener('click',()=>{
+        const start=candles.findIndex(c=>c.time>=stamp(t.entry_time));
+        const end=candles.findIndex(c=>c.time>=Math.max(stamp(t.exit_time),stamp(other.exit_time)));
+        if(start<0||end<0||!chart)return;
+        chart.timeScale().setVisibleLogicalRange({
+          from:Math.max(0,start-30),to:Math.min(candles.length-1,end+30)
+        });
+        el('details').textContent='EXP74 vs EXP75 — same entry '+t.entry_time+
+          '\\nEXP74 exit: '+t.exit_time+' | '+Number(t.net_pnl_pct).toFixed(3)+'% | '+t.exit_reason+
+          '\\nEXP75 exit: '+other.exit_time+' | '+Number(other.net_pnl_pct).toFixed(3)+'% | '+other.exit_reason+
+          '\\nEXP75 minus EXP74: '+delta.toFixed(3)+' percentage points';
+      });
+      details.appendChild(button);
+    }
   }catch(err){summary.textContent='Comparison unavailable: '+err.message;}
   updateVisionMarkers();
 }
