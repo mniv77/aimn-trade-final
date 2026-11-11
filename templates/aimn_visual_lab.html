@@ -205,6 +205,17 @@ if (requestedSymbol) {
   }
   symbolSelect.value = requestedSymbol;
 }
+// URL-driven launches must not silently switch the selected dataset.
+if(requestedSymbol){
+  el('symbol').disabled=true;
+  el('symbol').title='Symbol locked to Auto Tuner URL. Return to Auto Tuner to change it.';
+  const note=document.createElement('div');
+  note.id='urlSelectionNotice';
+  note.style.cssText='margin:8px 0;padding:10px;border:1px solid #5b84a4;border-radius:6px;color:#c5e5ff';
+  note.textContent='Selection locked to Auto Tuner: '+requestedSymbol+' '+requestedDirection+
+    ' '+requestedTimeframe+'. To change symbol or direction, use Auto Tuner.';
+  el('symbol').insertAdjacentElement('afterend',note);
+}
 function updateResearchContext() {
   const selected = el('symbol').value;
   const mode = kissRequest.get('entry_mode') || 'Not specified';
@@ -222,7 +233,8 @@ function updateResearchContext() {
     'Broker ID: ' + broker + ' | Entry strategy requested: ' + mode,
     'Historical dataset: ' + dataset,
     'Parameters received: ' + keys.map(k => k + '=' + (kissRequest.get(k) ?? 'not supplied')).join(' | '),
-    'Saved historical experiments are NOT recalculated using these parameters.'
+    'Saved historical experiments are NOT recalculated using these parameters.',
+    'IMPORTANT: Saved results must be checked against the requested configuration; a legacy CSV audit is not a V17 backtest.'
   ];
   if (!isSupportedSymbol(selected)) {
     lines.push('UNAVAILABLE: No validated candles for ' + selected + '. No substitute chart.');
@@ -259,6 +271,7 @@ async function loadSavedKissTrades(symbol) {
       if(symbol==='NVDA' && direction==='LONG'){
         savedKissTrades=nvdaLongAudit.map(t=>({...t,exp:'CSV Audit'}));
         savedKissState='csv_audit';
+        console.warn('Legacy NVDA LONG CSV audit displayed; URL parameters do not reproduce these trades.');
       }
       return;
     }
@@ -431,9 +444,13 @@ async function loadLab(){
   await loadSavedKissTrades(symbol);
   updateSavedKissNotice(symbol);
   updatePerformance();
+  if(savedKissState==='csv_audit'){
+    el('pnlSummary').textContent='WARNING — LEGACY NVDA LONG CSV AUDIT. These trades are not verified as matching the URL entry mode, RSI rescue, commission, or trailing parameters.';
+    el('pnlSummary').style.color='#ffbd6d';
+  }
   if(savedKissState==='csv_audit' || savedKissState==='saved'){
     const net=savedKissTrades.reduce((sum,t)=>sum+Number(t.net_pnl_pct||0),0);
-    el('pnlSummary').textContent=symbol+' '+requestedDirection+' — '+savedKissTrades.length+' saved research trades | Net P&L '+net.toFixed(3)+'% | Source: '+(savedKissState==='csv_audit'?'uploaded CSV audit':'saved KISS result');
+    el('pnlSummary').textContent=(savedKissState==='csv_audit'?'LEGACY CSV AUDIT — NOT VERIFIED FOR URL SETTINGS | ':'')+symbol+' '+requestedDirection+' — '+savedKissTrades.length+' historical trades | Net P&L '+net.toFixed(3)+'% | Source: '+(savedKissState==='csv_audit'?'legacy CSV audit':'saved KISS result');
   }
   // Hide the duplicate saved-KISS banner: the concise status line already reports it.
   // Preserve the banner for historical experiments where it contains distinct results.
