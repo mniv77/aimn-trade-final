@@ -6,7 +6,7 @@ from flask import Flask
 from kiss_backtest_routes import register_kiss_backtest_routes
 
 
-def main():
+def test_exp75_visual_lab_integration():
     app=Flask(__name__)
     register_kiss_backtest_routes(app)
     client=app.test_client()
@@ -31,4 +31,4 @@ def main():
 
 
 if __name__=="__main__":
-    main()
+    test_exp75_visual_lab_integration()
