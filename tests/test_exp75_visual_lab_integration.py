@@ -27,7 +27,14 @@ def test_exp75_visual_lab_integration():
                    t["exit_time"] in data["candle_timestamps"] for t in trades)
     denied=client.get("/api/aimn_visual_lab/exp74_75?symbol=TSLA")
     assert denied.status_code==400
-    print("EXP74/75 Visual Lab read-only route and 4680 candle alignment: OK")
+    html=Path("templates/aimn_visual_lab.html").read_text(encoding="utf-8")
+    assert 'id="expCompareMode"' in html
+    assert "await loadExpCompare(symbol);" in html
+    assert "expCompareMarkers.filter(" in html
+    assert "setVisibleLogicalRange({" in html
+    assert "Chart candles differ from EXP74/75 research data" in html
+    assert "el('symbol').disabled=true" in html
+    print("EXP74/75 Visual Lab route, markers, selection and 4680 candle alignment: OK")
 
 
 if __name__=="__main__":
