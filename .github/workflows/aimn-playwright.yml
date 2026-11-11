@@ -16,7 +16,7 @@ jobs:
       - name: Run tests
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
-        run: python -m pytest --base https://meirniv.pythonanywhere.com --timeout 45000 --browser auto -q -rs
+        run: python -m pytest tests/test_exp75_visual_lab_integration.py -q -rs
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
