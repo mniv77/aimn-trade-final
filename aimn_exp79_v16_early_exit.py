@@ -153,7 +153,7 @@ def main():
     report = {
         "experiment": "EXP79", "symbol": "NVDA", "direction": "SHORT",
         "candles": len(rows), "fee_pct_per_side": FEE,
-        "stop_pct": STOP, "rsi_rescue": RSI_LIMIT,
+        "stop_pct": STOP_PCT, "rsi_rescue": RSI_LIMIT,
         "assumptions": "V16 close signal/next-open entry; ST(10,3) exit; next-open rebound exit; session-close liquidation; intrabar stop; commission on each completed trade.",
         "caution": "Small in-sample research; results are percentage-point sums, not compounded portfolio returns. This is a fresh baseline replay; compare to EXP77 and investigate any differences.",
         "results": results,
