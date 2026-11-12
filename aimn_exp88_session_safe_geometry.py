@@ -92,22 +92,29 @@ def run(symbol,path):
         match=by_entry.get(nt) if nt and nt[:10]==times[i][:10] else None
         same=geometry(rows,i,True)
         cross=geometry(rows,i,False)
-        if same is None:continue
+        # A V16 signal on the first candle of a session has no same-day
+        # predecessor. Keep the signal/trade mapping and record missing
+        # geometry rather than silently dropping an accepted trade.
         rec={"symbol":symbol,"signal_time":times[i],"ST_signal":st[i],
           "accepted":match is not None,
           "net_trade_pct":match["net_pnl_pct"] if match else None,
           "winner":match["net_pnl_pct"]>0 if match else None,
-          "has_full_session_window":same["bars_of_prior_context"]==WIN,
-          "prior_bars_same_session":same["bars_of_prior_context"],
-          "window_crossed_session_in_exp87":same["bars_of_prior_context"]<WIN}
-        rec.update(same)
+          "has_full_session_window":same is not None and same["bars_of_prior_context"]==WIN,
+          "prior_bars_same_session":same["bars_of_prior_context"] if same else 0,
+          "window_crossed_session_in_exp87":same is None or same["bars_of_prior_context"]<WIN,
+          "missing_same_session_geometry":same is None}
+        if same is not None:
+            rec.update(same)
+        else:
+            rec.update({key:None for key in FEATURES})
         for key in FEATURES:
             rec["exp87_"+key]=cross.get(key)
-            v=same.get(key); old=cross.get(key)
+            v=same.get(key) if same else None; old=cross.get(key) if cross else None
             rec["changed_"+key]=(v!=old)
         data.append(rec)
     accepted=[r for r in data if r["accepted"]]
-    if len(accepted)!=len(trades):raise ValueError("baseline entry mapping failed")
+    if len(accepted)!=len(trades) or len(data)!=candidates:
+        raise ValueError(f"{symbol}: candidate/entry mapping mismatch: {len(data)}/{candidates} candidates; {len(accepted)}/{len(trades)} trades")
     winners=[r for r in accepted if r["winner"]]
     losers=[r for r in accepted if not r["winner"]]
     complete=[r for r in accepted if r["has_full_session_window"]]
@@ -122,6 +129,7 @@ def run(symbol,path):
       "session_boundary":{"all_signals":len(data),
           "signals_with_incomplete_same_session_window":sum(not r["has_full_session_window"] for r in data),
           "accepted_with_incomplete_window":sum(not r["has_full_session_window"] for r in accepted),
+          "accepted_with_no_same_session_predecessor":sum(r["missing_same_session_geometry"] for r in accepted),
           "accepted_with_any_geometry_change":sum(any(r["changed_"+k] for k in FEATURES) for r in accepted)},
       "same_session_all":{"winners":group(winners),"losers":group(losers)},
       "full_12bar_same_session_only":{"winners":group(complete_winners),
