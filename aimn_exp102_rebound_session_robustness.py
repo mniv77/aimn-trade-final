@@ -43,7 +43,7 @@ def summarize_sessions(records,h):
     sessions=defaultdict(list)
     key="f%d_close_move_pct"%h
     for r in records:
-        if r.get(key) is not None:
+        if r.get(key) not in (None,""):
             sessions[r["session"]].append(float(r[key]))
     means={day:sum(vals)/len(vals) for day,vals in sessions.items()}
     if not means:
@@ -67,7 +67,7 @@ def first_event_rows(records,h):
         is_qualified=(r["context"]=="DOWNWARD_36" and r["rebound"]=="UP_6")
         new_day=(r["session"]!=previous_session)
         if is_qualified and (not previous_qualified or new_day):
-            if r.get("f%d_close_move_pct"%h) is not None:
+            if r.get("f%d_close_move_pct"%h) not in (None,""):
                 events.append(r)
         previous_qualified=is_qualified
         previous_session=r["session"]
