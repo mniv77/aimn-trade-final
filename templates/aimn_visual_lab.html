@@ -22,7 +22,7 @@ button{cursor:pointer;background:#185abc}
 <select id="symbol"><option value="NVDA">NVDA</option><option value="AAPL">AAPL</option></select>
 <details id="legacyResearch" style="margin:8px 0;color:#9eacc1"><summary style="cursor:pointer">Archived experiments (historical comparison only)</summary><select id="experiment"><option value="both">EXP53 + EXP56</option><option value="exp53">EXP53 benchmark</option><option value="exp56">EXP56 candidate</option>
 <option value="exp58">EXP58 — V18 Supertrend Entry</option><option value="exp58v3">EXP58-V3 — Opening Filter</option><option value="exp68">EXP68 — V18 Risk-Aware</option><option value="exp66">EXP66 Supertrend Flip</option><option value="exp67">AAPL candles — EXP67 pending</option></select></details>
-<select id="trade"><option>Select a trade</option></select>
+<section style="padding:12px;border:1px solid #34506e;margin:10px 0"><strong>EXP74 vs EXP75 — NVDA SHORT research</strong> <select id="expCompareMode" onchange="updateVisionMarkers()"><option value="both">Both</option><option value="EXP74">EXP74</option><option value="EXP75">EXP75</option><option value="off">Hide</option></select><span id="expCompareSummary">Load NVDA SHORT chart to compare.</span><div id="expCompareTrades" style="max-height:180px;overflow:auto"></div></section><select id="trade"><option>Select a trade</option></select>
 <button onclick="loadLab()">Load Chart</button>
 
 <!-- AIMN_UNIFIED_NAV_V1 -->
@@ -37,6 +37,23 @@ button{cursor:pointer;background:#185abc}
 </div>
 
 
+<section id="majorTrendPanel" style="margin:12px 0;padding:12px;background:#132538;border:1px solid #47718b;border-radius:8px">
+<strong>AI Vision Research — Major Trend (offline baseline)</strong>
+<p>Major-trend estimates on the chart. No entry or exit recommendations; no paid AI calls.</p>
+<label><input id="majorTrendToggle" type="checkbox" checked> Show major-trend markers</label>
+<label style="margin-left:12px">Major horizon <select id="majorTrendHorizon"><option>40</option><option>70</option><option selected>100</option><option>150</option><option>200</option></select> candles per window</label>
+<div id="majorTrendSummary" style="margin-top:9px;font-weight:bold">Load NVDA to calculate the historical trend.</div>
+<div id="majorTrendStability" style="margin:8px 0;color:#c6d6e6">Stability statistics will appear after loading.</div>
+<pre id="majorTrendAudit" style="max-height:155px;overflow:auto;color:#c6d6e6"></pre>
+<small style="color:#9fb4c7">Green LONG · Red SHORT · Grey UNCERTAIN. Uses only past OHLC. This is a rule-based baseline, not yet a validated AI model prediction. Supertrend is not an input.</small>
+</section>
+<section id="noiseExitPanel" style="margin:12px 0;padding:12px;background:#1b2733;border:1px solid #6b7d8e;border-radius:8px">
+<strong>EXP71 — Supertrend noise-exit observation (research only)</strong>
+<p>WATCH: flat ST band with opposing price movement. HOLD: price resumes the original direction. EXIT CANDIDATE: opposing movement persists. Markers are observations, not executed trades.</p>
+<label><input type="checkbox" id="noiseExitToggle"> Show WATCH / HOLD / EXIT candidate markers</label>
+<div id="noiseExitSummary" style="margin-top:8px">Load historical candles to review candidate warnings.</div>
+<small>Uses completed candles only. The candidate exit rule is experimental; profit and accuracy are not validated.</small>
+</section>
 <!-- AIMN_SUPERTREND_OVERLAY_V1 -->
 <div style="margin:10px 0;padding:10px;background:#172638;
 border:1px solid #34506e;border-radius:6px">
@@ -86,6 +103,7 @@ border:1px solid #34506e;border-radius:6px">
     <input type="file" id="aiPredictionFile" accept=".json,application/json" style="max-width:270px">
   </label>
   <div id="aiPredictionStatus" style="margin-top:8px;color:#9eacc1">No independent AI predictions loaded. Existing human research notes are separate.</div>
+  <div id="aiVisionLedger" style="margin-top:10px;white-space:pre-wrap;color:#c7d9e9">AI Vision trade ledger: not loaded.</div>
 </div>
 <div id="blindResearchControls" style="margin:10px 0;padding:12px;background:#172638;border:1px solid #34506e;border-radius:6px">
   <strong>AI Vision — Blind Chart Research</strong>
@@ -103,6 +121,20 @@ border:1px solid #34506e;border-radius:6px">
       <button type="button" id="blindClose">Close</button>
     </div>
     <div id="blindChart" style="width:100%;height:570px"></div>
+    <div style="margin:12px 0;padding:12px;border:1px solid #456;border-radius:6px">
+      <strong>Major trend — blind prediction and feedback</strong>
+      <p id="blindPrediction" style="color:#a7d8ef">No prediction frozen yet. The offline baseline sees only the candles shown above.</p>
+      <button type="button" id="blindFreeze">Freeze prediction at this candle</button>
+      <button type="button" id="blindReveal" disabled>Reveal next 20 candles</button>
+      <div id="blindFeedback" hidden style="margin-top:10px">
+        <p id="blindRevealInfo"></p>
+        <label>Your review: <select id="blindVerdict"><option value="CORRECT">Correct major trend</option><option value="INCORRECT">Incorrect major trend</option><option value="PARTIAL">Partially correct</option><option value="UNCERTAIN">Cannot judge fairly</option></select></label>
+        <label> Notes: <input id="blindReviewNote" style="background:#202a36;color:white;padding:7px;width:40%" placeholder="Why? Minor V or major reversal?"></label>
+        <button type="button" id="blindSaveReview">Save review</button>
+      </div>
+      <p id="blindReviewStatus" style="color:#a7d8ef"></p>
+      <button type="button" id="blindExportReviews">Export blind reviews JSON</button>
+    </div>
     <p style="color:#b3c1d3">Send the PNG to ChatGPT and request a prediction BEFORE revealing subsequent candles. This is a research snapshot, not an AI decision.</p>
   </div>
 </div>
@@ -173,6 +205,17 @@ if (requestedSymbol) {
   }
   symbolSelect.value = requestedSymbol;
 }
+// URL-driven launches must not silently switch the selected dataset.
+if(requestedSymbol){
+  el('symbol').disabled=true;
+  el('symbol').title='Symbol locked to Auto Tuner URL. Return to Auto Tuner to change it.';
+  const note=document.createElement('div');
+  note.id='urlSelectionNotice';
+  note.style.cssText='margin:8px 0;padding:10px;border:1px solid #5b84a4;border-radius:6px;color:#c5e5ff';
+  note.textContent='Selection locked to Auto Tuner: '+requestedSymbol+' '+requestedDirection+
+    ' '+requestedTimeframe+'. To change symbol or direction, use Auto Tuner.';
+  el('symbol').insertAdjacentElement('afterend',note);
+}
 function updateResearchContext() {
   const selected = el('symbol').value;
   const mode = kissRequest.get('entry_mode') || 'Not specified';
@@ -190,7 +233,8 @@ function updateResearchContext() {
     'Broker ID: ' + broker + ' | Entry strategy requested: ' + mode,
     'Historical dataset: ' + dataset,
     'Parameters received: ' + keys.map(k => k + '=' + (kissRequest.get(k) ?? 'not supplied')).join(' | '),
-    'Saved historical experiments are NOT recalculated using these parameters.'
+    'Saved historical experiments are NOT recalculated using these parameters.',
+    'IMPORTANT: Saved results must be checked against the requested configuration; a legacy CSV audit is not a V17 backtest.'
   ];
   if (!isSupportedSymbol(selected)) {
     lines.push('UNAVAILABLE: No validated candles for ' + selected + '. No substitute chart.');
@@ -227,6 +271,7 @@ async function loadSavedKissTrades(symbol) {
       if(symbol==='NVDA' && direction==='LONG'){
         savedKissTrades=nvdaLongAudit.map(t=>({...t,exp:'CSV Audit'}));
         savedKissState='csv_audit';
+        console.warn('Legacy NVDA LONG CSV audit displayed; URL parameters do not reproduce these trades.');
       }
       return;
     }
@@ -392,14 +437,20 @@ async function loadLab(){
   series.setData(candles);
   installSupertrendOverlay();
   installVisionSelection();
+  refreshMajorTrendOverlay();
+  await loadExpCompare(symbol);
   el('status').textContent=symbol+' | '+requestedDirection+' | 5m | '+
     candles.length.toLocaleString()+' candles | Checking saved trades...';
   await loadSavedKissTrades(symbol);
   updateSavedKissNotice(symbol);
   updatePerformance();
+  if(savedKissState==='csv_audit'){
+    el('pnlSummary').textContent='WARNING — LEGACY NVDA LONG CSV AUDIT. These trades are not verified as matching the URL entry mode, RSI rescue, commission, or trailing parameters.';
+    el('pnlSummary').style.color='#ffbd6d';
+  }
   if(savedKissState==='csv_audit' || savedKissState==='saved'){
     const net=savedKissTrades.reduce((sum,t)=>sum+Number(t.net_pnl_pct||0),0);
-    el('pnlSummary').textContent=symbol+' '+requestedDirection+' — '+savedKissTrades.length+' saved research trades | Net P&L '+net.toFixed(3)+'% | Source: '+(savedKissState==='csv_audit'?'uploaded CSV audit':'saved KISS result');
+    el('pnlSummary').textContent=(savedKissState==='csv_audit'?'LEGACY CSV AUDIT — NOT VERIFIED FOR URL SETTINGS | ':'')+symbol+' '+requestedDirection+' — '+savedKissTrades.length+' historical trades | Net P&L '+net.toFixed(3)+'% | Source: '+(savedKissState==='csv_audit'?'legacy CSV audit':'saved KISS result');
   }
   // Hide the duplicate saved-KISS banner: the concise status line already reports it.
   // Preserve the banner for historical experiments where it contains distinct results.
@@ -630,6 +681,79 @@ function installVisionSelection(){
   });
 }
 
+
+let expCompareMarkers=[];
+async function loadExpCompare(symbol){
+  expCompareMarkers=[];
+  const summary=el('expCompareSummary'), details=el('expCompareTrades');
+  details.textContent='';
+  if(symbol!=='NVDA'||requestedDirection!=='SHORT'){
+    summary.textContent='NVDA SHORT only.'; updateVisionMarkers(); return;
+  }
+  try{
+    const res=await fetch('/api/aimn_visual_lab/exp74_75?symbol=NVDA',{cache:'no-store'});
+    if(!res.ok)throw Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.status!=='success'||data.source!=='frozen_research_candles')throw Error('Research data unavailable');
+    // Never overlay trades on a different or incomplete candle dataset.
+    const expected=data.candle_timestamps;
+    if(!Array.isArray(expected)||expected.length!==candles.length||
+       expected.some((timestamp,i)=>stamp(timestamp)!==candles[i].time)){
+      throw Error('Chart candles differ from EXP74/75 research data; comparison disabled');
+    }
+    const valid=new Set(candles.map(c=>c.time)), labels=[];
+    for(const name of ['EXP74','EXP75']){
+      const g=data.experiments[name];
+      labels.push(name+': '+g.count+' trades, '+g.winners+' winners, net '+Number(g.net_pct_sum).toFixed(3)+'%');
+      for(const t of g.trades){
+        for(const kind of ['entry','exit']){
+          const time=stamp(t[kind+'_time']);
+          if(!valid.has(time))continue;
+          expCompareMarkers.push({time,experiment:name,position:kind==='entry'?'aboveBar':'belowBar',
+            color:name==='EXP74'?'#4dc9ff':'#ffc15e',shape:kind==='entry'?'arrowDown':'circle',
+            text:name+' '+(kind==='entry'?'IN':'OUT '+Number(t.net_pnl_pct).toFixed(2)+'%')});
+        }
+      }
+    }
+    summary.textContent=labels.join(' | ')+' — summed trade returns, research only.';
+    const map=new Map(data.experiments.EXP75.trades.map(t=>[t.entry_time,t]));
+    const changes=data.experiments.EXP74.trades.filter(t=>map.has(t.entry_time)&&
+      (map.get(t.entry_time).exit_time!==t.exit_time||
+       Math.abs(Number(map.get(t.entry_time).net_pnl_pct)-Number(t.net_pnl_pct))>0.0001));
+    details.replaceChildren();
+    const heading=document.createElement('p');
+    heading.textContent=changes.length+' matched-entry trades with changed exits or P&L. Select one to inspect its candles.';
+    details.appendChild(heading);
+    changes.sort((a,b)=>{
+      const delta=t=>Number(map.get(t.entry_time).net_pnl_pct)-Number(t.net_pnl_pct);
+      return delta(a)-delta(b);
+    });
+    for(const t of changes){
+      const other=map.get(t.entry_time);
+      const delta=Number(other.net_pnl_pct)-Number(t.net_pnl_pct);
+      const button=document.createElement('button');
+      button.type='button';
+      button.style.cssText='display:block;margin:4px 0;width:100%;text-align:left;background:#202a36';
+      button.textContent=t.entry_time+' | EXP74 '+Number(t.net_pnl_pct).toFixed(2)+
+        '% | EXP75 '+Number(other.net_pnl_pct).toFixed(2)+'% | Δ '+delta.toFixed(2)+'%';
+      button.addEventListener('click',()=>{
+        const start=candles.findIndex(c=>c.time>=stamp(t.entry_time));
+        const end=candles.findIndex(c=>c.time>=Math.max(stamp(t.exit_time),stamp(other.exit_time)));
+        if(start<0||end<0||!chart)return;
+        chart.timeScale().setVisibleLogicalRange({
+          from:Math.max(0,start-30),to:Math.min(candles.length-1,end+30)
+        });
+        el('details').textContent='EXP74 vs EXP75 — same entry '+t.entry_time+
+          '\\nEXP74 exit: '+t.exit_time+' | '+Number(t.net_pnl_pct).toFixed(3)+'% | '+t.exit_reason+
+          '\\nEXP75 exit: '+other.exit_time+' | '+Number(other.net_pnl_pct).toFixed(3)+'% | '+other.exit_reason+
+          '\\nEXP75 minus EXP74: '+delta.toFixed(3)+' percentage points';
+      });
+      details.appendChild(button);
+    }
+  }catch(err){summary.textContent='Comparison unavailable: '+err.message;}
+  updateVisionMarkers();
+}
+
 function updateVisionMarkers(){
   if(!series)return;
   const view=el('observerView').value;
@@ -649,8 +773,113 @@ function updateVisionMarkers(){
   const review=view==='ai'?[]:visionAnnotations
     .filter(a=>a.symbol===el('symbol').value && valid.has(a.time))
     .map(a=>({time:a.time,position:'aboveBar',color:'#c2b5f4',shape:'square',text:'REVIEW: '+a.type.replaceAll('_',' ')}));
-  series.setMarkers([...kiss,...ai,...review].sort((a,b)=>a.time-b.time));
+  const major=el('majorTrendToggle').checked ? majorTrendMarkers.filter(m=>valid.has(m.time)) : [];
+  const noise=el('noiseExitToggle').checked ? noiseExitMarkers.filter(m=>valid.has(m.time)) : [];
+  const mode=el('expCompareMode').value;
+  const comparison=view==='ai'||mode==='off'?[]:expCompareMarkers.filter(m=>valid.has(m.time)&&(mode==='both'||m.experiment===mode));
+  series.setMarkers([...kiss,...ai,...review,...major,...noise,...comparison].sort((a,b)=>a.time-b.time));
 }
+
+
+// EXP71 candidate chart observations. No orders, no lookahead.
+let noiseExitMarkers=[];
+function refreshNoiseExitOverlay(){
+  noiseExitMarkers=[];
+  if(!candles.length){
+    el('noiseExitSummary').textContent='No candles loaded.';
+    return;
+  }
+  const st=calculateSupertrend(candles,10,3);
+  let watch=null, watches=0, holds=0, exits=0;
+  for(let i=15;i<candles.length;i++){
+    const c=candles[i], p=candles[i-1];
+    const red=st.downward[i]?.value, redPrev=st.downward[i-1]?.value;
+    const green=st.upward[i]?.value, greenPrev=st.upward[i-1]?.value;
+    const side=Number.isFinite(red)?'SHORT':Number.isFinite(green)?'LONG':null;
+    const band=side==='SHORT'?red:green;
+    const oldBand=side==='SHORT'?redPrev:greenPrev;
+    if(!side || !Number.isFinite(oldBand)){watch=null;continue;}
+    const tol=c.close*0.00015;
+    const flat=Math.abs(band-oldBand)<=tol;
+    const opposing=side==='SHORT'?c.close>p.close:c.close<p.close;
+    const favorable=side==='SHORT'?c.close<p.close:c.close>p.close;
+    if(watch && watch.side!==side){watch=null;}
+    if(!watch && flat && opposing){
+      watch={side,at:i,price:c.close};
+      watches++;
+      noiseExitMarkers.push({time:c.time,position:'aboveBar',shape:'circle',
+        color:'#eab65a',text:'WATCH '+side});
+    }else if(watch && i>watch.at){
+      // Require at least two later completed candles; do not label at the first bounce.
+      const elapsed=i-watch.at;
+      const reversal=watch.side==='SHORT'?c.close>watch.price:c.close<watch.price;
+      if(elapsed>=2 && reversal && opposing){
+        exits++;
+        noiseExitMarkers.push({time:c.time,position:'aboveBar',shape:'square',
+          color:'#f27b78',text:'EXIT? '+watch.side});
+        watch=null;
+      }else if(favorable && (side==='SHORT'?c.close<watch.price:c.close>watch.price)){
+        holds++;
+        noiseExitMarkers.push({time:c.time,position:'belowBar',shape:'circle',
+          color:'#49c6a1',text:'HOLD '+side});
+        watch=null;
+      }else if(elapsed>=5){watch=null;}
+    }
+  }
+  el('noiseExitSummary').textContent='Candidate chart events: '+watches+
+    ' WATCH, '+holds+' HOLD, '+exits+' EXIT? (not backtested trades).';
+  if(series)updateVisionMarkers();
+}
+el('noiseExitToggle').addEventListener('change',updateVisionMarkers);
+
+// AIMN_MAJOR_TREND_OFFLINE_V1: causal, OHLC-only, research display.
+let majorTrendMarkers=[];
+function majorTrendAt(rows,end,span){
+  if(end+1<2*span)return 'UNCERTAIN';
+  const a=rows.slice(end+1-2*span,end+1-span);
+  const b=rows.slice(end+1-span,end+1);
+  const ah=Math.max(...a.map(x=>x.high)),al=Math.min(...a.map(x=>x.low));
+  const bh=Math.max(...b.map(x=>x.high)),bl=Math.min(...b.map(x=>x.low));
+  return bh>ah&&bl>al?'LONG':bh<ah&&bl<al?'SHORT':'UNCERTAIN';
+}
+function refreshMajorTrendOverlay(){
+  if(!candles.length){
+    majorTrendMarkers=[];
+    el('majorTrendSummary').textContent='No historical candles loaded.';
+    el('majorTrendAudit').textContent='';
+    el('majorTrendStability').textContent='No data for stability assessment.';
+    return;
+  }
+  const span=Number(el('majorTrendHorizon').value), changes=[];
+  let previous=null;
+  for(let i=2*span-1;i<candles.length;i+=5){
+    const trend=majorTrendAt(candles,i,span);
+    if(trend!==previous){
+      changes.push({time:candles[i].time,position:'aboveBar',shape:'square',
+        color:trend==='LONG'?'#20d69a':trend==='SHORT'?'#ff6868':'#9aa9b8',
+        text:'MAJOR '+trend});
+      previous=trend;
+    }
+  }
+  const latest=majorTrendAt(candles,candles.length-1,span);
+  majorTrendMarkers=changes;
+  refreshNoiseExitOverlay();
+  const directional=changes.filter(m=>m.text==='MAJOR LONG'||m.text==='MAJOR SHORT');
+  const directFlips=directional.slice(1).filter((m,i)=>m.text!==directional[i].text).length;
+  const uncertainChanges=changes.filter(m=>m.text==='MAJOR UNCERTAIN').length;
+  const duration=candles.length>=2 ? (candles[candles.length-1].time-candles[0].time)/3600 : 0;
+  el('majorTrendStability').textContent='Standalone stability audit: '+directFlips+
+    ' directional changes (ignoring intervening UNCERTAIN states), '+uncertainChanges+
+    ' transitions into UNCERTAIN, over '+duration.toFixed(1)+' elapsed market-history hours. '+
+    'These are classification changes, NOT trades or proof of accuracy.';
+  el('majorTrendSummary').textContent='Latest '+el('symbol').value+' major trend: '+latest+
+    ' | '+span+' candles/window | '+changes.length+' observed classification changes';
+  el('majorTrendAudit').textContent=changes.slice(-12).reverse().map(m=>
+    new Date(m.time*1000).toISOString().slice(0,16)+' UTC  '+m.text).join('\n');
+  if(series)updateVisionMarkers();
+}
+el('majorTrendToggle').addEventListener('change',updateVisionMarkers);
+el('majorTrendHorizon').addEventListener('change',refreshMajorTrendOverlay);
 
 // Display-only loader: never creates AI predictions from KISS results.
 // Required schema: {predictions:[{symbol,time,action,reason,confidence,source}]}
@@ -661,9 +890,15 @@ el('aiPredictionFile').addEventListener('change',async event=>{
   if(!file)return;
   try{
     const data=JSON.parse(await file.text());
-    if(!Array.isArray(data.predictions))throw Error('Expected a predictions array');
+    const isRunner = data.research_only===true && Array.isArray(data.decisions) && Array.isArray(data.trades);
+    const predictions = isRunner ? data.decisions
+      .filter(p=>p.decision!=='WAIT')
+      .map(p=>({symbol:p.symbol,time:p.last_visible_candle_unix,action:p.decision,
+                reason:p.reason,confidence:({Low:0.3,Moderate:0.6,High:0.9})[p.confidence],
+                source:'AI_INDEPENDENT'})) : data.predictions;
+    if(!Array.isArray(predictions))throw Error('Expected independent runner output or predictions array');
     const allowed=new Set(['WATCH LONG','WATCH SHORT','ENTER LONG','ENTER SHORT','EXIT LONG','EXIT SHORT']);
-    const parsed=data.predictions.map((p,i)=>{
+    const parsed=predictions.map((p,i)=>{
       if(!p || typeof p!=='object')throw Error('Invalid row '+(i+1));
       const symbol=String(p.symbol||'').toUpperCase();
       const action=String(p.action||'').toUpperCase();
@@ -677,10 +912,25 @@ el('aiPredictionFile').addEventListener('change',async event=>{
       return {symbol,action,time,reason:p.reason,confidence:p.confidence};
     });
     independentAiPredictions=parsed;
-    el('aiPredictionStatus').textContent=parsed.length+' independent AI predictions loaded (display only; independence not yet verified).';
+    el('aiPredictionStatus').textContent=parsed.length+' independent AI decisions loaded (research only).';
+    if(isRunner){
+      if(data.symbol!==el('symbol').value)throw Error('Select '+data.symbol+' before loading this research run');
+      const wins=data.trades.filter(t=>t.net_pnl_pct>0).length;
+      const lines=data.trades.map((t,i)=>(i+1)+'. '+new Date(t.entry_unix*1000).toISOString()+
+        ' entry '+t.entry_price+' → '+new Date(t.exit_unix*1000).toISOString()+
+        ' exit '+t.exit_price+' | gross '+t.gross_pnl_pct.toFixed(3)+'% | net '+t.net_pnl_pct.toFixed(3)+'%');
+      el('aiVisionLedger').textContent='AI Vision independent research | '+data.trades.length+
+        ' closed trades | '+wins+' winners | gross '+data.realized_gross_pnl_pct.toFixed(3)+
+        '% | net '+data.realized_net_pnl_pct.toFixed(3)+
+        '% (sum of per-trade returns, not portfolio equity)\\n'+lines.join('\\n')+
+        (data.open_position?'\\nOPEN PAPER POSITION (excluded from realized P&L)':'');
+    }else{
+      el('aiVisionLedger').textContent='Prediction markers only; no verified trade ledger in this file.';
+    }
     updateVisionMarkers();
   }catch(err){
     independentAiPredictions=[];
+    el('aiVisionLedger').textContent='AI Vision trade ledger: not loaded.';
     el('aiPredictionStatus').textContent='Prediction file rejected: '+err.message;
     updateVisionMarkers();
   }
@@ -832,9 +1082,9 @@ function calculateSupertrend(bars,period=10,multiplier=3.0){
     if(i===period-1){
       direction=c.close>=midpoint?1:-1;
     }else if(previousDirection===1){
-      direction=c.close<lower?-1:1;
+      direction=c.close<prevLower?-1:1;
     }else{
-      direction=c.close>upper?1:-1;
+      direction=c.close>prevUpper?1:-1;
     }
 
     if(direction===1){
@@ -1047,8 +1297,8 @@ function drawBlindSnapshot(){
   const last=historical[historical.length-1];
   const cutoffDate=new Date(last.time*1000).toISOString().replace('T',' ').slice(0,16)+' UTC';
   el('blindInfo').textContent=el('symbol').value+' · 5m · Last visible candle: '+cutoffDate+' · '+blindCutoff+' of '+candles.length+' candles visible. No future candles shown.';
-  el('blindEarlier').disabled=blindCutoff<=60;
-  el('blindLater').disabled=blindCutoff>=candles.length;
+  el('blindEarlier').disabled=blindCutoff<=60 || !!blindFrozen;
+  el('blindLater').disabled=blindCutoff>=candles.length || !!blindFrozen;
 }
 el('blindOpen').addEventListener('click',()=>{
   if(!candles.length){alert('Load a historical chart first.');return;}
@@ -1077,6 +1327,75 @@ el('blindDownload').addEventListener('click',()=>{
   a.href=blindChart.takeScreenshot().toDataURL('image/png');
   a.click();
 });
+
+
+// AIMN_BLIND_MAJOR_REVIEW_V1 — freeze before reveal, no future information in prediction.
+let blindFrozen=null;
+let blindReviews=[];
+function blindShowEstimate(){
+  if(!candles.length||!blindCutoff)return;
+  const span=Number(el('majorTrendHorizon').value);
+  const trend=majorTrendAt(candles,blindCutoff-1,span);
+  el('blindPrediction').textContent=blindFrozen
+    ? 'FROZEN: '+blindFrozen.major_trend+' at '+new Date(blindFrozen.cutoff_unix*1000).toISOString()+
+      ' (window '+blindFrozen.major_span+'). Reveal and review this unchanged prediction.'
+    : 'Offline baseline at visible cutoff: '+trend+' ('+span+' candles/window). Freeze before revealing future.';
+}
+const oldDrawBlindSnapshot=drawBlindSnapshot;
+drawBlindSnapshot=function(){
+  oldDrawBlindSnapshot();
+  blindShowEstimate();
+  el('blindFreeze').disabled=!!blindFrozen;
+  el('blindReveal').disabled=!blindFrozen||blindFrozen.cutoff_index+20>candles.length;
+};
+el('blindFreeze').addEventListener('click',()=>{
+  if(!candles.length||!blindCutoff)return;
+  const span=Number(el('majorTrendHorizon').value);
+  const index=blindCutoff-1;
+  blindFrozen={
+    symbol:el('symbol').value,timeframe:'5m',
+    cutoff_index:index,cutoff_unix:candles[index].time,
+    major_span:span,major_trend:majorTrendAt(candles,index,span),
+    method:'deterministic_ohlc_structure_v1',research_only:true
+  };
+  el('blindFeedback').hidden=true;
+  el('blindReviewStatus').textContent='Prediction frozen. You may now reveal 20 subsequent candles.';
+  drawBlindSnapshot();
+});
+el('blindReveal').addEventListener('click',()=>{
+  if(!blindFrozen)return;
+  const end=Math.min(candles.length,blindFrozen.cutoff_index+21);
+  const visible=candles.slice(0,end);
+  blindSeries.setData(visible);
+  blindChart.timeScale().setVisibleLogicalRange({from:Math.max(0,end-110),to:end+3});
+  el('blindRevealInfo').textContent='Revealed '+(end-blindFrozen.cutoff_index-1)+
+    ' later candles. Frozen major trend: '+blindFrozen.major_trend+
+    '. Your assessment is qualitative, not an automatic accuracy label.';
+  el('blindFeedback').hidden=false;
+  el('blindFreeze').disabled=true;
+  el('blindReveal').disabled=true;
+});
+el('blindSaveReview').addEventListener('click',()=>{
+  if(!blindFrozen||el('blindFeedback').hidden)return;
+  blindReviews.push({...blindFrozen,review:el('blindVerdict').value,
+    review_note:el('blindReviewNote').value,
+    revealed_candles:Math.min(20,candles.length-blindFrozen.cutoff_index-1)});
+  el('blindReviewStatus').textContent='Saved '+blindReviews.length+
+    ' blind review(s) in this browser session. Export JSON to retain them.';
+  blindFrozen=null;
+  el('blindFeedback').hidden=true;
+  el('blindReviewNote').value='';
+  drawBlindSnapshot();
+});
+el('blindExportReviews').addEventListener('click',()=>{
+  const payload={research_only:true,source:'visual_lab_blind_major_trend_reviews_v1',
+    reviews:blindReviews};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='AIMn_Blind_Major_Trend_Reviews.json';a.click();
+  URL.revokeObjectURL(url);
+});
+
 
 // STEP64B: research context is initialized above, before the first chart load.
 

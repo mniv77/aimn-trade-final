@@ -313,3 +313,33 @@ def register_kiss_backtest_routes(app):
         except Exception as exc:
             import traceback
             return jsonify({"status": "error", "message": str(exc), "trace": traceback.format_exc()}), 500
+
+    @app.route("/api/aimn_visual_lab/exp74_75", methods=["GET"])
+    def aimn_exp74_75_comparison():
+        """Research-only historical NVDA comparison; no orders or persistence."""
+        try:
+            from kiss.exp74_kiss_hybrid_engine import run_kiss_backtest as hybrid
+            from kiss.exp75_kiss_profit_lock_engine import run_kiss_backtest as profit_lock
+            if request.args.get("symbol", "NVDA") != "NVDA":
+                return jsonify({"status":"error","message":"EXP74/75 currently validated for NVDA only"}), 400
+            source = Path(__file__).resolve().parent / "kiss/visual_research/aimn_nvda_candles.json"
+            rows = json.loads(source.read_text(encoding="utf-8"))
+            kwargs = dict(symbol="NVDA", direction="SHORT", timeframe="5m",
+                          entry_mode="V15", trailing_minus_pct=0.50,
+                          commission_pct=0.10, rsi_rescue_long=20, rsi_rescue_short=80)
+            experiments = {}
+            for label, engine in (("EXP74",hybrid),("EXP75",profit_lock)):
+                result = engine(rows, **kwargs)
+                experiments[label] = {
+                    "trades": result["trades"],
+                    "net_pct_sum": result["total_net_pnl_pct"],
+                    "winners": result["winner_count"],
+                    "count": len(result["trades"])
+                }
+            return jsonify({"status":"success","symbol":"NVDA","direction":"SHORT",
+                            "timeframe":"5m","source":"frozen_research_candles",
+                            "candle_timestamps":[str(row["timestamp"]) for row in rows],
+                            "experiments":experiments})
+        except Exception:
+            app.logger.exception("EXP74/75 Visual Laboratory comparison failed")
+            return jsonify({"status":"error","message":"Research comparison unavailable"}), 500

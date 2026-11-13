@@ -1,0 +1,30 @@
+name: AI Vision major trend five-assessment pilot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  major-trend-pilot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate research code before model calls
+        run: python -m unittest discover -s tests -p 'test_ai_vision*.py' -v
+      - name: Run exactly five historical trend assessments
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          test -n "$OPENAI_API_KEY" || (echo "OPENAI_API_KEY repository secret is not configured" && exit 1)
+          python -m kiss.ai_vision_major_trend_pilot --samples 5 --output kiss/results/ai_vision/major_trend_pilot.json
+      - name: Preserve assessment results for blind review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvda-major-trend-five-assessments
+          path: kiss/results/ai_vision/major_trend_pilot.json
+          if-no-files-found: warn
