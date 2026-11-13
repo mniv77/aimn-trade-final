@@ -19,10 +19,49 @@ END="2026-11-01T00:00:00Z"
 SYMBOLS=("NVDA","AAPL")
 
 def credentials():
-    key=next((os.environ.get(x) for x in ("APCA_API_KEY_ID","ALPACA_API_KEY","ALPACA_API_KEY_ID") if os.environ.get(x)),None)
-    secret=next((os.environ.get(x) for x in ("APCA_API_SECRET_KEY","ALPACA_SECRET_KEY","ALPACA_API_SECRET_KEY") if os.environ.get(x)),None)
+    # Existing AIMn clients use both APCA_* and ALPACA_KEY/ALPACA_SECRET.
+    # PythonAnywhere console sessions may not inherit web-app variables.
+    # Read a local .env file if python-dotenv is installed; otherwise parse
+    # only simple KEY=VALUE lines without executing any shell or Python code.
+    candidates=(ROOT/".env", ROOT/".env.local")
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        load_dotenv=None
+    if load_dotenv is not None:
+        for path in candidates:
+            if path.is_file():
+                load_dotenv(dotenv_path=path,override=False)
+    else:
+        recognized={"APCA_API_KEY_ID","APCA_API_SECRET_KEY",
+                    "ALPACA_API_KEY","ALPACA_API_KEY_ID","ALPACA_KEY",
+                    "ALPACA_SECRET","ALPACA_SECRET_KEY","ALPACA_API_SECRET_KEY"}
+        for path in candidates:
+            if not path.is_file():
+                continue
+            for line in path.read_text(encoding="utf-8").splitlines():
+                line=line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                name,value=line.split("=",1)
+                name=name.removeprefix("export ").strip()
+                if name in recognized and name not in os.environ:
+                    os.environ[name]=value.strip().strip('"').strip("'")
+    key_names=("APCA_API_KEY_ID","ALPACA_API_KEY","ALPACA_API_KEY_ID","ALPACA_KEY")
+    secret_names=("APCA_API_SECRET_KEY","ALPACA_SECRET_KEY","ALPACA_API_SECRET_KEY","ALPACA_SECRET")
+    key=next((v for name in key_names if (v:=os.environ.get(name)) and
+              not v.upper().startswith(("YOUR_","PK_DEFAULT"))),None)
+    secret=next((v for name in secret_names if (v:=os.environ.get(name)) and
+                 not v.upper().startswith(("YOUR_","SK_DEFAULT"))),None)
     if not key or not secret:
-        raise RuntimeError("Alpaca data credentials missing. Set APCA_API_KEY_ID and APCA_API_SECRET_KEY in the PythonAnywhere environment; do not paste secrets into chat.")
+        found=[p.name for p in candidates if p.is_file()]
+        raise RuntimeError(
+            "Alpaca credentials unavailable to this PythonAnywhere console. "
+            "Checked environment variables ALPACA_KEY/ALPACA_SECRET, APCA_* "
+            "and local .env/.env.local. Local env files present: "+
+            (", ".join(found) if found else "none")+
+            ". Existing AIMn web-app credentials may be stored separately. "
+            "Do not paste secrets into chat or commit them to Git.")
     return key,secret
 
 def fetch(symbol,feed,key,secret):
