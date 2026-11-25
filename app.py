@@ -19,9 +19,16 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 # 2. Map 'db' to your session (or adjust if your routes expect a cursor-based DB object)
 db = db_session
 
+
+
+
 # 3. Register your route blueprints/functions safely after app and db exist
 from backtest_routes import register_backtest_routes
 register_backtest_routes(app, db)
+
+from aimn_ai_teaching_route import register_aimn_ai_teaching_route
+register_aimn_ai_teaching_route(app)
+
 
 from backtest_feedback_routes import register_feedback_routes
 register_feedback_routes(app, db)
@@ -241,6 +248,18 @@ import numpy as np
 @app.route("/aimn_ai_vision_replay")
 def aimn_ai_vision_replay():
     return render_template("aimn_ai_vision_replay.html")
+
+
+# Research-only visual page. No trading execution.
+
+@app.route("/aimn_major_trend_research")
+def aimn_major_trend_research():
+    return render_template("aimn_major_trend_research.html")
+
+
+#from aimn_ai_teaching_route import register_aimn_ai_teaching_route
+#register_aimn_ai_teaching_route(app)
+
 
 #======================================================
 #     SYMBOLS FOR TUNER SELETCT SYAMBOL

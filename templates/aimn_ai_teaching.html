@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AIMn AI Teaching & Trade Comparison</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+{% raw %}
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b1220;color:#dce7f5;font:14px Arial,sans-serif}header{padding:18px 24px;border-bottom:1px solid #263c57}h1{margin:0 0 7px;font-size:23px}p{margin:6px 0;color:#a9bed4}.wrap{padding:14px 22px;max-width:1600px;margin:auto}.toolbar,.actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0}select,button,textarea,input{background:#17263a;border:1px solid #3c5874;color:#f2f6fa;border-radius:5px;padding:9px;font:inherit}button{cursor:pointer;background:#215eac}button:hover{background:#3273c5}button:disabled{opacity:.5;cursor:default}label{display:flex;align-items:center;gap:6px}#chart{width:100%;height:600px;border:1px solid #2b4059;border-radius:6px}.panel{background:#111d2e;border:1px solid #2b4059;border-radius:8px;padding:15px;margin-top:14px}.status{color:#9ac4e8;min-height:22px}.warn{color:#ffb99b}textarea{width:100%;min-height:76px;resize:vertical}#selected{font-weight:bold;color:#7ce0c1}#lessonList{max-height:270px;overflow:auto}.lesson{border-top:1px solid #30475e;padding:9px 0;display:flex;justify-content:space-between;gap:12px;align-items:center}.muted{color:#94a9c1}.chip{background:#243a53;padding:5px 9px;border-radius:5px}#comparison{white-space:pre-wrap}.secondary{background:#243a53}.activeMode{border-color:#7ce0c1}.small{font-size:12px}.lessonButtons{display:flex;gap:6px;flex-wrap:wrap}.lesson button{padding:6px 9px}.confidence{color:#b9d6ee}a{color:#8ccaff}@media(max-width:650px){#chart{height:420px}.wrap{padding:10px}}
+#hoverBar{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;background:#111d2e;border:1px solid #2b4059;border-radius:6px;padding:11px 14px;margin:9px 0 10px;min-height:58px}#hoverBar .field{display:flex;flex-direction:column;gap:4px}#hoverBar .field span{font-size:11px;color:#92aaca;text-transform:uppercase;letter-spacing:.05em}#hoverBar .field strong{font-size:14px;font-variant-numeric:tabular-nums;color:#f1f7ff}#hoverBar .hint{color:#93abc3;font-size:12px;margin-left:auto}
+{% endraw %}
+</style></head><body>
+<header><h1>AIMn AI Teaching & Trade Comparison</h1><p>Completed historical charts · Human teaching labels · Read-only research · No order execution</p></header>
+<main class="wrap"><div class="toolbar"><label>Symbol <select id="symbol"><option>NVDA</option><option>AAPL</option><option>TSLA</option><option>MSFT</option><option>AMZN</option><option>GOOGL</option><option>SPY</option><option>QQQ</option></select></label><label>Direction <select id="direction"><option>SHORT</option><option>LONG</option></select></label><span class="chip">5-minute candles</span><label><input type="checkbox" id="supertrend" checked> Supertrend (ATR 10 × 3)</label><button id="load">Load historical chart</button><button id="entire">Show entire chart</button></div>
+<section class="panel"><h3>Research phase</h3><div class="actions"><label>View <select id="researchMode"><option value="TEACH" selected>AI Academy — entry, exit & trade results</option><option value="ENTRIES">Entries Only — independent human marking</option><option value="FULL">All lesson types — legacy research</option></select></label><button id="compareEntries">Compare Entries — reveal saved KISS entries</button><button id="hideComparison" class="secondary">Hide KISS again</button></div><p id="phaseInfo">KISS is hidden. Mark your own entries first. Only entry markers appear in this phase.</p></section><div id="status" class="status">Select a symbol and load the historical chart.</div>
+<div id="hoverBar" aria-live="off">
+  <div class="field"><span>Candle time (source clock)</span><strong id="hoverTime">—</strong></div>
+  <div class="field"><span>UTC conversion / verification</span><strong id="hoverUTC">—</strong></div>
+  <div class="field"><span>Cursor price</span><strong id="hoverPrice">—</strong></div>
+  <div class="field"><span>Open</span><strong id="hoverOpen">—</strong></div>
+  <div class="field"><span>High</span><strong id="hoverHigh">—</strong></div>
+  <div class="field"><span>Low</span><strong id="hoverLow">—</strong></div>
+  <div class="field"><span>Close</span><strong id="hoverClose">—</strong></div>
+  <div class="hint">Hover to inspect · Click to select for teaching</div>
+</div>
+<div id="chart"></div>
+<section class="panel"><h3>Teach AI Vision</h3><div class="actions"><label>Teaching direction <select id="teachingDirection"><option value="SHORT">SHORT only</option><option value="LONG">LONG only</option><option value="BOTH">BOTH</option></select></label><span class="muted">Direction filters available labels; saved lessons remain intact.</span></div><p>Click a candle, select the lesson, and explain why that point matters. Your labels are hindsight teaching—not independent AI predictions.</p><p class="warn">NVDA/AAPL: New York market-time interpretation is provisional until the original June–August downloader is verified. Chart coordinates and existing lesson IDs remain unchanged. Other symbols: source timezone unverified.</p><div id="selected">No candle selected</div><div class="actions"><label>Lesson <select id="kind"><option value="ENTER_LONG">ENTER LONG</option><option value="ENTER_SHORT">ENTER SHORT</option><option value="EXIT_LONG">EXIT LONG</option><option value="EXIT_SHORT">EXIT SHORT</option><option value="MINOR_V_NOISE">MINOR V — IGNORE NOISE</option><option value="MAJOR_LONG_TO_SHORT">MAJOR LONG → SHORT</option><option value="MAJOR_SHORT_TO_LONG">MAJOR SHORT → LONG</option><option value="MISSED_OPPORTUNITY">MISSED OPPORTUNITY</option><option value="OTHER">OTHER</option></select></label><label>Confidence <select id="confidence"><option value="HIGH">High</option><option value="MEDIUM" selected>Medium</option><option value="LOW">Low</option><option value="NEEDS_REVIEW">Needs review</option></select></label><button id="save">Save teaching label</button><button id="cancelEdit" class="secondary" style="display:none">Cancel edit</button><button id="undo" class="secondary">Undo last change</button><button id="sortLessons" class="secondary">Sort by Candle Time</button><button id="export">Export lessons JSON</button><label>Import lessons JSON <input type="file" id="import" accept=".json,application/json"></label></div><textarea id="note" placeholder="What should AI recognize? What distinguishes this major transition from minor noise?"></textarea><p class="muted">Lessons are saved in this browser when storage is available. Export JSON regularly as a separate backup, especially before clearing browser data or changing computers.</p><div id="lessonCount" class="status"></div><div id="lessonList"></div></section>
+<section class="panel"><h3>Human hindsight trade results — P&amp;L</h3><p>Pairs chronological entry and exit labels. Uses each selected candle close as the teaching fill price. Results are hypothetical, not broker fills. Unpaired or overlapping labels are reported rather than silently discarded.</p><div class="actions"><label>Commission per side (%) <input id="humanFee" type="number" min="0" step="0.01" value="0.10" style="width:100px"></label><button id="exportTrades">Export paired trades JSON</button></div><div id="humanSummary" class="status"></div><div id="humanTrades" style="overflow-x:auto"></div></section><section class="panel"><h3>Saved KISS trade comparison</h3><p>Read-only saved KISS snapshot. Human hindsight lessons remain separate from KISS decisions. Independent AI predictions are not yet connected.</p><div class="actions"><label>Entry strategy <select id="kissMode"><option>V17</option><option>V15</option><option>V16</option></select></label><label>Commission per side % <input id="kissFee" type="number" min="0" step="0.01" value="0.10" style="width:100px"></label><label>Trailing minus % <input id="kissTrail" type="number" min="0" step="0.01" value="0.50" style="width:100px"></label><label>RSI rescue LONG <input id="kissLong" type="number" value="20" style="width:80px"></label><label>RSI rescue SHORT <input id="kissShort" type="number" value="80" style="width:80px"></label><button id="kissLoad">Load Saved KISS Trades (legacy view)</button><button id="kissClear">Hide KISS markers</button></div><div id="comparison" class="status">No saved KISS trades loaded. The complete MySQL candle dataset must match this chart before markers are shown.</div></section></main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), params=new URLSearchParams(location.search);
+const allowed=new Set(['NVDA','AAPL','TSLA','MSFT','AMZN','GOOGL','SPY','QQQ']);
+const initial=(params.get('symbol')||'NVDA').toUpperCase();if(allowed.has(initial))$('symbol').value=initial;
+$('direction').value=params.get('direction')==='LONG'?'LONG':'SHORT';
+let chart=null,series=null,candles=[],selected=null,lessons=[],stSeries=[],kissTrades=[],kissValidated=false,loadGeneration=0;
+let editId=null,undoSnapshot=null,kissVisible=false;
+const STORAGE_KEY='aimn_teaching_labels_phase1_v1';
+const isEntry=kind=>kind==='ENTER_SHORT'||kind==='ENTER_LONG';
+const entryKind=()=> $('direction').value==='SHORT'?'ENTER_SHORT':'ENTER_LONG';
+const tradeKinds=new Set(['ENTER_SHORT','EXIT_SHORT','ENTER_LONG','EXIT_LONG']);
+const teachingAllows=kind=>!tradeKinds.has(kind)||$('teachingDirection').value==='BOTH'||kind.endsWith($('teachingDirection').value);
+function refreshKindOptions(){const academy=$('researchMode').value==='TEACH';for(const o of $('kind').options){o.hidden=academy&&!teachingAllows(o.value);o.disabled=academy&&!teachingAllows(o.value)}if(academy&&!teachingAllows($('kind').value))$('kind').value=$('teachingDirection').value==='LONG'?'ENTER_LONG':'ENTER_SHORT'}
+const lessonOrder=(a,b)=>a.time-b.time||a.symbol.localeCompare(b.symbol)||a.kind.localeCompare(b.kind);
+function persistLessons(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(lessons))}catch(e){status('Browser storage unavailable; export lessons JSON for safekeeping.',true)}}
+function restoreLessons(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(Array.isArray(saved))lessons=saved.filter(l=>allowed.has(l.symbol)&&Number.isFinite(l.time)&&typeof l.kind==='string'&&typeof l.note==='string'&&l.source==='HUMAN_HINDSIGHT').sort(lessonOrder)}catch(e){status('Could not restore browser lessons. Import your exported JSON.',true)}}
+function snapshot(){undoSnapshot=lessons.map(l=>({...l}));$('undo').disabled=false}
+function sortLessons(){lessons.sort(lessonOrder);persistLessons();renderLessons();renderHumanTrades()}
+function resetEdit(){editId=null;$('save').textContent='Save teaching label';$('cancelEdit').style.display='none';$('note').value=''}
+function applyMode(){
+ const mode=$('researchMode').value,entries=mode==='ENTRIES',academy=mode==='TEACH';
+ $('kind').disabled=entries;if(entries)$('kind').value=entryKind();refreshKindOptions();
+ $('kissLoad').disabled=entries||academy;$('compareEntries').disabled=!entries;
+ $('phaseInfo').textContent=entries?'Independent entries: KISS hidden until comparison. Exits and other labels hidden, not deleted.':academy?'AI Academy: full hindsight; mark entries and exits, review paired hypothetical trades. KISS markers hidden.':'Legacy research view: all label types and saved KISS comparisons available.';
+ kissVisible=false;kissValidated=false;kissTrades=[];
+ $('comparison').textContent=academy?'KISS hidden during hindsight teaching. Switch to legacy view for saved KISS comparison.':'KISS hidden. Load or reveal a comparison when ready.';
+ resetEdit();renderLessons();drawMarkers();renderHumanTrades();
+}
+
+// Chart coordinates and existing lesson.time values are deliberately unchanged.
+// For the original NVDA/AAPL datasets, 09:30–15:55 suggests New York
+// wall-clock timestamps; the original downloader is not yet verified.
+const formatSource = seconds => new Date(seconds * 1000).toISOString().slice(0, 16).replace('T', ' ');
+const provisionalNY = symbol => symbol === 'NVDA' || symbol === 'AAPL';
+const nyParts = new Intl.DateTimeFormat('en-US', {
+  timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit',
+  hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'
+});
+function nyWallAsUTC(ms) {
+  const obj=Object.fromEntries(nyParts.formatToParts(new Date(ms)).filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]));
+  return Date.UTC(obj.year,obj.month-1,obj.day,obj.hour,obj.minute,obj.second);
+}
+function provisionalActualUTC(seconds) {
+  // Solve: New York wall time at actual instant == source wall-clock time.
+  const target=seconds*1000;
+  let guess=target+5*3600000;
+  for(let i=0;i<3;i++) guess+=target-nyWallAsUTC(guess);
+  if(nyWallAsUTC(guess)!==target) throw Error('Ambiguous NY candle timestamp');
+  return new Date(guess).toISOString();
+}
+function displayClock(seconds,symbol) {
+  return formatSource(seconds)+(provisionalNY(symbol)?' NY (provisional)':' source time (unverified)');
+}
+function displayUTC(seconds,symbol) {
+  return provisionalNY(symbol)?provisionalActualUTC(seconds).slice(0,16).replace('T',' ')+' UTC (provisional)':'Not verified for this dataset';
+}
+const fmtPrice=value=>Number.isFinite(value)?'$'+value.toFixed(2):'—';
+function updateHover(event){
+  if(!event||!event.time||!series||!candles.length){clearHover();return}
+  const t=typeof event.time==='number'?event.time:parseTime(event.time);
+  const c=candles.find(x=>x.time===t);
+  if(!c){clearHover();return}
+  $('hoverTime').textContent=displayClock(c.time,$('symbol').value);
+  $('hoverUTC').textContent=displayUTC(c.time,$('symbol').value);
+  $('hoverOpen').textContent=fmtPrice(c.open);
+  $('hoverHigh').textContent=fmtPrice(c.high);
+  $('hoverLow').textContent=fmtPrice(c.low);
+  $('hoverClose').textContent=fmtPrice(c.close);
+  const y=event.point&&Number.isFinite(event.point.y)?event.point.y:null;
+  const price=y===null?NaN:series.coordinateToPrice(y);
+  $('hoverPrice').textContent=fmtPrice(price);
+}
+function clearHover(){for(const id of ['hoverTime','hoverUTC','hoverPrice','hoverOpen','hoverHigh','hoverLow','hoverClose'])$(id).textContent='—'}
+const status=(msg,err=false)=>{$('status').textContent=msg;$('status').className='status'+(err?' warn':'')};
+function parseTime(s){if(typeof s==='number')return s>1e12?Math.floor(s/1000):s;if(typeof s!=='string')throw Error('Invalid candle timestamp');const normalized=s.includes('T')?s:s.replace(' ','T');const ms=Date.parse(/(?:Z|[+-]\d\d:\d\d)$/.test(normalized)?normalized:normalized+'Z');if(!Number.isFinite(ms))throw Error('Invalid candle timestamp '+s);return Math.floor(ms/1000)}
+function normalize(raw){const time=parseTime(raw.timestamp??raw.time);const c={time,open:Number(raw.open),high:Number(raw.high),low:Number(raw.low),close:Number(raw.close)};if(![c.open,c.high,c.low,c.close].every(Number.isFinite))throw Error('Invalid OHLC values');return c}
+async function getCandles(symbol){if(symbol==='NVDA'||symbol==='AAPL'){const url='/static/aimn_visual_lab/aimn_'+symbol.toLowerCase()+'_candles.json';const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw Error('Historical dataset '+r.status);const data=await r.json();if(!Array.isArray(data))throw Error('Invalid historical dataset');return data.map(normalize)}const q=new URLSearchParams({symbol,timeframe:'5m'});if(params.get('broker_id'))q.set('broker_id',params.get('broker_id'));const r=await fetch('/api/aimn_visual_lab/candles?'+q,{cache:'no-store'});if(!r.ok)throw Error('Candle API HTTP '+r.status);const data=await r.json();if(data.status!=='success'||!Array.isArray(data.candles))throw Error(data.message||'Candle API returned no candles');if(data.symbol&&data.symbol!==symbol)throw Error('Candle API symbol mismatch');return data.candles.map(normalize)}
+function supertrend(data,period=10,mult=3){let atr=0,prevClose=0,upper=0,lower=0,trend=1;const output=[];for(let i=0;i<data.length;i++){const c=data[i];const tr=i===0?c.high-c.low:Math.max(c.high-c.low,Math.abs(c.high-prevClose),Math.abs(c.low-prevClose));atr=i===0?tr:(atr*(period-1)+tr)/period;const middle=(c.high+c.low)/2;const basicUpper=middle+mult*atr,basicLower=middle-mult*atr;const prevUpper=upper,prevLower=lower;upper=i===0?basicUpper:(basicUpper<prevUpper||prevClose>prevUpper?basicUpper:prevUpper);lower=i===0?basicLower:(basicLower>prevLower||prevClose<prevLower?basicLower:prevLower);if(i>0){if(trend===1&&c.close<prevLower)trend=-1;else if(trend===-1&&c.close>prevUpper)trend=1}if(i>=period-1)output.push({time:c.time,value:trend===1?lower:upper,trend});prevClose=c.close}return output}
+function drawSupertrend(){stSeries.forEach(s=>{try{chart.removeSeries(s)}catch(e){}});stSeries=[];if(!$('supertrend').checked||!chart)return;const points=supertrend(candles);let segment=[],direction=null;function flush(){if(segment.length){const s=chart.addLineSeries({color:direction===1?'#15cb8d':'#ff6666',lineWidth:2,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});s.setData(segment);stSeries.push(s)}segment=[]}for(const p of points){if(direction!==null&&p.trend!==direction)flush();direction=p.trend;segment.push({time:p.time,value:p.value})}flush()}
+function drawMarkers(){
+ if(!series)return;
+ const symbol=$('symbol').value,entriesOnly=$('researchMode').value==='ENTRIES',academy=$('researchMode').value==='TEACH';
+ const visibleTimes=new Set(candles.map(c=>c.time));
+ const markers=lessons.filter(l=>l.symbol===symbol&&visibleTimes.has(l.time)&&(!entriesOnly||isEntry(l.kind))&&(!academy||teachingAllows(l.kind))).map(l=>({time:l.time,position:l.kind.includes('SHORT')?'aboveBar':'belowBar',color:l.kind.includes('NOISE')?'#f3c96d':l.kind.includes('SHORT')?'#ff8585':'#7fe5b5',shape:l.kind.includes('EXIT')?'circle':l.kind==='ENTER_SHORT'?'arrowDown':'arrowUp',text:l.kind.replaceAll('_',' ')+(l.confidence==='NEEDS_REVIEW'?' ?':'')}));
+ if(kissValidated&&kissVisible){for(const t of kissTrades){const entry=parseTime(t.entry_time);if(visibleTimes.has(entry))markers.push({time:entry,position:$('direction').value==='LONG'?'belowBar':'aboveBar',color:'#60a5fa',shape:$('direction').value==='LONG'?'arrowUp':'arrowDown',text:'KISS ENTRY '+String(t.trade_id??'')});if(!entriesOnly){const exit=parseTime(t.exit_time);if(visibleTimes.has(exit))markers.push({time:exit,position:$('direction').value==='LONG'?'aboveBar':'belowBar',color:'#fbbf24',shape:$('direction').value==='LONG'?'arrowDown':'arrowUp',text:'KISS EXIT '+String(t.trade_id??'')})}}}
+ markers.sort((a,b)=>a.time-b.time);series.setMarkers(markers)
+}
+async function load(){const generation=++loadGeneration;kissValidated=false;kissTrades=[];kissVisible=false;$('comparison').textContent='KISS overlay cleared. Load saved trades after chart loads.';const symbol=$('symbol').value;status('Loading '+symbol+' historical 5-minute candles…');try{const raw=await getCandles(symbol);if(generation!==loadGeneration)return;raw.sort((a,b)=>a.time-b.time);candles=raw.filter((c,i)=>i===0||c.time!==raw[i-1].time);if(!candles.length)throw Error('No historical candles');if(chart)chart.remove();chart=LightweightCharts.createChart($('chart'),{width:$('chart').clientWidth,height:$('chart').clientHeight,layout:{background:{color:'#0b1220'},textColor:'#dce7f5'},grid:{vertLines:{color:'#1b2b3d'},horzLines:{color:'#1b2b3d'}},localization:{timeFormatter:time=>displayClock(typeof time==='number'?time:parseTime(time),symbol)},timeScale:{timeVisible:true,secondsVisible:false,tickMarkFormatter:(time,tickMarkType,locale)=>{const d=new Date((typeof time==='number'?time:parseTime(time))*1000);return tickMarkType===0?String(d.getUTCFullYear()):tickMarkType===1?d.toLocaleString('en-US',{month:'short',timeZone:'UTC'}):tickMarkType===2?String(d.getUTCDate()):d.toISOString().slice(11,16)}}});series=chart.addCandlestickSeries({upColor:'#26a69a',downColor:'#ef5350',borderVisible:false,wickUpColor:'#26a69a',wickDownColor:'#ef5350'});series.setData(candles);stSeries=[];drawSupertrend();drawMarkers();chart.timeScale().fitContent();selected=null;$('selected').textContent='No candle selected';clearHover();chart.subscribeCrosshairMove(updateHover);chart.subscribeClick(event=>{if(!event.time)return;const t=typeof event.time==='number'?event.time:parseTime(event.time);const c=candles.find(x=>x.time===t);if(!c)return;selected=c;$('selected').textContent=symbol+' · '+displayClock(c.time,symbol)+' · Close '+c.close.toFixed(3)});status(symbol+' · '+candles.length.toLocaleString()+' historical candles · read-only');}catch(e){candles=[];selected=null;if(chart){chart.remove();chart=null;series=null}status('Unable to load chart: '+e.message,true)}}
+function renderLessons(){
+ const entriesOnly=$('researchMode').value==='ENTRIES',academy=$('researchMode').value==='TEACH',symbol=$('symbol').value;
+ const visible=lessons.filter(l=>l.symbol===symbol&&(!entriesOnly||isEntry(l.kind))&&(!academy||teachingAllows(l.kind))).sort(lessonOrder);
+ $('lessonCount').textContent=visible.length+' visible labels for '+symbol+' · '+lessons.length+' total saved (all symbols and types)';
+ const list=$('lessonList');list.replaceChildren();
+ visible.forEach(l=>{
+  const row=document.createElement('div');row.className='lesson';
+  const txt=document.createElement('div');const head=document.createElement('strong');
+  head.textContent=l.symbol+' · '+l.kind+' · '+displayClock(l.time,l.symbol);
+  const desc=document.createElement('p');desc.textContent=l.note||'(no explanation)';
+  const conf=document.createElement('div');conf.className='confidence small';conf.textContent='Confidence: '+(l.confidence||'Not rated');
+  txt.append(head,desc,conf);
+  const controls=document.createElement('div');controls.className='lessonButtons';
+  const edit=document.createElement('button');edit.textContent='Edit';edit.className='secondary';edit.onclick=()=>{
+   if(l.symbol!==$('symbol').value){status('Load '+l.symbol+' before editing this label.',true);return}
+   editId=l.id||null;
+   if(!l.id){l.id='legacy-'+String(l.recorded_at||'')+'-'+l.time+'-'+l.kind;editId=l.id;persistLessons()}
+   if($('researchMode').value==='TEACH'&&!teachingAllows(l.kind)){$('teachingDirection').value='BOTH';refreshKindOptions()}$('kind').value=l.kind;$('confidence').value=l.confidence||'MEDIUM';$('note').value=l.note;
+   selected=candles.find(c=>c.time===l.time)||{time:l.time,close:l.close};
+   $('selected').textContent='Editing '+displayClock(l.time,l.symbol)+' · '+l.kind;
+   $('save').textContent='Update selected label';$('cancelEdit').style.display='inline-block';
+   $('note').focus();
+  };
+  const remove=document.createElement('button');remove.textContent='Remove';remove.className='secondary';remove.onclick=()=>{snapshot();lessons=lessons.filter(x=>x!==l);sortLessons();drawMarkers();if(editId===l.id)resetEdit()};
+  controls.append(edit,remove);row.append(txt,controls);list.append(row)
+ })
+}
+$('save').onclick=()=>{
+ if(!selected){alert('Click a candle first.');return}
+ const symbol=$('symbol').value,kind=$('researchMode').value==='ENTRIES'?entryKind():$('kind').value;
+ if($('researchMode').value==='TEACH'&&!teachingAllows(kind)){alert('This label is outside the selected teaching direction.');return}
+  const note=$('note').value.trim();if(!note){alert('Please explain the lesson before saving.');return}
+ snapshot();
+ if(editId){const index=lessons.findIndex(l=>l.id===editId);if(index<0){alert('Original label not found. Cancel edit and try again.');return}
+  const old=lessons[index];lessons[index]={...old,kind,note,confidence:$('confidence').value,edited_at:new Date().toISOString()};
+ }else{
+  const existing=lessons.find(l=>l.symbol===symbol&&l.time===selected.time&&l.kind===kind);
+  if(existing&&!confirm('An entry of this type already exists on this candle. Add another?'))return;
+  lessons.push({id:'label-'+Date.now()+'-'+Math.random().toString(36).slice(2),symbol,direction:$('direction').value,timeframe:'5m',time:selected.time,utc:provisionalNY(symbol)?provisionalActualUTC(selected.time):null,market_timestamp:formatSource(selected.time),timestamp_basis:provisionalNY(symbol)?'NY_PROVISIONAL':'SOURCE_UNVERIFIED',close:selected.close,kind,note,confidence:$('confidence').value,source:'HUMAN_HINDSIGHT',recorded_at:new Date().toISOString()});
+ }
+ resetEdit();sortLessons();drawMarkers();status('Teaching label saved. Labels are sorted by candle time.')
+};
+$('cancelEdit').onclick=resetEdit;
+$('undo').onclick=()=>{if(!undoSnapshot)return;lessons=undoSnapshot;undoSnapshot=null;$('undo').disabled=true;resetEdit();sortLessons();drawMarkers();status('Last label change undone.')};
+$('sortLessons').onclick=()=>{sortLessons();status('Labels sorted from earliest to latest candle time.')};
+$('export').onclick=()=>{if(!lessons.length){alert('No lessons to export.');return}sortLessons();const payload={schema:'aimn_ai_teaching_v1',timestamp_policy:'chart_coordinates_unchanged; original_NY_assumption_provisional',research_type:'historical_hindsight',created_at:new Date().toISOString(),lessons};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='aimn_ai_teaching_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('import').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{
+ const data=JSON.parse(await file.text());if(data.schema!=='aimn_ai_teaching_v1'||!Array.isArray(data.lessons))throw Error('Not an AIMn teaching export');
+ const valid=data.lessons.filter(l=>allowed.has(l.symbol)&&Number.isFinite(l.time)&&typeof l.kind==='string'&&typeof l.note==='string'&&l.source==='HUMAN_HINDSIGHT');
+ if(valid.length!==data.lessons.length)throw Error('Some labels are invalid; import cancelled');
+ snapshot();let added=0;
+ const keys=new Set(lessons.map(l=>[l.symbol,l.time,l.kind,l.note].join('|')));
+ for(const l of valid){const key=[l.symbol,l.time,l.kind,l.note].join('|');if(keys.has(key))continue;keys.add(key);lessons.push({...l,id:l.id||'import-'+Date.now()+'-'+added,legacy_utc:l.utc??null,utc:provisionalNY(l.symbol)?provisionalActualUTC(l.time):null,market_timestamp:formatSource(l.time),timestamp_basis:provisionalNY(l.symbol)?'NY_PROVISIONAL':'SOURCE_UNVERIFIED'});added++}
+ sortLessons();drawMarkers();status('Imported '+added+' new historical teaching labels; '+(valid.length-added)+' duplicates skipped.')
+ }catch(err){status('Import failed: '+err.message,true)}e.target.value=''};
+
+async function loadSavedKiss(){
+  const symbol=$('symbol').value,direction=$('direction').value,generation=loadGeneration;
+  kissValidated=false;kissTrades=[];kissVisible=false;drawMarkers();
+  const report=$('comparison');report.textContent='Checking saved KISS snapshot and full candle alignment…';
+  $('kissLoad').disabled=true;
+  try{
+    if(!candles.length)throw Error('Load the historical chart first');
+    const q=new URLSearchParams({symbol,direction,timeframe:'5m',broker_id:params.get('broker_id')||'',entry_mode:$('kissMode').value,rsi_rescue_long:$('kissLong').value,rsi_rescue_short:$('kissShort').value,trailing_minus_pct:$('kissTrail').value,commission_pct:$('kissFee').value});
+    const savedResponse=await fetch('/api/aimn_visual_lab/saved_trades?'+q,{cache:'no-store'});
+    if(!savedResponse.ok)throw Error('Saved trades request HTTP '+savedResponse.status);
+    const saved=await savedResponse.json();
+    if(saved.status==='not_saved')throw Error('No saved KISS snapshot matches these exact settings. No backtest was run.');
+    if(saved.status!=='success'||!Array.isArray(saved.trades))throw Error(saved.message||'Invalid saved-trades response');
+    if(saved.symbol!==symbol||saved.direction!==direction||saved.timeframe!=='5m'||String(saved.broker_id)!==String(q.get('broker_id')))throw Error('Saved snapshot identity does not match selection');
+    if(saved.parameters?.entry_mode!==q.get('entry_mode'))throw Error('Saved entry mode mismatch');
+    const candleQ=new URLSearchParams({symbol,timeframe:'5m',broker_id:q.get('broker_id')});
+    const candleResponse=await fetch('/api/aimn_visual_lab/candles?'+candleQ,{cache:'no-store'});
+    if(!candleResponse.ok)throw Error('MySQL candle request HTTP '+candleResponse.status);
+    const db=await candleResponse.json();
+    if(db.status!=='success'||!Array.isArray(db.candles))throw Error(db.message||'Invalid MySQL candle response');
+    const dbCandles=db.candles.map(normalize).sort((a,b)=>a.time-b.time);
+    if(dbCandles.length!==candles.length)throw Error('Dataset mismatch: chart has '+candles.length+' candles; MySQL has '+dbCandles.length+'. KISS markers blocked.');
+    const tolerance=0.00001;
+    for(let i=0;i<candles.length;i++){
+      const a=candles[i],b=dbCandles[i];
+      if(a.time!==b.time||['open','high','low','close'].some(k=>Math.abs(a[k]-b[k])>tolerance)){
+        throw Error('Dataset mismatch at candle '+(i+1)+': chart '+displayClock(a.time,symbol)+' vs MySQL '+displayClock(b.time,symbol)+'. KISS markers blocked.');
+      }
+    }
+    if(generation!==loadGeneration||symbol!==$('symbol').value||direction!==$('direction').value)throw Error('Selection changed while loading; please retry');
+    const visible=new Set(candles.map(c=>c.time));
+    let outside=0;
+    for(const trade of saved.trades){if(!trade.entry_time||!trade.exit_time)throw Error('Saved trade missing entry/exit timestamp');if(!visible.has(parseTime(trade.entry_time))||!visible.has(parseTime(trade.exit_time)))outside++}
+    kissTrades=saved.trades;kissValidated=true;kissVisible=true;drawMarkers();
+    const inRange=saved.trades.length-outside;
+    report.textContent='DATASET VERIFIED: '+candles.length+' candles match MySQL timestamps and OHLC. Saved '+saved.parameters.entry_mode+' '+direction+' trades: '+saved.trades.length+'; '+inRange+' fully within chart, '+outside+' outside chart. Saved '+String(saved.saved_at_utc||'unknown')+'. Reported total P&L: '+String(saved.total_pnl_pct??'unknown')+'%. Blue = KISS entry; gold = KISS exit (legacy view only); red/green = human hindsight. No backtest executed.';
+  }catch(e){kissValidated=false;kissTrades=[];kissVisible=false;drawMarkers();report.textContent='KISS comparison unavailable: '+e.message}
+  finally{$('kissLoad').disabled=false}
+}
+
+function calculateHumanTrades(){
+ const symbol=$('symbol').value,mode=$('teachingDirection').value;
+ const ordered=lessons.filter(l=>l.symbol===symbol&&tradeKinds.has(l.kind)&&(mode==='BOTH'||l.kind.endsWith(mode))).slice().sort(lessonOrder);
+ const active={SHORT:null,LONG:null},trades=[],warnings=[];
+ for(const l of ordered){
+  const dir=l.kind.endsWith('SHORT')?'SHORT':'LONG';
+  if(l.kind.startsWith('ENTER')){
+   if(active[dir])warnings.push('Repeated '+dir+' entry at '+displayClock(l.time,symbol)+'; earlier entry still open');
+   else active[dir]=l;
+  }else{
+   const entry=active[dir];
+   if(!entry){warnings.push('Unpaired '+dir+' exit at '+displayClock(l.time,symbol));continue}
+   if(l.time<=entry.time){warnings.push('Non-chronological '+dir+' exit at '+displayClock(l.time,symbol));continue}
+   const e=Number(entry.close),x=Number(l.close);
+   if(!(e>0&&x>0)){warnings.push('Invalid entry/exit price for '+dir+' at '+displayClock(l.time,symbol));active[dir]=null;continue}
+   const gross=dir==='SHORT'?(e-x)/e*100:(x-e)/e*100;
+   const fee=Number($('humanFee').value);
+   const net=gross-2*(Number.isFinite(fee)&&fee>=0?fee:0);
+   trades.push({symbol,direction:dir,entry_label_id:entry.id,exit_label_id:l.id,entry_time:entry.time,exit_time:l.time,entry_close:e,exit_close:x,holding_minutes:(l.time-entry.time)/60,gross_pct:gross,net_pct:net,commission_per_side_pct:fee,source:'HUMAN_HINDSIGHT',price_basis:'CANDLE_CLOSE'});
+   active[dir]=null;
+  }
+ }
+ for(const dir of ['SHORT','LONG'])if(active[dir])warnings.push('Open '+dir+' entry at '+displayClock(active[dir].time,symbol)+' — no exit yet');
+ if(active.SHORT&&active.LONG)warnings.push('Overlapping LONG and SHORT lessons; verify intended position policy');
+ return {trades,warnings};
+}
+function renderHumanTrades(){
+ if(!$('humanTrades'))return;
+ const {trades,warnings}=calculateHumanTrades();
+ const sum=trades.reduce((a,t)=>a+t.net_pct,0),grossSum=trades.reduce((a,t)=>a+t.gross_pct,0);
+ const wins=trades.filter(t=>t.net_pct>0).length,losses=trades.filter(t=>t.net_pct<0).length,breakeven=trades.length-wins-losses;
+ const winRate=trades.length?100*wins/trades.length:0,average=trades.length?sum/trades.length:0;
+ $('humanSummary').textContent=trades.length+' completed hindsight trades · '+wins+' winners · '+losses+' losers · '+breakeven+' breakeven · win rate '+winRate.toFixed(1)+'% · average net '+average.toFixed(3)+'% per trade · sum gross '+grossSum.toFixed(3)+'% · sum net '+sum.toFixed(3)+'% (uncompounded; not portfolio return)'+(warnings.length?' · '+warnings.length+' pairing warnings':'');
+ const target=$('humanTrades');target.replaceChildren();
+ const table=document.createElement('table');table.style.cssText='width:100%;border-collapse:collapse;text-align:left;font-variant-numeric:tabular-nums';
+ const header=document.createElement('tr');for(const name of ['Direction','Entry (source time)','Exit (source time)','Entry close','Exit close','Minutes','Gross %','Net %']){const th=document.createElement('th');th.textContent=name;th.style.padding='9px';header.append(th)}table.append(header);
+ for(const t of trades){const row=document.createElement('tr');for(const val of [t.direction,displayClock(t.entry_time,t.symbol),displayClock(t.exit_time,t.symbol),fmtPrice(t.entry_close),fmtPrice(t.exit_close),t.holding_minutes.toFixed(0),t.gross_pct.toFixed(3),t.net_pct.toFixed(3)]){const cell=document.createElement('td');cell.textContent=val;cell.style.cssText='padding:9px;border-top:1px solid #30475e';row.append(cell)}table.append(row)}target.append(table);
+ for(const w of warnings){const p=document.createElement('p');p.className='warn';p.textContent='⚠ '+w;target.append(p)}
+}
+$('teachingDirection').onchange=()=>{refreshKindOptions();renderLessons();drawMarkers();renderHumanTrades()};
+$('humanFee').oninput=renderHumanTrades;
+$('exportTrades').onclick=()=>{const result=calculateHumanTrades();const payload={schema:'aimn_hindsight_paired_trades_v1',symbol:$('symbol').value,created_at:new Date().toISOString(),...result};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='aimn_hindsight_trades_'+$('symbol').value+'_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('kissLoad').onclick=loadSavedKiss;
+$('compareEntries').onclick=async()=>{
+ if($('researchMode').value!=='ENTRIES')return;
+ if(!confirm('Reveal KISS entries now? For an independent experiment, finish and export your human entries first.'))return;
+ await loadSavedKiss();
+};
+$('hideComparison').onclick=()=>{kissVisible=false;kissValidated=false;kissTrades=[];drawMarkers();$('comparison').textContent='KISS hidden again. Human labels unchanged.'};
+$('researchMode').onchange=applyMode;
+
+$('kissClear').onclick=()=>{kissValidated=false;kissTrades=[];kissVisible=false;drawMarkers();$('comparison').textContent='KISS markers hidden. Human teaching labels preserved.'};
+$('direction').onchange=()=>{kissValidated=false;kissTrades=[];kissVisible=false;if($('researchMode').value==='ENTRIES')$('kind').value=entryKind();resetEdit();renderLessons();drawMarkers();$('comparison').textContent='Direction changed; load the corresponding saved KISS snapshot.'};
+$('load').onclick=load;$('entire').onclick=()=>{if(chart)chart.timeScale().fitContent()};$('supertrend').onchange=()=>{if(chart)drawSupertrend()};$('symbol').onchange=()=>{resetEdit();load();renderLessons()};window.addEventListener('resize',()=>{if(chart)chart.applyOptions({width:$('chart').clientWidth,height:$('chart').clientHeight})});restoreLessons();$('undo').disabled=true;applyMode();load();
+</script></body></html>

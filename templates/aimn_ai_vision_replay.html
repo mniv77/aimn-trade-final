@@ -6,11 +6,11 @@
 <body><header><h1>AIMn AI Vision — All-Symbol Blind Replay & Research Log</h1><small>Independent research • All supported symbols • No KISS markers • No future candles on chart • No live orders • No automatic AI inference</small></header>
 <main>
 <section><div class="row"><label>Research direction <select id="direction"><option value="BOTH" selected>BOTH — AI chooses</option><option value="LONG">LONG only</option><option value="SHORT">SHORT only</option></select></label><label>Initial visible candles <input id="initial" type="number" value="100" min="20"></label><label>Step size <input id="step" type="number" value="5" min="1" max="100"></label><label>Optional local candle JSON <input id="file" type="file" accept=".json,application/json"></label><span id="selection"></span></div><p id="status">Loading historical candles from KISS Backtest Control selection…</p><div class="row"><button id="back" disabled>Earlier</button><button id="next" disabled>Reveal next step</button><button id="reset" disabled>Reset to beginning</button><button id="snapshot" disabled>Save chart PNG</button><span id="position"></span></div><p class="warning">Replay deliberately stops after each step for a new assessment. It cannot make ChatGPT decisions unattended.</p></section>
-<section><div id="chart"></div><p id="fallback">Chart library did not load. An internet connection is required to display candlesticks.</p></section>
+<section><div class="row" style="margin-bottom:12px"><label><input id="showST" type="checkbox"> Show Supertrend</label><label>ATR period <input id="stPeriod" type="number" min="2" max="100" value="10"></label><label>Multiplier <input id="stMultiplier" type="number" min="0.1" max="20" step="0.1" value="3"></label><small>Calculated only from revealed candles • ATR(10) × 3 default</small></div><div id="chart"></div><p id="fallback">Chart library did not load. An internet connection is required to display candlesticks.</p></section>
 <section><h2>Record a blind AI assessment</h2><p>Use only the visible chart. Record the decision <strong>before</strong> revealing more candles. A decision can be copied into ChatGPT for review, then saved here manually.</p><div class="row"><label>Decision <select id="decision"><option>WAIT</option><option>WATCH LONG</option><option>WATCH SHORT</option><option>ENTER LONG</option><option>ENTER SHORT</option><option>EXIT LONG</option><option>EXIT SHORT</option></select></label><label>Confidence <select id="confidence"><option>Low</option><option selected>Moderate</option><option>High</option></select></label><label>Reason <input id="reason" type="text" placeholder="Visible chart evidence" size="55"></label></div><p><label>Paste AI assessment (JSON) <textarea id="aiResponse" placeholder="Paste the structured JSON assessment returned by ChatGPT, then click Apply AI assessment"></textarea></label></p><div class="row"><button id="applyAI">Apply AI assessment</button><small>Checks the symbol, direction, and last visible candle before filling the assessment. Record it before revealing more candles.</small></div><p><label>Additional observations<textarea id="notes" placeholder="Levels, invalidation, uncertainty; no future information"></textarea></label></p><div class="row"><button id="record" disabled>Record prediction at current candle</button><button id="copy" disabled>Copy blind AI assessment packet</button><button id="export" disabled>Export prediction log JSON</button><button id="import">Import previous prediction log</button><input id="logfile" type="file" accept=".json,application/json" hidden></div><p id="feedback"></p><div id="logWrap"><table><thead><tr><th>#</th><th>Last candle (UTC)</th><th>Close</th><th>Decision</th><th>Confidence</th><th>Reason</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 </main><script>
 'use strict';
-const $=id=>document.getElementById(id);let candles=[],visible=0,log=[],chart,series,sourceName='';
+const $=id=>document.getElementById(id);let candles=[],visible=0,log=[],chart,series,stSegments=[],sourceName='';
 const launchParams=new URLSearchParams(window.location.search);
 const selectedSymbol=(launchParams.get('symbol')||'').trim().toUpperCase();
 const selectedBroker=(launchParams.get('broker_id')||'').trim();
@@ -25,10 +25,47 @@ const out=arr.map((x,i)=>{if(Array.isArray(x)){if(x.length<5)throw Error('Candle
 let t=x.time??x.timestamp??x.datetime??x.date??x.t??x.ts;let n;if(typeof t==='number')n=t>1e12?Math.floor(t/1000):t;else if(typeof t==='string'&&/^\d+$/.test(t)){let v=Number(t);n=v>1e12?Math.floor(v/1000):v}else{let parsed=Date.parse(t);if(!Number.isFinite(parsed))throw Error('Invalid timestamp at candle '+i);n=Math.floor(parsed/1000)}
 let o=Number(x.open??x.o),h=Number(x.high??x.h),l=Number(x.low??x.l),c=Number(x.close??x.c);if(![n,o,h,l,c].every(Number.isFinite))throw Error('Invalid OHLC at candle '+i);if(h<Math.max(o,c)||l>Math.min(o,c))throw Error('OHLC inconsistent at candle '+i);return {time:n,open:o,high:h,low:l,close:c}}).sort((a,b)=>a.time-b.time);
 for(let i=1;i<out.length;i++)if(out[i].time===out[i-1].time)throw Error('Duplicate candle timestamp '+stamp(out[i].time));if(out.length<20)throw Error('At least 20 candles required');return out}
+// Wilder ATR and conventional Supertrend; no future candles are used.
+function supertrend(bars,period,multiplier){
+  const segments=[];let active=null;
+  let atr=0,trSum=0,prevUpper=NaN,prevLower=NaN,prevST=NaN;
+  for(let i=0;i<bars.length;i++){
+    const b=bars[i],prev=bars[i-1];
+    const tr=prev?Math.max(b.high-b.low,Math.abs(b.high-prev.close),Math.abs(b.low-prev.close)):b.high-b.low;
+    if(i<period)trSum+=tr;
+    if(i===period-1)atr=trSum/period;
+    else if(i>=period)atr=(atr*(period-1)+tr)/period;
+    if(i<period-1)continue;
+    const mid=(b.high+b.low)/2;
+    const basicUpper=mid+multiplier*atr,basicLower=mid-multiplier*atr;
+    const upper=i===period-1?basicUpper:(basicUpper<prevUpper||prev.close>prevUpper?basicUpper:prevUpper);
+    const lower=i===period-1?basicLower:(basicLower>prevLower||prev.close<prevLower?basicLower:prevLower);
+    // A switch is tested against the *current* final band, but the prior
+    // Supertrend determines which side was active on the preceding candle.
+    let trend;
+    if(i===period-1)trend=b.close>=mid?1:-1;
+    else if(prevST===prevUpper)trend=b.close>upper?1:-1;
+    else trend=b.close<lower?-1:1;
+    const st=trend===1?lower:upper;
+    // Only one band has a value at a time. Independent series prevent false joins.
+    // Create independent continuous segments. No chart series ever spans a flip.
+    if(!active||active.trend!==trend){active={trend,points:[]};segments.push(active)}
+    active.points.push({time:b.time,value:st});
+    prevUpper=upper;prevLower=lower;prevST=st;
+  }
+  return segments;
+}
 function initChart(){if(!window.LightweightCharts){$('fallback').style.display='block';return}chart=LightweightCharts.createChart($('chart'),{layout:{background:{color:'#111c2b'},textColor:'#b9c8d8'},grid:{vertLines:{color:'#233347'},horzLines:{color:'#233347'}},rightPriceScale:{borderColor:'#34465e'},timeScale:{borderColor:'#34465e',timeVisible:true,secondsVisible:false},width:$('chart').clientWidth,height:510});series=chart.addCandlestickSeries({upColor:'#26a69a',downColor:'#ef5350',borderVisible:false,wickUpColor:'#26a69a',wickDownColor:'#ef5350'});new ResizeObserver(()=>chart.applyOptions({width:$('chart').clientWidth})).observe($('chart'))}
-function render(){if(!candles.length)return;let end=candles[visible-1];$('position').textContent=`${visible} of ${candles.length} candles • Last: ${stamp(end.time)} • Close: ${end.close.toFixed(2)}`;$('status').textContent=`${sourceName} / ${researchDirection()} loaded. Only candles through ${stamp(end.time)} are shown.`;if(series){series.setData(candles.slice(0,visible));chart.timeScale().fitContent();let from=Math.max(0,visible-95);chart.timeScale().setVisibleLogicalRange({from,to:visible+2})} $('back').disabled=visible<=20;$('next').disabled=visible>=candles.length;$('reset').disabled=false;$('snapshot').disabled=!chart;$('record').disabled=false;$('copy').disabled=false;$('export').disabled=log.length===0;renderLog()}
+function render(){if(!candles.length)return;let end=candles[visible-1];$('position').textContent=`${visible} of ${candles.length} candles • Last: ${stamp(end.time)} • Close: ${end.close.toFixed(2)}`;$('status').textContent=`${sourceName} / ${researchDirection()} loaded. Only candles through ${stamp(end.time)} are shown.`;if(series){series.setData(candles.slice(0,visible));const show=$('showST').checked,period=Math.max(2,Math.floor(Number($('stPeriod').value)||10)),mult=Math.max(.1,Number($('stMultiplier').value||3));stSegments.forEach(line=>chart.removeSeries(line));stSegments=[];
+if(show){for(const segment of supertrend(candles.slice(0,visible),period,mult)){
+  if(segment.points.length<2)continue;
+  const line=chart.addLineSeries({color:segment.trend===1?'#32d583':'#ff6b6b',lineWidth:2,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+  line.setData(segment.points);stSegments.push(line);
+}}
+chart.timeScale().fitContent();let from=Math.max(0,visible-95);chart.timeScale().setVisibleLogicalRange({from,to:visible+2})} $('back').disabled=visible<=20;$('next').disabled=visible>=candles.length;$('reset').disabled=false;$('snapshot').disabled=!chart;$('record').disabled=false;$('copy').disabled=false;$('export').disabled=log.length===0;renderLog()}
 function renderLog(){$('rows').replaceChildren();log.forEach((r,i)=>{let tr=document.createElement('tr');[i+1,r.candle_utc,r.close,r.decision,r.confidence,r.reason].forEach(v=>{let td=document.createElement('td');td.textContent=v;tr.append(td)});$('rows').append(tr)})}
 function saveBlob(name,blob){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
+['showST','stPeriod','stMultiplier'].forEach(id=>$(id).addEventListener('change',()=>{if(candles.length)render()}));
 $('direction').onchange=()=>{if(candles.length)render();setFeedback('Research direction: '+researchDirection()+'. Replay position unchanged. Existing recorded predictions keep their original direction.');};
 async function loadSelectedSymbol(){
   let symbol=symbolName();
@@ -86,4 +123,7 @@ if(['LONG','SHORT','BOTH'].includes((urlDirection||'').toUpperCase()))$('directi
 $('selection').textContent=selectedSymbol+' · '+selectedTimeframe;
 initChart();
 loadSelectedSymbol();
-</script></body></html>
+</script>
+<script src="/static/aimn_trend_noise_panel.js"></script>
+</body>
+</html>

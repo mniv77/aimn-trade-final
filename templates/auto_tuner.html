@@ -135,6 +135,27 @@
         <p class="hint" style="margin-top:10px;">Controlled research baseline: real 5-minute candles. Select broker, symbol and direction, adjust the three research parameters, then inspect every net loser.</p>
     </div>
 
+
+
+<a
+  href="/aimn_ai_teaching"
+  target="_blank"
+  class="aimn-teaching-link"
+  style="display:inline-block;
+         background:#2563eb;
+         color:#ffffff;
+         padding:13px 20px;
+         border-radius:6px;
+         font-weight:700;
+         text-decoration:none;
+         margin:12px 10px 0 0;"
+>
+  🧠 Open AI Teaching &amp; Trade Comparison
+</a>
+
+
+
+
     <div class="panel">
         <div class="title">📈 Review</div>
         <a class="feedback-link aimn-lab-link" href="/aimn_visual_lab" target="_blank">📈 Open Feedback Chart (Working)</a>
@@ -203,6 +224,7 @@ symbolSelect.addEventListener('change', updateChartLink);
 
 // AIMN_LAB_CONNECTION_V1
 // Auto Tuner sends research context; no trades are executed.
+
 function updateChartLink() {
     const p = new URLSearchParams();
 
@@ -218,38 +240,55 @@ function updateChartLink() {
         trailing_minus_pct: document.getElementById('trailing_minus').value
     };
 
-    Object.entries(values).forEach(([key,value]) => {
-        if(value !== '') p.set(key,value);
+    Object.entries(values).forEach(([key, value]) => {
+        if (value !== '') {
+            p.set(key, value);
+        }
     });
 
-    const url = '/aimn_visual_lab?' + p.toString();
-    const visionParams = new URLSearchParams({
-        broker_id: brokerSelect.value || '',
-        symbol: (symbolSelect.value || '').toUpperCase(),
-        direction: direction || 'LONG',
-        timeframe: '5m'
-    });
-    const visionLink = document.querySelector('.aimn-vision-link');
-    if (visionLink) visionLink.href = '/aimn_ai_vision_replay?' + visionParams.toString();
+    // Existing Feedback Chart
+    const labUrl = '/aimn_visual_lab?' + p.toString();
 
     document.querySelectorAll('.aimn-lab-link')
         .forEach(link => {
-            link.href = url;
+            link.href = labUrl;
         });
+
+    // Existing AI Vision Replay
+    const visionParams = new URLSearchParams({
+        broker_id: brokerSelect.value || '',
+        symbol: (symbolSelect.value || '').toUpperCase(),
+        direction: direction || 'SHORT',
+        timeframe: '5m'
+    });
+
+    const visionLink =
+        document.querySelector('.aimn-vision-link');
+
+    if (visionLink) {
+        visionLink.href =
+            '/aimn_ai_vision_replay?' +
+            visionParams.toString();
+    }
+
+    // NEW: AI Teaching & Trade Comparison
+    const teachingLink =
+        document.querySelector('.aimn-teaching-link');
+
+    if (teachingLink) {
+        const teachingParams = new URLSearchParams({
+            broker_id: brokerSelect.value || '',
+            symbol: (symbolSelect.value || '').toUpperCase(),
+            direction: direction || 'SHORT',
+            timeframe: '5m'
+        });
+
+        teachingLink.href =
+            '/aimn_ai_teaching?' +
+            teachingParams.toString();
+    }
 }
 
-[
-    'broker_select',
-    'symbol_select',
-    'entry_mode',
-    'commission_pct',
-    'rsi_rescue_long',
-    'rsi_rescue_short',
-    'trailing_minus'
-].forEach(id => {
-    document.getElementById(id)
-        .addEventListener('change',updateChartLink);
-});
 
 document.getElementById('btn_long')
     .addEventListener('click',updateChartLink);
