@@ -1,0 +1,91 @@
+{
+  "data_sha256": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+  "source_hashes": {
+    "E0_D3_candidates.csv": "4819c84b70abeaf9071ae0b854fa05eadb190a33332737dc9463292037f52c5d",
+    "E0_D3_trades.csv": "25e517cd5dce97bcb307829a824f8541f0d3c036260d2bd9f669b2eb04f762d2"
+  },
+  "opening_trades": 28,
+  "winners": 7,
+  "losers": 21,
+  "groups": [
+    {
+      "split": "ALL",
+      "outcome": "WINNER",
+      "trades": 7,
+      "net_sum_pct": 5.959075
+    },
+    {
+      "split": "ALL",
+      "outcome": "LOSER",
+      "trades": 21,
+      "net_sum_pct": -10.174557
+    },
+    {
+      "split": "ALL",
+      "outcome": "LOSS_CLOSE_ABOVE_FEE",
+      "trades": 2,
+      "net_sum_pct": -0.176992
+    },
+    {
+      "split": "ALL",
+      "outcome": "LOSS_CLOSE_NOT_ABOVE_FEE",
+      "trades": 19,
+      "net_sum_pct": -9.997565
+    },
+    {
+      "split": "JUN_JUL",
+      "outcome": "WINNER",
+      "trades": 3,
+      "net_sum_pct": 3.26775
+    },
+    {
+      "split": "JUN_JUL",
+      "outcome": "LOSER",
+      "trades": 13,
+      "net_sum_pct": -5.78743
+    },
+    {
+      "split": "JUN_JUL",
+      "outcome": "LOSS_CLOSE_ABOVE_FEE",
+      "trades": 2,
+      "net_sum_pct": -0.176992
+    },
+    {
+      "split": "JUN_JUL",
+      "outcome": "LOSS_CLOSE_NOT_ABOVE_FEE",
+      "trades": 11,
+      "net_sum_pct": -5.610438
+    },
+    {
+      "split": "AUG",
+      "outcome": "WINNER",
+      "trades": 4,
+      "net_sum_pct": 2.691325
+    },
+    {
+      "split": "AUG",
+      "outcome": "LOSER",
+      "trades": 8,
+      "net_sum_pct": -4.387127
+    },
+    {
+      "split": "AUG",
+      "outcome": "LOSS_CLOSE_ABOVE_FEE",
+      "trades": 0,
+      "net_sum_pct": 0
+    },
+    {
+      "split": "AUG",
+      "outcome": "LOSS_CLOSE_NOT_ABOVE_FEE",
+      "trades": 8,
+      "net_sum_pct": -4.387127
+    }
+  ],
+  "notes": [
+    "Discovery only; no new gate or policy replay.",
+    "Features end at completed signal candle; prior-session data only from earlier dates.",
+    "Prior session must end at 15:55; missing history retained as null.",
+    "Gap retracement is signed relative to opening gap; not clipped.",
+    "Small samples and missing features limit inference."
+  ]
+}

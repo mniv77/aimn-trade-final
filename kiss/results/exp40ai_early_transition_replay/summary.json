@@ -1,0 +1,1035 @@
+{
+  "notes": [
+    "All periods are discovery; no orders or production changes.",
+    "AE3 does not use future matching, Q4 or AH filters. All exits and session protections are frozen AA logic.",
+    "Net trade sums are not portfolio returns. Extra costs are arithmetic sensitivity.",
+    "June\u2013August warm-up feed provenance is unverified."
+  ],
+  "source_hashes": {
+    "aimn_exp40aa_reverse_transition_replay.py": "45aaab70cd3436b2dac18988dd7d0abbbdb2a09c47a9857c3d8fdda542b100b6",
+    "aimn_exp40b_causal_replay.py": "f43fb8b676bb48b2ecbc77477ae775a1079095feb5b35347d3697cb4c8c22651",
+    "aimn_exp40c_trajectory_forensics.py": "8aa1f6361efdc8fb17b19594a8fe4470d5de52c170fff30fa21181310f7bcba4",
+    "aimn_exp40d_deceleration_replay.py": "7faa4f24454fcbce64f5dd1ab016322c472622185f89200bb9995ae3fb0e88b3",
+    "aimn_exp40e_adaptive_trajectory.py": "3db3ba5947c4848daedc3837fd3de37ab34aa1014463bfb43c3a8a09775b8ada",
+    "aimn_exp40f_opening_session_forensics.py": "075c3eee0a345f465e3ad092c13fa87825818acd3e47a387ec3d5fe2b8a44cf0",
+    "aimn_exp40g_prior_session_replay.py": "75a192b814df8e01a76993ddb800a7a8182c092720bbd4f916234d0a11c06206",
+    "aimn_exp40h_session_protection.py": "7f546b190ddb76aeb0b7244f17ddcd7c5c6d57a5c1eaed83e660c160380535a6",
+    "aimn_exp40i_profit_preservation.py": "a86572dbea2b61bc618e91ba3259b609b911bf555330fc5e2963d83f267efa9e",
+    "aimn_exp40j_reverse_transition_forensics.py": "472ab234a33dbe7588fd2fa8ef5fce1fd25221ced9a95e61fca8cd519a29bb39",
+    "aimn_exp40k_structural_reversal_replay.py": "36bab76860e192d3d8529efa1ce6b90c1171cee238f992fc277bc193f98c2f1f",
+    "aimn_exp40l_alpaca_validation_downloader.py": "fe62b98873200dbc576d44a410c6166a78a395809aa893e65abbfbe3e70b3c20",
+    "aimn_exp40l_independent_validation.py": "964e924ba5ef3a48dac8e16c6da3c1b0615a6b1a8038a04b6f4f3183a391ff0e",
+    "aimn_exp40m_supertrend_forensics.py": "804e4c90b2993679638dc7ae1a2b99c89f1bd1ddc2dbb2e91e5f974bf0232e1b",
+    "aimn_exp40n_supertrend_trajectory_forensics.py": "613fc04ad377b1c7af38a9f4c995ef0bf1271f8958da2c1f2a20be84810286a8",
+    "aimn_exp40o_transition_recognition_forensics.py": "c20a2872c8b3ff244dabe03ca8453e0518a9db2b92b181da8d13406068c389cd",
+    "aimn_exp40p_transition_noise_forensics.py": "0f101ffbfd8a78108ff7e4ece12c85f14e83acc3a425e1ae4366cd1e0e4d86a3",
+    "aimn_exp40q_combined_trajectory_forensics.py": "ede4e39f98fd427165775cb5191dfe84e738c1a638ed7dbbbe72c86bc1f5b1b3",
+    "aimn_exp40r_entry_timing_forensics.py": "d6925c24e7c92da1f9e658948bedda0d983066380bc9ef4de1004d6d834e9664",
+    "aimn_exp40s_opening_trajectory_forensics.py": "bf32703dd21e908e043983b6467b0be9a29017338cfdc7db590c62b1b362af52",
+    "aimn_exp40t_opening_selectivity.py": "6c3edd17cfe9bfa2a2d15157488fcab9ede062b605e857c3af5fcea68cdb5277",
+    "aimn_exp40u_combined_causal_replay.py": "67ad4c4e6c6680ec5e611d408edb2197612d499e29aa6e3dbc0ec3d835b01657",
+    "aimn_exp40v_transition_verification.py": "4e69c8528a4e64f0c082ef596c34f5a4b6ce8dd815fd4ee93f0f7fb08decad76",
+    "aimn_exp40x_causal_invalidation_replay.py": "251f946917176eefda05ea38af37b72d5e3fd9f488d5e3bf56027e8cd0730664",
+    "aimn_exp40z_reverse_transition_forensics.py": "97f3f71f972ea5c4594570d5df720fcceaa6eae446b5928db24b5a1febfb5ec4",
+    "engine/kiss_backtest.py": "0131b7dfc5bcbd16439ba21ed22702fa3350776116918acbe0683bfbcc44c5b7",
+    "kiss/kiss_exp53_supertrend.py": "c1727a67c903fdc7dc0ca61562f233a07908aebb04347ce255f4e9fccede1749",
+    "aimn_exp40ab_historical_robustness.py": "fac91ea9ae3a84b3754881a29d6ad978af443168256d450d098234082295ecb4",
+    "aimn_exp40ac_structural_position_forensics.py": "d116ea188cad9703eb7050b811156b798bad49d8063caccda0255a2eefeee85f",
+    "aimn_exp40ad_sequential_trajectory_forensics.py": "d44e26696a89e94f0233bb612804a0d48b32fadf13451bf574d4126bfeb40380",
+    "aimn_exp40ae_early_transition_forensics.py": "94fffebd4f8ac9be3436aced9cfe1b3e7526d37ca1eba18cd7522a7b27ade2f6"
+  },
+  "reference_hashes": {
+    "kiss/results/exp40aa_reverse_transition_replay/DISCOVERY_AA1_candidates.csv": "9f4a66ab7603360f4dfa21eea2101166f73e1c3dfef19ff46748396590f7e938",
+    "kiss/results/exp40aa_reverse_transition_replay/DISCOVERY_AA1_trades.csv": "11ed4b87168bc5fc66febdd18601307ec4e20979f1a0d2e9e83915dad03d4a7a",
+    "kiss/results/exp40ab_historical_robustness/AB1_candidates.csv": "b9dd38fd00aa90260d93a33eb418017eee4fd263f7afdf4e29dc6e8635c4ab6d",
+    "kiss/results/exp40ab_historical_robustness/AB1_trades.csv": "78dd5b1d820ddb66c4b507c19697ea841ec0a9c166a979f3f8891634f98f0d9b",
+    "kiss/results/exp40aa_reverse_transition_replay/NOVEMBER_AA1_candidates.csv": "f1f9b5492b7ce18cee2167c26a5501e5442332b31fad6cbdb9dbedeeda0a593e",
+    "kiss/results/exp40aa_reverse_transition_replay/NOVEMBER_AA1_trades.csv": "29f2a56a313acb0a3cad980cf1f4b1257d9371f297804de495bf7da447bffec0"
+  },
+  "periods": {
+    "JUN_AUG": {
+      "AI0": {
+        "trades": 16,
+        "winners": 9,
+        "losers": 7,
+        "net_sum_pct": -0.152856,
+        "gross_sum_pct": 3.047144,
+        "exits": {
+          "FIRST_CANDLE_INVALIDATION": 2,
+          "SUPPLEMENTAL_HIGHER_HIGH": 4,
+          "TRAILING_REVERSE": 3,
+          "V_PROFIT": 5,
+          "TREND_CHANGE": 1,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+        },
+        "average_net_pct": -0.009553,
+        "extra_cost_net_pct": {
+          "0.02": -0.472856,
+          "0.05": -0.952856,
+          "0.10": -1.752856
+        },
+        "candidates": 93,
+        "statuses": {
+          "REJECTED": 66,
+          "SCHEDULED": 16,
+          "BLOCKED_POSITION": 11
+        },
+        "events": {
+          "signals": 93,
+          "rejected": 66,
+          "first_candle_invalidation": 2,
+          "supplemental_warning": 4,
+          "blocked_in_position": 11,
+          "time_gate": 3,
+          "structural_warning": 1
+        },
+        "splits": {
+          "06": {
+            "trades": 6,
+            "winners": 4,
+            "losers": 2,
+            "net_sum_pct": -0.370925,
+            "gross_sum_pct": 0.829075,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH": 2,
+              "TRAILING_REVERSE": 1,
+              "V_PROFIT": 2
+            },
+            "average_net_pct": -0.061821,
+            "extra_cost_net_pct": {
+              "0.02": -0.490925,
+              "0.05": -0.670925,
+              "0.10": -0.970925
+            }
+          },
+          "07": {
+            "trades": 7,
+            "winners": 5,
+            "losers": 2,
+            "net_sum_pct": 1.638658,
+            "gross_sum_pct": 3.038658,
+            "exits": {
+              "TRAILING_REVERSE": 1,
+              "FIRST_CANDLE_INVALIDATION": 1,
+              "V_PROFIT": 3,
+              "SUPPLEMENTAL_HIGHER_HIGH": 2
+            },
+            "average_net_pct": 0.234094,
+            "extra_cost_net_pct": {
+              "0.02": 1.498658,
+              "0.05": 1.288658,
+              "0.10": 0.938658
+            }
+          },
+          "08": {
+            "trades": 3,
+            "winners": 0,
+            "losers": 3,
+            "net_sum_pct": -1.420589,
+            "gross_sum_pct": -0.820589,
+            "exits": {
+              "TRAILING_REVERSE": 1,
+              "TREND_CHANGE": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            },
+            "average_net_pct": -0.47353,
+            "extra_cost_net_pct": {
+              "0.02": -1.480589,
+              "0.05": -1.570589,
+              "0.10": -1.720589
+            }
+          }
+        }
+      },
+      "AI1": {
+        "trades": 75,
+        "winners": 34,
+        "losers": 41,
+        "net_sum_pct": -10.329582,
+        "gross_sum_pct": 4.670418,
+        "exits": {
+          "TRAILING_REVERSE": 35,
+          "SUPPLEMENTAL_HIGHER_HIGH": 11,
+          "V_PROFIT": 21,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 4,
+          "SESSION_FLATTEN": 4
+        },
+        "average_net_pct": -0.137728,
+        "extra_cost_net_pct": {
+          "0.02": -11.829582,
+          "0.05": -14.079582,
+          "0.10": -17.829582
+        },
+        "candidates": 104,
+        "statuses": {
+          "SCHEDULED": 75,
+          "BLOCKED_POSITION": 19,
+          "REJECTED": 10
+        },
+        "events": {
+          "signals": 104,
+          "blocked_in_position": 19,
+          "supplemental_warning": 11,
+          "time_gate": 12,
+          "rejected": 10,
+          "structural_warning": 6
+        },
+        "splits": {
+          "06": {
+            "trades": 27,
+            "winners": 14,
+            "losers": 13,
+            "net_sum_pct": -1.422787,
+            "gross_sum_pct": 3.977213,
+            "exits": {
+              "TRAILING_REVERSE": 13,
+              "SUPPLEMENTAL_HIGHER_HIGH": 4,
+              "V_PROFIT": 9,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            },
+            "average_net_pct": -0.052696,
+            "extra_cost_net_pct": {
+              "0.02": -1.962787,
+              "0.05": -2.772787,
+              "0.10": -4.122787
+            }
+          },
+          "07": {
+            "trades": 37,
+            "winners": 14,
+            "losers": 23,
+            "net_sum_pct": -8.843252,
+            "gross_sum_pct": -1.443252,
+            "exits": {
+              "TRAILING_REVERSE": 20,
+              "V_PROFIT": 7,
+              "SUPPLEMENTAL_HIGHER_HIGH": 6,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 3,
+              "SESSION_FLATTEN": 1
+            },
+            "average_net_pct": -0.239007,
+            "extra_cost_net_pct": {
+              "0.02": -9.583252,
+              "0.05": -10.693252,
+              "0.10": -12.543252
+            }
+          },
+          "08": {
+            "trades": 11,
+            "winners": 6,
+            "losers": 5,
+            "net_sum_pct": -0.063543,
+            "gross_sum_pct": 2.136457,
+            "exits": {
+              "SESSION_FLATTEN": 3,
+              "V_PROFIT": 5,
+              "TRAILING_REVERSE": 2,
+              "SUPPLEMENTAL_HIGHER_HIGH": 1
+            },
+            "average_net_pct": -0.005777,
+            "extra_cost_net_pct": {
+              "0.02": -0.283543,
+              "0.05": -0.613543,
+              "0.10": -1.163543
+            }
+          }
+        }
+      },
+      "AI2": {
+        "trades": 83,
+        "winners": 20,
+        "losers": 63,
+        "net_sum_pct": -16.850638,
+        "gross_sum_pct": -0.250638,
+        "exits": {
+          "FIRST_CANDLE_INVALIDATION": 42,
+          "SUPPLEMENTAL_HIGHER_HIGH": 6,
+          "TRAILING_REVERSE": 16,
+          "V_PROFIT": 14,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 3,
+          "SESSION_FLATTEN": 2
+        },
+        "average_net_pct": -0.20302,
+        "extra_cost_net_pct": {
+          "0.02": -18.510638,
+          "0.05": -21.000638,
+          "0.10": -25.150638
+        },
+        "candidates": 104,
+        "statuses": {
+          "SCHEDULED": 83,
+          "BLOCKED_POSITION": 10,
+          "REJECTED": 11
+        },
+        "events": {
+          "signals": 104,
+          "first_candle_invalidation": 42,
+          "blocked_in_position": 10,
+          "supplemental_warning": 6,
+          "time_gate": 12,
+          "rejected": 11,
+          "structural_warning": 4
+        },
+        "splits": {
+          "06": {
+            "trades": 31,
+            "winners": 10,
+            "losers": 21,
+            "net_sum_pct": -3.250596,
+            "gross_sum_pct": 2.949404,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 16,
+              "SUPPLEMENTAL_HIGHER_HIGH": 3,
+              "TRAILING_REVERSE": 4,
+              "V_PROFIT": 7,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            },
+            "average_net_pct": -0.104858,
+            "extra_cost_net_pct": {
+              "0.02": -3.870596,
+              "0.05": -4.800596,
+              "0.10": -6.350596
+            }
+          },
+          "07": {
+            "trades": 38,
+            "winners": 7,
+            "losers": 31,
+            "net_sum_pct": -10.983108,
+            "gross_sum_pct": -3.383108,
+            "exits": {
+              "TRAILING_REVERSE": 12,
+              "FIRST_CANDLE_INVALIDATION": 18,
+              "SUPPLEMENTAL_HIGHER_HIGH": 3,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 2,
+              "V_PROFIT": 3
+            },
+            "average_net_pct": -0.289029,
+            "extra_cost_net_pct": {
+              "0.02": -11.743108,
+              "0.05": -12.883108,
+              "0.10": -14.783108
+            }
+          },
+          "08": {
+            "trades": 14,
+            "winners": 3,
+            "losers": 11,
+            "net_sum_pct": -2.616934,
+            "gross_sum_pct": 0.183066,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 8,
+              "V_PROFIT": 4,
+              "SESSION_FLATTEN": 2
+            },
+            "average_net_pct": -0.186924,
+            "extra_cost_net_pct": {
+              "0.02": -2.896934,
+              "0.05": -3.316934,
+              "0.10": -4.016934
+            }
+          }
+        }
+      },
+      "AI3": {
+        "trades": 81,
+        "winners": 29,
+        "losers": 52,
+        "net_sum_pct": -11.70447,
+        "gross_sum_pct": 4.49553,
+        "exits": {
+          "FIRST_CANDLE_INVALIDATION": 21,
+          "TRAILING_REVERSE": 25,
+          "SUPPLEMENTAL_HIGHER_HIGH": 8,
+          "V_PROFIT": 20,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 4,
+          "SESSION_FLATTEN": 3
+        },
+        "average_net_pct": -0.1445,
+        "extra_cost_net_pct": {
+          "0.02": -13.32447,
+          "0.05": -15.75447,
+          "0.10": -19.80447
+        },
+        "candidates": 104,
+        "statuses": {
+          "SCHEDULED": 81,
+          "BLOCKED_POSITION": 13,
+          "REJECTED": 10
+        },
+        "events": {
+          "signals": 104,
+          "first_candle_invalidation": 21,
+          "blocked_in_position": 13,
+          "supplemental_warning": 8,
+          "time_gate": 12,
+          "rejected": 10,
+          "structural_warning": 6
+        },
+        "splits": {
+          "06": {
+            "trades": 30,
+            "winners": 14,
+            "losers": 16,
+            "net_sum_pct": -1.141849,
+            "gross_sum_pct": 4.858151,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 8,
+              "TRAILING_REVERSE": 8,
+              "SUPPLEMENTAL_HIGHER_HIGH": 4,
+              "V_PROFIT": 9,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            },
+            "average_net_pct": -0.038062,
+            "extra_cost_net_pct": {
+              "0.02": -1.741849,
+              "0.05": -2.641849,
+              "0.10": -4.141849
+            }
+          },
+          "07": {
+            "trades": 38,
+            "winners": 10,
+            "losers": 28,
+            "net_sum_pct": -9.358159,
+            "gross_sum_pct": -1.758159,
+            "exits": {
+              "TRAILING_REVERSE": 16,
+              "V_PROFIT": 6,
+              "SUPPLEMENTAL_HIGHER_HIGH": 3,
+              "FIRST_CANDLE_INVALIDATION": 9,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 3,
+              "SESSION_FLATTEN": 1
+            },
+            "average_net_pct": -0.246267,
+            "extra_cost_net_pct": {
+              "0.02": -10.118159,
+              "0.05": -11.258159,
+              "0.10": -13.158159
+            }
+          },
+          "08": {
+            "trades": 13,
+            "winners": 5,
+            "losers": 8,
+            "net_sum_pct": -1.204462,
+            "gross_sum_pct": 1.395538,
+            "exits": {
+              "SESSION_FLATTEN": 2,
+              "V_PROFIT": 5,
+              "FIRST_CANDLE_INVALIDATION": 4,
+              "TRAILING_REVERSE": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH": 1
+            },
+            "average_net_pct": -0.092651,
+            "extra_cost_net_pct": {
+              "0.02": -1.464462,
+              "0.05": -1.854462,
+              "0.10": -2.504462
+            }
+          }
+        }
+      }
+    },
+    "SEP_OCT": {
+      "AI0": {
+        "trades": 13,
+        "winners": 4,
+        "losers": 9,
+        "net_sum_pct": -2.369424,
+        "gross_sum_pct": 0.230576,
+        "exits": {
+          "SUPPLEMENTAL_HIGHER_HIGH": 2,
+          "V_PROFIT": 2,
+          "FIRST_CANDLE_INVALIDATION": 5,
+          "TRAILING_REVERSE": 3,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+        },
+        "average_net_pct": -0.182263,
+        "extra_cost_net_pct": {
+          "0.02": -2.629424,
+          "0.05": -3.019424,
+          "0.10": -3.669424
+        },
+        "candidates": 54,
+        "statuses": {
+          "REJECTED": 28,
+          "SCHEDULED": 13,
+          "BLOCKED_POSITION": 13
+        },
+        "events": {
+          "signals": 54,
+          "rejected": 28,
+          "blocked_in_position": 13,
+          "supplemental_warning": 2,
+          "time_gate": 5,
+          "first_candle_invalidation": 5,
+          "structural_warning": 1
+        },
+        "splits": {
+          "09": {
+            "trades": 3,
+            "winners": 2,
+            "losers": 1,
+            "net_sum_pct": -0.128444,
+            "gross_sum_pct": 0.471556,
+            "exits": {
+              "SUPPLEMENTAL_HIGHER_HIGH": 1,
+              "V_PROFIT": 1,
+              "FIRST_CANDLE_INVALIDATION": 1
+            },
+            "average_net_pct": -0.042815,
+            "extra_cost_net_pct": {
+              "0.02": -0.188444,
+              "0.05": -0.278444,
+              "0.10": -0.428444
+            }
+          },
+          "10": {
+            "trades": 10,
+            "winners": 2,
+            "losers": 8,
+            "net_sum_pct": -2.24098,
+            "gross_sum_pct": -0.24098,
+            "exits": {
+              "SUPPLEMENTAL_HIGHER_HIGH": 1,
+              "FIRST_CANDLE_INVALIDATION": 4,
+              "TRAILING_REVERSE": 3,
+              "V_PROFIT": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            },
+            "average_net_pct": -0.224098,
+            "extra_cost_net_pct": {
+              "0.02": -2.44098,
+              "0.05": -2.74098,
+              "0.10": -3.24098
+            }
+          }
+        }
+      },
+      "AI1": {
+        "trades": 32,
+        "winners": 16,
+        "losers": 16,
+        "net_sum_pct": -4.100103,
+        "gross_sum_pct": 2.299897,
+        "exits": {
+          "V_PROFIT": 11,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 4,
+          "SUPPLEMENTAL_HIGHER_HIGH": 6,
+          "SESSION_FLATTEN": 2,
+          "TRAILING_REVERSE": 9
+        },
+        "average_net_pct": -0.128128,
+        "extra_cost_net_pct": {
+          "0.02": -4.740103,
+          "0.05": -5.700103,
+          "0.10": -7.300103
+        },
+        "candidates": 57,
+        "statuses": {
+          "SCHEDULED": 32,
+          "REJECTED": 9,
+          "BLOCKED_POSITION": 16
+        },
+        "events": {
+          "signals": 57,
+          "structural_warning": 6,
+          "time_gate": 10,
+          "rejected": 9,
+          "blocked_in_position": 16,
+          "supplemental_warning": 6
+        },
+        "splits": {
+          "09": {
+            "trades": 12,
+            "winners": 6,
+            "losers": 6,
+            "net_sum_pct": -1.487671,
+            "gross_sum_pct": 0.912329,
+            "exits": {
+              "V_PROFIT": 4,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH": 2,
+              "SESSION_FLATTEN": 2,
+              "TRAILING_REVERSE": 3
+            },
+            "average_net_pct": -0.123973,
+            "extra_cost_net_pct": {
+              "0.02": -1.727671,
+              "0.05": -2.087671,
+              "0.10": -2.687671
+            }
+          },
+          "10": {
+            "trades": 20,
+            "winners": 10,
+            "losers": 10,
+            "net_sum_pct": -2.612432,
+            "gross_sum_pct": 1.387568,
+            "exits": {
+              "V_PROFIT": 7,
+              "SUPPLEMENTAL_HIGHER_HIGH": 4,
+              "TRAILING_REVERSE": 6,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 3
+            },
+            "average_net_pct": -0.130622,
+            "extra_cost_net_pct": {
+              "0.02": -3.012432,
+              "0.05": -3.612432,
+              "0.10": -4.612432
+            }
+          }
+        }
+      },
+      "AI2": {
+        "trades": 38,
+        "winners": 13,
+        "losers": 25,
+        "net_sum_pct": -5.921814,
+        "gross_sum_pct": 1.678186,
+        "exits": {
+          "V_PROFIT": 9,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 3,
+          "SUPPLEMENTAL_HIGHER_HIGH": 3,
+          "FIRST_CANDLE_INVALIDATION": 21,
+          "SESSION_FLATTEN": 1,
+          "TRAILING_REVERSE": 1
+        },
+        "average_net_pct": -0.155837,
+        "extra_cost_net_pct": {
+          "0.02": -6.681814,
+          "0.05": -7.821814,
+          "0.10": -9.721814
+        },
+        "candidates": 57,
+        "statuses": {
+          "SCHEDULED": 38,
+          "REJECTED": 10,
+          "BLOCKED_POSITION": 9
+        },
+        "events": {
+          "signals": 57,
+          "structural_warning": 5,
+          "time_gate": 10,
+          "rejected": 10,
+          "blocked_in_position": 9,
+          "supplemental_warning": 3,
+          "first_candle_invalidation": 21
+        },
+        "splits": {
+          "09": {
+            "trades": 16,
+            "winners": 5,
+            "losers": 11,
+            "net_sum_pct": -2.298614,
+            "gross_sum_pct": 0.901386,
+            "exits": {
+              "V_PROFIT": 3,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH": 2,
+              "FIRST_CANDLE_INVALIDATION": 9,
+              "SESSION_FLATTEN": 1
+            },
+            "average_net_pct": -0.143663,
+            "extra_cost_net_pct": {
+              "0.02": -2.618614,
+              "0.05": -3.098614,
+              "0.10": -3.898614
+            }
+          },
+          "10": {
+            "trades": 22,
+            "winners": 8,
+            "losers": 14,
+            "net_sum_pct": -3.6232,
+            "gross_sum_pct": 0.7768,
+            "exits": {
+              "V_PROFIT": 6,
+              "SUPPLEMENTAL_HIGHER_HIGH": 1,
+              "FIRST_CANDLE_INVALIDATION": 12,
+              "TRAILING_REVERSE": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+            },
+            "average_net_pct": -0.164691,
+            "extra_cost_net_pct": {
+              "0.02": -4.0632,
+              "0.05": -4.7232,
+              "0.10": -5.8232
+            }
+          }
+        }
+      },
+      "AI3": {
+        "trades": 36,
+        "winners": 15,
+        "losers": 21,
+        "net_sum_pct": -5.961608,
+        "gross_sum_pct": 1.238392,
+        "exits": {
+          "V_PROFIT": 9,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 3,
+          "SUPPLEMENTAL_HIGHER_HIGH": 6,
+          "FIRST_CANDLE_INVALIDATION": 8,
+          "SESSION_FLATTEN": 3,
+          "TRAILING_REVERSE": 7
+        },
+        "average_net_pct": -0.1656,
+        "extra_cost_net_pct": {
+          "0.02": -6.681608,
+          "0.05": -7.761608,
+          "0.10": -9.561608
+        },
+        "candidates": 57,
+        "statuses": {
+          "SCHEDULED": 36,
+          "REJECTED": 9,
+          "BLOCKED_POSITION": 12
+        },
+        "events": {
+          "signals": 57,
+          "structural_warning": 5,
+          "time_gate": 10,
+          "rejected": 9,
+          "blocked_in_position": 12,
+          "supplemental_warning": 6,
+          "first_candle_invalidation": 8
+        },
+        "splits": {
+          "09": {
+            "trades": 15,
+            "winners": 6,
+            "losers": 9,
+            "net_sum_pct": -2.199643,
+            "gross_sum_pct": 0.800357,
+            "exits": {
+              "V_PROFIT": 3,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH": 3,
+              "FIRST_CANDLE_INVALIDATION": 4,
+              "SESSION_FLATTEN": 2,
+              "TRAILING_REVERSE": 2
+            },
+            "average_net_pct": -0.146643,
+            "extra_cost_net_pct": {
+              "0.02": -2.499643,
+              "0.05": -2.949643,
+              "0.10": -3.699643
+            }
+          },
+          "10": {
+            "trades": 21,
+            "winners": 9,
+            "losers": 12,
+            "net_sum_pct": -3.761965,
+            "gross_sum_pct": 0.438035,
+            "exits": {
+              "V_PROFIT": 6,
+              "SUPPLEMENTAL_HIGHER_HIGH": 3,
+              "TRAILING_REVERSE": 5,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 2,
+              "FIRST_CANDLE_INVALIDATION": 4,
+              "SESSION_FLATTEN": 1
+            },
+            "average_net_pct": -0.179141,
+            "extra_cost_net_pct": {
+              "0.02": -4.181965,
+              "0.05": -4.811965,
+              "0.10": -5.861965
+            }
+          }
+        }
+      }
+    },
+    "NOV": {
+      "AI0": {
+        "trades": 2,
+        "winners": 2,
+        "losers": 0,
+        "net_sum_pct": 1.216933,
+        "gross_sum_pct": 1.616933,
+        "exits": {
+          "V_PROFIT": 1,
+          "SUPPLEMENTAL_HIGHER_HIGH": 1
+        },
+        "average_net_pct": 0.608467,
+        "extra_cost_net_pct": {
+          "0.02": 1.176933,
+          "0.05": 1.116933,
+          "0.10": 1.016933
+        },
+        "candidates": 19,
+        "statuses": {
+          "REJECTED": 11,
+          "SCHEDULED": 2,
+          "BLOCKED_POSITION": 6
+        },
+        "events": {
+          "signals": 19,
+          "rejected": 11,
+          "blocked_in_position": 6,
+          "supplemental_warning": 1,
+          "time_gate": 1
+        },
+        "splits": {
+          "11": {
+            "trades": 2,
+            "winners": 2,
+            "losers": 0,
+            "net_sum_pct": 1.216933,
+            "gross_sum_pct": 1.616933,
+            "exits": {
+              "V_PROFIT": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH": 1
+            },
+            "average_net_pct": 0.608467,
+            "extra_cost_net_pct": {
+              "0.02": 1.176933,
+              "0.05": 1.116933,
+              "0.10": 1.016933
+            }
+          }
+        }
+      },
+      "AI1": {
+        "trades": 11,
+        "winners": 3,
+        "losers": 8,
+        "net_sum_pct": -2.568494,
+        "gross_sum_pct": -0.368494,
+        "exits": {
+          "V_PROFIT": 4,
+          "TRAILING_REVERSE": 7
+        },
+        "average_net_pct": -0.233499,
+        "extra_cost_net_pct": {
+          "0.02": -2.788494,
+          "0.05": -3.118494,
+          "0.10": -3.668494
+        },
+        "candidates": 13,
+        "statuses": {
+          "SCHEDULED": 11,
+          "BLOCKED_POSITION": 1,
+          "REJECTED": 1
+        },
+        "events": {
+          "signals": 13,
+          "blocked_in_position": 1,
+          "structural_warning": 1,
+          "time_gate": 1,
+          "rejected": 1
+        },
+        "splits": {
+          "11": {
+            "trades": 11,
+            "winners": 3,
+            "losers": 8,
+            "net_sum_pct": -2.568494,
+            "gross_sum_pct": -0.368494,
+            "exits": {
+              "V_PROFIT": 4,
+              "TRAILING_REVERSE": 7
+            },
+            "average_net_pct": -0.233499,
+            "extra_cost_net_pct": {
+              "0.02": -2.788494,
+              "0.05": -3.118494,
+              "0.10": -3.668494
+            }
+          }
+        }
+      },
+      "AI2": {
+        "trades": 11,
+        "winners": 2,
+        "losers": 9,
+        "net_sum_pct": -2.678255,
+        "gross_sum_pct": -0.478255,
+        "exits": {
+          "FIRST_CANDLE_INVALIDATION": 3,
+          "V_PROFIT": 3,
+          "TRAILING_REVERSE": 5
+        },
+        "average_net_pct": -0.243478,
+        "extra_cost_net_pct": {
+          "0.02": -2.898255,
+          "0.05": -3.228255,
+          "0.10": -3.778255
+        },
+        "candidates": 13,
+        "statuses": {
+          "SCHEDULED": 11,
+          "BLOCKED_POSITION": 1,
+          "REJECTED": 1
+        },
+        "events": {
+          "signals": 13,
+          "first_candle_invalidation": 3,
+          "blocked_in_position": 1,
+          "structural_warning": 1,
+          "time_gate": 1,
+          "rejected": 1
+        },
+        "splits": {
+          "11": {
+            "trades": 11,
+            "winners": 2,
+            "losers": 9,
+            "net_sum_pct": -2.678255,
+            "gross_sum_pct": -0.478255,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 3,
+              "V_PROFIT": 3,
+              "TRAILING_REVERSE": 5
+            },
+            "average_net_pct": -0.243478,
+            "extra_cost_net_pct": {
+              "0.02": -2.898255,
+              "0.05": -3.228255,
+              "0.10": -3.778255
+            }
+          }
+        }
+      },
+      "AI3": {
+        "trades": 11,
+        "winners": 2,
+        "losers": 9,
+        "net_sum_pct": -2.86542,
+        "gross_sum_pct": -0.66542,
+        "exits": {
+          "FIRST_CANDLE_INVALIDATION": 2,
+          "V_PROFIT": 3,
+          "TRAILING_REVERSE": 6
+        },
+        "average_net_pct": -0.260493,
+        "extra_cost_net_pct": {
+          "0.02": -3.08542,
+          "0.05": -3.41542,
+          "0.10": -3.96542
+        },
+        "candidates": 13,
+        "statuses": {
+          "SCHEDULED": 11,
+          "BLOCKED_POSITION": 1,
+          "REJECTED": 1
+        },
+        "events": {
+          "signals": 13,
+          "first_candle_invalidation": 2,
+          "blocked_in_position": 1,
+          "structural_warning": 1,
+          "time_gate": 1,
+          "rejected": 1
+        },
+        "splits": {
+          "11": {
+            "trades": 11,
+            "winners": 2,
+            "losers": 9,
+            "net_sum_pct": -2.86542,
+            "gross_sum_pct": -0.66542,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 2,
+              "V_PROFIT": 3,
+              "TRAILING_REVERSE": 6
+            },
+            "average_net_pct": -0.260493,
+            "extra_cost_net_pct": {
+              "0.02": -3.08542,
+              "0.05": -3.41542,
+              "0.10": -3.96542
+            }
+          }
+        }
+      }
+    }
+  },
+  "combined": {
+    "AI0": {
+      "trades": 31,
+      "winners": 15,
+      "losers": 16,
+      "net_sum_pct": -1.305347,
+      "gross_sum_pct": 4.894653,
+      "exits": {
+        "FIRST_CANDLE_INVALIDATION": 7,
+        "SUPPLEMENTAL_HIGHER_HIGH": 7,
+        "TRAILING_REVERSE": 6,
+        "V_PROFIT": 8,
+        "TREND_CHANGE": 1,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+      },
+      "average_net_pct": -0.042108,
+      "extra_cost_net_pct": {
+        "0.02": -1.925347,
+        "0.05": -2.855347,
+        "0.10": -4.405347
+      }
+    },
+    "AI1": {
+      "trades": 118,
+      "winners": 53,
+      "losers": 65,
+      "net_sum_pct": -16.998179,
+      "gross_sum_pct": 6.601821,
+      "exits": {
+        "TRAILING_REVERSE": 51,
+        "SUPPLEMENTAL_HIGHER_HIGH": 17,
+        "V_PROFIT": 36,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 8,
+        "SESSION_FLATTEN": 6
+      },
+      "average_net_pct": -0.144052,
+      "extra_cost_net_pct": {
+        "0.02": -19.358179,
+        "0.05": -22.898179,
+        "0.10": -28.798179
+      }
+    },
+    "AI2": {
+      "trades": 132,
+      "winners": 35,
+      "losers": 97,
+      "net_sum_pct": -25.450707,
+      "gross_sum_pct": 0.949293,
+      "exits": {
+        "FIRST_CANDLE_INVALIDATION": 66,
+        "SUPPLEMENTAL_HIGHER_HIGH": 9,
+        "TRAILING_REVERSE": 22,
+        "V_PROFIT": 26,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 6,
+        "SESSION_FLATTEN": 3
+      },
+      "average_net_pct": -0.192808,
+      "extra_cost_net_pct": {
+        "0.02": -28.090707,
+        "0.05": -32.050707,
+        "0.10": -38.650707
+      }
+    },
+    "AI3": {
+      "trades": 128,
+      "winners": 46,
+      "losers": 82,
+      "net_sum_pct": -20.531498,
+      "gross_sum_pct": 5.068502,
+      "exits": {
+        "FIRST_CANDLE_INVALIDATION": 31,
+        "TRAILING_REVERSE": 38,
+        "SUPPLEMENTAL_HIGHER_HIGH": 14,
+        "V_PROFIT": 32,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 7,
+        "SESSION_FLATTEN": 6
+      },
+      "average_net_pct": -0.160402,
+      "extra_cost_net_pct": {
+        "0.02": -23.091498,
+        "0.05": -26.931498,
+        "0.10": -33.331498
+      }
+    }
+  }
+}

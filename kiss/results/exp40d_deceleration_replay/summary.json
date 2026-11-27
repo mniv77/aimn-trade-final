@@ -1,0 +1,324 @@
+{
+  "notes": [
+    "Exploratory discovery only; all months previously examined.",
+    "Missing 12-return history passes D1-D3; reported separately.",
+    "Structure means signal close below previous three lows, not confirmed major reversal.",
+    "B2 overnight and stop assumptions unchanged; no added slippage.",
+    "Splits assigned by signal date; continuous replay, not independent validation."
+  ],
+  "variants": {
+    "D0_BASELINE": {
+      "trades": 122,
+      "winners": 41,
+      "losers": 81,
+      "net_sum_pct": -30.391587,
+      "gross_sum_pct": -5.991587,
+      "exits": {
+        "TRAILING_REVERSE": 87,
+        "V_PROFIT": 35
+      },
+      "events": {
+        "signals": 135,
+        "blocked_in_position": 13
+      },
+      "open_position": null,
+      "missing_history": 39,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 83,
+          "winners": 27,
+          "losers": 56,
+          "net_sum_pct": -19.068242,
+          "gross_sum_pct": -2.468242,
+          "exits": {
+            "TRAILING_REVERSE": 60,
+            "V_PROFIT": 23
+          }
+        },
+        "AUG": {
+          "trades": 39,
+          "winners": 14,
+          "losers": 25,
+          "net_sum_pct": -11.323345,
+          "gross_sum_pct": -3.523345,
+          "exits": {
+            "TRAILING_REVERSE": 27,
+            "V_PROFIT": 12
+          }
+        }
+      },
+      "removed": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      }
+    },
+    "D1_RISE_DECEL": {
+      "trades": 72,
+      "winners": 24,
+      "losers": 48,
+      "net_sum_pct": -13.927933,
+      "gross_sum_pct": 0.472067,
+      "exits": {
+        "V_PROFIT": 19,
+        "TRAILING_REVERSE": 53
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 60,
+        "blocked_in_position": 3
+      },
+      "open_position": null,
+      "missing_history": 39,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 46,
+          "winners": 14,
+          "losers": 32,
+          "net_sum_pct": -8.175423,
+          "gross_sum_pct": 1.024577,
+          "exits": {
+            "V_PROFIT": 11,
+            "TRAILING_REVERSE": 35
+          }
+        },
+        "AUG": {
+          "trades": 26,
+          "winners": 10,
+          "losers": 16,
+          "net_sum_pct": -5.75251,
+          "gross_sum_pct": -0.55251,
+          "exits": {
+            "TRAILING_REVERSE": 18,
+            "V_PROFIT": 8
+          }
+        }
+      },
+      "removed": {
+        "trades": 57,
+        "winners": 19,
+        "losers": 38,
+        "net_sum_pct": -19.615663,
+        "gross_sum_pct": -8.215663,
+        "exits": {
+          "TRAILING_REVERSE": 39,
+          "V_PROFIT": 18
+        }
+      },
+      "added": {
+        "trades": 7,
+        "winners": 2,
+        "losers": 5,
+        "net_sum_pct": -3.152009,
+        "gross_sum_pct": -1.752009,
+        "exits": {
+          "TRAILING_REVERSE": 5,
+          "V_PROFIT": 2
+        }
+      }
+    },
+    "D2_EFF_DECEL": {
+      "trades": 68,
+      "winners": 23,
+      "losers": 45,
+      "net_sum_pct": -14.149729,
+      "gross_sum_pct": -0.549729,
+      "exits": {
+        "TRAILING_REVERSE": 50,
+        "V_PROFIT": 18
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 65,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "missing_history": 39,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 44,
+          "winners": 14,
+          "losers": 30,
+          "net_sum_pct": -7.67461,
+          "gross_sum_pct": 1.12539,
+          "exits": {
+            "TRAILING_REVERSE": 33,
+            "V_PROFIT": 11
+          }
+        },
+        "AUG": {
+          "trades": 24,
+          "winners": 9,
+          "losers": 15,
+          "net_sum_pct": -6.475119,
+          "gross_sum_pct": -1.675119,
+          "exits": {
+            "TRAILING_REVERSE": 17,
+            "V_PROFIT": 7
+          }
+        }
+      },
+      "removed": {
+        "trades": 63,
+        "winners": 20,
+        "losers": 43,
+        "net_sum_pct": -20.948116,
+        "gross_sum_pct": -8.348116,
+        "exits": {
+          "TRAILING_REVERSE": 44,
+          "V_PROFIT": 19
+        }
+      },
+      "added": {
+        "trades": 9,
+        "winners": 2,
+        "losers": 7,
+        "net_sum_pct": -4.706258,
+        "gross_sum_pct": -2.906258,
+        "exits": {
+          "TRAILING_REVERSE": 7,
+          "V_PROFIT": 2
+        }
+      }
+    },
+    "D3_BOTH": {
+      "trades": 64,
+      "winners": 23,
+      "losers": 41,
+      "net_sum_pct": -11.658255,
+      "gross_sum_pct": 1.141745,
+      "exits": {
+        "V_PROFIT": 18,
+        "TRAILING_REVERSE": 46
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 69,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "missing_history": 39,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 41,
+          "winners": 14,
+          "losers": 27,
+          "net_sum_pct": -5.80829,
+          "gross_sum_pct": 2.39171,
+          "exits": {
+            "V_PROFIT": 11,
+            "TRAILING_REVERSE": 30
+          }
+        },
+        "AUG": {
+          "trades": 23,
+          "winners": 9,
+          "losers": 14,
+          "net_sum_pct": -5.849965,
+          "gross_sum_pct": -1.249965,
+          "exits": {
+            "TRAILING_REVERSE": 16,
+            "V_PROFIT": 7
+          }
+        }
+      },
+      "removed": {
+        "trades": 66,
+        "winners": 20,
+        "losers": 46,
+        "net_sum_pct": -22.859682,
+        "gross_sum_pct": -9.659682,
+        "exits": {
+          "TRAILING_REVERSE": 47,
+          "V_PROFIT": 19
+        }
+      },
+      "added": {
+        "trades": 8,
+        "winners": 2,
+        "losers": 6,
+        "net_sum_pct": -4.12635,
+        "gross_sum_pct": -2.52635,
+        "exits": {
+          "TRAILING_REVERSE": 6,
+          "V_PROFIT": 2
+        }
+      }
+    },
+    "D4_STRUCTURE": {
+      "trades": 13,
+      "winners": 4,
+      "losers": 9,
+      "net_sum_pct": -5.448248,
+      "gross_sum_pct": -2.848248,
+      "exits": {
+        "V_PROFIT": 4,
+        "TRAILING_REVERSE": 9
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 121,
+        "blocked_in_position": 1
+      },
+      "open_position": null,
+      "missing_history": 39,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 6,
+          "winners": 2,
+          "losers": 4,
+          "net_sum_pct": -1.633831,
+          "gross_sum_pct": -0.433831,
+          "exits": {
+            "V_PROFIT": 2,
+            "TRAILING_REVERSE": 4
+          }
+        },
+        "AUG": {
+          "trades": 7,
+          "winners": 2,
+          "losers": 5,
+          "net_sum_pct": -3.814417,
+          "gross_sum_pct": -2.414417,
+          "exits": {
+            "TRAILING_REVERSE": 5,
+            "V_PROFIT": 2
+          }
+        }
+      },
+      "removed": {
+        "trades": 111,
+        "winners": 38,
+        "losers": 73,
+        "net_sum_pct": -26.71247,
+        "gross_sum_pct": -4.51247,
+        "exits": {
+          "TRAILING_REVERSE": 79,
+          "V_PROFIT": 32
+        }
+      },
+      "added": {
+        "trades": 2,
+        "winners": 1,
+        "losers": 1,
+        "net_sum_pct": -1.769131,
+        "gross_sum_pct": -1.369131,
+        "exits": {
+          "TRAILING_REVERSE": 1,
+          "V_PROFIT": 1
+        }
+      }
+    }
+  }
+}

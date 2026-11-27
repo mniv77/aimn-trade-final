@@ -1,0 +1,411 @@
+{
+  "notes": [
+    "Discovery only; no production changes.",
+    "Flatten at scheduled 15:55 bar open, not its close. Existing pending exit takes precedence.",
+    "Flatten variants disallow signals timestamped 15:50 or later to prevent entry at or after flatten time; hence H2 already prevents stale closing signals on complete sessions.",
+    "H4 additionally rejects signal timestamps >=15:30. These are bar-start labels.",
+    "H1 cancels pending entries crossing a date boundary.",
+    "No extra slippage; 0.2% round-trip fee; sums not portfolio returns."
+  ],
+  "variants": {
+    "H0_G1": {
+      "trades": 36,
+      "winners": 17,
+      "losers": 19,
+      "net_sum_pct": -3.306771,
+      "gross_sum_pct": 3.893229,
+      "exits": {
+        "V_PROFIT": 15,
+        "TRAILING_REVERSE": 21
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 97,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 3,
+      "stale_entries": 1,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 20,
+          "winners": 9,
+          "losers": 11,
+          "net_sum_pct": -1.058582,
+          "gross_sum_pct": 2.941418,
+          "exits": {
+            "V_PROFIT": 8,
+            "TRAILING_REVERSE": 12
+          }
+        },
+        "AUG": {
+          "trades": 16,
+          "winners": 8,
+          "losers": 8,
+          "net_sum_pct": -2.248189,
+          "gross_sum_pct": 0.951811,
+          "exits": {
+            "TRAILING_REVERSE": 9,
+            "V_PROFIT": 7
+          }
+        }
+      },
+      "removed": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": []
+    },
+    "H1_CANCEL": {
+      "trades": 35,
+      "winners": 17,
+      "losers": 18,
+      "net_sum_pct": -3.24069,
+      "gross_sum_pct": 3.75931,
+      "exits": {
+        "V_PROFIT": 15,
+        "TRAILING_REVERSE": 20
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 97,
+        "stale_entry_cancelled": 1,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 3,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 19,
+          "winners": 9,
+          "losers": 10,
+          "net_sum_pct": -0.992501,
+          "gross_sum_pct": 2.807499,
+          "exits": {
+            "V_PROFIT": 8,
+            "TRAILING_REVERSE": 11
+          }
+        },
+        "AUG": {
+          "trades": 16,
+          "winners": 8,
+          "losers": 8,
+          "net_sum_pct": -2.248189,
+          "gross_sum_pct": 0.951811,
+          "exits": {
+            "TRAILING_REVERSE": 9,
+            "V_PROFIT": 7
+          }
+        }
+      },
+      "removed": {
+        "trades": 1,
+        "winners": 0,
+        "losers": 1,
+        "net_sum_pct": -0.066081,
+        "gross_sum_pct": 0.133919,
+        "exits": {
+          "TRAILING_REVERSE": 1
+        }
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": []
+    },
+    "H2_FLATTEN": {
+      "trades": 35,
+      "winners": 18,
+      "losers": 17,
+      "net_sum_pct": -1.274517,
+      "gross_sum_pct": 5.725483,
+      "exits": {
+        "V_PROFIT": 15,
+        "TRAILING_REVERSE": 16,
+        "SESSION_FLATTEN": 4
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 98,
+        "time_gate": 1,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 19,
+          "winners": 9,
+          "losers": 10,
+          "net_sum_pct": -1.426347,
+          "gross_sum_pct": 2.373653,
+          "exits": {
+            "V_PROFIT": 8,
+            "TRAILING_REVERSE": 9,
+            "SESSION_FLATTEN": 2
+          }
+        },
+        "AUG": {
+          "trades": 16,
+          "winners": 9,
+          "losers": 7,
+          "net_sum_pct": 0.15183,
+          "gross_sum_pct": 3.35183,
+          "exits": {
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 2,
+            "V_PROFIT": 7
+          }
+        }
+      },
+      "removed": {
+        "trades": 1,
+        "winners": 0,
+        "losers": 1,
+        "net_sum_pct": -0.066081,
+        "gross_sum_pct": 0.133919,
+        "exits": {
+          "TRAILING_REVERSE": 1
+        }
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [
+        {
+          "signal_time": "2026-07-08 15:40:00",
+          "old_net": 0.245872,
+          "new_net": -0.302619,
+          "old_exit": "2026-07-09 09:35:00",
+          "new_exit": "2026-07-08 15:55:00"
+        },
+        {
+          "signal_time": "2026-07-09 15:25:00",
+          "old_net": -0.113042,
+          "new_net": 0.001603,
+          "old_exit": "2026-07-10 09:30:00",
+          "new_exit": "2026-07-09 15:55:00"
+        },
+        {
+          "signal_time": "2026-08-04 15:10:00",
+          "old_net": -2.127511,
+          "new_net": 0.0971,
+          "old_exit": "2026-08-05 09:30:00",
+          "new_exit": "2026-08-04 15:55:00"
+        },
+        {
+          "signal_time": "2026-08-07 15:40:00",
+          "old_net": -0.57462,
+          "new_net": -0.399212,
+          "old_exit": "2026-08-07 15:55:00",
+          "new_exit": "2026-08-07 15:55:00"
+        }
+      ]
+    },
+    "H3_BOTH": {
+      "trades": 35,
+      "winners": 18,
+      "losers": 17,
+      "net_sum_pct": -1.274517,
+      "gross_sum_pct": 5.725483,
+      "exits": {
+        "V_PROFIT": 15,
+        "TRAILING_REVERSE": 16,
+        "SESSION_FLATTEN": 4
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 98,
+        "time_gate": 1,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 19,
+          "winners": 9,
+          "losers": 10,
+          "net_sum_pct": -1.426347,
+          "gross_sum_pct": 2.373653,
+          "exits": {
+            "V_PROFIT": 8,
+            "TRAILING_REVERSE": 9,
+            "SESSION_FLATTEN": 2
+          }
+        },
+        "AUG": {
+          "trades": 16,
+          "winners": 9,
+          "losers": 7,
+          "net_sum_pct": 0.15183,
+          "gross_sum_pct": 3.35183,
+          "exits": {
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 2,
+            "V_PROFIT": 7
+          }
+        }
+      },
+      "removed": {
+        "trades": 1,
+        "winners": 0,
+        "losers": 1,
+        "net_sum_pct": -0.066081,
+        "gross_sum_pct": 0.133919,
+        "exits": {
+          "TRAILING_REVERSE": 1
+        }
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [
+        {
+          "signal_time": "2026-07-08 15:40:00",
+          "old_net": 0.245872,
+          "new_net": -0.302619,
+          "old_exit": "2026-07-09 09:35:00",
+          "new_exit": "2026-07-08 15:55:00"
+        },
+        {
+          "signal_time": "2026-07-09 15:25:00",
+          "old_net": -0.113042,
+          "new_net": 0.001603,
+          "old_exit": "2026-07-10 09:30:00",
+          "new_exit": "2026-07-09 15:55:00"
+        },
+        {
+          "signal_time": "2026-08-04 15:10:00",
+          "old_net": -2.127511,
+          "new_net": 0.0971,
+          "old_exit": "2026-08-05 09:30:00",
+          "new_exit": "2026-08-04 15:55:00"
+        },
+        {
+          "signal_time": "2026-08-07 15:40:00",
+          "old_net": -0.57462,
+          "new_net": -0.399212,
+          "old_exit": "2026-08-07 15:55:00",
+          "new_exit": "2026-08-07 15:55:00"
+        }
+      ]
+    },
+    "H4_CUTOFF": {
+      "trades": 32,
+      "winners": 17,
+      "losers": 15,
+      "net_sum_pct": -0.672133,
+      "gross_sum_pct": 5.727867,
+      "exits": {
+        "V_PROFIT": 14,
+        "TRAILING_REVERSE": 16,
+        "SESSION_FLATTEN": 2
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 101,
+        "time_gate": 4,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 17,
+          "winners": 8,
+          "losers": 9,
+          "net_sum_pct": -1.223175,
+          "gross_sum_pct": 2.176825,
+          "exits": {
+            "V_PROFIT": 7,
+            "TRAILING_REVERSE": 9,
+            "SESSION_FLATTEN": 1
+          }
+        },
+        "AUG": {
+          "trades": 15,
+          "winners": 9,
+          "losers": 6,
+          "net_sum_pct": 0.551042,
+          "gross_sum_pct": 3.551042,
+          "exits": {
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 1,
+            "V_PROFIT": 7
+          }
+        }
+      },
+      "removed": {
+        "trades": 4,
+        "winners": 2,
+        "losers": 2,
+        "net_sum_pct": -0.295382,
+        "gross_sum_pct": 0.504618,
+        "exits": {
+          "TRAILING_REVERSE": 3,
+          "V_PROFIT": 1
+        }
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [
+        {
+          "signal_time": "2026-07-09 15:25:00",
+          "old_net": -0.113042,
+          "new_net": 0.001603,
+          "old_exit": "2026-07-10 09:30:00",
+          "new_exit": "2026-07-09 15:55:00"
+        },
+        {
+          "signal_time": "2026-08-04 15:10:00",
+          "old_net": -2.127511,
+          "new_net": 0.0971,
+          "old_exit": "2026-08-05 09:30:00",
+          "new_exit": "2026-08-04 15:55:00"
+        }
+      ]
+    }
+  },
+  "baseline_parity": {
+    "trades": 36,
+    "candidates": 135
+  }
+}

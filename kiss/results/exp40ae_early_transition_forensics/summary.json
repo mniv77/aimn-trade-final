@@ -1,0 +1,1049 @@
+{
+  "notes": [
+    "All periods discovery. Observational warnings only; no replay or orders.",
+    "AE2 requires two preceding three-change rising phases, second weaker, followed by bearish close. AE3 requires preceding trailing four-bar peak and lower high/bearish close. AE4 intersection.",
+    "Future six-bar outcomes and later TWO_STEP matches are hindsight only. Overlapping warnings dependent; matching does not establish same transition.",
+    "No-later-TWO_STEP is not proof of a missed opportunity. No threshold optimization."
+  ],
+  "source_hashes": {
+    "kiss/visual_research/aimn_nvda_candles.json": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+    "kiss/visual_research/independent_holdout_exp127/nvda_sep_oct_2026_5m_iex.json": "3e944cd4cdeba1adb650804a0a3e81d5355c225d9ad05546176b1de8ef9e9718",
+    "kiss/visual_research/independent_holdout_exp40l/nvda_2026-11-16_2026-11-25_5m_iex.json": "eabb5477fc612d1d7ad21973282bc2a527c94da26fefdb9931172c89950b572d"
+  },
+  "candles": {
+    "JUN_AUG": 4680,
+    "SEP_OCT": 3354,
+    "NOV": 624
+  },
+  "focus_parity": {
+    "JUN_AUG": 93,
+    "SEP_OCT": 54,
+    "NOV": 19
+  },
+  "groups": [
+    {
+      "period": "JUN_AUG",
+      "context": "ALL",
+      "detector": "AE0",
+      "warnings": 546,
+      "complete": 507,
+      "persistent": 99,
+      "persistent_pct": 19.527,
+      "outcomes": {
+        "TARGET_FADED": 232,
+        "NO_FEE_SCALE_EXCURSION": 176,
+        "PERSISTENT_TARGET": 99,
+        "CENSORED": 39
+      },
+      "two_step_matches": {
+        "SAME_BAR": 546
+      },
+      "median_lead_bars": null,
+      "median_peak_age": 7.0,
+      "median_peak_to_entry_pct": 0.794702,
+      "median_favorable_pct": 0.312256,
+      "median_adverse_pct": -0.247609,
+      "median_terminal_pct": 0.026404
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "ALL",
+      "detector": "AE1",
+      "warnings": 278,
+      "complete": 247,
+      "persistent": 43,
+      "persistent_pct": 17.409,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 108,
+        "TARGET_FADED": 96,
+        "PERSISTENT_TARGET": 43,
+        "CENSORED": 31
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 117,
+        "EARLIER": 141,
+        "CENSORED": 20
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.4186,
+      "median_favorable_pct": 0.232728,
+      "median_adverse_pct": -0.227868,
+      "median_terminal_pct": -0.007273
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "ALL",
+      "detector": "AE2",
+      "warnings": 257,
+      "complete": 243,
+      "persistent": 29,
+      "persistent_pct": 11.934,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 107,
+        "TARGET_FADED": 107,
+        "PERSISTENT_TARGET": 29,
+        "CENSORED": 14
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 135,
+        "EARLIER": 91,
+        "SAME_BAR": 20,
+        "CENSORED": 11
+      },
+      "median_lead_bars": 2,
+      "median_peak_age": 2,
+      "median_peak_to_entry_pct": 0.290034,
+      "median_favorable_pct": 0.214684,
+      "median_adverse_pct": -0.243577,
+      "median_terminal_pct": 0.010224
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "ALL",
+      "detector": "AE3",
+      "warnings": 445,
+      "complete": 400,
+      "persistent": 60,
+      "persistent_pct": 15.0,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 175,
+        "TARGET_FADED": 165,
+        "PERSISTENT_TARGET": 60,
+        "CENSORED": 45
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 202,
+        "EARLIER": 208,
+        "CENSORED": 35
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.352599,
+      "median_favorable_pct": 0.247911,
+      "median_adverse_pct": -0.258602,
+      "median_terminal_pct": -0.007093
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "ALL",
+      "detector": "AE4",
+      "warnings": 77,
+      "complete": 72,
+      "persistent": 5,
+      "persistent_pct": 6.944,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 41,
+        "TARGET_FADED": 26,
+        "PERSISTENT_TARGET": 5,
+        "CENSORED": 5
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 48,
+        "EARLIER": 26,
+        "CENSORED": 3
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.287562,
+      "median_favorable_pct": 0.162385,
+      "median_adverse_pct": -0.351674,
+      "median_terminal_pct": -0.110185
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "LONG/SHORT",
+      "detector": "AE0",
+      "warnings": 93,
+      "complete": 90,
+      "persistent": 18,
+      "persistent_pct": 20.0,
+      "outcomes": {
+        "PERSISTENT_TARGET": 18,
+        "NO_FEE_SCALE_EXCURSION": 36,
+        "TARGET_FADED": 36,
+        "CENSORED": 3
+      },
+      "two_step_matches": {
+        "SAME_BAR": 93
+      },
+      "median_lead_bars": null,
+      "median_peak_age": 5,
+      "median_peak_to_entry_pct": 0.691082,
+      "median_favorable_pct": 0.263527,
+      "median_adverse_pct": -0.200541,
+      "median_terminal_pct": 0.020288
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "LONG/SHORT",
+      "detector": "AE1",
+      "warnings": 58,
+      "complete": 49,
+      "persistent": 9,
+      "persistent_pct": 18.367,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 23,
+        "PERSISTENT_TARGET": 9,
+        "TARGET_FADED": 17,
+        "CENSORED": 9
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 23,
+        "EARLIER": 29,
+        "CENSORED": 6
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.439754,
+      "median_favorable_pct": 0.213416,
+      "median_adverse_pct": -0.30439,
+      "median_terminal_pct": -0.012898
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "LONG/SHORT",
+      "detector": "AE2",
+      "warnings": 67,
+      "complete": 58,
+      "persistent": 8,
+      "persistent_pct": 13.793,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 20,
+        "TARGET_FADED": 30,
+        "CENSORED": 9,
+        "PERSISTENT_TARGET": 8
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 27,
+        "EARLIER": 28,
+        "CENSORED": 6,
+        "SAME_BAR": 6
+      },
+      "median_lead_bars": 2.0,
+      "median_peak_age": 2,
+      "median_peak_to_entry_pct": 0.348199,
+      "median_favorable_pct": 0.3171,
+      "median_adverse_pct": -0.23021,
+      "median_terminal_pct": 0.053851
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "LONG/SHORT",
+      "detector": "AE3",
+      "warnings": 104,
+      "complete": 92,
+      "persistent": 16,
+      "persistent_pct": 17.391,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 43,
+        "TARGET_FADED": 33,
+        "PERSISTENT_TARGET": 16,
+        "CENSORED": 12
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 48,
+        "EARLIER": 47,
+        "CENSORED": 9
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.372923,
+      "median_favorable_pct": 0.219518,
+      "median_adverse_pct": -0.233076,
+      "median_terminal_pct": -0.022225
+    },
+    {
+      "period": "JUN_AUG",
+      "context": "LONG/SHORT",
+      "detector": "AE4",
+      "warnings": 21,
+      "complete": 17,
+      "persistent": 1,
+      "persistent_pct": 5.882,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 10,
+        "TARGET_FADED": 6,
+        "CENSORED": 4,
+        "PERSISTENT_TARGET": 1
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 8,
+        "EARLIER": 11,
+        "CENSORED": 2
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.434126,
+      "median_favorable_pct": 0.165055,
+      "median_adverse_pct": -0.330659,
+      "median_terminal_pct": -0.112788
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "ALL",
+      "detector": "AE0",
+      "warnings": 409,
+      "complete": 379,
+      "persistent": 37,
+      "persistent_pct": 9.763,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 211,
+        "TARGET_FADED": 131,
+        "CENSORED": 30,
+        "PERSISTENT_TARGET": 37
+      },
+      "two_step_matches": {
+        "SAME_BAR": 409
+      },
+      "median_lead_bars": null,
+      "median_peak_age": 7,
+      "median_peak_to_entry_pct": 0.508964,
+      "median_favorable_pct": 0.178706,
+      "median_adverse_pct": -0.187701,
+      "median_terminal_pct": -0.017721
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "ALL",
+      "detector": "AE1",
+      "warnings": 194,
+      "complete": 171,
+      "persistent": 11,
+      "persistent_pct": 6.433,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 98,
+        "TARGET_FADED": 62,
+        "CENSORED": 23,
+        "PERSISTENT_TARGET": 11
+      },
+      "two_step_matches": {
+        "EARLIER": 111,
+        "CENSORED": 15,
+        "NO_LATER_TWO_STEP": 68
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 5.0,
+      "median_peak_to_entry_pct": 0.298005,
+      "median_favorable_pct": 0.179296,
+      "median_adverse_pct": -0.162602,
+      "median_terminal_pct": -0.01837
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "ALL",
+      "detector": "AE2",
+      "warnings": 179,
+      "complete": 167,
+      "persistent": 12,
+      "persistent_pct": 7.186,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 86,
+        "TARGET_FADED": 69,
+        "CENSORED": 12,
+        "PERSISTENT_TARGET": 12
+      },
+      "two_step_matches": {
+        "EARLIER": 93,
+        "NO_LATER_TWO_STEP": 61,
+        "SAME_BAR": 16,
+        "CENSORED": 9
+      },
+      "median_lead_bars": 2,
+      "median_peak_age": 2,
+      "median_peak_to_entry_pct": 0.199245,
+      "median_favorable_pct": 0.198235,
+      "median_adverse_pct": -0.14566,
+      "median_terminal_pct": 0.024183
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "ALL",
+      "detector": "AE3",
+      "warnings": 310,
+      "complete": 281,
+      "persistent": 32,
+      "persistent_pct": 11.388,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 149,
+        "TARGET_FADED": 100,
+        "CENSORED": 29,
+        "PERSISTENT_TARGET": 32
+      },
+      "two_step_matches": {
+        "EARLIER": 181,
+        "CENSORED": 21,
+        "NO_LATER_TWO_STEP": 108
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.267726,
+      "median_favorable_pct": 0.190611,
+      "median_adverse_pct": -0.157524,
+      "median_terminal_pct": 0.035412
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "ALL",
+      "detector": "AE4",
+      "warnings": 63,
+      "complete": 59,
+      "persistent": 6,
+      "persistent_pct": 10.169,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 29,
+        "TARGET_FADED": 24,
+        "CENSORED": 4,
+        "PERSISTENT_TARGET": 6
+      },
+      "two_step_matches": {
+        "EARLIER": 38,
+        "NO_LATER_TWO_STEP": 21,
+        "CENSORED": 4
+      },
+      "median_lead_bars": 1.5,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.180195,
+      "median_favorable_pct": 0.206186,
+      "median_adverse_pct": -0.162602,
+      "median_terminal_pct": 0.027369
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "LONG/SHORT",
+      "detector": "AE0",
+      "warnings": 54,
+      "complete": 45,
+      "persistent": 3,
+      "persistent_pct": 6.667,
+      "outcomes": {
+        "TARGET_FADED": 16,
+        "CENSORED": 9,
+        "NO_FEE_SCALE_EXCURSION": 26,
+        "PERSISTENT_TARGET": 3
+      },
+      "two_step_matches": {
+        "SAME_BAR": 54
+      },
+      "median_lead_bars": null,
+      "median_peak_age": 5.0,
+      "median_peak_to_entry_pct": 0.467967,
+      "median_favorable_pct": 0.187175,
+      "median_adverse_pct": -0.180866,
+      "median_terminal_pct": 0.009409
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "LONG/SHORT",
+      "detector": "AE1",
+      "warnings": 37,
+      "complete": 27,
+      "persistent": 3,
+      "persistent_pct": 11.111,
+      "outcomes": {
+        "TARGET_FADED": 13,
+        "CENSORED": 10,
+        "NO_FEE_SCALE_EXCURSION": 11,
+        "PERSISTENT_TARGET": 3
+      },
+      "two_step_matches": {
+        "EARLIER": 20,
+        "CENSORED": 8,
+        "NO_LATER_TWO_STEP": 9
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.252708,
+      "median_favorable_pct": 0.212262,
+      "median_adverse_pct": -0.157948,
+      "median_terminal_pct": 0.168844
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "LONG/SHORT",
+      "detector": "AE2",
+      "warnings": 35,
+      "complete": 30,
+      "persistent": 2,
+      "persistent_pct": 6.667,
+      "outcomes": {
+        "TARGET_FADED": 15,
+        "CENSORED": 5,
+        "NO_FEE_SCALE_EXCURSION": 13,
+        "PERSISTENT_TARGET": 2
+      },
+      "two_step_matches": {
+        "SAME_BAR": 4,
+        "EARLIER": 17,
+        "CENSORED": 4,
+        "NO_LATER_TWO_STEP": 10
+      },
+      "median_lead_bars": 2,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.219309,
+      "median_favorable_pct": 0.247976,
+      "median_adverse_pct": -0.124331,
+      "median_terminal_pct": 0.119851
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "LONG/SHORT",
+      "detector": "AE3",
+      "warnings": 57,
+      "complete": 47,
+      "persistent": 8,
+      "persistent_pct": 17.021,
+      "outcomes": {
+        "TARGET_FADED": 20,
+        "CENSORED": 10,
+        "NO_FEE_SCALE_EXCURSION": 19,
+        "PERSISTENT_TARGET": 8
+      },
+      "two_step_matches": {
+        "EARLIER": 28,
+        "CENSORED": 8,
+        "NO_LATER_TWO_STEP": 21
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.254369,
+      "median_favorable_pct": 0.242939,
+      "median_adverse_pct": -0.152179,
+      "median_terminal_pct": 0.147405
+    },
+    {
+      "period": "SEP_OCT",
+      "context": "LONG/SHORT",
+      "detector": "AE4",
+      "warnings": 11,
+      "complete": 9,
+      "persistent": 1,
+      "persistent_pct": 11.111,
+      "outcomes": {
+        "TARGET_FADED": 6,
+        "CENSORED": 2,
+        "NO_FEE_SCALE_EXCURSION": 2,
+        "PERSISTENT_TARGET": 1
+      },
+      "two_step_matches": {
+        "EARLIER": 6,
+        "CENSORED": 2,
+        "NO_LATER_TWO_STEP": 3
+      },
+      "median_lead_bars": 2.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.192417,
+      "median_favorable_pct": 0.26106,
+      "median_adverse_pct": -0.152179,
+      "median_terminal_pct": 0.188644
+    },
+    {
+      "period": "NOV",
+      "context": "ALL",
+      "detector": "AE0",
+      "warnings": 82,
+      "complete": 78,
+      "persistent": 21,
+      "persistent_pct": 26.923,
+      "outcomes": {
+        "PERSISTENT_TARGET": 21,
+        "TARGET_FADED": 38,
+        "NO_FEE_SCALE_EXCURSION": 19,
+        "CENSORED": 4
+      },
+      "two_step_matches": {
+        "SAME_BAR": 82
+      },
+      "median_lead_bars": null,
+      "median_peak_age": 7.0,
+      "median_peak_to_entry_pct": 1.385573,
+      "median_favorable_pct": 0.536334,
+      "median_adverse_pct": -0.440826,
+      "median_terminal_pct": 0.081068
+    },
+    {
+      "period": "NOV",
+      "context": "ALL",
+      "detector": "AE1",
+      "warnings": 47,
+      "complete": 42,
+      "persistent": 12,
+      "persistent_pct": 28.571,
+      "outcomes": {
+        "TARGET_FADED": 21,
+        "PERSISTENT_TARGET": 12,
+        "NO_FEE_SCALE_EXCURSION": 9,
+        "CENSORED": 5
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 15,
+        "EARLIER": 30,
+        "CENSORED": 2
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.802896,
+      "median_favorable_pct": 0.407291,
+      "median_adverse_pct": -0.463848,
+      "median_terminal_pct": -0.011995
+    },
+    {
+      "period": "NOV",
+      "context": "ALL",
+      "detector": "AE2",
+      "warnings": 25,
+      "complete": 22,
+      "persistent": 7,
+      "persistent_pct": 31.818,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 7,
+        "PERSISTENT_TARGET": 7,
+        "TARGET_FADED": 8,
+        "CENSORED": 3
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 9,
+        "EARLIER": 10,
+        "SAME_BAR": 4,
+        "CENSORED": 2
+      },
+      "median_lead_bars": 2.0,
+      "median_peak_age": 2,
+      "median_peak_to_entry_pct": 0.686778,
+      "median_favorable_pct": 0.432228,
+      "median_adverse_pct": -0.358818,
+      "median_terminal_pct": 0.139261
+    },
+    {
+      "period": "NOV",
+      "context": "ALL",
+      "detector": "AE3",
+      "warnings": 55,
+      "complete": 48,
+      "persistent": 16,
+      "persistent_pct": 33.333,
+      "outcomes": {
+        "PERSISTENT_TARGET": 16,
+        "NO_FEE_SCALE_EXCURSION": 11,
+        "TARGET_FADED": 21,
+        "CENSORED": 7
+      },
+      "two_step_matches": {
+        "EARLIER": 35,
+        "NO_LATER_TWO_STEP": 18,
+        "CENSORED": 2
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.762615,
+      "median_favorable_pct": 0.43409,
+      "median_adverse_pct": -0.459405,
+      "median_terminal_pct": 0.136345
+    },
+    {
+      "period": "NOV",
+      "context": "ALL",
+      "detector": "AE4",
+      "warnings": 6,
+      "complete": 5,
+      "persistent": 0,
+      "persistent_pct": 0.0,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 3,
+        "TARGET_FADED": 2,
+        "CENSORED": 1
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 3,
+        "EARLIER": 3
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.493464,
+      "median_favorable_pct": 0.147029,
+      "median_adverse_pct": -0.456383,
+      "median_terminal_pct": 0.006413
+    },
+    {
+      "period": "NOV",
+      "context": "LONG/SHORT",
+      "detector": "AE0",
+      "warnings": 19,
+      "complete": 18,
+      "persistent": 8,
+      "persistent_pct": 44.444,
+      "outcomes": {
+        "PERSISTENT_TARGET": 8,
+        "TARGET_FADED": 5,
+        "NO_FEE_SCALE_EXCURSION": 5,
+        "CENSORED": 1
+      },
+      "two_step_matches": {
+        "SAME_BAR": 19
+      },
+      "median_lead_bars": null,
+      "median_peak_age": 3,
+      "median_peak_to_entry_pct": 1.089774,
+      "median_favorable_pct": 0.808885,
+      "median_adverse_pct": -0.329481,
+      "median_terminal_pct": 0.413829
+    },
+    {
+      "period": "NOV",
+      "context": "LONG/SHORT",
+      "detector": "AE1",
+      "warnings": 12,
+      "complete": 11,
+      "persistent": 4,
+      "persistent_pct": 36.364,
+      "outcomes": {
+        "TARGET_FADED": 6,
+        "PERSISTENT_TARGET": 4,
+        "NO_FEE_SCALE_EXCURSION": 1,
+        "CENSORED": 1
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 3,
+        "EARLIER": 9
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.788496,
+      "median_favorable_pct": 0.418891,
+      "median_adverse_pct": -0.462428,
+      "median_terminal_pct": -0.030403
+    },
+    {
+      "period": "NOV",
+      "context": "LONG/SHORT",
+      "detector": "AE2",
+      "warnings": 9,
+      "complete": 8,
+      "persistent": 2,
+      "persistent_pct": 25.0,
+      "outcomes": {
+        "PERSISTENT_TARGET": 2,
+        "TARGET_FADED": 3,
+        "NO_FEE_SCALE_EXCURSION": 3,
+        "CENSORED": 1
+      },
+      "two_step_matches": {
+        "EARLIER": 2,
+        "NO_LATER_TWO_STEP": 4,
+        "SAME_BAR": 3
+      },
+      "median_lead_bars": 1.5,
+      "median_peak_age": 2,
+      "median_peak_to_entry_pct": 0.686778,
+      "median_favorable_pct": 0.302573,
+      "median_adverse_pct": -0.356906,
+      "median_terminal_pct": -0.171886
+    },
+    {
+      "period": "NOV",
+      "context": "LONG/SHORT",
+      "detector": "AE3",
+      "warnings": 13,
+      "complete": 12,
+      "persistent": 6,
+      "persistent_pct": 50.0,
+      "outcomes": {
+        "PERSISTENT_TARGET": 6,
+        "TARGET_FADED": 4,
+        "NO_FEE_SCALE_EXCURSION": 2,
+        "CENSORED": 1
+      },
+      "two_step_matches": {
+        "EARLIER": 10,
+        "NO_LATER_TWO_STEP": 3
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.550964,
+      "median_favorable_pct": 0.571751,
+      "median_adverse_pct": -0.424101,
+      "median_terminal_pct": 0.277146
+    },
+    {
+      "period": "NOV",
+      "context": "LONG/SHORT",
+      "detector": "AE4",
+      "warnings": 2,
+      "complete": 1,
+      "persistent": 0,
+      "persistent_pct": 0.0,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 1,
+        "CENSORED": 1
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 1,
+        "EARLIER": 1
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 6.0,
+      "median_peak_to_entry_pct": 0.500696,
+      "median_favorable_pct": 0.147029,
+      "median_adverse_pct": -1.21726,
+      "median_terminal_pct": -0.98475
+    },
+    {
+      "period": "ALL",
+      "context": "ALL",
+      "detector": "AE0",
+      "warnings": 1037,
+      "complete": 964,
+      "persistent": 157,
+      "persistent_pct": 16.286,
+      "outcomes": {
+        "TARGET_FADED": 401,
+        "NO_FEE_SCALE_EXCURSION": 406,
+        "PERSISTENT_TARGET": 157,
+        "CENSORED": 73
+      },
+      "two_step_matches": {
+        "SAME_BAR": 1037
+      },
+      "median_lead_bars": null,
+      "median_peak_age": 7,
+      "median_peak_to_entry_pct": 0.708719,
+      "median_favorable_pct": 0.249389,
+      "median_adverse_pct": -0.22664,
+      "median_terminal_pct": 0.009478
+    },
+    {
+      "period": "ALL",
+      "context": "ALL",
+      "detector": "AE1",
+      "warnings": 519,
+      "complete": 460,
+      "persistent": 66,
+      "persistent_pct": 14.348,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 215,
+        "TARGET_FADED": 179,
+        "PERSISTENT_TARGET": 66,
+        "CENSORED": 59
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 200,
+        "EARLIER": 282,
+        "CENSORED": 37
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.38729,
+      "median_favorable_pct": 0.214895,
+      "median_adverse_pct": -0.194303,
+      "median_terminal_pct": -0.013434
+    },
+    {
+      "period": "ALL",
+      "context": "ALL",
+      "detector": "AE2",
+      "warnings": 461,
+      "complete": 432,
+      "persistent": 48,
+      "persistent_pct": 11.111,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 200,
+        "TARGET_FADED": 184,
+        "PERSISTENT_TARGET": 48,
+        "CENSORED": 29
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 205,
+        "EARLIER": 194,
+        "SAME_BAR": 40,
+        "CENSORED": 22
+      },
+      "median_lead_bars": 2.0,
+      "median_peak_age": 2,
+      "median_peak_to_entry_pct": 0.253648,
+      "median_favorable_pct": 0.213868,
+      "median_adverse_pct": -0.20521,
+      "median_terminal_pct": 0.018097
+    },
+    {
+      "period": "ALL",
+      "context": "ALL",
+      "detector": "AE3",
+      "warnings": 810,
+      "complete": 729,
+      "persistent": 108,
+      "persistent_pct": 14.815,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 335,
+        "TARGET_FADED": 286,
+        "PERSISTENT_TARGET": 108,
+        "CENSORED": 81
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 328,
+        "EARLIER": 424,
+        "CENSORED": 58
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.333215,
+      "median_favorable_pct": 0.225684,
+      "median_adverse_pct": -0.208918,
+      "median_terminal_pct": 0.014632
+    },
+    {
+      "period": "ALL",
+      "context": "ALL",
+      "detector": "AE4",
+      "warnings": 146,
+      "complete": 136,
+      "persistent": 11,
+      "persistent_pct": 8.088,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 73,
+        "TARGET_FADED": 52,
+        "PERSISTENT_TARGET": 11,
+        "CENSORED": 10
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 72,
+        "EARLIER": 67,
+        "CENSORED": 7
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.222654,
+      "median_favorable_pct": 0.178731,
+      "median_adverse_pct": -0.254274,
+      "median_terminal_pct": -0.005637
+    },
+    {
+      "period": "ALL",
+      "context": "LONG/SHORT",
+      "detector": "AE0",
+      "warnings": 166,
+      "complete": 153,
+      "persistent": 29,
+      "persistent_pct": 18.954,
+      "outcomes": {
+        "PERSISTENT_TARGET": 29,
+        "NO_FEE_SCALE_EXCURSION": 67,
+        "TARGET_FADED": 57,
+        "CENSORED": 13
+      },
+      "two_step_matches": {
+        "SAME_BAR": 166
+      },
+      "median_lead_bars": null,
+      "median_peak_age": 5.0,
+      "median_peak_to_entry_pct": 0.61294,
+      "median_favorable_pct": 0.241418,
+      "median_adverse_pct": -0.202286,
+      "median_terminal_pct": 0.026404
+    },
+    {
+      "period": "ALL",
+      "context": "LONG/SHORT",
+      "detector": "AE1",
+      "warnings": 107,
+      "complete": 87,
+      "persistent": 16,
+      "persistent_pct": 18.391,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 35,
+        "PERSISTENT_TARGET": 16,
+        "TARGET_FADED": 36,
+        "CENSORED": 20
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 35,
+        "EARLIER": 58,
+        "CENSORED": 14
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1,
+      "median_peak_to_entry_pct": 0.419084,
+      "median_favorable_pct": 0.227357,
+      "median_adverse_pct": -0.274148,
+      "median_terminal_pct": 0.030491
+    },
+    {
+      "period": "ALL",
+      "context": "LONG/SHORT",
+      "detector": "AE2",
+      "warnings": 111,
+      "complete": 96,
+      "persistent": 12,
+      "persistent_pct": 12.5,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 36,
+        "TARGET_FADED": 48,
+        "CENSORED": 15,
+        "PERSISTENT_TARGET": 12
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 41,
+        "EARLIER": 47,
+        "CENSORED": 10,
+        "SAME_BAR": 13
+      },
+      "median_lead_bars": 2,
+      "median_peak_age": 2,
+      "median_peak_to_entry_pct": 0.323328,
+      "median_favorable_pct": 0.265948,
+      "median_adverse_pct": -0.204125,
+      "median_terminal_pct": 0.086814
+    },
+    {
+      "period": "ALL",
+      "context": "LONG/SHORT",
+      "detector": "AE3",
+      "warnings": 174,
+      "complete": 151,
+      "persistent": 30,
+      "persistent_pct": 19.868,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 64,
+        "TARGET_FADED": 57,
+        "PERSISTENT_TARGET": 30,
+        "CENSORED": 23
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 72,
+        "EARLIER": 85,
+        "CENSORED": 17
+      },
+      "median_lead_bars": 1,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.344151,
+      "median_favorable_pct": 0.242939,
+      "median_adverse_pct": -0.198807,
+      "median_terminal_pct": 0.009588
+    },
+    {
+      "period": "ALL",
+      "context": "LONG/SHORT",
+      "detector": "AE4",
+      "warnings": 34,
+      "complete": 27,
+      "persistent": 2,
+      "persistent_pct": 7.407,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 13,
+        "TARGET_FADED": 12,
+        "CENSORED": 7,
+        "PERSISTENT_TARGET": 2
+      },
+      "two_step_matches": {
+        "NO_LATER_TWO_STEP": 12,
+        "EARLIER": 18,
+        "CENSORED": 4
+      },
+      "median_lead_bars": 1.0,
+      "median_peak_age": 1.0,
+      "median_peak_to_entry_pct": 0.344151,
+      "median_favorable_pct": 0.213416,
+      "median_adverse_pct": -0.177042,
+      "median_terminal_pct": 0.054201
+    }
+  ]
+}

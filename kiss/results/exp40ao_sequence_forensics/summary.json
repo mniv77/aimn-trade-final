@@ -1,0 +1,392 @@
+{
+  "source_sha256": "b69f0251548884c953c130cb75f6ae527306f458d0184ae9d133a8bc291e50a5",
+  "notes": [
+    "Discovery only. Signs of adjacent three-change close velocity windows ending at original peak. Final SHORT refers to detected warning, not verified future trend. Zero and missing history separate in AO4 detail. Outcomes are from existing sequential replays, not new strategy tests. AJ1 net P&L absent from source; only AM3 net reported."
+  ],
+  "groups": [
+    {
+      "period": "ALL",
+      "formation": "AO1",
+      "authorizations": 26,
+      "details": {
+        "SHORT_LONG": 26
+      },
+      "aj1": {
+        "WIN": 12,
+        "NO_FEE_CLOSE": 6,
+        "GIVEBACK": 3,
+        "UNTRADED": 5,
+        "win_rate_pct": 57.1429
+      },
+      "am3": {
+        "WIN": 7,
+        "NO_FEE_CLOSE": 3,
+        "GIVEBACK": 1,
+        "UNTRADED": 15,
+        "win_rate_pct": 63.6364
+      },
+      "am3_net_pct": -0.443425,
+      "am3_gate_pass": 13
+    },
+    {
+      "period": "ALL",
+      "formation": "AO2",
+      "authorizations": 30,
+      "details": {
+        "LONG_LONG": 30
+      },
+      "aj1": {
+        "WIN": 10,
+        "NO_FEE_CLOSE": 15,
+        "GIVEBACK": 3,
+        "UNTRADED": 2,
+        "win_rate_pct": 35.7143
+      },
+      "am3": {
+        "WIN": 3,
+        "NO_FEE_CLOSE": 2,
+        "GIVEBACK": 0,
+        "UNTRADED": 25,
+        "win_rate_pct": 60.0
+      },
+      "am3_net_pct": 1.107504,
+      "am3_gate_pass": 5
+    },
+    {
+      "period": "ALL",
+      "formation": "AO3",
+      "authorizations": 2,
+      "details": {
+        "LONG_SHORT": 2
+      },
+      "aj1": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 1,
+        "GIVEBACK": 1,
+        "UNTRADED": 0,
+        "win_rate_pct": 0.0
+      },
+      "am3": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 2,
+        "win_rate_pct": null
+      },
+      "am3_net_pct": 0,
+      "am3_gate_pass": 0
+    },
+    {
+      "period": "ALL",
+      "formation": "AO4",
+      "authorizations": 7,
+      "details": {
+        "SHORT_SHORT": 3,
+        "MISSING": 4
+      },
+      "aj1": {
+        "WIN": 3,
+        "NO_FEE_CLOSE": 3,
+        "GIVEBACK": 1,
+        "UNTRADED": 0,
+        "win_rate_pct": 42.8571
+      },
+      "am3": {
+        "WIN": 1,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 6,
+        "win_rate_pct": 100.0
+      },
+      "am3_net_pct": 0.28209,
+      "am3_gate_pass": 1
+    },
+    {
+      "period": "JUN_AUG",
+      "formation": "AO1",
+      "authorizations": 15,
+      "details": {
+        "SHORT_LONG": 15
+      },
+      "aj1": {
+        "WIN": 7,
+        "NO_FEE_CLOSE": 4,
+        "GIVEBACK": 1,
+        "UNTRADED": 3,
+        "win_rate_pct": 58.3333
+      },
+      "am3": {
+        "WIN": 4,
+        "NO_FEE_CLOSE": 3,
+        "GIVEBACK": 0,
+        "UNTRADED": 8,
+        "win_rate_pct": 57.1429
+      },
+      "am3_net_pct": -0.676601,
+      "am3_gate_pass": 9
+    },
+    {
+      "period": "JUN_AUG",
+      "formation": "AO2",
+      "authorizations": 18,
+      "details": {
+        "LONG_LONG": 18
+      },
+      "aj1": {
+        "WIN": 5,
+        "NO_FEE_CLOSE": 11,
+        "GIVEBACK": 1,
+        "UNTRADED": 1,
+        "win_rate_pct": 29.4118
+      },
+      "am3": {
+        "WIN": 1,
+        "NO_FEE_CLOSE": 2,
+        "GIVEBACK": 0,
+        "UNTRADED": 15,
+        "win_rate_pct": 33.3333
+      },
+      "am3_net_pct": 0.575731,
+      "am3_gate_pass": 3
+    },
+    {
+      "period": "JUN_AUG",
+      "formation": "AO3",
+      "authorizations": 0,
+      "details": {},
+      "aj1": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 0,
+        "win_rate_pct": null
+      },
+      "am3": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 0,
+        "win_rate_pct": null
+      },
+      "am3_net_pct": 0,
+      "am3_gate_pass": 0
+    },
+    {
+      "period": "JUN_AUG",
+      "formation": "AO4",
+      "authorizations": 5,
+      "details": {
+        "SHORT_SHORT": 3,
+        "MISSING": 2
+      },
+      "aj1": {
+        "WIN": 2,
+        "NO_FEE_CLOSE": 2,
+        "GIVEBACK": 1,
+        "UNTRADED": 0,
+        "win_rate_pct": 40.0
+      },
+      "am3": {
+        "WIN": 1,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 4,
+        "win_rate_pct": 100.0
+      },
+      "am3_net_pct": 0.28209,
+      "am3_gate_pass": 1
+    },
+    {
+      "period": "SEP_OCT",
+      "formation": "AO1",
+      "authorizations": 9,
+      "details": {
+        "SHORT_LONG": 9
+      },
+      "aj1": {
+        "WIN": 4,
+        "NO_FEE_CLOSE": 1,
+        "GIVEBACK": 2,
+        "UNTRADED": 2,
+        "win_rate_pct": 57.1429
+      },
+      "am3": {
+        "WIN": 3,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 1,
+        "UNTRADED": 5,
+        "win_rate_pct": 75.0
+      },
+      "am3_net_pct": 0.233176,
+      "am3_gate_pass": 4
+    },
+    {
+      "period": "SEP_OCT",
+      "formation": "AO2",
+      "authorizations": 9,
+      "details": {
+        "LONG_LONG": 9
+      },
+      "aj1": {
+        "WIN": 4,
+        "NO_FEE_CLOSE": 3,
+        "GIVEBACK": 1,
+        "UNTRADED": 1,
+        "win_rate_pct": 50.0
+      },
+      "am3": {
+        "WIN": 1,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 8,
+        "win_rate_pct": 100.0
+      },
+      "am3_net_pct": 0.089697,
+      "am3_gate_pass": 1
+    },
+    {
+      "period": "SEP_OCT",
+      "formation": "AO3",
+      "authorizations": 1,
+      "details": {
+        "LONG_SHORT": 1
+      },
+      "aj1": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 1,
+        "UNTRADED": 0,
+        "win_rate_pct": 0.0
+      },
+      "am3": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 1,
+        "win_rate_pct": null
+      },
+      "am3_net_pct": 0,
+      "am3_gate_pass": 0
+    },
+    {
+      "period": "SEP_OCT",
+      "formation": "AO4",
+      "authorizations": 1,
+      "details": {
+        "MISSING": 1
+      },
+      "aj1": {
+        "WIN": 1,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 0,
+        "win_rate_pct": 100.0
+      },
+      "am3": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 1,
+        "win_rate_pct": null
+      },
+      "am3_net_pct": 0,
+      "am3_gate_pass": 0
+    },
+    {
+      "period": "NOV",
+      "formation": "AO1",
+      "authorizations": 2,
+      "details": {
+        "SHORT_LONG": 2
+      },
+      "aj1": {
+        "WIN": 1,
+        "NO_FEE_CLOSE": 1,
+        "GIVEBACK": 0,
+        "UNTRADED": 0,
+        "win_rate_pct": 50.0
+      },
+      "am3": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 2,
+        "win_rate_pct": null
+      },
+      "am3_net_pct": 0,
+      "am3_gate_pass": 0
+    },
+    {
+      "period": "NOV",
+      "formation": "AO2",
+      "authorizations": 3,
+      "details": {
+        "LONG_LONG": 3
+      },
+      "aj1": {
+        "WIN": 1,
+        "NO_FEE_CLOSE": 1,
+        "GIVEBACK": 1,
+        "UNTRADED": 0,
+        "win_rate_pct": 33.3333
+      },
+      "am3": {
+        "WIN": 1,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 2,
+        "win_rate_pct": 100.0
+      },
+      "am3_net_pct": 0.442076,
+      "am3_gate_pass": 1
+    },
+    {
+      "period": "NOV",
+      "formation": "AO3",
+      "authorizations": 1,
+      "details": {
+        "LONG_SHORT": 1
+      },
+      "aj1": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 1,
+        "GIVEBACK": 0,
+        "UNTRADED": 0,
+        "win_rate_pct": 0.0
+      },
+      "am3": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 1,
+        "win_rate_pct": null
+      },
+      "am3_net_pct": 0,
+      "am3_gate_pass": 0
+    },
+    {
+      "period": "NOV",
+      "formation": "AO4",
+      "authorizations": 1,
+      "details": {
+        "MISSING": 1
+      },
+      "aj1": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 1,
+        "GIVEBACK": 0,
+        "UNTRADED": 0,
+        "win_rate_pct": 0.0
+      },
+      "am3": {
+        "WIN": 0,
+        "NO_FEE_CLOSE": 0,
+        "GIVEBACK": 0,
+        "UNTRADED": 1,
+        "win_rate_pct": null
+      },
+      "am3_net_pct": 0,
+      "am3_gate_pass": 0
+    }
+  ]
+}

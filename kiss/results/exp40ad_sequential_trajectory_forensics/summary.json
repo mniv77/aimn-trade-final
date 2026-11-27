@@ -1,0 +1,8394 @@
+{
+  "notes": [
+    "All periods discovery; no filters or replay. Positive velocity denotes SHORT; percentage points per five-minute interval. Each phase uses three consecutive close changes; adjacent phases share endpoint only. High/low ranges use disjoint destination bars. Missing history stays missing.",
+    "Six-bar price proxy is retrospective, not executable P&L. Overlapping candidate outcomes are dependent. Trade labels use frozen AA1/AB1 only."
+  ],
+  "source_hashes": {
+    "kiss/visual_research/aimn_nvda_candles.json": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+    "kiss/results/exp40aa_reverse_transition_replay/DISCOVERY_AA1_candidates.csv": "9f4a66ab7603360f4dfa21eea2101166f73e1c3dfef19ff46748396590f7e938",
+    "kiss/results/exp40aa_reverse_transition_replay/DISCOVERY_AA1_trades.csv": "11ed4b87168bc5fc66febdd18601307ec4e20979f1a0d2e9e83915dad03d4a7a",
+    "kiss/visual_research/independent_holdout_exp127/nvda_sep_oct_2026_5m_iex.json": "3e944cd4cdeba1adb650804a0a3e81d5355c225d9ad05546176b1de8ef9e9718",
+    "kiss/results/exp40ab_historical_robustness/AB1_candidates.csv": "b9dd38fd00aa90260d93a33eb418017eee4fd263f7afdf4e29dc6e8635c4ab6d",
+    "kiss/results/exp40ab_historical_robustness/AB1_trades.csv": "78dd5b1d820ddb66c4b507c19697ea841ec0a9c166a979f3f8891634f98f0d9b",
+    "kiss/visual_research/independent_holdout_exp40l/nvda_2026-11-16_2026-11-25_5m_iex.json": "eabb5477fc612d1d7ad21973282bc2a527c94da26fefdb9931172c89950b572d",
+    "kiss/results/exp40aa_reverse_transition_replay/NOVEMBER_AA1_candidates.csv": "f1f9b5492b7ce18cee2167c26a5501e5442332b31fad6cbdb9dbedeeda0a593e",
+    "kiss/results/exp40aa_reverse_transition_replay/NOVEMBER_AA1_trades.csv": "29f2a56a313acb0a3cad980cf1f4b1257d9371f297804de495bf7da447bffec0"
+  },
+  "groups": [
+    {
+      "period": "ALL",
+      "group": "PATTERN",
+      "label": "LONG/LONG/LONG",
+      "count": 2,
+      "trade_outcomes": {
+        "UNTRADED": 2
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 2,
+          "median": -0.055553
+        },
+        "A_efficiency": {
+          "available": 2,
+          "median": -0.288969
+        },
+        "A_range_pct": {
+          "available": 2,
+          "median": 0.4132
+        },
+        "A_high": {
+          "available": 2,
+          "median": 203.385
+        },
+        "A_low": {
+          "available": 2,
+          "median": 202.54
+        },
+        "B_velocity": {
+          "available": 2,
+          "median": -0.158815
+        },
+        "B_efficiency": {
+          "available": 2,
+          "median": -0.759036
+        },
+        "B_range_pct": {
+          "available": 2,
+          "median": 0.669249
+        },
+        "B_high": {
+          "available": 2,
+          "median": 204.48
+        },
+        "B_low": {
+          "available": 2,
+          "median": 203.125
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": -0.013032
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": -0.236568
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 0.263317
+        },
+        "C_high": {
+          "available": 2,
+          "median": 204.4825
+        },
+        "C_low": {
+          "available": 2,
+          "median": 203.945
+        },
+        "BA_delta_velocity": {
+          "available": 2,
+          "median": -0.103262
+        },
+        "BA_delta_efficiency": {
+          "available": 2,
+          "median": -0.470067
+        },
+        "BA_delta_range_pct": {
+          "available": 2,
+          "median": 0.256049
+        },
+        "BA_delta_high": {
+          "available": 2,
+          "median": 0.542992
+        },
+        "BA_delta_low": {
+          "available": 2,
+          "median": 0.28734
+        },
+        "CB_delta_velocity": {
+          "available": 2,
+          "median": 0.145783
+        },
+        "CB_delta_efficiency": {
+          "available": 2,
+          "median": 0.522468
+        },
+        "CB_delta_range_pct": {
+          "available": 2,
+          "median": -0.405932
+        },
+        "CB_delta_high": {
+          "available": 2,
+          "median": -0.002073
+        },
+        "CB_delta_low": {
+          "available": 2,
+          "median": 0.402522
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PATTERN",
+      "label": "LONG/LONG/SHORT",
+      "count": 43,
+      "trade_outcomes": {
+        "NO_FEE_CLOSE": 2,
+        "UNTRADED": 37,
+        "GIVEBACK": 1,
+        "WIN": 3
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 15,
+        "TARGET_FADED": 19,
+        "CENSORED": 6,
+        "PERSISTENT_TARGET": 3
+      },
+      "features": {
+        "A_velocity": {
+          "available": 43,
+          "median": -0.081695
+        },
+        "A_efficiency": {
+          "available": 43,
+          "median": -0.870968
+        },
+        "A_range_pct": {
+          "available": 43,
+          "median": 0.435971
+        },
+        "A_high": {
+          "available": 43,
+          "median": 212.445
+        },
+        "A_low": {
+          "available": 43,
+          "median": 212.06
+        },
+        "B_velocity": {
+          "available": 43,
+          "median": -0.076285
+        },
+        "B_efficiency": {
+          "available": 43,
+          "median": -0.726027
+        },
+        "B_range_pct": {
+          "available": 43,
+          "median": 0.500276
+        },
+        "B_high": {
+          "available": 43,
+          "median": 212.57
+        },
+        "B_low": {
+          "available": 43,
+          "median": 212.21
+        },
+        "C_velocity": {
+          "available": 43,
+          "median": 0.113968
+        },
+        "C_efficiency": {
+          "available": 43,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 43,
+          "median": 0.513691
+        },
+        "C_high": {
+          "available": 43,
+          "median": 212.49
+        },
+        "C_low": {
+          "available": 43,
+          "median": 211.8
+        },
+        "BA_delta_velocity": {
+          "available": 43,
+          "median": 0.004357
+        },
+        "BA_delta_efficiency": {
+          "available": 43,
+          "median": 0.0
+        },
+        "BA_delta_range_pct": {
+          "available": 43,
+          "median": 0.010672
+        },
+        "BA_delta_high": {
+          "available": 43,
+          "median": 0.255821
+        },
+        "BA_delta_low": {
+          "available": 43,
+          "median": 0.293226
+        },
+        "CB_delta_velocity": {
+          "available": 43,
+          "median": 0.198089
+        },
+        "CB_delta_efficiency": {
+          "available": 43,
+          "median": 1.609023
+        },
+        "CB_delta_range_pct": {
+          "available": 43,
+          "median": -0.016904
+        },
+        "CB_delta_high": {
+          "available": 43,
+          "median": -0.015441
+        },
+        "CB_delta_low": {
+          "available": 43,
+          "median": -0.019549
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PATTERN",
+      "label": "LONG/SHORT/SHORT",
+      "count": 32,
+      "trade_outcomes": {
+        "UNTRADED": 24,
+        "WIN": 4,
+        "NO_FEE_CLOSE": 3,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 14,
+        "TARGET_FADED": 5,
+        "PERSISTENT_TARGET": 9,
+        "CENSORED": 4
+      },
+      "features": {
+        "A_velocity": {
+          "available": 32,
+          "median": -0.069577
+        },
+        "A_efficiency": {
+          "available": 32,
+          "median": -0.548841
+        },
+        "A_range_pct": {
+          "available": 32,
+          "median": 0.440008
+        },
+        "A_high": {
+          "available": 32,
+          "median": 212.295
+        },
+        "A_low": {
+          "available": 32,
+          "median": 211.875
+        },
+        "B_velocity": {
+          "available": 32,
+          "median": 0.051308
+        },
+        "B_efficiency": {
+          "available": 32,
+          "median": 0.361434
+        },
+        "B_range_pct": {
+          "available": 32,
+          "median": 0.384867
+        },
+        "B_high": {
+          "available": 32,
+          "median": 212.27
+        },
+        "B_low": {
+          "available": 32,
+          "median": 211.7875
+        },
+        "C_velocity": {
+          "available": 32,
+          "median": 0.087694
+        },
+        "C_efficiency": {
+          "available": 32,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 32,
+          "median": 0.39414
+        },
+        "C_high": {
+          "available": 32,
+          "median": 212.1325
+        },
+        "C_low": {
+          "available": 32,
+          "median": 211.62
+        },
+        "BA_delta_velocity": {
+          "available": 32,
+          "median": 0.118255
+        },
+        "BA_delta_efficiency": {
+          "available": 32,
+          "median": 0.997656
+        },
+        "BA_delta_range_pct": {
+          "available": 32,
+          "median": -0.034613
+        },
+        "BA_delta_high": {
+          "available": 32,
+          "median": 0.003933
+        },
+        "BA_delta_low": {
+          "available": 32,
+          "median": 0.052424
+        },
+        "CB_delta_velocity": {
+          "available": 32,
+          "median": 0.038524
+        },
+        "CB_delta_efficiency": {
+          "available": 32,
+          "median": 0.485309
+        },
+        "CB_delta_range_pct": {
+          "available": 32,
+          "median": 0.019186
+        },
+        "CB_delta_high": {
+          "available": 32,
+          "median": -0.180863
+        },
+        "CB_delta_low": {
+          "available": 32,
+          "median": -0.221777
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PATTERN",
+      "label": "MISSING",
+      "count": 22,
+      "trade_outcomes": {
+        "UNTRADED": 22
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 6,
+        "NO_FEE_SCALE_EXCURSION": 4,
+        "TARGET_FADED": 12
+      },
+      "features": {
+        "A_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "A_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "A_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "A_high": {
+          "available": 0,
+          "median": null
+        },
+        "A_low": {
+          "available": 0,
+          "median": null
+        },
+        "B_velocity": {
+          "available": 7,
+          "median": -0.072489
+        },
+        "B_efficiency": {
+          "available": 7,
+          "median": -0.256566
+        },
+        "B_range_pct": {
+          "available": 7,
+          "median": 0.847022
+        },
+        "B_high": {
+          "available": 7,
+          "median": 203.565
+        },
+        "B_low": {
+          "available": 7,
+          "median": 202.01
+        },
+        "C_velocity": {
+          "available": 22,
+          "median": 0.227381
+        },
+        "C_efficiency": {
+          "available": 22,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 22,
+          "median": 1.078681
+        },
+        "C_high": {
+          "available": 22,
+          "median": 207.075
+        },
+        "C_low": {
+          "available": 22,
+          "median": 205.177
+        },
+        "BA_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_low": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_velocity": {
+          "available": 7,
+          "median": 0.260785
+        },
+        "CB_delta_efficiency": {
+          "available": 7,
+          "median": 1.180328
+        },
+        "CB_delta_range_pct": {
+          "available": 7,
+          "median": -0.01449
+        },
+        "CB_delta_high": {
+          "available": 7,
+          "median": -0.112186
+        },
+        "CB_delta_low": {
+          "available": 7,
+          "median": -0.305854
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PATTERN",
+      "label": "SHORT/FLAT/SHORT",
+      "count": 1,
+      "trade_outcomes": {
+        "UNTRADED": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 1,
+          "median": 0.032438
+        },
+        "A_efficiency": {
+          "available": 1,
+          "median": 0.365079
+        },
+        "A_range_pct": {
+          "available": 1,
+          "median": 0.300402
+        },
+        "A_high": {
+          "available": 1,
+          "median": 236.66
+        },
+        "A_low": {
+          "available": 1,
+          "median": 235.95
+        },
+        "B_velocity": {
+          "available": 1,
+          "median": -0.0
+        },
+        "B_efficiency": {
+          "available": 1,
+          "median": -0.0
+        },
+        "B_range_pct": {
+          "available": 1,
+          "median": 0.190581
+        },
+        "B_high": {
+          "available": 1,
+          "median": 236.23
+        },
+        "B_low": {
+          "available": 1,
+          "median": 235.78
+        },
+        "C_velocity": {
+          "available": 1,
+          "median": 0.074821
+        },
+        "C_efficiency": {
+          "available": 1,
+          "median": 0.688312
+        },
+        "C_range_pct": {
+          "available": 1,
+          "median": 0.340928
+        },
+        "C_high": {
+          "available": 1,
+          "median": 236.34
+        },
+        "C_low": {
+          "available": 1,
+          "median": 235.535
+        },
+        "BA_delta_velocity": {
+          "available": 1,
+          "median": -0.032438
+        },
+        "BA_delta_efficiency": {
+          "available": 1,
+          "median": -0.365079
+        },
+        "BA_delta_range_pct": {
+          "available": 1,
+          "median": -0.109821
+        },
+        "BA_delta_high": {
+          "available": 1,
+          "median": -0.181695
+        },
+        "BA_delta_low": {
+          "available": 1,
+          "median": -0.072049
+        },
+        "CB_delta_velocity": {
+          "available": 1,
+          "median": 0.074821
+        },
+        "CB_delta_efficiency": {
+          "available": 1,
+          "median": 0.688312
+        },
+        "CB_delta_range_pct": {
+          "available": 1,
+          "median": 0.150347
+        },
+        "CB_delta_high": {
+          "available": 1,
+          "median": 0.046565
+        },
+        "CB_delta_low": {
+          "available": 1,
+          "median": -0.10391
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PATTERN",
+      "label": "SHORT/LONG/SHORT",
+      "count": 42,
+      "trade_outcomes": {
+        "UNTRADED": 33,
+        "WIN": 3,
+        "NO_FEE_CLOSE": 5,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 15,
+        "NO_FEE_SCALE_EXCURSION": 23,
+        "PERSISTENT_TARGET": 2,
+        "CENSORED": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 42,
+          "median": 0.043519
+        },
+        "A_efficiency": {
+          "available": 42,
+          "median": 0.34093
+        },
+        "A_range_pct": {
+          "available": 42,
+          "median": 0.446342
+        },
+        "A_high": {
+          "available": 42,
+          "median": 210.575
+        },
+        "A_low": {
+          "available": 42,
+          "median": 209.625
+        },
+        "B_velocity": {
+          "available": 42,
+          "median": -0.075608
+        },
+        "B_efficiency": {
+          "available": 42,
+          "median": -0.770444
+        },
+        "B_range_pct": {
+          "available": 42,
+          "median": 0.4565
+        },
+        "B_high": {
+          "available": 42,
+          "median": 211.22
+        },
+        "B_low": {
+          "available": 42,
+          "median": 209.83
+        },
+        "C_velocity": {
+          "available": 42,
+          "median": 0.109382
+        },
+        "C_efficiency": {
+          "available": 42,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 42,
+          "median": 0.486618
+        },
+        "C_high": {
+          "available": 42,
+          "median": 211.11
+        },
+        "C_low": {
+          "available": 42,
+          "median": 209.78
+        },
+        "BA_delta_velocity": {
+          "available": 42,
+          "median": -0.134085
+        },
+        "BA_delta_efficiency": {
+          "available": 42,
+          "median": -1.110571
+        },
+        "BA_delta_range_pct": {
+          "available": 42,
+          "median": -0.032419
+        },
+        "BA_delta_high": {
+          "available": 42,
+          "median": 0.044694
+        },
+        "BA_delta_low": {
+          "available": 42,
+          "median": 0.033213
+        },
+        "CB_delta_velocity": {
+          "available": 42,
+          "median": 0.192017
+        },
+        "CB_delta_efficiency": {
+          "available": 42,
+          "median": 1.547453
+        },
+        "CB_delta_range_pct": {
+          "available": 42,
+          "median": 0.017937
+        },
+        "CB_delta_high": {
+          "available": 42,
+          "median": 0.008698
+        },
+        "CB_delta_low": {
+          "available": 42,
+          "median": -0.050786
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PATTERN",
+      "label": "SHORT/SHORT/SHORT",
+      "count": 24,
+      "trade_outcomes": {
+        "WIN": 5,
+        "UNTRADED": 16,
+        "NO_FEE_CLOSE": 3
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 5,
+        "PERSISTENT_TARGET": 8,
+        "NO_FEE_SCALE_EXCURSION": 10,
+        "CENSORED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 24,
+          "median": 0.035399
+        },
+        "A_efficiency": {
+          "available": 24,
+          "median": 0.296892
+        },
+        "A_range_pct": {
+          "available": 24,
+          "median": 0.423983
+        },
+        "A_high": {
+          "available": 24,
+          "median": 208.7425
+        },
+        "A_low": {
+          "available": 24,
+          "median": 207.7155
+        },
+        "B_velocity": {
+          "available": 24,
+          "median": 0.045854
+        },
+        "B_efficiency": {
+          "available": 24,
+          "median": 0.535101
+        },
+        "B_range_pct": {
+          "available": 24,
+          "median": 0.339128
+        },
+        "B_high": {
+          "available": 24,
+          "median": 208.575
+        },
+        "B_low": {
+          "available": 24,
+          "median": 207.895
+        },
+        "C_velocity": {
+          "available": 24,
+          "median": 0.082807
+        },
+        "C_efficiency": {
+          "available": 24,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 24,
+          "median": 0.414117
+        },
+        "C_high": {
+          "available": 24,
+          "median": 208.165
+        },
+        "C_low": {
+          "available": 24,
+          "median": 207.505
+        },
+        "BA_delta_velocity": {
+          "available": 24,
+          "median": 0.01234
+        },
+        "BA_delta_efficiency": {
+          "available": 24,
+          "median": 0.179107
+        },
+        "BA_delta_range_pct": {
+          "available": 24,
+          "median": -0.022823
+        },
+        "BA_delta_high": {
+          "available": 24,
+          "median": -0.171845
+        },
+        "BA_delta_low": {
+          "available": 24,
+          "median": -0.144767
+        },
+        "CB_delta_velocity": {
+          "available": 24,
+          "median": 0.028588
+        },
+        "CB_delta_efficiency": {
+          "available": 24,
+          "median": 0.24188
+        },
+        "CB_delta_range_pct": {
+          "available": 24,
+          "median": 0.05023
+        },
+        "CB_delta_high": {
+          "available": 24,
+          "median": -0.174998
+        },
+        "CB_delta_low": {
+          "available": 24,
+          "median": -0.21874
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PHASE",
+      "label": "LONG_TO_SHORT",
+      "count": 92,
+      "trade_outcomes": {
+        "NO_FEE_CLOSE": 7,
+        "UNTRADED": 77,
+        "WIN": 6,
+        "GIVEBACK": 2
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 39,
+        "TARGET_FADED": 39,
+        "PERSISTENT_TARGET": 6,
+        "CENSORED": 8
+      },
+      "features": {
+        "A_velocity": {
+          "available": 86,
+          "median": 0.00116
+        },
+        "A_efficiency": {
+          "available": 86,
+          "median": 0.005395
+        },
+        "A_range_pct": {
+          "available": 86,
+          "median": 0.437162
+        },
+        "A_high": {
+          "available": 86,
+          "median": 211.5825
+        },
+        "A_low": {
+          "available": 86,
+          "median": 210.905
+        },
+        "B_velocity": {
+          "available": 92,
+          "median": -0.076082
+        },
+        "B_efficiency": {
+          "available": 92,
+          "median": -0.739048
+        },
+        "B_range_pct": {
+          "available": 92,
+          "median": 0.490341
+        },
+        "B_high": {
+          "available": 92,
+          "median": 211.255
+        },
+        "B_low": {
+          "available": 92,
+          "median": 209.64
+        },
+        "C_velocity": {
+          "available": 92,
+          "median": 0.114099
+        },
+        "C_efficiency": {
+          "available": 92,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 92,
+          "median": 0.517529
+        },
+        "C_high": {
+          "available": 92,
+          "median": 211.381
+        },
+        "C_low": {
+          "available": 92,
+          "median": 209.915
+        },
+        "BA_delta_velocity": {
+          "available": 86,
+          "median": -0.081543
+        },
+        "BA_delta_efficiency": {
+          "available": 86,
+          "median": -0.500007
+        },
+        "BA_delta_range_pct": {
+          "available": 86,
+          "median": -0.004245
+        },
+        "BA_delta_high": {
+          "available": 86,
+          "median": 0.179194
+        },
+        "BA_delta_low": {
+          "available": 86,
+          "median": 0.1618
+        },
+        "CB_delta_velocity": {
+          "available": 92,
+          "median": 0.197419
+        },
+        "CB_delta_efficiency": {
+          "available": 92,
+          "median": 1.547968
+        },
+        "CB_delta_range_pct": {
+          "available": 92,
+          "median": 0.005309
+        },
+        "CB_delta_high": {
+          "available": 92,
+          "median": -0.005755
+        },
+        "CB_delta_low": {
+          "available": 92,
+          "median": -0.044586
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PHASE",
+      "label": "MISSING",
+      "count": 15,
+      "trade_outcomes": {
+        "UNTRADED": 15
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 5,
+        "NO_FEE_SCALE_EXCURSION": 3,
+        "TARGET_FADED": 7
+      },
+      "features": {
+        "A_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "A_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "A_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "A_high": {
+          "available": 0,
+          "median": null
+        },
+        "A_low": {
+          "available": 0,
+          "median": null
+        },
+        "B_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "B_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "B_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "B_high": {
+          "available": 0,
+          "median": null
+        },
+        "B_low": {
+          "available": 0,
+          "median": null
+        },
+        "C_velocity": {
+          "available": 15,
+          "median": 0.222478
+        },
+        "C_efficiency": {
+          "available": 15,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 15,
+          "median": 1.083696
+        },
+        "C_high": {
+          "available": 15,
+          "median": 207.3
+        },
+        "C_low": {
+          "available": 15,
+          "median": 205.599
+        },
+        "BA_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_low": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_low": {
+          "available": 0,
+          "median": null
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PHASE",
+      "label": "NONSHORT",
+      "count": 2,
+      "trade_outcomes": {
+        "UNTRADED": 2
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 2,
+          "median": -0.055553
+        },
+        "A_efficiency": {
+          "available": 2,
+          "median": -0.288969
+        },
+        "A_range_pct": {
+          "available": 2,
+          "median": 0.4132
+        },
+        "A_high": {
+          "available": 2,
+          "median": 203.385
+        },
+        "A_low": {
+          "available": 2,
+          "median": 202.54
+        },
+        "B_velocity": {
+          "available": 2,
+          "median": -0.158815
+        },
+        "B_efficiency": {
+          "available": 2,
+          "median": -0.759036
+        },
+        "B_range_pct": {
+          "available": 2,
+          "median": 0.669249
+        },
+        "B_high": {
+          "available": 2,
+          "median": 204.48
+        },
+        "B_low": {
+          "available": 2,
+          "median": 203.125
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": -0.013032
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": -0.236568
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 0.263317
+        },
+        "C_high": {
+          "available": 2,
+          "median": 204.4825
+        },
+        "C_low": {
+          "available": 2,
+          "median": 203.945
+        },
+        "BA_delta_velocity": {
+          "available": 2,
+          "median": -0.103262
+        },
+        "BA_delta_efficiency": {
+          "available": 2,
+          "median": -0.470067
+        },
+        "BA_delta_range_pct": {
+          "available": 2,
+          "median": 0.256049
+        },
+        "BA_delta_high": {
+          "available": 2,
+          "median": 0.542992
+        },
+        "BA_delta_low": {
+          "available": 2,
+          "median": 0.28734
+        },
+        "CB_delta_velocity": {
+          "available": 2,
+          "median": 0.145783
+        },
+        "CB_delta_efficiency": {
+          "available": 2,
+          "median": 0.522468
+        },
+        "CB_delta_range_pct": {
+          "available": 2,
+          "median": -0.405932
+        },
+        "CB_delta_high": {
+          "available": 2,
+          "median": -0.002073
+        },
+        "CB_delta_low": {
+          "available": 2,
+          "median": 0.402522
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PHASE",
+      "label": "SHORT_NOT_STRENGTHENING",
+      "count": 12,
+      "trade_outcomes": {
+        "UNTRADED": 9,
+        "WIN": 1,
+        "GIVEBACK": 1,
+        "NO_FEE_CLOSE": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 6,
+        "PERSISTENT_TARGET": 4,
+        "TARGET_FADED": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 12,
+          "median": 0.0007
+        },
+        "A_efficiency": {
+          "available": 12,
+          "median": -0.005017
+        },
+        "A_range_pct": {
+          "available": 12,
+          "median": 0.42211
+        },
+        "A_high": {
+          "available": 12,
+          "median": 217.3575
+        },
+        "A_low": {
+          "available": 12,
+          "median": 216.0625
+        },
+        "B_velocity": {
+          "available": 12,
+          "median": 0.079356
+        },
+        "B_efficiency": {
+          "available": 12,
+          "median": 0.577762
+        },
+        "B_range_pct": {
+          "available": 12,
+          "median": 0.405953
+        },
+        "B_high": {
+          "available": 12,
+          "median": 217.26
+        },
+        "B_low": {
+          "available": 12,
+          "median": 216.335
+        },
+        "C_velocity": {
+          "available": 12,
+          "median": 0.055348
+        },
+        "C_efficiency": {
+          "available": 12,
+          "median": 0.65578
+        },
+        "C_range_pct": {
+          "available": 12,
+          "median": 0.331163
+        },
+        "C_high": {
+          "available": 12,
+          "median": 216.64
+        },
+        "C_low": {
+          "available": 12,
+          "median": 215.9475
+        },
+        "BA_delta_velocity": {
+          "available": 12,
+          "median": 0.095325
+        },
+        "BA_delta_efficiency": {
+          "available": 12,
+          "median": 0.576239
+        },
+        "BA_delta_range_pct": {
+          "available": 12,
+          "median": 0.012983
+        },
+        "BA_delta_high": {
+          "available": 12,
+          "median": -0.035165
+        },
+        "BA_delta_low": {
+          "available": 12,
+          "median": -0.030955
+        },
+        "CB_delta_velocity": {
+          "available": 12,
+          "median": -0.016841
+        },
+        "CB_delta_efficiency": {
+          "available": 12,
+          "median": 0.133349
+        },
+        "CB_delta_range_pct": {
+          "available": 12,
+          "median": -0.073346
+        },
+        "CB_delta_high": {
+          "available": 12,
+          "median": -0.180863
+        },
+        "CB_delta_low": {
+          "available": 12,
+          "median": -0.128675
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PHASE",
+      "label": "SHORT_STRENGTHENING",
+      "count": 45,
+      "trade_outcomes": {
+        "UNTRADED": 32,
+        "WIN": 8,
+        "NO_FEE_CLOSE": 5
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 18,
+        "TARGET_FADED": 9,
+        "PERSISTENT_TARGET": 13,
+        "CENSORED": 5
+      },
+      "features": {
+        "A_velocity": {
+          "available": 44,
+          "median": -0.013207
+        },
+        "A_efficiency": {
+          "available": 44,
+          "median": -0.242804
+        },
+        "A_range_pct": {
+          "available": 44,
+          "median": 0.435817
+        },
+        "A_high": {
+          "available": 44,
+          "median": 210.53
+        },
+        "A_low": {
+          "available": 44,
+          "median": 209.83
+        },
+        "B_velocity": {
+          "available": 45,
+          "median": 0.043208
+        },
+        "B_efficiency": {
+          "available": 45,
+          "median": 0.360231
+        },
+        "B_range_pct": {
+          "available": 45,
+          "median": 0.332833
+        },
+        "B_high": {
+          "available": 45,
+          "median": 210.3
+        },
+        "B_low": {
+          "available": 45,
+          "median": 209.72
+        },
+        "C_velocity": {
+          "available": 45,
+          "median": 0.099568
+        },
+        "C_efficiency": {
+          "available": 45,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 45,
+          "median": 0.465814
+        },
+        "C_high": {
+          "available": 45,
+          "median": 210.165
+        },
+        "C_low": {
+          "available": 45,
+          "median": 209.39
+        },
+        "BA_delta_velocity": {
+          "available": 44,
+          "median": 0.060356
+        },
+        "BA_delta_efficiency": {
+          "available": 44,
+          "median": 0.679614
+        },
+        "BA_delta_range_pct": {
+          "available": 44,
+          "median": -0.042239
+        },
+        "BA_delta_high": {
+          "available": 44,
+          "median": -0.060469
+        },
+        "BA_delta_low": {
+          "available": 44,
+          "median": -0.049458
+        },
+        "CB_delta_velocity": {
+          "available": 45,
+          "median": 0.045812
+        },
+        "CB_delta_efficiency": {
+          "available": 45,
+          "median": 0.52
+        },
+        "CB_delta_range_pct": {
+          "available": 45,
+          "median": 0.073516
+        },
+        "CB_delta_high": {
+          "available": 45,
+          "median": -0.185449
+        },
+        "CB_delta_low": {
+          "available": 45,
+          "median": -0.270053
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PRICE",
+      "label": "CENSORED",
+      "count": 13,
+      "trade_outcomes": {
+        "UNTRADED": 13
+      },
+      "price_outcomes": {
+        "CENSORED": 13
+      },
+      "features": {
+        "A_velocity": {
+          "available": 13,
+          "median": -0.030537
+        },
+        "A_efficiency": {
+          "available": 13,
+          "median": -0.42
+        },
+        "A_range_pct": {
+          "available": 13,
+          "median": 0.281032
+        },
+        "A_high": {
+          "available": 13,
+          "median": 217.665
+        },
+        "A_low": {
+          "available": 13,
+          "median": 217.065
+        },
+        "B_velocity": {
+          "available": 13,
+          "median": -0.014904
+        },
+        "B_efficiency": {
+          "available": 13,
+          "median": -0.2
+        },
+        "B_range_pct": {
+          "available": 13,
+          "median": 0.236586
+        },
+        "B_high": {
+          "available": 13,
+          "median": 218.035
+        },
+        "B_low": {
+          "available": 13,
+          "median": 217.465
+        },
+        "C_velocity": {
+          "available": 13,
+          "median": 0.07882
+        },
+        "C_efficiency": {
+          "available": 13,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 13,
+          "median": 0.373459
+        },
+        "C_high": {
+          "available": 13,
+          "median": 218.18
+        },
+        "C_low": {
+          "available": 13,
+          "median": 217.06
+        },
+        "BA_delta_velocity": {
+          "available": 13,
+          "median": 0.018095
+        },
+        "BA_delta_efficiency": {
+          "available": 13,
+          "median": 0.067702
+        },
+        "BA_delta_range_pct": {
+          "available": 13,
+          "median": -0.002507
+        },
+        "BA_delta_high": {
+          "available": 13,
+          "median": 0.053528
+        },
+        "BA_delta_low": {
+          "available": 13,
+          "median": 0.063833
+        },
+        "CB_delta_velocity": {
+          "available": 13,
+          "median": 0.094439
+        },
+        "CB_delta_efficiency": {
+          "available": 13,
+          "median": 1.2
+        },
+        "CB_delta_range_pct": {
+          "available": 13,
+          "median": 0.008858
+        },
+        "CB_delta_high": {
+          "available": 13,
+          "median": -0.065912
+        },
+        "CB_delta_low": {
+          "available": 13,
+          "median": -0.107301
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PRICE",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 67,
+      "trade_outcomes": {
+        "UNTRADED": 49,
+        "NO_FEE_CLOSE": 12,
+        "GIVEBACK": 2,
+        "WIN": 4
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 67
+      },
+      "features": {
+        "A_velocity": {
+          "available": 63,
+          "median": 0.005684
+        },
+        "A_efficiency": {
+          "available": 63,
+          "median": 0.045267
+        },
+        "A_range_pct": {
+          "available": 63,
+          "median": 0.413695
+        },
+        "A_high": {
+          "available": 63,
+          "median": 212.745
+        },
+        "A_low": {
+          "available": 63,
+          "median": 212.06
+        },
+        "B_velocity": {
+          "available": 64,
+          "median": -0.031718
+        },
+        "B_efficiency": {
+          "available": 64,
+          "median": -0.292824
+        },
+        "B_range_pct": {
+          "available": 64,
+          "median": 0.405602
+        },
+        "B_high": {
+          "available": 64,
+          "median": 212.63
+        },
+        "B_low": {
+          "available": 64,
+          "median": 212.21
+        },
+        "C_velocity": {
+          "available": 67,
+          "median": 0.108822
+        },
+        "C_efficiency": {
+          "available": 67,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 67,
+          "median": 0.470475
+        },
+        "C_high": {
+          "available": 67,
+          "median": 212.33
+        },
+        "C_low": {
+          "available": 67,
+          "median": 211.64
+        },
+        "BA_delta_velocity": {
+          "available": 63,
+          "median": -0.037247
+        },
+        "BA_delta_efficiency": {
+          "available": 63,
+          "median": -0.169554
+        },
+        "BA_delta_range_pct": {
+          "available": 63,
+          "median": -0.018882
+        },
+        "BA_delta_high": {
+          "available": 63,
+          "median": 0.084283
+        },
+        "BA_delta_low": {
+          "available": 63,
+          "median": 0.092206
+        },
+        "CB_delta_velocity": {
+          "available": 64,
+          "median": 0.118488
+        },
+        "CB_delta_efficiency": {
+          "available": 64,
+          "median": 1.122322
+        },
+        "CB_delta_range_pct": {
+          "available": 64,
+          "median": 0.008618
+        },
+        "CB_delta_high": {
+          "available": 64,
+          "median": -0.070195
+        },
+        "CB_delta_low": {
+          "available": 64,
+          "median": -0.112523
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PRICE",
+      "label": "PERSISTENT_TARGET",
+      "count": 29,
+      "trade_outcomes": {
+        "UNTRADED": 23,
+        "WIN": 6
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 29
+      },
+      "features": {
+        "A_velocity": {
+          "available": 23,
+          "median": -0.006346
+        },
+        "A_efficiency": {
+          "available": 23,
+          "median": -0.086957
+        },
+        "A_range_pct": {
+          "available": 23,
+          "median": 0.517971
+        },
+        "A_high": {
+          "available": 23,
+          "median": 206.195
+        },
+        "A_low": {
+          "available": 23,
+          "median": 204.78
+        },
+        "B_velocity": {
+          "available": 24,
+          "median": 0.047771
+        },
+        "B_efficiency": {
+          "available": 24,
+          "median": 0.368265
+        },
+        "B_range_pct": {
+          "available": 24,
+          "median": 0.490835
+        },
+        "B_high": {
+          "available": 24,
+          "median": 206.3325
+        },
+        "B_low": {
+          "available": 24,
+          "median": 205.4355
+        },
+        "C_velocity": {
+          "available": 29,
+          "median": 0.123187
+        },
+        "C_efficiency": {
+          "available": 29,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 29,
+          "median": 0.567766
+        },
+        "C_high": {
+          "available": 29,
+          "median": 205.91
+        },
+        "C_low": {
+          "available": 29,
+          "median": 205.11
+        },
+        "BA_delta_velocity": {
+          "available": 23,
+          "median": 0.083733
+        },
+        "BA_delta_efficiency": {
+          "available": 23,
+          "median": 0.52
+        },
+        "BA_delta_range_pct": {
+          "available": 23,
+          "median": -0.002967
+        },
+        "BA_delta_high": {
+          "available": 23,
+          "median": -0.00475
+        },
+        "BA_delta_low": {
+          "available": 23,
+          "median": -0.046466
+        },
+        "CB_delta_velocity": {
+          "available": 24,
+          "median": 0.07133
+        },
+        "CB_delta_efficiency": {
+          "available": 24,
+          "median": 0.617973
+        },
+        "CB_delta_range_pct": {
+          "available": 24,
+          "median": 0.032959
+        },
+        "CB_delta_high": {
+          "available": 24,
+          "median": -0.180736
+        },
+        "CB_delta_low": {
+          "available": 24,
+          "median": -0.246773
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "PRICE",
+      "label": "TARGET_FADED",
+      "count": 57,
+      "trade_outcomes": {
+        "UNTRADED": 50,
+        "WIN": 5,
+        "GIVEBACK": 1,
+        "NO_FEE_CLOSE": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 57
+      },
+      "features": {
+        "A_velocity": {
+          "available": 45,
+          "median": -0.00538
+        },
+        "A_efficiency": {
+          "available": 45,
+          "median": -0.121107
+        },
+        "A_range_pct": {
+          "available": 45,
+          "median": 0.453119
+        },
+        "A_high": {
+          "available": 45,
+          "median": 211.91
+        },
+        "A_low": {
+          "available": 45,
+          "median": 210.67
+        },
+        "B_velocity": {
+          "available": 50,
+          "median": -0.048321
+        },
+        "B_efficiency": {
+          "available": 50,
+          "median": -0.338936
+        },
+        "B_range_pct": {
+          "available": 50,
+          "median": 0.534673
+        },
+        "B_high": {
+          "available": 50,
+          "median": 210.765
+        },
+        "B_low": {
+          "available": 50,
+          "median": 209.64
+        },
+        "C_velocity": {
+          "available": 57,
+          "median": 0.110963
+        },
+        "C_efficiency": {
+          "available": 57,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 57,
+          "median": 0.535136
+        },
+        "C_high": {
+          "available": 57,
+          "median": 210.33
+        },
+        "C_low": {
+          "available": 57,
+          "median": 209.42
+        },
+        "BA_delta_velocity": {
+          "available": 45,
+          "median": -0.032438
+        },
+        "BA_delta_efficiency": {
+          "available": 45,
+          "median": -0.188104
+        },
+        "BA_delta_range_pct": {
+          "available": 45,
+          "median": -0.009206
+        },
+        "BA_delta_high": {
+          "available": 45,
+          "median": 0.095981
+        },
+        "BA_delta_low": {
+          "available": 45,
+          "median": 0.069258
+        },
+        "CB_delta_velocity": {
+          "available": 50,
+          "median": 0.149302
+        },
+        "CB_delta_efficiency": {
+          "available": 50,
+          "median": 1.230692
+        },
+        "CB_delta_range_pct": {
+          "available": 50,
+          "median": 0.028467
+        },
+        "CB_delta_high": {
+          "available": 50,
+          "median": 3.4e-05
+        },
+        "CB_delta_low": {
+          "available": 50,
+          "median": -0.056049
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "TRADE",
+      "label": "GIVEBACK",
+      "count": 3,
+      "trade_outcomes": {
+        "GIVEBACK": 3
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 1,
+        "NO_FEE_SCALE_EXCURSION": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 3,
+          "median": -0.064148
+        },
+        "A_efficiency": {
+          "available": 3,
+          "median": -0.603175
+        },
+        "A_range_pct": {
+          "available": 3,
+          "median": 0.380496
+        },
+        "A_high": {
+          "available": 3,
+          "median": 212.87
+        },
+        "A_low": {
+          "available": 3,
+          "median": 212.06
+        },
+        "B_velocity": {
+          "available": 3,
+          "median": -0.006739
+        },
+        "B_efficiency": {
+          "available": 3,
+          "median": -0.125
+        },
+        "B_range_pct": {
+          "available": 3,
+          "median": 0.328548
+        },
+        "B_high": {
+          "available": 3,
+          "median": 212.98
+        },
+        "B_low": {
+          "available": 3,
+          "median": 212.485
+        },
+        "C_velocity": {
+          "available": 3,
+          "median": 0.108822
+        },
+        "C_efficiency": {
+          "available": 3,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 3,
+          "median": 0.347606
+        },
+        "C_high": {
+          "available": 3,
+          "median": 212.92
+        },
+        "C_low": {
+          "available": 3,
+          "median": 212.18
+        },
+        "BA_delta_velocity": {
+          "available": 3,
+          "median": 0.057409
+        },
+        "BA_delta_efficiency": {
+          "available": 3,
+          "median": 0.478175
+        },
+        "BA_delta_range_pct": {
+          "available": 3,
+          "median": -0.14761
+        },
+        "BA_delta_high": {
+          "available": 3,
+          "median": 0.051675
+        },
+        "BA_delta_low": {
+          "available": 3,
+          "median": 0.200415
+        },
+        "CB_delta_velocity": {
+          "available": 3,
+          "median": 0.116233
+        },
+        "CB_delta_efficiency": {
+          "available": 3,
+          "median": 1.125
+        },
+        "CB_delta_range_pct": {
+          "available": 3,
+          "median": 0.114719
+        },
+        "CB_delta_high": {
+          "available": 3,
+          "median": -0.075666
+        },
+        "CB_delta_low": {
+          "available": 3,
+          "median": -0.14354
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "TRADE",
+      "label": "NO_FEE_CLOSE",
+      "count": 13,
+      "trade_outcomes": {
+        "NO_FEE_CLOSE": 13
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 12,
+        "TARGET_FADED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 13,
+          "median": 0.005684
+        },
+        "A_efficiency": {
+          "available": 13,
+          "median": 0.170507
+        },
+        "A_range_pct": {
+          "available": 13,
+          "median": 0.385557
+        },
+        "A_high": {
+          "available": 13,
+          "median": 217.12
+        },
+        "A_low": {
+          "available": 13,
+          "median": 216.73
+        },
+        "B_velocity": {
+          "available": 13,
+          "median": -0.001598
+        },
+        "B_efficiency": {
+          "available": 13,
+          "median": -0.023256
+        },
+        "B_range_pct": {
+          "available": 13,
+          "median": 0.444455
+        },
+        "B_high": {
+          "available": 13,
+          "median": 218.045
+        },
+        "B_low": {
+          "available": 13,
+          "median": 217.08
+        },
+        "C_velocity": {
+          "available": 13,
+          "median": 0.098102
+        },
+        "C_efficiency": {
+          "available": 13,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 13,
+          "median": 0.502713
+        },
+        "C_high": {
+          "available": 13,
+          "median": 217.76
+        },
+        "C_low": {
+          "available": 13,
+          "median": 216.33
+        },
+        "BA_delta_velocity": {
+          "available": 13,
+          "median": 0.032455
+        },
+        "BA_delta_efficiency": {
+          "available": 13,
+          "median": 0.555556
+        },
+        "BA_delta_range_pct": {
+          "available": 13,
+          "median": -0.042243
+        },
+        "BA_delta_high": {
+          "available": 13,
+          "median": 0.071856
+        },
+        "BA_delta_low": {
+          "available": 13,
+          "median": 0.092206
+        },
+        "CB_delta_velocity": {
+          "available": 13,
+          "median": 0.057768
+        },
+        "CB_delta_efficiency": {
+          "available": 13,
+          "median": 1.023256
+        },
+        "CB_delta_range_pct": {
+          "available": 13,
+          "median": 0.063874
+        },
+        "CB_delta_high": {
+          "available": 13,
+          "median": -0.086246
+        },
+        "CB_delta_low": {
+          "available": 13,
+          "median": -0.159672
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "TRADE",
+      "label": "UNTRADED",
+      "count": 135,
+      "trade_outcomes": {
+        "UNTRADED": 135
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 23,
+        "NO_FEE_SCALE_EXCURSION": 49,
+        "TARGET_FADED": 50,
+        "CENSORED": 13
+      },
+      "features": {
+        "A_velocity": {
+          "available": 113,
+          "median": -0.008655
+        },
+        "A_efficiency": {
+          "available": 113,
+          "median": -0.129032
+        },
+        "A_range_pct": {
+          "available": 113,
+          "median": 0.438354
+        },
+        "A_high": {
+          "available": 113,
+          "median": 210.72
+        },
+        "A_low": {
+          "available": 113,
+          "median": 209.85
+        },
+        "B_velocity": {
+          "available": 120,
+          "median": -0.039363
+        },
+        "B_efficiency": {
+          "available": 120,
+          "median": -0.308112
+        },
+        "B_range_pct": {
+          "available": 120,
+          "median": 0.466
+        },
+        "B_high": {
+          "available": 120,
+          "median": 210.695
+        },
+        "B_low": {
+          "available": 120,
+          "median": 209.68
+        },
+        "C_velocity": {
+          "available": 135,
+          "median": 0.113551
+        },
+        "C_efficiency": {
+          "available": 135,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 135,
+          "median": 0.502221
+        },
+        "C_high": {
+          "available": 135,
+          "median": 209.91
+        },
+        "C_low": {
+          "available": 135,
+          "median": 208.99
+        },
+        "BA_delta_velocity": {
+          "available": 113,
+          "median": -0.013431
+        },
+        "BA_delta_efficiency": {
+          "available": 113,
+          "median": -0.103896
+        },
+        "BA_delta_range_pct": {
+          "available": 113,
+          "median": -0.002507
+        },
+        "BA_delta_high": {
+          "available": 113,
+          "median": 0.084283
+        },
+        "BA_delta_low": {
+          "available": 113,
+          "median": 0.063833
+        },
+        "CB_delta_velocity": {
+          "available": 120,
+          "median": 0.130678
+        },
+        "CB_delta_efficiency": {
+          "available": 120,
+          "median": 1.158501
+        },
+        "CB_delta_range_pct": {
+          "available": 120,
+          "median": 0.008327
+        },
+        "CB_delta_high": {
+          "available": 120,
+          "median": -0.052061
+        },
+        "CB_delta_low": {
+          "available": 120,
+          "median": -0.078856
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "group": "TRADE",
+      "label": "WIN",
+      "count": 15,
+      "trade_outcomes": {
+        "WIN": 15
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 5,
+        "PERSISTENT_TARGET": 6,
+        "NO_FEE_SCALE_EXCURSION": 4
+      },
+      "features": {
+        "A_velocity": {
+          "available": 15,
+          "median": 0.00485
+        },
+        "A_efficiency": {
+          "available": 15,
+          "median": 0.033708
+        },
+        "A_range_pct": {
+          "available": 15,
+          "median": 0.350046
+        },
+        "A_high": {
+          "available": 15,
+          "median": 206.375
+        },
+        "A_low": {
+          "available": 15,
+          "median": 205.351
+        },
+        "B_velocity": {
+          "available": 15,
+          "median": 0.004856
+        },
+        "B_efficiency": {
+          "available": 15,
+          "median": 0.06383
+        },
+        "B_range_pct": {
+          "available": 15,
+          "median": 0.329506
+        },
+        "B_high": {
+          "available": 15,
+          "median": 206.335
+        },
+        "B_low": {
+          "available": 15,
+          "median": 205.745
+        },
+        "C_velocity": {
+          "available": 15,
+          "median": 0.099568
+        },
+        "C_efficiency": {
+          "available": 15,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 15,
+          "median": 0.470475
+        },
+        "C_high": {
+          "available": 15,
+          "median": 205.91
+        },
+        "C_low": {
+          "available": 15,
+          "median": 205.13
+        },
+        "BA_delta_velocity": {
+          "available": 15,
+          "median": -0.008633
+        },
+        "BA_delta_efficiency": {
+          "available": 15,
+          "median": -0.024149
+        },
+        "BA_delta_range_pct": {
+          "available": 15,
+          "median": -0.018882
+        },
+        "BA_delta_high": {
+          "available": 15,
+          "median": -0.054055
+        },
+        "BA_delta_low": {
+          "available": 15,
+          "median": -0.042896
+        },
+        "CB_delta_velocity": {
+          "available": 15,
+          "median": 0.094711
+        },
+        "CB_delta_efficiency": {
+          "available": 15,
+          "median": 0.900093
+        },
+        "CB_delta_range_pct": {
+          "available": 15,
+          "median": 0.065502
+        },
+        "CB_delta_high": {
+          "available": 15,
+          "median": -0.077949
+        },
+        "CB_delta_low": {
+          "available": 15,
+          "median": -0.138942
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PATTERN",
+      "label": "LONG/LONG/LONG",
+      "count": 2,
+      "trade_outcomes": {
+        "UNTRADED": 2
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 2,
+          "median": -0.055553
+        },
+        "A_efficiency": {
+          "available": 2,
+          "median": -0.288969
+        },
+        "A_range_pct": {
+          "available": 2,
+          "median": 0.4132
+        },
+        "A_high": {
+          "available": 2,
+          "median": 203.385
+        },
+        "A_low": {
+          "available": 2,
+          "median": 202.54
+        },
+        "B_velocity": {
+          "available": 2,
+          "median": -0.158815
+        },
+        "B_efficiency": {
+          "available": 2,
+          "median": -0.759036
+        },
+        "B_range_pct": {
+          "available": 2,
+          "median": 0.669249
+        },
+        "B_high": {
+          "available": 2,
+          "median": 204.48
+        },
+        "B_low": {
+          "available": 2,
+          "median": 203.125
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": -0.013032
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": -0.236568
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 0.263317
+        },
+        "C_high": {
+          "available": 2,
+          "median": 204.4825
+        },
+        "C_low": {
+          "available": 2,
+          "median": 203.945
+        },
+        "BA_delta_velocity": {
+          "available": 2,
+          "median": -0.103262
+        },
+        "BA_delta_efficiency": {
+          "available": 2,
+          "median": -0.470067
+        },
+        "BA_delta_range_pct": {
+          "available": 2,
+          "median": 0.256049
+        },
+        "BA_delta_high": {
+          "available": 2,
+          "median": 0.542992
+        },
+        "BA_delta_low": {
+          "available": 2,
+          "median": 0.28734
+        },
+        "CB_delta_velocity": {
+          "available": 2,
+          "median": 0.145783
+        },
+        "CB_delta_efficiency": {
+          "available": 2,
+          "median": 0.522468
+        },
+        "CB_delta_range_pct": {
+          "available": 2,
+          "median": -0.405932
+        },
+        "CB_delta_high": {
+          "available": 2,
+          "median": -0.002073
+        },
+        "CB_delta_low": {
+          "available": 2,
+          "median": 0.402522
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PATTERN",
+      "label": "LONG/LONG/SHORT",
+      "count": 19,
+      "trade_outcomes": {
+        "NO_FEE_CLOSE": 1,
+        "UNTRADED": 17,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 7,
+        "TARGET_FADED": 9,
+        "CENSORED": 2,
+        "PERSISTENT_TARGET": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 19,
+          "median": -0.074479
+        },
+        "A_efficiency": {
+          "available": 19,
+          "median": -0.870968
+        },
+        "A_range_pct": {
+          "available": 19,
+          "median": 0.456802
+        },
+        "A_high": {
+          "available": 19,
+          "median": 203.03
+        },
+        "A_low": {
+          "available": 19,
+          "median": 201.21
+        },
+        "B_velocity": {
+          "available": 19,
+          "median": -0.075879
+        },
+        "B_efficiency": {
+          "available": 19,
+          "median": -0.651934
+        },
+        "B_range_pct": {
+          "available": 19,
+          "median": 0.54975
+        },
+        "B_high": {
+          "available": 19,
+          "median": 203.65
+        },
+        "B_low": {
+          "available": 19,
+          "median": 202.15
+        },
+        "C_velocity": {
+          "available": 19,
+          "median": 0.113968
+        },
+        "C_efficiency": {
+          "available": 19,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 19,
+          "median": 0.513691
+        },
+        "C_high": {
+          "available": 19,
+          "median": 203.32
+        },
+        "C_low": {
+          "available": 19,
+          "median": 202.06
+        },
+        "BA_delta_velocity": {
+          "available": 19,
+          "median": 0.043195
+        },
+        "BA_delta_efficiency": {
+          "available": 19,
+          "median": 0.177778
+        },
+        "BA_delta_range_pct": {
+          "available": 19,
+          "median": -0.000153
+        },
+        "BA_delta_high": {
+          "available": 19,
+          "median": 0.237691
+        },
+        "BA_delta_low": {
+          "available": 19,
+          "median": 0.278997
+        },
+        "CB_delta_velocity": {
+          "available": 19,
+          "median": 0.203443
+        },
+        "CB_delta_efficiency": {
+          "available": 19,
+          "median": 1.473985
+        },
+        "CB_delta_range_pct": {
+          "available": 19,
+          "median": -0.098391
+        },
+        "CB_delta_high": {
+          "available": 19,
+          "median": -0.033509
+        },
+        "CB_delta_low": {
+          "available": 19,
+          "median": 0.032298
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PATTERN",
+      "label": "LONG/SHORT/SHORT",
+      "count": 16,
+      "trade_outcomes": {
+        "UNTRADED": 11,
+        "WIN": 3,
+        "NO_FEE_CLOSE": 1,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 7,
+        "TARGET_FADED": 3,
+        "PERSISTENT_TARGET": 5,
+        "CENSORED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 16,
+          "median": -0.069577
+        },
+        "A_efficiency": {
+          "available": 16,
+          "median": -0.559578
+        },
+        "A_range_pct": {
+          "available": 16,
+          "median": 0.532262
+        },
+        "A_high": {
+          "available": 16,
+          "median": 209.085
+        },
+        "A_low": {
+          "available": 16,
+          "median": 208.21
+        },
+        "B_velocity": {
+          "available": 16,
+          "median": 0.047094
+        },
+        "B_efficiency": {
+          "available": 16,
+          "median": 0.327957
+        },
+        "B_range_pct": {
+          "available": 16,
+          "median": 0.408971
+        },
+        "B_high": {
+          "available": 16,
+          "median": 208.705
+        },
+        "B_low": {
+          "available": 16,
+          "median": 207.335
+        },
+        "C_velocity": {
+          "available": 16,
+          "median": 0.112037
+        },
+        "C_efficiency": {
+          "available": 16,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 16,
+          "median": 0.469484
+        },
+        "C_high": {
+          "available": 16,
+          "median": 208.16
+        },
+        "C_low": {
+          "available": 16,
+          "median": 207.055
+        },
+        "BA_delta_velocity": {
+          "available": 16,
+          "median": 0.112094
+        },
+        "BA_delta_efficiency": {
+          "available": 16,
+          "median": 1.065745
+        },
+        "BA_delta_range_pct": {
+          "available": 16,
+          "median": -0.057606
+        },
+        "BA_delta_high": {
+          "available": 16,
+          "median": 0.001558
+        },
+        "BA_delta_low": {
+          "available": 16,
+          "median": 0.056427
+        },
+        "CB_delta_velocity": {
+          "available": 16,
+          "median": 0.077092
+        },
+        "CB_delta_efficiency": {
+          "available": 16,
+          "median": 0.645184
+        },
+        "CB_delta_range_pct": {
+          "available": 16,
+          "median": 0.083352
+        },
+        "CB_delta_high": {
+          "available": 16,
+          "median": -0.173831
+        },
+        "CB_delta_low": {
+          "available": 16,
+          "median": -0.260218
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PATTERN",
+      "label": "MISSING",
+      "count": 17,
+      "trade_outcomes": {
+        "UNTRADED": 17
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 5,
+        "NO_FEE_SCALE_EXCURSION": 4,
+        "TARGET_FADED": 8
+      },
+      "features": {
+        "A_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "A_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "A_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "A_high": {
+          "available": 0,
+          "median": null
+        },
+        "A_low": {
+          "available": 0,
+          "median": null
+        },
+        "B_velocity": {
+          "available": 5,
+          "median": -0.108812
+        },
+        "B_efficiency": {
+          "available": 5,
+          "median": -0.303448
+        },
+        "B_range_pct": {
+          "available": 5,
+          "median": 0.847022
+        },
+        "B_high": {
+          "available": 5,
+          "median": 203.565
+        },
+        "B_low": {
+          "available": 5,
+          "median": 202.01
+        },
+        "C_velocity": {
+          "available": 17,
+          "median": 0.222478
+        },
+        "C_efficiency": {
+          "available": 17,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 17,
+          "median": 1.073666
+        },
+        "C_high": {
+          "available": 17,
+          "median": 207.09
+        },
+        "C_low": {
+          "available": 17,
+          "median": 205.534
+        },
+        "BA_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_low": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_velocity": {
+          "available": 5,
+          "median": 0.331863
+        },
+        "CB_delta_efficiency": {
+          "available": 5,
+          "median": 1.256566
+        },
+        "CB_delta_range_pct": {
+          "available": 5,
+          "median": -0.067622
+        },
+        "CB_delta_high": {
+          "available": 5,
+          "median": -0.102175
+        },
+        "CB_delta_low": {
+          "available": 5,
+          "median": -0.305854
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PATTERN",
+      "label": "SHORT/LONG/SHORT",
+      "count": 27,
+      "trade_outcomes": {
+        "UNTRADED": 22,
+        "WIN": 2,
+        "NO_FEE_CLOSE": 3
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 13,
+        "NO_FEE_SCALE_EXCURSION": 13,
+        "PERSISTENT_TARGET": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 27,
+          "median": 0.037093
+        },
+        "A_efficiency": {
+          "available": 27,
+          "median": 0.29148
+        },
+        "A_range_pct": {
+          "available": 27,
+          "median": 0.48543
+        },
+        "A_high": {
+          "available": 27,
+          "median": 209.34
+        },
+        "A_low": {
+          "available": 27,
+          "median": 208.17
+        },
+        "B_velocity": {
+          "available": 27,
+          "median": -0.098104
+        },
+        "B_efficiency": {
+          "available": 27,
+          "median": -0.80198
+        },
+        "B_range_pct": {
+          "available": 27,
+          "median": 0.461314
+        },
+        "B_high": {
+          "available": 27,
+          "median": 209.72
+        },
+        "B_low": {
+          "available": 27,
+          "median": 208.63
+        },
+        "C_velocity": {
+          "available": 27,
+          "median": 0.129943
+        },
+        "C_efficiency": {
+          "available": 27,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 27,
+          "median": 0.521368
+        },
+        "C_high": {
+          "available": 27,
+          "median": 209.23
+        },
+        "C_low": {
+          "available": 27,
+          "median": 208.43
+        },
+        "BA_delta_velocity": {
+          "available": 27,
+          "median": -0.134256
+        },
+        "BA_delta_efficiency": {
+          "available": 27,
+          "median": -1.116438
+        },
+        "BA_delta_range_pct": {
+          "available": 27,
+          "median": -0.029927
+        },
+        "BA_delta_high": {
+          "available": 27,
+          "median": 0.065472
+        },
+        "BA_delta_low": {
+          "available": 27,
+          "median": 0.03242
+        },
+        "CB_delta_velocity": {
+          "available": 27,
+          "median": 0.217374
+        },
+        "CB_delta_efficiency": {
+          "available": 27,
+          "median": 1.689727
+        },
+        "CB_delta_range_pct": {
+          "available": 27,
+          "median": 0.067645
+        },
+        "CB_delta_high": {
+          "available": 27,
+          "median": 0.002519
+        },
+        "CB_delta_low": {
+          "available": 27,
+          "median": -0.06565
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PATTERN",
+      "label": "SHORT/SHORT/SHORT",
+      "count": 12,
+      "trade_outcomes": {
+        "WIN": 4,
+        "UNTRADED": 8
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 3,
+        "PERSISTENT_TARGET": 5,
+        "NO_FEE_SCALE_EXCURSION": 4
+      },
+      "features": {
+        "A_velocity": {
+          "available": 12,
+          "median": 0.039719
+        },
+        "A_efficiency": {
+          "available": 12,
+          "median": 0.310372
+        },
+        "A_range_pct": {
+          "available": 12,
+          "median": 0.416643
+        },
+        "A_high": {
+          "available": 12,
+          "median": 206.2825
+        },
+        "A_low": {
+          "available": 12,
+          "median": 205.0655
+        },
+        "B_velocity": {
+          "available": 12,
+          "median": 0.043852
+        },
+        "B_efficiency": {
+          "available": 12,
+          "median": 0.499122
+        },
+        "B_range_pct": {
+          "available": 12,
+          "median": 0.337465
+        },
+        "B_high": {
+          "available": 12,
+          "median": 206.2825
+        },
+        "B_low": {
+          "available": 12,
+          "median": 205.4275
+        },
+        "C_velocity": {
+          "available": 12,
+          "median": 0.084697
+        },
+        "C_efficiency": {
+          "available": 12,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 12,
+          "median": 0.414117
+        },
+        "C_high": {
+          "available": 12,
+          "median": 205.705
+        },
+        "C_low": {
+          "available": 12,
+          "median": 204.69
+        },
+        "BA_delta_velocity": {
+          "available": 12,
+          "median": 0.009086
+        },
+        "BA_delta_efficiency": {
+          "available": 12,
+          "median": 0.105564
+        },
+        "BA_delta_range_pct": {
+          "available": 12,
+          "median": -0.033671
+        },
+        "BA_delta_high": {
+          "available": 12,
+          "median": -0.087382
+        },
+        "BA_delta_low": {
+          "available": 12,
+          "median": -0.092044
+        },
+        "CB_delta_velocity": {
+          "available": 12,
+          "median": 0.044845
+        },
+        "CB_delta_efficiency": {
+          "available": 12,
+          "median": 0.222602
+        },
+        "CB_delta_range_pct": {
+          "available": 12,
+          "median": 0.072082
+        },
+        "CB_delta_high": {
+          "available": 12,
+          "median": -0.187973
+        },
+        "CB_delta_low": {
+          "available": 12,
+          "median": -0.275096
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PHASE",
+      "label": "LONG_TO_SHORT",
+      "count": 51,
+      "trade_outcomes": {
+        "NO_FEE_CLOSE": 4,
+        "UNTRADED": 44,
+        "WIN": 2,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 21,
+        "TARGET_FADED": 25,
+        "PERSISTENT_TARGET": 3,
+        "CENSORED": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 46,
+          "median": 0.010721
+        },
+        "A_efficiency": {
+          "available": 46,
+          "median": 0.093742
+        },
+        "A_range_pct": {
+          "available": 46,
+          "median": 0.457386
+        },
+        "A_high": {
+          "available": 46,
+          "median": 207.11
+        },
+        "A_low": {
+          "available": 46,
+          "median": 206.06
+        },
+        "B_velocity": {
+          "available": 51,
+          "median": -0.085882
+        },
+        "B_efficiency": {
+          "available": 51,
+          "median": -0.726027
+        },
+        "B_range_pct": {
+          "available": 51,
+          "median": 0.550977
+        },
+        "B_high": {
+          "available": 51,
+          "median": 207.37
+        },
+        "B_low": {
+          "available": 51,
+          "median": 205.711
+        },
+        "C_velocity": {
+          "available": 51,
+          "median": 0.128168
+        },
+        "C_efficiency": {
+          "available": 51,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 51,
+          "median": 0.546018
+        },
+        "C_high": {
+          "available": 51,
+          "median": 207.337
+        },
+        "C_low": {
+          "available": 51,
+          "median": 205.595
+        },
+        "BA_delta_velocity": {
+          "available": 46,
+          "median": -0.096355
+        },
+        "BA_delta_efficiency": {
+          "available": 46,
+          "median": -0.729329
+        },
+        "BA_delta_range_pct": {
+          "available": 46,
+          "median": -0.018878
+        },
+        "BA_delta_high": {
+          "available": 46,
+          "median": 0.179194
+        },
+        "BA_delta_low": {
+          "available": 46,
+          "median": 0.139987
+        },
+        "CB_delta_velocity": {
+          "available": 51,
+          "median": 0.217374
+        },
+        "CB_delta_efficiency": {
+          "available": 51,
+          "median": 1.585586
+        },
+        "CB_delta_range_pct": {
+          "available": 51,
+          "median": -0.00632
+        },
+        "CB_delta_high": {
+          "available": 51,
+          "median": -0.01668
+        },
+        "CB_delta_low": {
+          "available": 51,
+          "median": -0.05274
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PHASE",
+      "label": "MISSING",
+      "count": 12,
+      "trade_outcomes": {
+        "UNTRADED": 12
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 4,
+        "NO_FEE_SCALE_EXCURSION": 3,
+        "TARGET_FADED": 5
+      },
+      "features": {
+        "A_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "A_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "A_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "A_high": {
+          "available": 0,
+          "median": null
+        },
+        "A_low": {
+          "available": 0,
+          "median": null
+        },
+        "B_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "B_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "B_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "B_high": {
+          "available": 0,
+          "median": null
+        },
+        "B_low": {
+          "available": 0,
+          "median": null
+        },
+        "C_velocity": {
+          "available": 12,
+          "median": 0.219427
+        },
+        "C_efficiency": {
+          "available": 12,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 12,
+          "median": 0.996253
+        },
+        "C_high": {
+          "available": 12,
+          "median": 207.455
+        },
+        "C_low": {
+          "available": 12,
+          "median": 205.8245
+        },
+        "BA_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_low": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_low": {
+          "available": 0,
+          "median": null
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PHASE",
+      "label": "NONSHORT",
+      "count": 2,
+      "trade_outcomes": {
+        "UNTRADED": 2
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 2,
+          "median": -0.055553
+        },
+        "A_efficiency": {
+          "available": 2,
+          "median": -0.288969
+        },
+        "A_range_pct": {
+          "available": 2,
+          "median": 0.4132
+        },
+        "A_high": {
+          "available": 2,
+          "median": 203.385
+        },
+        "A_low": {
+          "available": 2,
+          "median": 202.54
+        },
+        "B_velocity": {
+          "available": 2,
+          "median": -0.158815
+        },
+        "B_efficiency": {
+          "available": 2,
+          "median": -0.759036
+        },
+        "B_range_pct": {
+          "available": 2,
+          "median": 0.669249
+        },
+        "B_high": {
+          "available": 2,
+          "median": 204.48
+        },
+        "B_low": {
+          "available": 2,
+          "median": 203.125
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": -0.013032
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": -0.236568
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 0.263317
+        },
+        "C_high": {
+          "available": 2,
+          "median": 204.4825
+        },
+        "C_low": {
+          "available": 2,
+          "median": 203.945
+        },
+        "BA_delta_velocity": {
+          "available": 2,
+          "median": -0.103262
+        },
+        "BA_delta_efficiency": {
+          "available": 2,
+          "median": -0.470067
+        },
+        "BA_delta_range_pct": {
+          "available": 2,
+          "median": 0.256049
+        },
+        "BA_delta_high": {
+          "available": 2,
+          "median": 0.542992
+        },
+        "BA_delta_low": {
+          "available": 2,
+          "median": 0.28734
+        },
+        "CB_delta_velocity": {
+          "available": 2,
+          "median": 0.145783
+        },
+        "CB_delta_efficiency": {
+          "available": 2,
+          "median": 0.522468
+        },
+        "CB_delta_range_pct": {
+          "available": 2,
+          "median": -0.405932
+        },
+        "CB_delta_high": {
+          "available": 2,
+          "median": -0.002073
+        },
+        "CB_delta_low": {
+          "available": 2,
+          "median": 0.402522
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PHASE",
+      "label": "SHORT_NOT_STRENGTHENING",
+      "count": 4,
+      "trade_outcomes": {
+        "UNTRADED": 2,
+        "WIN": 1,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 3,
+        "PERSISTENT_TARGET": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 4,
+          "median": 0.001258
+        },
+        "A_efficiency": {
+          "available": 4,
+          "median": 0.078744
+        },
+        "A_range_pct": {
+          "available": 4,
+          "median": 0.50044
+        },
+        "A_high": {
+          "available": 4,
+          "median": 208.6975
+        },
+        "A_low": {
+          "available": 4,
+          "median": 207.7605
+        },
+        "B_velocity": {
+          "available": 4,
+          "median": 0.079863
+        },
+        "B_efficiency": {
+          "available": 4,
+          "median": 0.499336
+        },
+        "B_range_pct": {
+          "available": 4,
+          "median": 0.405953
+        },
+        "B_high": {
+          "available": 4,
+          "median": 208.525
+        },
+        "B_low": {
+          "available": 4,
+          "median": 207.665
+        },
+        "C_velocity": {
+          "available": 4,
+          "median": 0.048892
+        },
+        "C_efficiency": {
+          "available": 4,
+          "median": 0.637117
+        },
+        "C_range_pct": {
+          "available": 4,
+          "median": 0.316135
+        },
+        "C_high": {
+          "available": 4,
+          "median": 208.21
+        },
+        "C_low": {
+          "available": 4,
+          "median": 207.51
+        },
+        "BA_delta_velocity": {
+          "available": 4,
+          "median": 0.092955
+        },
+        "BA_delta_efficiency": {
+          "available": 4,
+          "median": 0.626751
+        },
+        "BA_delta_range_pct": {
+          "available": 4,
+          "median": -0.094487
+        },
+        "BA_delta_high": {
+          "available": 4,
+          "median": -0.099576
+        },
+        "BA_delta_low": {
+          "available": 4,
+          "median": -0.116156
+        },
+        "CB_delta_velocity": {
+          "available": 4,
+          "median": -0.026243
+        },
+        "CB_delta_efficiency": {
+          "available": 4,
+          "median": 0.089429
+        },
+        "CB_delta_range_pct": {
+          "available": 4,
+          "median": -0.081892
+        },
+        "CB_delta_high": {
+          "available": 4,
+          "median": -0.150859
+        },
+        "CB_delta_low": {
+          "available": 4,
+          "median": -0.07466
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PHASE",
+      "label": "SHORT_STRENGTHENING",
+      "count": 24,
+      "trade_outcomes": {
+        "UNTRADED": 17,
+        "WIN": 6,
+        "NO_FEE_CLOSE": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 8,
+        "TARGET_FADED": 6,
+        "PERSISTENT_TARGET": 9,
+        "CENSORED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 24,
+          "median": -0.032992
+        },
+        "A_efficiency": {
+          "available": 24,
+          "median": -0.418724
+        },
+        "A_range_pct": {
+          "available": 24,
+          "median": 0.457603
+        },
+        "A_high": {
+          "available": 24,
+          "median": 206.51
+        },
+        "A_low": {
+          "available": 24,
+          "median": 205.4655
+        },
+        "B_velocity": {
+          "available": 24,
+          "median": 0.042921
+        },
+        "B_efficiency": {
+          "available": 24,
+          "median": 0.333333
+        },
+        "B_range_pct": {
+          "available": 24,
+          "median": 0.362724
+        },
+        "B_high": {
+          "available": 24,
+          "median": 206.5275
+        },
+        "B_low": {
+          "available": 24,
+          "median": 205.5175
+        },
+        "C_velocity": {
+          "available": 24,
+          "median": 0.107371
+        },
+        "C_efficiency": {
+          "available": 24,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 24,
+          "median": 0.469484
+        },
+        "C_high": {
+          "available": 24,
+          "median": 206.245
+        },
+        "C_low": {
+          "available": 24,
+          "median": 205.035
+        },
+        "BA_delta_velocity": {
+          "available": 24,
+          "median": 0.072664
+        },
+        "BA_delta_efficiency": {
+          "available": 24,
+          "median": 0.741409
+        },
+        "BA_delta_range_pct": {
+          "available": 24,
+          "median": -0.04509
+        },
+        "BA_delta_high": {
+          "available": 24,
+          "median": -0.036016
+        },
+        "BA_delta_low": {
+          "available": 24,
+          "median": -0.044681
+        },
+        "CB_delta_velocity": {
+          "available": 24,
+          "median": 0.066068
+        },
+        "CB_delta_efficiency": {
+          "available": 24,
+          "median": 0.544998
+        },
+        "CB_delta_range_pct": {
+          "available": 24,
+          "median": 0.092756
+        },
+        "CB_delta_high": {
+          "available": 24,
+          "median": -0.187973
+        },
+        "CB_delta_low": {
+          "available": 24,
+          "median": -0.297351
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PRICE",
+      "label": "CENSORED",
+      "count": 3,
+      "trade_outcomes": {
+        "UNTRADED": 3
+      },
+      "price_outcomes": {
+        "CENSORED": 3
+      },
+      "features": {
+        "A_velocity": {
+          "available": 3,
+          "median": -0.03066
+        },
+        "A_efficiency": {
+          "available": 3,
+          "median": -0.518072
+        },
+        "A_range_pct": {
+          "available": 3,
+          "median": 0.227649
+        },
+        "A_high": {
+          "available": 3,
+          "median": 217.665
+        },
+        "A_low": {
+          "available": 3,
+          "median": 217.17
+        },
+        "B_velocity": {
+          "available": 3,
+          "median": -0.011712
+        },
+        "B_efficiency": {
+          "available": 3,
+          "median": -0.162791
+        },
+        "B_range_pct": {
+          "available": 3,
+          "median": 0.225142
+        },
+        "B_high": {
+          "available": 3,
+          "median": 218.035
+        },
+        "B_low": {
+          "available": 3,
+          "median": 217.545
+        },
+        "C_velocity": {
+          "available": 3,
+          "median": 0.143711
+        },
+        "C_efficiency": {
+          "available": 3,
+          "median": 0.739437
+        },
+        "C_range_pct": {
+          "available": 3,
+          "median": 0.513691
+        },
+        "C_high": {
+          "available": 3,
+          "median": 218.18
+        },
+        "C_low": {
+          "available": 3,
+          "median": 217.06
+        },
+        "BA_delta_velocity": {
+          "available": 3,
+          "median": 0.037207
+        },
+        "BA_delta_efficiency": {
+          "available": 3,
+          "median": 0.355282
+        },
+        "BA_delta_range_pct": {
+          "available": 3,
+          "median": -0.002507
+        },
+        "BA_delta_high": {
+          "available": 3,
+          "median": 0.077336
+        },
+        "BA_delta_low": {
+          "available": 3,
+          "median": 0.172676
+        },
+        "CB_delta_velocity": {
+          "available": 3,
+          "median": 0.187326
+        },
+        "CB_delta_efficiency": {
+          "available": 3,
+          "median": 0.902227
+        },
+        "CB_delta_range_pct": {
+          "available": 3,
+          "median": 0.288548
+        },
+        "CB_delta_high": {
+          "available": 3,
+          "median": 0.066503
+        },
+        "CB_delta_low": {
+          "available": 3,
+          "median": -0.332544
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PRICE",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 36,
+      "trade_outcomes": {
+        "UNTRADED": 30,
+        "NO_FEE_CLOSE": 5,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 36
+      },
+      "features": {
+        "A_velocity": {
+          "available": 32,
+          "median": 0.005783
+        },
+        "A_efficiency": {
+          "available": 32,
+          "median": 0.05104
+        },
+        "A_range_pct": {
+          "available": 32,
+          "median": 0.416643
+        },
+        "A_high": {
+          "available": 32,
+          "median": 205.9975
+        },
+        "A_low": {
+          "available": 32,
+          "median": 203.75
+        },
+        "B_velocity": {
+          "available": 33,
+          "median": -0.046507
+        },
+        "B_efficiency": {
+          "available": 33,
+          "median": -0.50315
+        },
+        "B_range_pct": {
+          "available": 33,
+          "median": 0.451686
+        },
+        "B_high": {
+          "available": 33,
+          "median": 205.53
+        },
+        "B_low": {
+          "available": 33,
+          "median": 203.8
+        },
+        "C_velocity": {
+          "available": 36,
+          "median": 0.114239
+        },
+        "C_efficiency": {
+          "available": 36,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 36,
+          "median": 0.493826
+        },
+        "C_high": {
+          "available": 36,
+          "median": 205.78
+        },
+        "C_low": {
+          "available": 36,
+          "median": 203.76
+        },
+        "BA_delta_velocity": {
+          "available": 32,
+          "median": -0.055042
+        },
+        "BA_delta_efficiency": {
+          "available": 32,
+          "median": -0.280545
+        },
+        "BA_delta_range_pct": {
+          "available": 32,
+          "median": -0.027517
+        },
+        "BA_delta_high": {
+          "available": 32,
+          "median": 0.120424
+        },
+        "BA_delta_low": {
+          "available": 32,
+          "median": 0.106145
+        },
+        "CB_delta_velocity": {
+          "available": 33,
+          "median": 0.122083
+        },
+        "CB_delta_efficiency": {
+          "available": 33,
+          "median": 1.116438
+        },
+        "CB_delta_range_pct": {
+          "available": 33,
+          "median": -0.016251
+        },
+        "CB_delta_high": {
+          "available": 33,
+          "median": -0.072642
+        },
+        "CB_delta_low": {
+          "available": 33,
+          "median": -0.101892
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PRICE",
+      "label": "PERSISTENT_TARGET",
+      "count": 18,
+      "trade_outcomes": {
+        "UNTRADED": 13,
+        "WIN": 5
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 18
+      },
+      "features": {
+        "A_velocity": {
+          "available": 13,
+          "median": -0.003361
+        },
+        "A_efficiency": {
+          "available": 13,
+          "median": -0.033223
+        },
+        "A_range_pct": {
+          "available": 13,
+          "median": 0.380026
+        },
+        "A_high": {
+          "available": 13,
+          "median": 206.375
+        },
+        "A_low": {
+          "available": 13,
+          "median": 205.351
+        },
+        "B_velocity": {
+          "available": 14,
+          "median": 0.03323
+        },
+        "B_efficiency": {
+          "available": 14,
+          "median": 0.254776
+        },
+        "B_range_pct": {
+          "available": 14,
+          "median": 0.387862
+        },
+        "B_high": {
+          "available": 14,
+          "median": 206.355
+        },
+        "B_low": {
+          "available": 14,
+          "median": 205.6525
+        },
+        "C_velocity": {
+          "available": 18,
+          "median": 0.107429
+        },
+        "C_efficiency": {
+          "available": 18,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 18,
+          "median": 0.441446
+        },
+        "C_high": {
+          "available": 18,
+          "median": 206.7125
+        },
+        "C_low": {
+          "available": 18,
+          "median": 205.472
+        },
+        "BA_delta_velocity": {
+          "available": 13,
+          "median": 0.083733
+        },
+        "BA_delta_efficiency": {
+          "available": 13,
+          "median": 0.623701
+        },
+        "BA_delta_range_pct": {
+          "available": 13,
+          "median": -0.021281
+        },
+        "BA_delta_high": {
+          "available": 13,
+          "median": -0.066883
+        },
+        "BA_delta_low": {
+          "available": 13,
+          "median": -0.046466
+        },
+        "CB_delta_velocity": {
+          "available": 14,
+          "median": 0.057174
+        },
+        "CB_delta_efficiency": {
+          "available": 14,
+          "median": 0.657075
+        },
+        "CB_delta_range_pct": {
+          "available": 14,
+          "median": 0.056073
+        },
+        "CB_delta_high": {
+          "available": 14,
+          "median": -0.161817
+        },
+        "CB_delta_low": {
+          "available": 14,
+          "median": -0.22657
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "PRICE",
+      "label": "TARGET_FADED",
+      "count": 36,
+      "trade_outcomes": {
+        "UNTRADED": 31,
+        "WIN": 4,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 36
+      },
+      "features": {
+        "A_velocity": {
+          "available": 28,
+          "median": 0.010214
+        },
+        "A_efficiency": {
+          "available": 28,
+          "median": 0.060052
+        },
+        "A_range_pct": {
+          "available": 28,
+          "median": 0.508083
+        },
+        "A_high": {
+          "available": 28,
+          "median": 209.35
+        },
+        "A_low": {
+          "available": 28,
+          "median": 208.42
+        },
+        "B_velocity": {
+          "available": 31,
+          "median": -0.072489
+        },
+        "B_efficiency": {
+          "available": 31,
+          "median": -0.358289
+        },
+        "B_range_pct": {
+          "available": 31,
+          "median": 0.558231
+        },
+        "B_high": {
+          "available": 31,
+          "median": 209.17
+        },
+        "B_low": {
+          "available": 31,
+          "median": 208.57
+        },
+        "C_velocity": {
+          "available": 36,
+          "median": 0.129056
+        },
+        "C_efficiency": {
+          "available": 36,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 36,
+          "median": 0.600554
+        },
+        "C_high": {
+          "available": 36,
+          "median": 208.415
+        },
+        "C_low": {
+          "available": 36,
+          "median": 207.125
+        },
+        "BA_delta_velocity": {
+          "available": 28,
+          "median": -0.074279
+        },
+        "BA_delta_efficiency": {
+          "available": 28,
+          "median": -0.435407
+        },
+        "BA_delta_range_pct": {
+          "available": 28,
+          "median": -0.037381
+        },
+        "BA_delta_high": {
+          "available": 28,
+          "median": 0.15002
+        },
+        "BA_delta_low": {
+          "available": 28,
+          "median": 0.062975
+        },
+        "CB_delta_velocity": {
+          "available": 31,
+          "median": 0.217374
+        },
+        "CB_delta_efficiency": {
+          "available": 31,
+          "median": 1.35348
+        },
+        "CB_delta_range_pct": {
+          "available": 31,
+          "median": 0.017063
+        },
+        "CB_delta_high": {
+          "available": 31,
+          "median": -0.01668
+        },
+        "CB_delta_low": {
+          "available": 31,
+          "median": -0.062271
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "TRADE",
+      "label": "GIVEBACK",
+      "count": 2,
+      "trade_outcomes": {
+        "GIVEBACK": 2
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 1,
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 2,
+          "median": -0.099257
+        },
+        "A_efficiency": {
+          "available": 2,
+          "median": -0.801587
+        },
+        "A_range_pct": {
+          "available": 2,
+          "median": 0.480434
+        },
+        "A_high": {
+          "available": 2,
+          "median": 207.4575
+        },
+        "A_low": {
+          "available": 2,
+          "median": 206.455
+        },
+        "B_velocity": {
+          "available": 2,
+          "median": 0.037009
+        },
+        "B_efficiency": {
+          "available": 2,
+          "median": 0.091279
+        },
+        "B_range_pct": {
+          "available": 2,
+          "median": 0.375396
+        },
+        "B_high": {
+          "available": 2,
+          "median": 207.535
+        },
+        "B_low": {
+          "available": 2,
+          "median": 206.7525
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": 0.090598
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 0.444605
+        },
+        "C_high": {
+          "available": 2,
+          "median": 207.22
+        },
+        "C_low": {
+          "available": 2,
+          "median": 206.3125
+        },
+        "BA_delta_velocity": {
+          "available": 2,
+          "median": 0.136265
+        },
+        "BA_delta_efficiency": {
+          "available": 2,
+          "median": 0.892866
+        },
+        "BA_delta_range_pct": {
+          "available": 2,
+          "median": -0.105039
+        },
+        "BA_delta_high": {
+          "available": 2,
+          "median": 0.043507
+        },
+        "BA_delta_low": {
+          "available": 2,
+          "median": 0.14751
+        },
+        "CB_delta_velocity": {
+          "available": 2,
+          "median": 0.053589
+        },
+        "CB_delta_efficiency": {
+          "available": 2,
+          "median": 0.908721
+        },
+        "CB_delta_range_pct": {
+          "available": 2,
+          "median": 0.069209
+        },
+        "CB_delta_high": {
+          "available": 2,
+          "median": -0.148519
+        },
+        "CB_delta_low": {
+          "available": 2,
+          "median": -0.217958
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "TRADE",
+      "label": "NO_FEE_CLOSE",
+      "count": 5,
+      "trade_outcomes": {
+        "NO_FEE_CLOSE": 5
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 5
+      },
+      "features": {
+        "A_velocity": {
+          "available": 5,
+          "median": 0.005684
+        },
+        "A_efficiency": {
+          "available": 5,
+          "median": 0.170507
+        },
+        "A_range_pct": {
+          "available": 5,
+          "median": 0.508007
+        },
+        "A_high": {
+          "available": 5,
+          "median": 208.75
+        },
+        "A_low": {
+          "available": 5,
+          "median": 208.08
+        },
+        "B_velocity": {
+          "available": 5,
+          "median": -0.05567
+        },
+        "B_efficiency": {
+          "available": 5,
+          "median": -0.116438
+        },
+        "B_range_pct": {
+          "available": 5,
+          "median": 0.500307
+        },
+        "B_high": {
+          "available": 5,
+          "median": 208.9
+        },
+        "B_low": {
+          "available": 5,
+          "median": 208.43
+        },
+        "C_velocity": {
+          "available": 5,
+          "median": 0.196492
+        },
+        "C_efficiency": {
+          "available": 5,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 5,
+          "median": 0.79076
+        },
+        "C_high": {
+          "available": 5,
+          "median": 208.83
+        },
+        "C_low": {
+          "available": 5,
+          "median": 207.18
+        },
+        "BA_delta_velocity": {
+          "available": 5,
+          "median": -0.091565
+        },
+        "BA_delta_efficiency": {
+          "available": 5,
+          "median": -0.673657
+        },
+        "BA_delta_range_pct": {
+          "available": 5,
+          "median": -0.067266
+        },
+        "BA_delta_high": {
+          "available": 5,
+          "median": 0.102238
+        },
+        "BA_delta_low": {
+          "available": 5,
+          "median": 0.124579
+        },
+        "CB_delta_velocity": {
+          "available": 5,
+          "median": 0.266551
+        },
+        "CB_delta_efficiency": {
+          "available": 5,
+          "median": 1.116438
+        },
+        "CB_delta_range_pct": {
+          "available": 5,
+          "median": 0.136755
+        },
+        "CB_delta_high": {
+          "available": 5,
+          "median": -0.086246
+        },
+        "CB_delta_low": {
+          "available": 5,
+          "median": -0.331797
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "TRADE",
+      "label": "UNTRADED",
+      "count": 77,
+      "trade_outcomes": {
+        "UNTRADED": 77
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 13,
+        "NO_FEE_SCALE_EXCURSION": 30,
+        "TARGET_FADED": 31,
+        "CENSORED": 3
+      },
+      "features": {
+        "A_velocity": {
+          "available": 60,
+          "median": 0.00116
+        },
+        "A_efficiency": {
+          "available": 60,
+          "median": 0.005395
+        },
+        "A_range_pct": {
+          "available": 60,
+          "median": 0.457386
+        },
+        "A_high": {
+          "available": 60,
+          "median": 207.0375
+        },
+        "A_low": {
+          "available": 60,
+          "median": 205.8855
+        },
+        "B_velocity": {
+          "available": 65,
+          "median": -0.054508
+        },
+        "B_efficiency": {
+          "available": 65,
+          "median": -0.473985
+        },
+        "B_range_pct": {
+          "available": 65,
+          "median": 0.512704
+        },
+        "B_high": {
+          "available": 65,
+          "median": 206.965
+        },
+        "B_low": {
+          "available": 65,
+          "median": 205.56
+        },
+        "C_velocity": {
+          "available": 77,
+          "median": 0.125345
+        },
+        "C_efficiency": {
+          "available": 77,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 77,
+          "median": 0.521368
+        },
+        "C_high": {
+          "available": 77,
+          "median": 207.09
+        },
+        "C_low": {
+          "available": 77,
+          "median": 205.599
+        },
+        "BA_delta_velocity": {
+          "available": 60,
+          "median": -0.043203
+        },
+        "BA_delta_efficiency": {
+          "available": 60,
+          "median": -0.221713
+        },
+        "BA_delta_range_pct": {
+          "available": 60,
+          "median": -0.023194
+        },
+        "BA_delta_high": {
+          "available": 60,
+          "median": 0.132074
+        },
+        "BA_delta_low": {
+          "available": 60,
+          "median": 0.087048
+        },
+        "CB_delta_velocity": {
+          "available": 65,
+          "median": 0.158767
+        },
+        "CB_delta_efficiency": {
+          "available": 65,
+          "median": 1.150925
+        },
+        "CB_delta_range_pct": {
+          "available": 65,
+          "median": 0.017063
+        },
+        "CB_delta_high": {
+          "available": 65,
+          "median": -0.041714
+        },
+        "CB_delta_low": {
+          "available": 65,
+          "median": -0.077602
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "group": "TRADE",
+      "label": "WIN",
+      "count": 9,
+      "trade_outcomes": {
+        "WIN": 9
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 4,
+        "PERSISTENT_TARGET": 5
+      },
+      "features": {
+        "A_velocity": {
+          "available": 9,
+          "median": 0.005148
+        },
+        "A_efficiency": {
+          "available": 9,
+          "median": 0.09417
+        },
+        "A_range_pct": {
+          "available": 9,
+          "median": 0.350046
+        },
+        "A_high": {
+          "available": 9,
+          "median": 206.19
+        },
+        "A_low": {
+          "available": 9,
+          "median": 204.78
+        },
+        "B_velocity": {
+          "available": 9,
+          "median": 0.045479
+        },
+        "B_efficiency": {
+          "available": 9,
+          "median": 0.288889
+        },
+        "B_range_pct": {
+          "available": 9,
+          "median": 0.380026
+        },
+        "B_high": {
+          "available": 9,
+          "median": 206.23
+        },
+        "B_low": {
+          "available": 9,
+          "median": 205.11
+        },
+        "C_velocity": {
+          "available": 9,
+          "median": 0.099568
+        },
+        "C_efficiency": {
+          "available": 9,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 9,
+          "median": 0.396295
+        },
+        "C_high": {
+          "available": 9,
+          "median": 205.5
+        },
+        "C_low": {
+          "available": 9,
+          "median": 204.25
+        },
+        "BA_delta_velocity": {
+          "available": 9,
+          "median": 0.040331
+        },
+        "BA_delta_efficiency": {
+          "available": 9,
+          "median": 0.449618
+        },
+        "BA_delta_range_pct": {
+          "available": 9,
+          "median": -0.02054
+        },
+        "BA_delta_high": {
+          "available": 9,
+          "median": -0.07026
+        },
+        "BA_delta_low": {
+          "available": 9,
+          "median": -0.046466
+        },
+        "CB_delta_velocity": {
+          "available": 9,
+          "median": 0.05993
+        },
+        "CB_delta_efficiency": {
+          "available": 9,
+          "median": 0.623701
+        },
+        "CB_delta_range_pct": {
+          "available": 9,
+          "median": 0.092324
+        },
+        "CB_delta_high": {
+          "available": 9,
+          "median": -0.104503
+        },
+        "CB_delta_low": {
+          "available": 9,
+          "median": -0.138942
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PATTERN",
+      "label": "LONG/LONG/SHORT",
+      "count": 6,
+      "trade_outcomes": {
+        "WIN": 2,
+        "UNTRADED": 4
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "TARGET_FADED": 3,
+        "NO_FEE_SCALE_EXCURSION": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 6,
+          "median": -0.048346
+        },
+        "A_efficiency": {
+          "available": 6,
+          "median": -0.322985
+        },
+        "A_range_pct": {
+          "available": 6,
+          "median": 0.535523
+        },
+        "A_high": {
+          "available": 6,
+          "median": 154.06
+        },
+        "A_low": {
+          "available": 6,
+          "median": 153.225
+        },
+        "B_velocity": {
+          "available": 6,
+          "median": -0.17651
+        },
+        "B_efficiency": {
+          "available": 6,
+          "median": -0.930049
+        },
+        "B_range_pct": {
+          "available": 6,
+          "median": 0.742473
+        },
+        "B_high": {
+          "available": 6,
+          "median": 154.45
+        },
+        "B_low": {
+          "available": 6,
+          "median": 153.465
+        },
+        "C_velocity": {
+          "available": 6,
+          "median": 0.200144
+        },
+        "C_efficiency": {
+          "available": 6,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 6,
+          "median": 0.754654
+        },
+        "C_high": {
+          "available": 6,
+          "median": 154.52
+        },
+        "C_low": {
+          "available": 6,
+          "median": 153.395
+        },
+        "BA_delta_velocity": {
+          "available": 6,
+          "median": -0.056632
+        },
+        "BA_delta_efficiency": {
+          "available": 6,
+          "median": -0.092654
+        },
+        "BA_delta_range_pct": {
+          "available": 6,
+          "median": 0.073552
+        },
+        "BA_delta_high": {
+          "available": 6,
+          "median": 0.498132
+        },
+        "BA_delta_low": {
+          "available": 6,
+          "median": 0.328626
+        },
+        "CB_delta_velocity": {
+          "available": 6,
+          "median": 0.388519
+        },
+        "CB_delta_efficiency": {
+          "available": 6,
+          "median": 1.684349
+        },
+        "CB_delta_range_pct": {
+          "available": 6,
+          "median": 0.110584
+        },
+        "CB_delta_high": {
+          "available": 6,
+          "median": 0.099877
+        },
+        "CB_delta_low": {
+          "available": 6,
+          "median": -0.009775
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PATTERN",
+      "label": "LONG/SHORT/SHORT",
+      "count": 2,
+      "trade_outcomes": {
+        "UNTRADED": 2
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 2,
+          "median": -0.113842
+        },
+        "A_efficiency": {
+          "available": 2,
+          "median": -0.313725
+        },
+        "A_range_pct": {
+          "available": 2,
+          "median": 1.146614
+        },
+        "A_high": {
+          "available": 2,
+          "median": 159.055
+        },
+        "A_low": {
+          "available": 2,
+          "median": 157.245
+        },
+        "B_velocity": {
+          "available": 2,
+          "median": 0.157433
+        },
+        "B_efficiency": {
+          "available": 2,
+          "median": 0.420115
+        },
+        "B_range_pct": {
+          "available": 2,
+          "median": 1.090918
+        },
+        "B_high": {
+          "available": 2,
+          "median": 158.7525
+        },
+        "B_low": {
+          "available": 2,
+          "median": 157.03
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": 0.235523
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 0.865541
+        },
+        "C_high": {
+          "available": 2,
+          "median": 158.03
+        },
+        "C_low": {
+          "available": 2,
+          "median": 156.67
+        },
+        "BA_delta_velocity": {
+          "available": 2,
+          "median": 0.271274
+        },
+        "BA_delta_efficiency": {
+          "available": 2,
+          "median": 0.733841
+        },
+        "BA_delta_range_pct": {
+          "available": 2,
+          "median": -0.055696
+        },
+        "BA_delta_high": {
+          "available": 2,
+          "median": -0.191789
+        },
+        "BA_delta_low": {
+          "available": 2,
+          "median": -0.142172
+        },
+        "CB_delta_velocity": {
+          "available": 2,
+          "median": 0.07809
+        },
+        "CB_delta_efficiency": {
+          "available": 2,
+          "median": 0.579885
+        },
+        "CB_delta_range_pct": {
+          "available": 2,
+          "median": -0.225377
+        },
+        "CB_delta_high": {
+          "available": 2,
+          "median": -0.456438
+        },
+        "CB_delta_low": {
+          "available": 2,
+          "median": -0.227706
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PATTERN",
+      "label": "MISSING",
+      "count": 3,
+      "trade_outcomes": {
+        "UNTRADED": 3
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "TARGET_FADED": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "A_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "A_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "A_high": {
+          "available": 0,
+          "median": null
+        },
+        "A_low": {
+          "available": 0,
+          "median": null
+        },
+        "B_velocity": {
+          "available": 1,
+          "median": 0.232284
+        },
+        "B_efficiency": {
+          "available": 1,
+          "median": 0.357711
+        },
+        "B_range_pct": {
+          "available": 1,
+          "median": 1.446358
+        },
+        "B_high": {
+          "available": 1,
+          "median": 162.535
+        },
+        "B_low": {
+          "available": 1,
+          "median": 160.2
+        },
+        "C_velocity": {
+          "available": 3,
+          "median": 0.252628
+        },
+        "C_efficiency": {
+          "available": 3,
+          "median": 0.931034
+        },
+        "C_range_pct": {
+          "available": 3,
+          "median": 1.755918
+        },
+        "C_high": {
+          "available": 3,
+          "median": 161.365
+        },
+        "C_low": {
+          "available": 3,
+          "median": 158.55
+        },
+        "BA_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_low": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_velocity": {
+          "available": 1,
+          "median": 0.020343
+        },
+        "CB_delta_efficiency": {
+          "available": 1,
+          "median": 0.573324
+        },
+        "CB_delta_range_pct": {
+          "available": 1,
+          "median": 0.30956
+        },
+        "CB_delta_high": {
+          "available": 1,
+          "median": -0.719845
+        },
+        "CB_delta_low": {
+          "available": 1,
+          "median": -1.029963
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PATTERN",
+      "label": "SHORT/LONG/SHORT",
+      "count": 4,
+      "trade_outcomes": {
+        "UNTRADED": 4
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "NO_FEE_SCALE_EXCURSION": 2,
+        "CENSORED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 4,
+          "median": 0.106297
+        },
+        "A_efficiency": {
+          "available": 4,
+          "median": 0.726667
+        },
+        "A_range_pct": {
+          "available": 4,
+          "median": 0.615159
+        },
+        "A_high": {
+          "available": 4,
+          "median": 151.335
+        },
+        "A_low": {
+          "available": 4,
+          "median": 150.57
+        },
+        "B_velocity": {
+          "available": 4,
+          "median": -0.179497
+        },
+        "B_efficiency": {
+          "available": 4,
+          "median": -0.97479
+        },
+        "B_range_pct": {
+          "available": 4,
+          "median": 0.673056
+        },
+        "B_high": {
+          "available": 4,
+          "median": 151.36
+        },
+        "B_low": {
+          "available": 4,
+          "median": 150.55
+        },
+        "C_velocity": {
+          "available": 4,
+          "median": 0.129947
+        },
+        "C_efficiency": {
+          "available": 4,
+          "median": 0.692008
+        },
+        "C_range_pct": {
+          "available": 4,
+          "median": 0.795734
+        },
+        "C_high": {
+          "available": 4,
+          "median": 151.4875
+        },
+        "C_low": {
+          "available": 4,
+          "median": 150.28
+        },
+        "BA_delta_velocity": {
+          "available": 4,
+          "median": -0.254156
+        },
+        "BA_delta_efficiency": {
+          "available": 4,
+          "median": -1.511477
+        },
+        "BA_delta_range_pct": {
+          "available": 4,
+          "median": 0.008321
+        },
+        "BA_delta_high": {
+          "available": 4,
+          "median": 0.024767
+        },
+        "BA_delta_low": {
+          "available": 4,
+          "median": 0.020262
+        },
+        "CB_delta_velocity": {
+          "available": 4,
+          "median": 0.304683
+        },
+        "CB_delta_efficiency": {
+          "available": 4,
+          "median": 1.57649
+        },
+        "CB_delta_range_pct": {
+          "available": 4,
+          "median": 0.075559
+        },
+        "CB_delta_high": {
+          "available": 4,
+          "median": 0.086245
+        },
+        "CB_delta_low": {
+          "available": 4,
+          "median": 0.007646
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PATTERN",
+      "label": "SHORT/SHORT/SHORT",
+      "count": 4,
+      "trade_outcomes": {
+        "UNTRADED": 4
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 3,
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 4,
+          "median": 0.061542
+        },
+        "A_efficiency": {
+          "available": 4,
+          "median": 0.526885
+        },
+        "A_range_pct": {
+          "available": 4,
+          "median": 0.581849
+        },
+        "A_high": {
+          "available": 4,
+          "median": 160.0375
+        },
+        "A_low": {
+          "available": 4,
+          "median": 159.1075
+        },
+        "B_velocity": {
+          "available": 4,
+          "median": 0.119769
+        },
+        "B_efficiency": {
+          "available": 4,
+          "median": 0.616235
+        },
+        "B_range_pct": {
+          "available": 4,
+          "median": 0.560339
+        },
+        "B_high": {
+          "available": 4,
+          "median": 159.4975
+        },
+        "B_low": {
+          "available": 4,
+          "median": 158.645
+        },
+        "C_velocity": {
+          "available": 4,
+          "median": 0.181504
+        },
+        "C_efficiency": {
+          "available": 4,
+          "median": 0.850365
+        },
+        "C_range_pct": {
+          "available": 4,
+          "median": 0.655197
+        },
+        "C_high": {
+          "available": 4,
+          "median": 158.9075
+        },
+        "C_low": {
+          "available": 4,
+          "median": 157.9075
+        },
+        "BA_delta_velocity": {
+          "available": 4,
+          "median": 0.036148
+        },
+        "BA_delta_efficiency": {
+          "available": 4,
+          "median": 0.166992
+        },
+        "BA_delta_range_pct": {
+          "available": 4,
+          "median": 0.025479
+        },
+        "BA_delta_high": {
+          "available": 4,
+          "median": -0.337412
+        },
+        "BA_delta_low": {
+          "available": 4,
+          "median": -0.337668
+        },
+        "CB_delta_velocity": {
+          "available": 4,
+          "median": 0.040344
+        },
+        "CB_delta_efficiency": {
+          "available": 4,
+          "median": 0.234129
+        },
+        "CB_delta_range_pct": {
+          "available": 4,
+          "median": 0.094116
+        },
+        "CB_delta_high": {
+          "available": 4,
+          "median": -0.36995
+        },
+        "CB_delta_low": {
+          "available": 4,
+          "median": -0.40175
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PHASE",
+      "label": "LONG_TO_SHORT",
+      "count": 10,
+      "trade_outcomes": {
+        "UNTRADED": 8,
+        "WIN": 2
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 2,
+        "TARGET_FADED": 3,
+        "NO_FEE_SCALE_EXCURSION": 4,
+        "CENSORED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 10,
+          "median": -0.031919
+        },
+        "A_efficiency": {
+          "available": 10,
+          "median": -0.179655
+        },
+        "A_range_pct": {
+          "available": 10,
+          "median": 0.615159
+        },
+        "A_high": {
+          "available": 10,
+          "median": 154.06
+        },
+        "A_low": {
+          "available": 10,
+          "median": 153.225
+        },
+        "B_velocity": {
+          "available": 10,
+          "median": -0.17651
+        },
+        "B_efficiency": {
+          "available": 10,
+          "median": -0.946218
+        },
+        "B_range_pct": {
+          "available": 10,
+          "median": 0.742473
+        },
+        "B_high": {
+          "available": 10,
+          "median": 154.24
+        },
+        "B_low": {
+          "available": 10,
+          "median": 153.465
+        },
+        "C_velocity": {
+          "available": 10,
+          "median": 0.178315
+        },
+        "C_efficiency": {
+          "available": 10,
+          "median": 0.877193
+        },
+        "C_range_pct": {
+          "available": 10,
+          "median": 0.754654
+        },
+        "C_high": {
+          "available": 10,
+          "median": 154.1925
+        },
+        "C_low": {
+          "available": 10,
+          "median": 153.265
+        },
+        "BA_delta_velocity": {
+          "available": 10,
+          "median": -0.177814
+        },
+        "BA_delta_efficiency": {
+          "available": 10,
+          "median": -0.733566
+        },
+        "BA_delta_range_pct": {
+          "available": 10,
+          "median": 0.073552
+        },
+        "BA_delta_high": {
+          "available": 10,
+          "median": 0.243476
+        },
+        "BA_delta_low": {
+          "available": 10,
+          "median": 0.08327
+        },
+        "CB_delta_velocity": {
+          "available": 10,
+          "median": 0.314471
+        },
+        "CB_delta_efficiency": {
+          "available": 10,
+          "median": 1.57649
+        },
+        "CB_delta_range_pct": {
+          "available": 10,
+          "median": 0.088721
+        },
+        "CB_delta_high": {
+          "available": 10,
+          "median": 0.092443
+        },
+        "CB_delta_low": {
+          "available": 10,
+          "median": -0.009775
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PHASE",
+      "label": "MISSING",
+      "count": 2,
+      "trade_outcomes": {
+        "UNTRADED": 2
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "TARGET_FADED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "A_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "A_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "A_high": {
+          "available": 0,
+          "median": null
+        },
+        "A_low": {
+          "available": 0,
+          "median": null
+        },
+        "B_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "B_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "B_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "B_high": {
+          "available": 0,
+          "median": null
+        },
+        "B_low": {
+          "available": 0,
+          "median": null
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": 0.415006
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": 0.678855
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 1.800355
+        },
+        "C_high": {
+          "available": 2,
+          "median": 160.3225
+        },
+        "C_low": {
+          "available": 2,
+          "median": 157.455
+        },
+        "BA_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_low": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_low": {
+          "available": 0,
+          "median": null
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PHASE",
+      "label": "SHORT_NOT_STRENGTHENING",
+      "count": 1,
+      "trade_outcomes": {
+        "UNTRADED": 1
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 1,
+          "median": 0.050063
+        },
+        "A_efficiency": {
+          "available": 1,
+          "median": 0.48
+        },
+        "A_range_pct": {
+          "available": 1,
+          "median": 0.484981
+        },
+        "A_high": {
+          "available": 1,
+          "median": 160.125
+        },
+        "A_low": {
+          "available": 1,
+          "median": 159.35
+        },
+        "B_velocity": {
+          "available": 1,
+          "median": 0.13579
+        },
+        "B_efficiency": {
+          "available": 1,
+          "median": 1.0
+        },
+        "B_range_pct": {
+          "available": 1,
+          "median": 0.513913
+        },
+        "B_high": {
+          "available": 1,
+          "median": 159.64
+        },
+        "B_low": {
+          "available": 1,
+          "median": 158.82
+        },
+        "C_velocity": {
+          "available": 1,
+          "median": 0.104881
+        },
+        "C_efficiency": {
+          "available": 1,
+          "median": 0.526316
+        },
+        "C_range_pct": {
+          "available": 1,
+          "median": 0.667044
+        },
+        "C_high": {
+          "available": 1,
+          "median": 159.435
+        },
+        "C_low": {
+          "available": 1,
+          "median": 158.375
+        },
+        "BA_delta_velocity": {
+          "available": 1,
+          "median": 0.085728
+        },
+        "BA_delta_efficiency": {
+          "available": 1,
+          "median": 0.52
+        },
+        "BA_delta_range_pct": {
+          "available": 1,
+          "median": 0.028932
+        },
+        "BA_delta_high": {
+          "available": 1,
+          "median": -0.302888
+        },
+        "BA_delta_low": {
+          "available": 1,
+          "median": -0.332601
+        },
+        "CB_delta_velocity": {
+          "available": 1,
+          "median": -0.030909
+        },
+        "CB_delta_efficiency": {
+          "available": 1,
+          "median": -0.473684
+        },
+        "CB_delta_range_pct": {
+          "available": 1,
+          "median": 0.153131
+        },
+        "CB_delta_high": {
+          "available": 1,
+          "median": -0.128414
+        },
+        "CB_delta_low": {
+          "available": 1,
+          "median": -0.280191
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PHASE",
+      "label": "SHORT_STRENGTHENING",
+      "count": 6,
+      "trade_outcomes": {
+        "UNTRADED": 6
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 1,
+        "PERSISTENT_TARGET": 4,
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 5,
+          "median": 0.011845
+        },
+        "A_efficiency": {
+          "available": 5,
+          "median": 0.045267
+        },
+        "A_range_pct": {
+          "available": 5,
+          "median": 0.872206
+        },
+        "A_high": {
+          "available": 5,
+          "median": 159.95
+        },
+        "A_low": {
+          "available": 5,
+          "median": 158.45
+        },
+        "B_velocity": {
+          "available": 6,
+          "median": 0.14882
+        },
+        "B_efficiency": {
+          "available": 6,
+          "median": 0.433878
+        },
+        "B_range_pct": {
+          "available": 6,
+          "median": 0.92707
+        },
+        "B_high": {
+          "available": 6,
+          "median": 159.4975
+        },
+        "B_low": {
+          "available": 6,
+          "median": 158.645
+        },
+        "C_velocity": {
+          "available": 6,
+          "median": 0.200369
+        },
+        "C_efficiency": {
+          "available": 6,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 6,
+          "median": 0.770237
+        },
+        "C_high": {
+          "available": 6,
+          "median": 158.9075
+        },
+        "C_low": {
+          "available": 6,
+          "median": 157.9075
+        },
+        "BA_delta_velocity": {
+          "available": 5,
+          "median": 0.171488
+        },
+        "BA_delta_efficiency": {
+          "available": 5,
+          "median": 0.654348
+        },
+        "BA_delta_range_pct": {
+          "available": 5,
+          "median": 0.022025
+        },
+        "BA_delta_high": {
+          "available": 5,
+          "median": -0.352849
+        },
+        "BA_delta_low": {
+          "available": 5,
+          "median": -0.342735
+        },
+        "CB_delta_velocity": {
+          "available": 6,
+          "median": 0.068502
+        },
+        "CB_delta_efficiency": {
+          "available": 6,
+          "median": 0.546662
+        },
+        "CB_delta_range_pct": {
+          "available": 6,
+          "median": 0.032758
+        },
+        "CB_delta_high": {
+          "available": 6,
+          "median": -0.538632
+        },
+        "CB_delta_low": {
+          "available": 6,
+          "median": -0.40175
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PRICE",
+      "label": "CENSORED",
+      "count": 1,
+      "trade_outcomes": {
+        "UNTRADED": 1
+      },
+      "price_outcomes": {
+        "CENSORED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 1,
+          "median": 0.132471
+        },
+        "A_efficiency": {
+          "available": 1,
+          "median": 0.786667
+        },
+        "A_range_pct": {
+          "available": 1,
+          "median": 0.626431
+        },
+        "A_high": {
+          "available": 1,
+          "median": 148.61
+        },
+        "A_low": {
+          "available": 1,
+          "median": 147.68
+        },
+        "B_velocity": {
+          "available": 1,
+          "median": -0.05072
+        },
+        "B_efficiency": {
+          "available": 1,
+          "median": -0.56962
+        },
+        "B_range_pct": {
+          "available": 1,
+          "median": 0.493677
+        },
+        "B_high": {
+          "available": 1,
+          "median": 148.36
+        },
+        "B_low": {
+          "available": 1,
+          "median": 147.63
+        },
+        "C_velocity": {
+          "available": 1,
+          "median": 0.145177
+        },
+        "C_efficiency": {
+          "available": 1,
+          "median": 0.754386
+        },
+        "C_range_pct": {
+          "available": 1,
+          "median": 0.958844
+        },
+        "C_high": {
+          "available": 1,
+          "median": 148.5
+        },
+        "C_low": {
+          "available": 1,
+          "median": 147.08
+        },
+        "BA_delta_velocity": {
+          "available": 1,
+          "median": -0.183191
+        },
+        "BA_delta_efficiency": {
+          "available": 1,
+          "median": -1.356287
+        },
+        "BA_delta_range_pct": {
+          "available": 1,
+          "median": -0.132754
+        },
+        "BA_delta_high": {
+          "available": 1,
+          "median": -0.168226
+        },
+        "BA_delta_low": {
+          "available": 1,
+          "median": -0.033857
+        },
+        "CB_delta_velocity": {
+          "available": 1,
+          "median": 0.195897
+        },
+        "CB_delta_efficiency": {
+          "available": 1,
+          "median": 1.324006
+        },
+        "CB_delta_range_pct": {
+          "available": 1,
+          "median": 0.465167
+        },
+        "CB_delta_high": {
+          "available": 1,
+          "median": 0.094365
+        },
+        "CB_delta_low": {
+          "available": 1,
+          "median": -0.372553
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PRICE",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 5,
+      "trade_outcomes": {
+        "UNTRADED": 5
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 5
+      },
+      "features": {
+        "A_velocity": {
+          "available": 5,
+          "median": 0.011845
+        },
+        "A_efficiency": {
+          "available": 5,
+          "median": 0.045267
+        },
+        "A_range_pct": {
+          "available": 5,
+          "median": 0.745372
+        },
+        "A_high": {
+          "available": 5,
+          "median": 154.06
+        },
+        "A_low": {
+          "available": 5,
+          "median": 153.46
+        },
+        "B_velocity": {
+          "available": 5,
+          "median": -0.121559
+        },
+        "B_efficiency": {
+          "available": 5,
+          "median": -1.0
+        },
+        "B_range_pct": {
+          "available": 5,
+          "median": 0.951798
+        },
+        "B_high": {
+          "available": 5,
+          "median": 154.24
+        },
+        "B_low": {
+          "available": 5,
+          "median": 153.24
+        },
+        "C_velocity": {
+          "available": 5,
+          "median": 0.186111
+        },
+        "C_efficiency": {
+          "available": 5,
+          "median": 0.70073
+        },
+        "C_range_pct": {
+          "available": 5,
+          "median": 0.897123
+        },
+        "C_high": {
+          "available": 5,
+          "median": 154.04
+        },
+        "C_low": {
+          "available": 5,
+          "median": 152.66
+        },
+        "BA_delta_velocity": {
+          "available": 5,
+          "median": -0.201682
+        },
+        "BA_delta_efficiency": {
+          "available": 5,
+          "median": -0.155048
+        },
+        "BA_delta_range_pct": {
+          "available": 5,
+          "median": 0.111645
+        },
+        "BA_delta_high": {
+          "available": 5,
+          "median": 0.116838
+        },
+        "BA_delta_low": {
+          "available": 5,
+          "median": 0.006516
+        },
+        "CB_delta_velocity": {
+          "available": 5,
+          "median": 0.29891
+        },
+        "CB_delta_efficiency": {
+          "available": 5,
+          "median": 1.451456
+        },
+        "CB_delta_range_pct": {
+          "available": 5,
+          "median": 0.019927
+        },
+        "CB_delta_high": {
+          "available": 5,
+          "median": -0.061592
+        },
+        "CB_delta_low": {
+          "available": 5,
+          "median": -0.195478
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PRICE",
+      "label": "PERSISTENT_TARGET",
+      "count": 8,
+      "trade_outcomes": {
+        "UNTRADED": 7,
+        "WIN": 1
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 8
+      },
+      "features": {
+        "A_velocity": {
+          "available": 7,
+          "median": 0.050063
+        },
+        "A_efficiency": {
+          "available": 7,
+          "median": 0.39759
+        },
+        "A_range_pct": {
+          "available": 7,
+          "median": 0.603888
+        },
+        "A_high": {
+          "available": 7,
+          "median": 159.95
+        },
+        "A_low": {
+          "available": 7,
+          "median": 158.45
+        },
+        "B_velocity": {
+          "available": 7,
+          "median": 0.059591
+        },
+        "B_efficiency": {
+          "available": 7,
+          "median": 0.387755
+        },
+        "B_range_pct": {
+          "available": 7,
+          "median": 0.606766
+        },
+        "B_high": {
+          "available": 7,
+          "median": 159.64
+        },
+        "B_low": {
+          "available": 7,
+          "median": 158.82
+        },
+        "C_velocity": {
+          "available": 8,
+          "median": 0.174789
+        },
+        "C_efficiency": {
+          "available": 8,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 8,
+          "median": 0.62959
+        },
+        "C_high": {
+          "available": 8,
+          "median": 159.5375
+        },
+        "C_low": {
+          "available": 8,
+          "median": 158.5975
+        },
+        "BA_delta_velocity": {
+          "available": 7,
+          "median": -0.013431
+        },
+        "BA_delta_efficiency": {
+          "available": 7,
+          "median": -0.186015
+        },
+        "BA_delta_range_pct": {
+          "available": 7,
+          "median": 0.028932
+        },
+        "BA_delta_high": {
+          "available": 7,
+          "median": -0.302888
+        },
+        "BA_delta_low": {
+          "available": 7,
+          "median": -0.238693
+        },
+        "CB_delta_velocity": {
+          "available": 7,
+          "median": 0.085728
+        },
+        "CB_delta_efficiency": {
+          "available": 7,
+          "median": 0.612245
+        },
+        "CB_delta_range_pct": {
+          "available": 7,
+          "median": 0.028932
+        },
+        "CB_delta_high": {
+          "available": 7,
+          "median": -0.272625
+        },
+        "CB_delta_low": {
+          "available": 7,
+          "median": -0.280191
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "PRICE",
+      "label": "TARGET_FADED",
+      "count": 5,
+      "trade_outcomes": {
+        "UNTRADED": 4,
+        "WIN": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 5
+      },
+      "features": {
+        "A_velocity": {
+          "available": 3,
+          "median": -0.060883
+        },
+        "A_efficiency": {
+          "available": 3,
+          "median": -0.325581
+        },
+        "A_range_pct": {
+          "available": 3,
+          "median": 0.410959
+        },
+        "A_high": {
+          "available": 3,
+          "median": 154.06
+        },
+        "A_low": {
+          "available": 3,
+          "median": 152.99
+        },
+        "B_velocity": {
+          "available": 4,
+          "median": -0.129128
+        },
+        "B_efficiency": {
+          "available": 4,
+          "median": -0.643697
+        },
+        "B_range_pct": {
+          "available": 4,
+          "median": 0.951143
+        },
+        "B_high": {
+          "available": 4,
+          "median": 155.145
+        },
+        "B_low": {
+          "available": 4,
+          "median": 153.685
+        },
+        "C_velocity": {
+          "available": 5,
+          "median": 0.252628
+        },
+        "C_efficiency": {
+          "available": 5,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 5,
+          "median": 1.570849
+        },
+        "C_high": {
+          "available": 5,
+          "median": 155.8
+        },
+        "C_low": {
+          "available": 5,
+          "median": 153.51
+        },
+        "BA_delta_velocity": {
+          "available": 3,
+          "median": -0.008633
+        },
+        "BA_delta_efficiency": {
+          "available": 3,
+          "median": -0.030261
+        },
+        "BA_delta_range_pct": {
+          "available": 3,
+          "median": 0.002903
+        },
+        "BA_delta_high": {
+          "available": 3,
+          "median": 0.604415
+        },
+        "BA_delta_low": {
+          "available": 3,
+          "median": 0.300673
+        },
+        "CB_delta_velocity": {
+          "available": 4,
+          "median": 0.294799
+        },
+        "CB_delta_efficiency": {
+          "available": 4,
+          "median": 1.421475
+        },
+        "CB_delta_range_pct": {
+          "available": 4,
+          "median": 0.253613
+        },
+        "CB_delta_high": {
+          "available": 4,
+          "median": 0.099877
+        },
+        "CB_delta_low": {
+          "available": 4,
+          "median": -0.18845
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "TRADE",
+      "label": "UNTRADED",
+      "count": 17,
+      "trade_outcomes": {
+        "UNTRADED": 17
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 7,
+        "TARGET_FADED": 4,
+        "NO_FEE_SCALE_EXCURSION": 5,
+        "CENSORED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 14,
+          "median": 0.030954
+        },
+        "A_efficiency": {
+          "available": 14,
+          "median": 0.221429
+        },
+        "A_range_pct": {
+          "available": 14,
+          "median": 0.615159
+        },
+        "A_high": {
+          "available": 14,
+          "median": 155.2475
+        },
+        "A_low": {
+          "available": 14,
+          "median": 153.955
+        },
+        "B_velocity": {
+          "available": 15,
+          "median": -0.024906
+        },
+        "B_efficiency": {
+          "available": 15,
+          "median": -0.389831
+        },
+        "B_range_pct": {
+          "available": 15,
+          "median": 0.787863
+        },
+        "B_high": {
+          "available": 15,
+          "median": 155.63
+        },
+        "B_low": {
+          "available": 15,
+          "median": 153.91
+        },
+        "C_velocity": {
+          "available": 17,
+          "median": 0.192708
+        },
+        "C_efficiency": {
+          "available": 17,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 17,
+          "median": 0.897123
+        },
+        "C_high": {
+          "available": 17,
+          "median": 156.42
+        },
+        "C_low": {
+          "available": 17,
+          "median": 154.52
+        },
+        "BA_delta_velocity": {
+          "available": 14,
+          "median": -0.044481
+        },
+        "BA_delta_efficiency": {
+          "available": 14,
+          "median": -0.170532
+        },
+        "BA_delta_range_pct": {
+          "available": 14,
+          "median": 0.06952
+        },
+        "BA_delta_high": {
+          "available": 14,
+          "median": 0.005411
+        },
+        "BA_delta_low": {
+          "available": 14,
+          "median": 0.006516
+        },
+        "CB_delta_velocity": {
+          "available": 15,
+          "median": 0.195897
+        },
+        "CB_delta_efficiency": {
+          "available": 15,
+          "median": 1.324006
+        },
+        "CB_delta_range_pct": {
+          "available": 15,
+          "median": 0.046252
+        },
+        "CB_delta_high": {
+          "available": 15,
+          "median": -0.128414
+        },
+        "CB_delta_low": {
+          "available": 15,
+          "median": -0.306249
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "group": "TRADE",
+      "label": "WIN",
+      "count": 2,
+      "trade_outcomes": {
+        "WIN": 2
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "TARGET_FADED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 2,
+          "median": -0.035193
+        },
+        "A_efficiency": {
+          "available": 2,
+          "median": -0.222458
+        },
+        "A_range_pct": {
+          "available": 2,
+          "median": 0.492814
+        },
+        "A_high": {
+          "available": 2,
+          "median": 156.78
+        },
+        "A_low": {
+          "available": 2,
+          "median": 156.005
+        },
+        "B_velocity": {
+          "available": 2,
+          "median": -0.091825
+        },
+        "B_efficiency": {
+          "available": 2,
+          "median": -0.63089
+        },
+        "B_range_pct": {
+          "available": 2,
+          "median": 0.512764
+        },
+        "B_high": {
+          "available": 2,
+          "median": 157.045
+        },
+        "B_low": {
+          "available": 2,
+          "median": 156.2375
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": 0.132941
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": 0.777778
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 0.555426
+        },
+        "C_high": {
+          "available": 2,
+          "median": 157.095
+        },
+        "C_low": {
+          "available": 2,
+          "median": 156.2225
+        },
+        "BA_delta_velocity": {
+          "available": 2,
+          "median": -0.056632
+        },
+        "BA_delta_efficiency": {
+          "available": 2,
+          "median": -0.408431
+        },
+        "BA_delta_range_pct": {
+          "available": 2,
+          "median": 0.019949
+        },
+        "BA_delta_high": {
+          "available": 2,
+          "median": 0.165093
+        },
+        "BA_delta_low": {
+          "available": 2,
+          "median": 0.145729
+        },
+        "CB_delta_velocity": {
+          "available": 2,
+          "median": 0.224766
+        },
+        "CB_delta_efficiency": {
+          "available": 2,
+          "median": 1.408667
+        },
+        "CB_delta_range_pct": {
+          "available": 2,
+          "median": 0.042662
+        },
+        "CB_delta_high": {
+          "available": 2,
+          "median": 0.034661
+        },
+        "CB_delta_low": {
+          "available": 2,
+          "median": -0.009775
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PATTERN",
+      "label": "LONG/LONG/SHORT",
+      "count": 18,
+      "trade_outcomes": {
+        "UNTRADED": 16,
+        "NO_FEE_CLOSE": 1,
+        "WIN": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 7,
+        "CENSORED": 4,
+        "NO_FEE_SCALE_EXCURSION": 6,
+        "PERSISTENT_TARGET": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 18,
+          "median": -0.084167
+        },
+        "A_efficiency": {
+          "available": 18,
+          "median": -0.934137
+        },
+        "A_range_pct": {
+          "available": 18,
+          "median": 0.410764
+        },
+        "A_high": {
+          "available": 18,
+          "median": 217.4125
+        },
+        "A_low": {
+          "available": 18,
+          "median": 216.2275
+        },
+        "B_velocity": {
+          "available": 18,
+          "median": -0.070934
+        },
+        "B_efficiency": {
+          "available": 18,
+          "median": -0.856688
+        },
+        "B_range_pct": {
+          "available": 18,
+          "median": 0.422211
+        },
+        "B_high": {
+          "available": 18,
+          "median": 218.045
+        },
+        "B_low": {
+          "available": 18,
+          "median": 217.09
+        },
+        "C_velocity": {
+          "available": 18,
+          "median": 0.088461
+        },
+        "C_efficiency": {
+          "available": 18,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 18,
+          "median": 0.407826
+        },
+        "C_high": {
+          "available": 18,
+          "median": 217.8825
+        },
+        "C_low": {
+          "available": 18,
+          "median": 216.9025
+        },
+        "BA_delta_velocity": {
+          "available": 18,
+          "median": 0.01102
+        },
+        "BA_delta_efficiency": {
+          "available": 18,
+          "median": 0.0
+        },
+        "BA_delta_range_pct": {
+          "available": 18,
+          "median": 0.007421
+        },
+        "BA_delta_high": {
+          "available": 18,
+          "median": 0.253198
+        },
+        "BA_delta_low": {
+          "available": 18,
+          "median": 0.279284
+        },
+        "CB_delta_velocity": {
+          "available": 18,
+          "median": 0.156319
+        },
+        "CB_delta_efficiency": {
+          "available": 18,
+          "median": 1.619069
+        },
+        "CB_delta_range_pct": {
+          "available": 18,
+          "median": 0.000941
+        },
+        "CB_delta_high": {
+          "available": 18,
+          "median": -0.017199
+        },
+        "CB_delta_low": {
+          "available": 18,
+          "median": -0.026329
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PATTERN",
+      "label": "LONG/SHORT/SHORT",
+      "count": 14,
+      "trade_outcomes": {
+        "UNTRADED": 11,
+        "WIN": 1,
+        "NO_FEE_CLOSE": 2
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 2,
+        "NO_FEE_SCALE_EXCURSION": 7,
+        "CENSORED": 3,
+        "PERSISTENT_TARGET": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 14,
+          "median": -0.055061
+        },
+        "A_efficiency": {
+          "available": 14,
+          "median": -0.470513
+        },
+        "A_range_pct": {
+          "available": 14,
+          "median": 0.363369
+        },
+        "A_high": {
+          "available": 14,
+          "median": 215.6375
+        },
+        "A_low": {
+          "available": 14,
+          "median": 214.4775
+        },
+        "B_velocity": {
+          "available": 14,
+          "median": 0.056483
+        },
+        "B_efficiency": {
+          "available": 14,
+          "median": 0.529845
+        },
+        "B_range_pct": {
+          "available": 14,
+          "median": 0.272529
+        },
+        "B_high": {
+          "available": 14,
+          "median": 215.74
+        },
+        "B_low": {
+          "available": 14,
+          "median": 214.7025
+        },
+        "C_velocity": {
+          "available": 14,
+          "median": 0.057085
+        },
+        "C_efficiency": {
+          "available": 14,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 14,
+          "median": 0.315147
+        },
+        "C_high": {
+          "available": 14,
+          "median": 215.005
+        },
+        "C_low": {
+          "available": 14,
+          "median": 214.2625
+        },
+        "BA_delta_velocity": {
+          "available": 14,
+          "median": 0.121133
+        },
+        "BA_delta_efficiency": {
+          "available": 14,
+          "median": 1.180513
+        },
+        "BA_delta_range_pct": {
+          "available": 14,
+          "median": -0.010924
+        },
+        "BA_delta_high": {
+          "available": 14,
+          "median": 0.005894
+        },
+        "BA_delta_low": {
+          "available": 14,
+          "median": 0.046028
+        },
+        "CB_delta_velocity": {
+          "available": 14,
+          "median": 0.023708
+        },
+        "CB_delta_efficiency": {
+          "available": 14,
+          "median": 0.224172
+        },
+        "CB_delta_range_pct": {
+          "available": 14,
+          "median": 0.000504
+        },
+        "CB_delta_high": {
+          "available": 14,
+          "median": -0.16357
+        },
+        "CB_delta_low": {
+          "available": 14,
+          "median": -0.155725
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PATTERN",
+      "label": "MISSING",
+      "count": 2,
+      "trade_outcomes": {
+        "UNTRADED": 2
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "A_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "A_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "A_high": {
+          "available": 0,
+          "median": null
+        },
+        "A_low": {
+          "available": 0,
+          "median": null
+        },
+        "B_velocity": {
+          "available": 1,
+          "median": -0.025774
+        },
+        "B_efficiency": {
+          "available": 1,
+          "median": -0.180328
+        },
+        "B_range_pct": {
+          "available": 1,
+          "median": 0.571723
+        },
+        "B_high": {
+          "available": 1,
+          "median": 213.93
+        },
+        "B_low": {
+          "available": 1,
+          "median": 212.71
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": 0.063609
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": 0.527778
+        },
+        "C_range_pct": {
+          "available": 2,
+          "median": 0.491931
+        },
+        "C_high": {
+          "available": 2,
+          "median": 213.81
+        },
+        "C_low": {
+          "available": 2,
+          "median": 212.76
+        },
+        "BA_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_low": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_velocity": {
+          "available": 1,
+          "median": 0.148303
+        },
+        "CB_delta_efficiency": {
+          "available": 1,
+          "median": 1.180328
+        },
+        "CB_delta_range_pct": {
+          "available": 1,
+          "median": -0.01449
+        },
+        "CB_delta_high": {
+          "available": 1,
+          "median": -0.112186
+        },
+        "CB_delta_low": {
+          "available": 1,
+          "median": -0.098726
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PATTERN",
+      "label": "SHORT/FLAT/SHORT",
+      "count": 1,
+      "trade_outcomes": {
+        "UNTRADED": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 1,
+          "median": 0.032438
+        },
+        "A_efficiency": {
+          "available": 1,
+          "median": 0.365079
+        },
+        "A_range_pct": {
+          "available": 1,
+          "median": 0.300402
+        },
+        "A_high": {
+          "available": 1,
+          "median": 236.66
+        },
+        "A_low": {
+          "available": 1,
+          "median": 235.95
+        },
+        "B_velocity": {
+          "available": 1,
+          "median": -0.0
+        },
+        "B_efficiency": {
+          "available": 1,
+          "median": -0.0
+        },
+        "B_range_pct": {
+          "available": 1,
+          "median": 0.190581
+        },
+        "B_high": {
+          "available": 1,
+          "median": 236.23
+        },
+        "B_low": {
+          "available": 1,
+          "median": 235.78
+        },
+        "C_velocity": {
+          "available": 1,
+          "median": 0.074821
+        },
+        "C_efficiency": {
+          "available": 1,
+          "median": 0.688312
+        },
+        "C_range_pct": {
+          "available": 1,
+          "median": 0.340928
+        },
+        "C_high": {
+          "available": 1,
+          "median": 236.34
+        },
+        "C_low": {
+          "available": 1,
+          "median": 235.535
+        },
+        "BA_delta_velocity": {
+          "available": 1,
+          "median": -0.032438
+        },
+        "BA_delta_efficiency": {
+          "available": 1,
+          "median": -0.365079
+        },
+        "BA_delta_range_pct": {
+          "available": 1,
+          "median": -0.109821
+        },
+        "BA_delta_high": {
+          "available": 1,
+          "median": -0.181695
+        },
+        "BA_delta_low": {
+          "available": 1,
+          "median": -0.072049
+        },
+        "CB_delta_velocity": {
+          "available": 1,
+          "median": 0.074821
+        },
+        "CB_delta_efficiency": {
+          "available": 1,
+          "median": 0.688312
+        },
+        "CB_delta_range_pct": {
+          "available": 1,
+          "median": 0.150347
+        },
+        "CB_delta_high": {
+          "available": 1,
+          "median": 0.046565
+        },
+        "CB_delta_low": {
+          "available": 1,
+          "median": -0.10391
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PATTERN",
+      "label": "SHORT/LONG/SHORT",
+      "count": 11,
+      "trade_outcomes": {
+        "UNTRADED": 7,
+        "WIN": 1,
+        "NO_FEE_CLOSE": 2,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 2,
+        "NO_FEE_SCALE_EXCURSION": 8,
+        "CENSORED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 11,
+          "median": 0.047661
+        },
+        "A_efficiency": {
+          "available": 11,
+          "median": 0.320388
+        },
+        "A_range_pct": {
+          "available": 11,
+          "median": 0.380496
+        },
+        "A_high": {
+          "available": 11,
+          "median": 224.26
+        },
+        "A_low": {
+          "available": 11,
+          "median": 223.65
+        },
+        "B_velocity": {
+          "available": 11,
+          "median": -0.052537
+        },
+        "B_efficiency": {
+          "available": 11,
+          "median": -0.619718
+        },
+        "B_range_pct": {
+          "available": 11,
+          "median": 0.312982
+        },
+        "B_high": {
+          "available": 11,
+          "median": 224.07
+        },
+        "B_low": {
+          "available": 11,
+          "median": 223.67
+        },
+        "C_velocity": {
+          "available": 11,
+          "median": 0.054805
+        },
+        "C_efficiency": {
+          "available": 11,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 11,
+          "median": 0.314742
+        },
+        "C_high": {
+          "available": 11,
+          "median": 223.85
+        },
+        "C_low": {
+          "available": 11,
+          "median": 223.43
+        },
+        "BA_delta_velocity": {
+          "available": 11,
+          "median": -0.098155
+        },
+        "BA_delta_efficiency": {
+          "available": 11,
+          "median": -1.061356
+        },
+        "BA_delta_range_pct": {
+          "available": 11,
+          "median": -0.093211
+        },
+        "BA_delta_high": {
+          "available": 11,
+          "median": -0.056338
+        },
+        "BA_delta_low": {
+          "available": 11,
+          "median": 0.037725
+        },
+        "CB_delta_velocity": {
+          "available": 11,
+          "median": 0.105016
+        },
+        "CB_delta_efficiency": {
+          "available": 11,
+          "median": 1.315106
+        },
+        "CB_delta_range_pct": {
+          "available": 11,
+          "median": -0.054236
+        },
+        "CB_delta_high": {
+          "available": 11,
+          "median": 0.013322
+        },
+        "CB_delta_low": {
+          "available": 11,
+          "median": 0.070653
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PATTERN",
+      "label": "SHORT/SHORT/SHORT",
+      "count": 8,
+      "trade_outcomes": {
+        "UNTRADED": 4,
+        "WIN": 1,
+        "NO_FEE_CLOSE": 3
+      },
+      "price_outcomes": {
+        "CENSORED": 1,
+        "TARGET_FADED": 2,
+        "NO_FEE_SCALE_EXCURSION": 5
+      },
+      "features": {
+        "A_velocity": {
+          "available": 8,
+          "median": 0.02897
+        },
+        "A_efficiency": {
+          "available": 8,
+          "median": 0.25747
+        },
+        "A_range_pct": {
+          "available": 8,
+          "median": 0.293311
+        },
+        "A_high": {
+          "available": 8,
+          "median": 226.255
+        },
+        "A_low": {
+          "available": 8,
+          "median": 225.3375
+        },
+        "B_velocity": {
+          "available": 8,
+          "median": 0.038449
+        },
+        "B_efficiency": {
+          "available": 8,
+          "median": 0.53125
+        },
+        "B_range_pct": {
+          "available": 8,
+          "median": 0.287356
+        },
+        "B_high": {
+          "available": 8,
+          "median": 226.14
+        },
+        "B_low": {
+          "available": 8,
+          "median": 225.15
+        },
+        "C_velocity": {
+          "available": 8,
+          "median": 0.052435
+        },
+        "C_efficiency": {
+          "available": 8,
+          "median": 0.932203
+        },
+        "C_range_pct": {
+          "available": 8,
+          "median": 0.294991
+        },
+        "C_high": {
+          "available": 8,
+          "median": 225.925
+        },
+        "C_low": {
+          "available": 8,
+          "median": 224.965
+        },
+        "BA_delta_velocity": {
+          "available": 8,
+          "median": 0.017136
+        },
+        "BA_delta_efficiency": {
+          "available": 8,
+          "median": 0.179107
+        },
+        "BA_delta_range_pct": {
+          "available": 8,
+          "median": -0.021101
+        },
+        "BA_delta_high": {
+          "available": 8,
+          "median": -0.171845
+        },
+        "BA_delta_low": {
+          "available": 8,
+          "median": -0.111378
+        },
+        "CB_delta_velocity": {
+          "available": 8,
+          "median": 0.016747
+        },
+        "CB_delta_efficiency": {
+          "available": 8,
+          "median": 0.264857
+        },
+        "CB_delta_range_pct": {
+          "available": 8,
+          "median": 0.007634
+        },
+        "CB_delta_high": {
+          "available": 8,
+          "median": -0.140399
+        },
+        "CB_delta_low": {
+          "available": 8,
+          "median": -0.14463
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PHASE",
+      "label": "LONG_TO_SHORT",
+      "count": 31,
+      "trade_outcomes": {
+        "UNTRADED": 25,
+        "WIN": 2,
+        "NO_FEE_CLOSE": 3,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 11,
+        "CENSORED": 5,
+        "NO_FEE_SCALE_EXCURSION": 14,
+        "PERSISTENT_TARGET": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 30,
+          "median": -0.021545
+        },
+        "A_efficiency": {
+          "available": 30,
+          "median": -0.366713
+        },
+        "A_range_pct": {
+          "available": 30,
+          "median": 0.383026
+        },
+        "A_high": {
+          "available": 30,
+          "median": 217.4575
+        },
+        "A_low": {
+          "available": 30,
+          "median": 216.32
+        },
+        "B_velocity": {
+          "available": 31,
+          "median": -0.053286
+        },
+        "B_efficiency": {
+          "available": 31,
+          "median": -0.673469
+        },
+        "B_range_pct": {
+          "available": 31,
+          "median": 0.348728
+        },
+        "B_high": {
+          "available": 31,
+          "median": 218.055
+        },
+        "B_low": {
+          "available": 31,
+          "median": 217.1
+        },
+        "C_velocity": {
+          "available": 31,
+          "median": 0.06133
+        },
+        "C_efficiency": {
+          "available": 31,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 31,
+          "median": 0.372411
+        },
+        "C_high": {
+          "available": 31,
+          "median": 217.92
+        },
+        "C_low": {
+          "available": 31,
+          "median": 217.02
+        },
+        "BA_delta_velocity": {
+          "available": 30,
+          "median": -0.030335
+        },
+        "BA_delta_efficiency": {
+          "available": 30,
+          "median": -0.238928
+        },
+        "BA_delta_range_pct": {
+          "available": 30,
+          "median": -0.009446
+        },
+        "BA_delta_high": {
+          "available": 30,
+          "median": 0.158947
+        },
+        "BA_delta_low": {
+          "available": 30,
+          "median": 0.192346
+        },
+        "CB_delta_velocity": {
+          "available": 31,
+          "median": 0.144116
+        },
+        "CB_delta_efficiency": {
+          "available": 31,
+          "median": 1.5
+        },
+        "CB_delta_range_pct": {
+          "available": 31,
+          "median": -0.012191
+        },
+        "CB_delta_high": {
+          "available": 31,
+          "median": -0.002352
+        },
+        "CB_delta_low": {
+          "available": 31,
+          "median": -0.025913
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PHASE",
+      "label": "MISSING",
+      "count": 1,
+      "trade_outcomes": {
+        "UNTRADED": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "A_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "A_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "A_high": {
+          "available": 0,
+          "median": null
+        },
+        "A_low": {
+          "available": 0,
+          "median": null
+        },
+        "B_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "B_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "B_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "B_high": {
+          "available": 0,
+          "median": null
+        },
+        "B_low": {
+          "available": 0,
+          "median": null
+        },
+        "C_velocity": {
+          "available": 1,
+          "median": 0.004688
+        },
+        "C_efficiency": {
+          "available": 1,
+          "median": 0.055556
+        },
+        "C_range_pct": {
+          "available": 1,
+          "median": 0.426629
+        },
+        "C_high": {
+          "available": 1,
+          "median": 213.93
+        },
+        "C_low": {
+          "available": 1,
+          "median": 213.02
+        },
+        "BA_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "BA_delta_low": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_velocity": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_efficiency": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_range_pct": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_high": {
+          "available": 0,
+          "median": null
+        },
+        "CB_delta_low": {
+          "available": 0,
+          "median": null
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PHASE",
+      "label": "SHORT_NOT_STRENGTHENING",
+      "count": 7,
+      "trade_outcomes": {
+        "UNTRADED": 6,
+        "NO_FEE_CLOSE": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 2,
+        "NO_FEE_SCALE_EXCURSION": 3,
+        "PERSISTENT_TARGET": 2
+      },
+      "features": {
+        "A_velocity": {
+          "available": 7,
+          "median": -0.053286
+        },
+        "A_efficiency": {
+          "available": 7,
+          "median": -0.269841
+        },
+        "A_range_pct": {
+          "available": 7,
+          "median": 0.391705
+        },
+        "A_high": {
+          "available": 7,
+          "median": 217.86
+        },
+        "A_low": {
+          "available": 7,
+          "median": 216.87
+        },
+        "B_velocity": {
+          "available": 7,
+          "median": 0.078035
+        },
+        "B_efficiency": {
+          "available": 7,
+          "median": 0.5625
+        },
+        "B_range_pct": {
+          "available": 7,
+          "median": 0.388738
+        },
+        "B_high": {
+          "available": 7,
+          "median": 218.09
+        },
+        "B_low": {
+          "available": 7,
+          "median": 217.26
+        },
+        "C_velocity": {
+          "available": 7,
+          "median": 0.051808
+        },
+        "C_efficiency": {
+          "available": 7,
+          "median": 0.853659
+        },
+        "C_range_pct": {
+          "available": 7,
+          "median": 0.333052
+        },
+        "C_high": {
+          "available": 7,
+          "median": 217.685
+        },
+        "C_low": {
+          "available": 7,
+          "median": 216.84
+        },
+        "BA_delta_velocity": {
+          "available": 7,
+          "median": 0.104922
+        },
+        "BA_delta_efficiency": {
+          "available": 7,
+          "median": 0.632479
+        },
+        "BA_delta_range_pct": {
+          "available": 7,
+          "median": 0.051538
+        },
+        "BA_delta_high": {
+          "available": 7,
+          "median": 0.0
+        },
+        "BA_delta_low": {
+          "available": 7,
+          "median": -0.008883
+        },
+        "CB_delta_velocity": {
+          "available": 7,
+          "median": -0.016714
+        },
+        "CB_delta_efficiency": {
+          "available": 7,
+          "median": 0.157393
+        },
+        "CB_delta_range_pct": {
+          "available": 7,
+          "median": -0.086303
+        },
+        "CB_delta_high": {
+          "available": 7,
+          "median": -0.234278
+        },
+        "CB_delta_low": {
+          "available": 7,
+          "median": -0.162904
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PHASE",
+      "label": "SHORT_STRENGTHENING",
+      "count": 15,
+      "trade_outcomes": {
+        "UNTRADED": 9,
+        "WIN": 2,
+        "NO_FEE_CLOSE": 4
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 2,
+        "NO_FEE_SCALE_EXCURSION": 9,
+        "CENSORED": 4
+      },
+      "features": {
+        "A_velocity": {
+          "available": 15,
+          "median": -0.009413
+        },
+        "A_efficiency": {
+          "available": 15,
+          "median": -0.166667
+        },
+        "A_range_pct": {
+          "available": 15,
+          "median": 0.227834
+        },
+        "A_high": {
+          "available": 15,
+          "median": 217.81
+        },
+        "A_low": {
+          "available": 15,
+          "median": 216.63
+        },
+        "B_velocity": {
+          "available": 15,
+          "median": 0.026777
+        },
+        "B_efficiency": {
+          "available": 15,
+          "median": 0.333333
+        },
+        "B_range_pct": {
+          "available": 15,
+          "median": 0.238241
+        },
+        "B_high": {
+          "available": 15,
+          "median": 218.045
+        },
+        "B_low": {
+          "available": 15,
+          "median": 217.17
+        },
+        "C_velocity": {
+          "available": 15,
+          "median": 0.053062
+        },
+        "C_efficiency": {
+          "available": 15,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 15,
+          "median": 0.241961
+        },
+        "C_high": {
+          "available": 15,
+          "median": 217.41
+        },
+        "C_low": {
+          "available": 15,
+          "median": 216.07
+        },
+        "BA_delta_velocity": {
+          "available": 15,
+          "median": 0.028268
+        },
+        "BA_delta_efficiency": {
+          "available": 15,
+          "median": 0.609926
+        },
+        "BA_delta_range_pct": {
+          "available": 15,
+          "median": -0.042243
+        },
+        "BA_delta_high": {
+          "available": 15,
+          "median": -0.043104
+        },
+        "BA_delta_low": {
+          "available": 15,
+          "median": -0.03533
+        },
+        "CB_delta_velocity": {
+          "available": 15,
+          "median": 0.030687
+        },
+        "CB_delta_efficiency": {
+          "available": 15,
+          "median": 0.300245
+        },
+        "CB_delta_range_pct": {
+          "available": 15,
+          "median": 0.00944
+        },
+        "CB_delta_high": {
+          "available": 15,
+          "median": -0.096648
+        },
+        "CB_delta_low": {
+          "available": 15,
+          "median": -0.118133
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PRICE",
+      "label": "CENSORED",
+      "count": 9,
+      "trade_outcomes": {
+        "UNTRADED": 9
+      },
+      "price_outcomes": {
+        "CENSORED": 9
+      },
+      "features": {
+        "A_velocity": {
+          "available": 9,
+          "median": -0.030537
+        },
+        "A_efficiency": {
+          "available": 9,
+          "median": -0.344538
+        },
+        "A_range_pct": {
+          "available": 9,
+          "median": 0.281032
+        },
+        "A_high": {
+          "available": 9,
+          "median": 217.84
+        },
+        "A_low": {
+          "available": 9,
+          "median": 217.065
+        },
+        "B_velocity": {
+          "available": 9,
+          "median": -0.014904
+        },
+        "B_efficiency": {
+          "available": 9,
+          "median": -0.2
+        },
+        "B_range_pct": {
+          "available": 9,
+          "median": 0.236586
+        },
+        "B_high": {
+          "available": 9,
+          "median": 218.43
+        },
+        "B_low": {
+          "available": 9,
+          "median": 217.465
+        },
+        "C_velocity": {
+          "available": 9,
+          "median": 0.052726
+        },
+        "C_efficiency": {
+          "available": 9,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 9,
+          "median": 0.217176
+        },
+        "C_high": {
+          "available": 9,
+          "median": 218.275
+        },
+        "C_low": {
+          "available": 9,
+          "median": 217.46
+        },
+        "BA_delta_velocity": {
+          "available": 9,
+          "median": 0.018095
+        },
+        "BA_delta_efficiency": {
+          "available": 9,
+          "median": 0.067702
+        },
+        "BA_delta_range_pct": {
+          "available": 9,
+          "median": 4e-05
+        },
+        "BA_delta_high": {
+          "available": 9,
+          "median": 0.053528
+        },
+        "BA_delta_low": {
+          "available": 9,
+          "median": 0.063833
+        },
+        "CB_delta_velocity": {
+          "available": 9,
+          "median": 0.046187
+        },
+        "CB_delta_efficiency": {
+          "available": 9,
+          "median": 1.2
+        },
+        "CB_delta_range_pct": {
+          "available": 9,
+          "median": -0.023452
+        },
+        "CB_delta_high": {
+          "available": 9,
+          "median": -0.089214
+        },
+        "CB_delta_low": {
+          "available": 9,
+          "median": -0.056017
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PRICE",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 26,
+      "trade_outcomes": {
+        "WIN": 4,
+        "UNTRADED": 14,
+        "NO_FEE_CLOSE": 7,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 26
+      },
+      "features": {
+        "A_velocity": {
+          "available": 26,
+          "median": -0.003535
+        },
+        "A_efficiency": {
+          "available": 26,
+          "median": -0.059022
+        },
+        "A_range_pct": {
+          "available": 26,
+          "median": 0.354504
+        },
+        "A_high": {
+          "available": 26,
+          "median": 217.655
+        },
+        "A_low": {
+          "available": 26,
+          "median": 216.455
+        },
+        "B_velocity": {
+          "available": 26,
+          "median": -0.005404
+        },
+        "B_efficiency": {
+          "available": 26,
+          "median": -0.098585
+        },
+        "B_range_pct": {
+          "available": 26,
+          "median": 0.308142
+        },
+        "B_high": {
+          "available": 26,
+          "median": 218.09
+        },
+        "B_low": {
+          "available": 26,
+          "median": 217.185
+        },
+        "C_velocity": {
+          "available": 26,
+          "median": 0.061683
+        },
+        "C_efficiency": {
+          "available": 26,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 26,
+          "median": 0.350356
+        },
+        "C_high": {
+          "available": 26,
+          "median": 217.84
+        },
+        "C_low": {
+          "available": 26,
+          "median": 216.8675
+        },
+        "BA_delta_velocity": {
+          "available": 26,
+          "median": -0.013722
+        },
+        "BA_delta_efficiency": {
+          "available": 26,
+          "median": -0.073537
+        },
+        "BA_delta_range_pct": {
+          "available": 26,
+          "median": -0.030562
+        },
+        "BA_delta_high": {
+          "available": 26,
+          "median": 0.049325
+        },
+        "BA_delta_low": {
+          "available": 26,
+          "median": 0.100294
+        },
+        "CB_delta_velocity": {
+          "available": 26,
+          "median": 0.081309
+        },
+        "CB_delta_efficiency": {
+          "available": 26,
+          "median": 1.082437
+        },
+        "CB_delta_range_pct": {
+          "available": 26,
+          "median": 0.008618
+        },
+        "CB_delta_high": {
+          "available": 26,
+          "median": -0.070195
+        },
+        "CB_delta_low": {
+          "available": 26,
+          "median": -0.122535
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PRICE",
+      "label": "PERSISTENT_TARGET",
+      "count": 3,
+      "trade_outcomes": {
+        "UNTRADED": 3
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 3
+      },
+      "features": {
+        "A_velocity": {
+          "available": 3,
+          "median": -0.08701
+        },
+        "A_efficiency": {
+          "available": 3,
+          "median": -0.741294
+        },
+        "A_range_pct": {
+          "available": 3,
+          "median": 0.391705
+        },
+        "A_high": {
+          "available": 3,
+          "median": 217.69
+        },
+        "A_low": {
+          "available": 3,
+          "median": 216.84
+        },
+        "B_velocity": {
+          "available": 3,
+          "median": 0.080508
+        },
+        "B_efficiency": {
+          "available": 3,
+          "median": 0.466667
+        },
+        "B_range_pct": {
+          "available": 3,
+          "median": 0.429549
+        },
+        "B_high": {
+          "available": 3,
+          "median": 217.69
+        },
+        "B_low": {
+          "available": 3,
+          "median": 216.845
+        },
+        "C_velocity": {
+          "available": 3,
+          "median": 0.090642
+        },
+        "C_efficiency": {
+          "available": 3,
+          "median": 0.88785
+        },
+        "C_range_pct": {
+          "available": 3,
+          "median": 0.391985
+        },
+        "C_high": {
+          "available": 3,
+          "median": 217.18
+        },
+        "C_low": {
+          "available": 3,
+          "median": 216.33
+        },
+        "BA_delta_velocity": {
+          "available": 3,
+          "median": 0.137344
+        },
+        "BA_delta_efficiency": {
+          "available": 3,
+          "median": 0.941026
+        },
+        "BA_delta_range_pct": {
+          "available": 3,
+          "median": -0.002967
+        },
+        "BA_delta_high": {
+          "available": 3,
+          "median": 0.0
+        },
+        "BA_delta_low": {
+          "available": 3,
+          "median": 0.002306
+        },
+        "CB_delta_velocity": {
+          "available": 3,
+          "median": -0.016554
+        },
+        "CB_delta_efficiency": {
+          "available": 3,
+          "median": 0.263158
+        },
+        "CB_delta_range_pct": {
+          "available": 3,
+          "median": -0.093097
+        },
+        "CB_delta_high": {
+          "available": 3,
+          "median": -0.234278
+        },
+        "CB_delta_low": {
+          "available": 3,
+          "median": -0.237497
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "PRICE",
+      "label": "TARGET_FADED",
+      "count": 16,
+      "trade_outcomes": {
+        "UNTRADED": 15,
+        "NO_FEE_CLOSE": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 16
+      },
+      "features": {
+        "A_velocity": {
+          "available": 14,
+          "median": -0.050217
+        },
+        "A_efficiency": {
+          "available": 14,
+          "median": -0.47104
+        },
+        "A_range_pct": {
+          "available": 14,
+          "median": 0.414207
+        },
+        "A_high": {
+          "available": 14,
+          "median": 217.265
+        },
+        "A_low": {
+          "available": 14,
+          "median": 216.32
+        },
+        "B_velocity": {
+          "available": 15,
+          "median": -0.025895
+        },
+        "B_efficiency": {
+          "available": 15,
+          "median": -0.269841
+        },
+        "B_range_pct": {
+          "available": 15,
+          "median": 0.356174
+        },
+        "B_high": {
+          "available": 15,
+          "median": 217.83
+        },
+        "B_low": {
+          "available": 15,
+          "median": 217.08
+        },
+        "C_velocity": {
+          "available": 16,
+          "median": 0.058811
+        },
+        "C_efficiency": {
+          "available": 16,
+          "median": 0.657164
+        },
+        "C_range_pct": {
+          "available": 16,
+          "median": 0.340099
+        },
+        "C_high": {
+          "available": 16,
+          "median": 215.845
+        },
+        "C_low": {
+          "available": 16,
+          "median": 214.92
+        },
+        "BA_delta_velocity": {
+          "available": 14,
+          "median": 0.024831
+        },
+        "BA_delta_efficiency": {
+          "available": 14,
+          "median": 0.039423
+        },
+        "BA_delta_range_pct": {
+          "available": 14,
+          "median": 0.021259
+        },
+        "BA_delta_high": {
+          "available": 14,
+          "median": 0.05648
+        },
+        "BA_delta_low": {
+          "available": 14,
+          "median": 0.057762
+        },
+        "CB_delta_velocity": {
+          "available": 15,
+          "median": 0.083141
+        },
+        "CB_delta_efficiency": {
+          "available": 15,
+          "median": 1.180328
+        },
+        "CB_delta_range_pct": {
+          "available": 15,
+          "median": -0.012191
+        },
+        "CB_delta_high": {
+          "available": 15,
+          "median": 0.014113
+        },
+        "CB_delta_low": {
+          "available": 15,
+          "median": -0.025913
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "TRADE",
+      "label": "GIVEBACK",
+      "count": 1,
+      "trade_outcomes": {
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 1,
+          "median": 0.051672
+        },
+        "A_efficiency": {
+          "available": 1,
+          "median": 0.320388
+        },
+        "A_range_pct": {
+          "available": 1,
+          "median": 0.380496
+        },
+        "A_high": {
+          "available": 1,
+          "median": 212.87
+        },
+        "A_low": {
+          "available": 1,
+          "median": 212.06
+        },
+        "B_velocity": {
+          "available": 1,
+          "median": -0.052537
+        },
+        "B_efficiency": {
+          "available": 1,
+          "median": -0.752809
+        },
+        "B_range_pct": {
+          "available": 1,
+          "median": 0.232886
+        },
+        "B_high": {
+          "available": 1,
+          "median": 212.98
+        },
+        "B_low": {
+          "available": 1,
+          "median": 212.485
+        },
+        "C_velocity": {
+          "available": 1,
+          "median": 0.108822
+        },
+        "C_efficiency": {
+          "available": 1,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 1,
+          "median": 0.347606
+        },
+        "C_high": {
+          "available": 1,
+          "median": 212.92
+        },
+        "C_low": {
+          "available": 1,
+          "median": 212.18
+        },
+        "BA_delta_velocity": {
+          "available": 1,
+          "median": -0.104209
+        },
+        "BA_delta_efficiency": {
+          "available": 1,
+          "median": -1.073197
+        },
+        "BA_delta_range_pct": {
+          "available": 1,
+          "median": -0.14761
+        },
+        "BA_delta_high": {
+          "available": 1,
+          "median": 0.051675
+        },
+        "BA_delta_low": {
+          "available": 1,
+          "median": 0.200415
+        },
+        "CB_delta_velocity": {
+          "available": 1,
+          "median": 0.161359
+        },
+        "CB_delta_efficiency": {
+          "available": 1,
+          "median": 1.752809
+        },
+        "CB_delta_range_pct": {
+          "available": 1,
+          "median": 0.114719
+        },
+        "CB_delta_high": {
+          "available": 1,
+          "median": -0.028172
+        },
+        "CB_delta_low": {
+          "available": 1,
+          "median": -0.14354
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "TRADE",
+      "label": "NO_FEE_CLOSE",
+      "count": 8,
+      "trade_outcomes": {
+        "NO_FEE_CLOSE": 8
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 7,
+        "TARGET_FADED": 1
+      },
+      "features": {
+        "A_velocity": {
+          "available": 8,
+          "median": 0.012786
+        },
+        "A_efficiency": {
+          "available": 8,
+          "median": 0.139641
+        },
+        "A_range_pct": {
+          "available": 8,
+          "median": 0.372014
+        },
+        "A_high": {
+          "available": 8,
+          "median": 222.055
+        },
+        "A_low": {
+          "available": 8,
+          "median": 220.6325
+        },
+        "B_velocity": {
+          "available": 8,
+          "median": 0.02659
+        },
+        "B_efficiency": {
+          "available": 8,
+          "median": 0.350694
+        },
+        "B_range_pct": {
+          "available": 8,
+          "median": 0.322908
+        },
+        "B_high": {
+          "available": 8,
+          "median": 221.93
+        },
+        "B_low": {
+          "available": 8,
+          "median": 221.04
+        },
+        "C_velocity": {
+          "available": 8,
+          "median": 0.053933
+        },
+        "C_efficiency": {
+          "available": 8,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 8,
+          "median": 0.323897
+        },
+        "C_high": {
+          "available": 8,
+          "median": 221.4275
+        },
+        "C_low": {
+          "available": 8,
+          "median": 220.625
+        },
+        "BA_delta_velocity": {
+          "available": 8,
+          "median": 0.039133
+        },
+        "BA_delta_efficiency": {
+          "available": 8,
+          "median": 0.582741
+        },
+        "BA_delta_range_pct": {
+          "available": 8,
+          "median": -0.027576
+        },
+        "BA_delta_high": {
+          "available": 8,
+          "median": -0.115563
+        },
+        "BA_delta_low": {
+          "available": 8,
+          "median": -0.044381
+        },
+        "CB_delta_velocity": {
+          "available": 8,
+          "median": 0.027955
+        },
+        "CB_delta_efficiency": {
+          "available": 8,
+          "median": 0.620098
+        },
+        "CB_delta_range_pct": {
+          "available": 8,
+          "median": 0.028642
+        },
+        "CB_delta_high": {
+          "available": 8,
+          "median": -0.100334
+        },
+        "CB_delta_low": {
+          "available": 8,
+          "median": -0.126786
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "TRADE",
+      "label": "UNTRADED",
+      "count": 41,
+      "trade_outcomes": {
+        "UNTRADED": 41
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 15,
+        "CENSORED": 9,
+        "NO_FEE_SCALE_EXCURSION": 14,
+        "PERSISTENT_TARGET": 3
+      },
+      "features": {
+        "A_velocity": {
+          "available": 39,
+          "median": -0.033063
+        },
+        "A_efficiency": {
+          "available": 39,
+          "median": -0.42
+        },
+        "A_range_pct": {
+          "available": 39,
+          "median": 0.356987
+        },
+        "A_high": {
+          "available": 39,
+          "median": 217.69
+        },
+        "A_low": {
+          "available": 39,
+          "median": 216.56
+        },
+        "B_velocity": {
+          "available": 40,
+          "median": -0.025834
+        },
+        "B_efficiency": {
+          "available": 40,
+          "median": -0.234409
+        },
+        "B_range_pct": {
+          "available": 40,
+          "median": 0.338068
+        },
+        "B_high": {
+          "available": 40,
+          "median": 218.05
+        },
+        "B_low": {
+          "available": 40,
+          "median": 217.135
+        },
+        "C_velocity": {
+          "available": 41,
+          "median": 0.058837
+        },
+        "C_efficiency": {
+          "available": 41,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 41,
+          "median": 0.340928
+        },
+        "C_high": {
+          "available": 41,
+          "median": 217.855
+        },
+        "C_low": {
+          "available": 41,
+          "median": 216.91
+        },
+        "BA_delta_velocity": {
+          "available": 39,
+          "median": 0.015625
+        },
+        "BA_delta_efficiency": {
+          "available": 39,
+          "median": 0.02248
+        },
+        "BA_delta_range_pct": {
+          "available": 39,
+          "median": 4e-05
+        },
+        "BA_delta_high": {
+          "available": 39,
+          "median": 0.058839
+        },
+        "BA_delta_low": {
+          "available": 39,
+          "median": 0.063833
+        },
+        "CB_delta_velocity": {
+          "available": 40,
+          "median": 0.08879
+        },
+        "CB_delta_efficiency": {
+          "available": 40,
+          "median": 1.154266
+        },
+        "CB_delta_range_pct": {
+          "available": 40,
+          "median": -0.015697
+        },
+        "CB_delta_high": {
+          "available": 40,
+          "median": -0.056458
+        },
+        "CB_delta_low": {
+          "available": 40,
+          "median": -0.049239
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "group": "TRADE",
+      "label": "WIN",
+      "count": 4,
+      "trade_outcomes": {
+        "WIN": 4
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 4
+      },
+      "features": {
+        "A_velocity": {
+          "available": 4,
+          "median": 0.02096
+        },
+        "A_efficiency": {
+          "available": 4,
+          "median": 0.277132
+        },
+        "A_range_pct": {
+          "available": 4,
+          "median": 0.397788
+        },
+        "A_high": {
+          "available": 4,
+          "median": 215.2925
+        },
+        "A_low": {
+          "available": 4,
+          "median": 214.2275
+        },
+        "B_velocity": {
+          "available": 4,
+          "median": -0.010187
+        },
+        "B_efficiency": {
+          "available": 4,
+          "median": -0.138298
+        },
+        "B_range_pct": {
+          "available": 4,
+          "median": 0.295323
+        },
+        "B_high": {
+          "available": 4,
+          "median": 215.575
+        },
+        "B_low": {
+          "available": 4,
+          "median": 214.8075
+        },
+        "C_velocity": {
+          "available": 4,
+          "median": 0.100383
+        },
+        "C_efficiency": {
+          "available": 4,
+          "median": 1.0
+        },
+        "C_range_pct": {
+          "available": 4,
+          "median": 0.380027
+        },
+        "C_high": {
+          "available": 4,
+          "median": 215.4125
+        },
+        "C_low": {
+          "available": 4,
+          "median": 214.4975
+        },
+        "BA_delta_velocity": {
+          "available": 4,
+          "median": -0.011565
+        },
+        "BA_delta_efficiency": {
+          "available": 4,
+          "median": -0.267801
+        },
+        "BA_delta_range_pct": {
+          "available": 4,
+          "median": -0.092347
+        },
+        "BA_delta_high": {
+          "available": 4,
+          "median": -0.033183
+        },
+        "BA_delta_low": {
+          "available": 4,
+          "median": 0.089667
+        },
+        "CB_delta_velocity": {
+          "available": 4,
+          "median": 0.10588
+        },
+        "CB_delta_efficiency": {
+          "available": 4,
+          "median": 1.138298
+        },
+        "CB_delta_range_pct": {
+          "available": 4,
+          "median": 0.035228
+        },
+        "CB_delta_high": {
+          "available": 4,
+          "median": -0.075349
+        },
+        "CB_delta_low": {
+          "available": 4,
+          "median": -0.15378
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,311 @@
+{
+  "notes": [
+    "Observational only; no trades, optimization, or production edits. Both periods are discovery.",
+    "ST ATR10 multiplier3. Warm-up as EXP40-M. All warning features use completed bars only.",
+    "Flip matching: next 1-6 same-session bars (30m or 180m horizon). Session-end incomplete unmatched cases censored.",
+    "Warnings already aligned with ST are retained but excluded from flip anticipation labels. Multiple warnings can match one flip.",
+    "Extreme reference is retrospective, prior ST run within same session, excludes flip bar; delay starts at extreme bar close. Not executable.",
+    "Price pivot proxy: strict centered 3-bar high/low and subsequent 3-bar close excursion >=1 ATR; known only after 3 future bars. Not objective major-trend truth.",
+    "No flip within horizon does not prove a false price reversal. Future price outcomes are descriptive only."
+  ],
+  "evaluated_5m_bars": 5304,
+  "flip_count": 161,
+  "warning_count": 2081,
+  "price_pivot_count": 353,
+  "groups": [
+    {
+      "period": "DISCOVERY",
+      "timeframe": 5,
+      "target": "SHORT",
+      "flips": 61,
+      "extreme_available": 55,
+      "median_delay_minutes": 40.0,
+      "median_close_move_pct": 0.8675588371019822,
+      "price_pivot_proxies": 144,
+      "price_pivot_flip_labels": {
+        "NO_FLIP_WITHIN_HORIZON": 121,
+        "MATCHED": 17,
+        "CENSORED": 6
+      },
+      "rules": {
+        "PEAK_BREAK": {
+          "warnings": 278,
+          "labels": {
+            "NO_FLIP_WITHIN_HORIZON": 111,
+            "NOT_OPPOSITE_ST": 137,
+            "MATCHED": 18,
+            "CENSORED": 12
+          },
+          "distinct_flips_anticipated": 18,
+          "median_warning_lead_minutes": 15.0
+        },
+        "TWO_STEP": {
+          "warnings": 546,
+          "labels": {
+            "NOT_OPPOSITE_ST": 355,
+            "NO_FLIP_WITHIN_HORIZON": 124,
+            "MATCHED": 61,
+            "CENSORED": 6
+          },
+          "distinct_flips_anticipated": 35,
+          "median_warning_lead_minutes": 10.0
+        }
+      }
+    },
+    {
+      "period": "DISCOVERY",
+      "timeframe": 5,
+      "target": "LONG",
+      "flips": 61,
+      "extreme_available": 48,
+      "median_delay_minutes": 57.5,
+      "median_close_move_pct": 0.8988783028177423,
+      "price_pivot_proxies": 150,
+      "price_pivot_flip_labels": {
+        "NO_FLIP_WITHIN_HORIZON": 125,
+        "MATCHED": 17,
+        "CENSORED": 8
+      },
+      "rules": {
+        "PEAK_BREAK": {
+          "warnings": 263,
+          "labels": {
+            "NOT_OPPOSITE_ST": 118,
+            "NO_FLIP_WITHIN_HORIZON": 112,
+            "CENSORED": 14,
+            "MATCHED": 19
+          },
+          "distinct_flips_anticipated": 18,
+          "median_warning_lead_minutes": 20.0
+        },
+        "TWO_STEP": {
+          "warnings": 525,
+          "labels": {
+            "NO_FLIP_WITHIN_HORIZON": 160,
+            "NOT_OPPOSITE_ST": 317,
+            "CENSORED": 18,
+            "MATCHED": 30
+          },
+          "distinct_flips_anticipated": 20,
+          "median_warning_lead_minutes": 10.0
+        }
+      }
+    },
+    {
+      "period": "DISCOVERY",
+      "timeframe": 30,
+      "target": "SHORT",
+      "flips": 12,
+      "extreme_available": 7,
+      "median_delay_minutes": 150.0,
+      "median_close_move_pct": 1.6796505606340297,
+      "price_pivot_proxies": 8,
+      "price_pivot_flip_labels": {
+        "NO_FLIP_WITHIN_HORIZON": 3,
+        "MATCHED": 1,
+        "CENSORED": 4
+      },
+      "rules": {
+        "PEAK_BREAK": {
+          "warnings": 35,
+          "labels": {
+            "CENSORED": 13,
+            "NOT_OPPOSITE_ST": 19,
+            "NO_FLIP_WITHIN_HORIZON": 2,
+            "MATCHED": 1
+          },
+          "distinct_flips_anticipated": 1,
+          "median_warning_lead_minutes": 60.0
+        },
+        "TWO_STEP": {
+          "warnings": 74,
+          "labels": {
+            "NOT_OPPOSITE_ST": 53,
+            "MATCHED": 3,
+            "CENSORED": 10,
+            "NO_FLIP_WITHIN_HORIZON": 8
+          },
+          "distinct_flips_anticipated": 2,
+          "median_warning_lead_minutes": 60.0
+        }
+      }
+    },
+    {
+      "period": "DISCOVERY",
+      "timeframe": 30,
+      "target": "LONG",
+      "flips": 11,
+      "extreme_available": 8,
+      "median_delay_minutes": 90.0,
+      "median_close_move_pct": 1.7317252537137835,
+      "price_pivot_proxies": 5,
+      "price_pivot_flip_labels": {
+        "MATCHED": 2,
+        "NO_FLIP_WITHIN_HORIZON": 2,
+        "CENSORED": 1
+      },
+      "rules": {
+        "PEAK_BREAK": {
+          "warnings": 32,
+          "labels": {
+            "CENSORED": 16,
+            "MATCHED": 2,
+            "NOT_OPPOSITE_ST": 9,
+            "NO_FLIP_WITHIN_HORIZON": 5
+          },
+          "distinct_flips_anticipated": 2,
+          "median_warning_lead_minutes": 150.0
+        },
+        "TWO_STEP": {
+          "warnings": 73,
+          "labels": {
+            "NOT_OPPOSITE_ST": 48,
+            "CENSORED": 13,
+            "MATCHED": 6,
+            "NO_FLIP_WITHIN_HORIZON": 6
+          },
+          "distinct_flips_anticipated": 3,
+          "median_warning_lead_minutes": 90.0
+        }
+      }
+    },
+    {
+      "period": "NOVEMBER",
+      "timeframe": 5,
+      "target": "SHORT",
+      "flips": 7,
+      "extreme_available": 4,
+      "median_delay_minutes": 97.5,
+      "median_close_move_pct": 2.2130325515206626,
+      "price_pivot_proxies": 24,
+      "price_pivot_flip_labels": {
+        "NO_FLIP_WITHIN_HORIZON": 23,
+        "CENSORED": 1
+      },
+      "rules": {
+        "PEAK_BREAK": {
+          "warnings": 47,
+          "labels": {
+            "NO_FLIP_WITHIN_HORIZON": 15,
+            "NOT_OPPOSITE_ST": 29,
+            "MATCHED": 2,
+            "CENSORED": 1
+          },
+          "distinct_flips_anticipated": 2,
+          "median_warning_lead_minutes": 27.5
+        },
+        "TWO_STEP": {
+          "warnings": 82,
+          "labels": {
+            "NO_FLIP_WITHIN_HORIZON": 16,
+            "MATCHED": 7,
+            "NOT_OPPOSITE_ST": 56,
+            "CENSORED": 3
+          },
+          "distinct_flips_anticipated": 3,
+          "median_warning_lead_minutes": 15.0
+        }
+      }
+    },
+    {
+      "period": "NOVEMBER",
+      "timeframe": 5,
+      "target": "LONG",
+      "flips": 7,
+      "extreme_available": 5,
+      "median_delay_minutes": 55.0,
+      "median_close_move_pct": 2.018324259726459,
+      "price_pivot_proxies": 22,
+      "price_pivot_flip_labels": {
+        "NO_FLIP_WITHIN_HORIZON": 19,
+        "MATCHED": 2,
+        "CENSORED": 1
+      },
+      "rules": {
+        "PEAK_BREAK": {
+          "warnings": 39,
+          "labels": {
+            "NOT_OPPOSITE_ST": 13,
+            "NO_FLIP_WITHIN_HORIZON": 24,
+            "MATCHED": 2
+          },
+          "distinct_flips_anticipated": 2,
+          "median_warning_lead_minutes": 7.5
+        },
+        "TWO_STEP": {
+          "warnings": 57,
+          "labels": {
+            "NOT_OPPOSITE_ST": 24,
+            "NO_FLIP_WITHIN_HORIZON": 25,
+            "CENSORED": 4,
+            "MATCHED": 4
+          },
+          "distinct_flips_anticipated": 2,
+          "median_warning_lead_minutes": 7.5
+        }
+      }
+    },
+    {
+      "period": "NOVEMBER",
+      "timeframe": 30,
+      "target": "SHORT",
+      "flips": 1,
+      "extreme_available": 1,
+      "median_delay_minutes": 30.0,
+      "median_close_move_pct": 2.4319221784902774,
+      "price_pivot_proxies": 0,
+      "price_pivot_flip_labels": {},
+      "rules": {
+        "PEAK_BREAK": {
+          "warnings": 1,
+          "labels": {
+            "NOT_OPPOSITE_ST": 1
+          },
+          "distinct_flips_anticipated": 0,
+          "median_warning_lead_minutes": null
+        },
+        "TWO_STEP": {
+          "warnings": 20,
+          "labels": {
+            "NOT_OPPOSITE_ST": 19,
+            "NO_FLIP_WITHIN_HORIZON": 1
+          },
+          "distinct_flips_anticipated": 0,
+          "median_warning_lead_minutes": null
+        }
+      }
+    },
+    {
+      "period": "NOVEMBER",
+      "timeframe": 30,
+      "target": "LONG",
+      "flips": 1,
+      "extreme_available": 0,
+      "median_delay_minutes": null,
+      "median_close_move_pct": null,
+      "price_pivot_proxies": 0,
+      "price_pivot_flip_labels": {},
+      "rules": {
+        "PEAK_BREAK": {
+          "warnings": 4,
+          "labels": {
+            "CENSORED": 2,
+            "NO_FLIP_WITHIN_HORIZON": 2
+          },
+          "distinct_flips_anticipated": 0,
+          "median_warning_lead_minutes": null
+        },
+        "TWO_STEP": {
+          "warnings": 5,
+          "labels": {
+            "NOT_OPPOSITE_ST": 1,
+            "NO_FLIP_WITHIN_HORIZON": 1,
+            "CENSORED": 3
+          },
+          "distinct_flips_anticipated": 0,
+          "median_warning_lead_minutes": null
+        }
+      }
+    }
+  ]
+}

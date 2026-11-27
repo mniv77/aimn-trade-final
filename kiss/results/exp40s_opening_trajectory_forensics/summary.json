@@ -1,0 +1,124 @@
+{
+  "notes": [
+    "Observational only; both periods discovery; no thresholds selected or strategy changes.",
+    "All features use completed candles through signal; outcome columns inherited from EXP40-P are retrospective.",
+    "Session efficiency includes first open and completed closes; positive favors SHORT. Opening gap and previous session context use prior available regular-session close.",
+    "Prior last30 return uses previous session final six-bar open to close. November includes verified EXP144 warm-up.",
+    "Warning numbers count all earlier same-session TWO_STEP SHORT warnings, or earlier LONG/SHORT-context warnings respectively, regardless of Q4 decision or outcome.",
+    "Repeated warnings overlap; 24 observations are not independent trades. No profitability inference."
+  ],
+  "source_sha256": "05d885fa55df7237001662cdc67e078aad43669c494c4bcdf195bd19c877cf2d",
+  "observations": 24,
+  "groups": [
+    {
+      "period": "DISCOVERY",
+      "outcome": "NO_FEE_SCALE_EXCURSION",
+      "count": 5,
+      "first_focus_warnings": 3,
+      "opening_gap_pct": 1.177527,
+      "session_return_pct": -0.454257,
+      "session_peak_age_bars": 3.0,
+      "session_peak_to_close_pct": 1.240832,
+      "session_short_efficiency": 0.228733,
+      "lower_high_streak": 3.0,
+      "lower_low_streak": 2.0,
+      "focus_warning_number": 1.0
+    },
+    {
+      "period": "DISCOVERY",
+      "outcome": "PERSISTENT_TARGET",
+      "count": 6,
+      "first_focus_warnings": 5,
+      "opening_gap_pct": 0.961124,
+      "session_return_pct": -0.793523,
+      "session_peak_age_bars": 4.5,
+      "session_peak_to_close_pct": 1.184998,
+      "session_short_efficiency": 0.420258,
+      "lower_high_streak": 2.5,
+      "lower_low_streak": 2.0,
+      "focus_warning_number": 1.0
+    },
+    {
+      "period": "DISCOVERY",
+      "outcome": "TARGET_FADED",
+      "count": 9,
+      "first_focus_warnings": 4,
+      "opening_gap_pct": 1.676865,
+      "session_return_pct": -0.088819,
+      "session_peak_age_bars": 4.0,
+      "session_peak_to_close_pct": 1.256378,
+      "session_short_efficiency": 0.072996,
+      "lower_high_streak": 3.0,
+      "lower_low_streak": 2.0,
+      "focus_warning_number": 2.0
+    },
+    {
+      "period": "NOVEMBER",
+      "outcome": "PERSISTENT_TARGET",
+      "count": 2,
+      "first_focus_warnings": 1,
+      "opening_gap_pct": -0.514105,
+      "session_return_pct": 0.954545,
+      "session_peak_age_bars": 4.0,
+      "session_peak_to_close_pct": 1.815053,
+      "session_short_efficiency": -0.190248,
+      "lower_high_streak": 2.0,
+      "lower_low_streak": 2.0,
+      "focus_warning_number": 1.5
+    },
+    {
+      "period": "NOVEMBER",
+      "outcome": "TARGET_FADED",
+      "count": 2,
+      "first_focus_warnings": 1,
+      "opening_gap_pct": -0.514105,
+      "session_return_pct": 0.722851,
+      "session_peak_age_bars": 3.5,
+      "session_peak_to_close_pct": 2.04335,
+      "session_short_efficiency": -0.139061,
+      "lower_high_streak": 3.5,
+      "lower_low_streak": 3.5,
+      "focus_warning_number": 1.5
+    }
+  ],
+  "first_vs_repeated": [
+    {
+      "period": "DISCOVERY",
+      "warning_group": "FIRST",
+      "observations": 12,
+      "outcomes": {
+        "PERSISTENT_TARGET": 5,
+        "TARGET_FADED": 4,
+        "NO_FEE_SCALE_EXCURSION": 3
+      }
+    },
+    {
+      "period": "DISCOVERY",
+      "warning_group": "REPEATED",
+      "observations": 8,
+      "outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 2,
+        "PERSISTENT_TARGET": 1,
+        "TARGET_FADED": 5
+      }
+    },
+    {
+      "period": "NOVEMBER",
+      "warning_group": "FIRST",
+      "observations": 2,
+      "outcomes": {
+        "PERSISTENT_TARGET": 1,
+        "TARGET_FADED": 1
+      }
+    },
+    {
+      "period": "NOVEMBER",
+      "warning_group": "REPEATED",
+      "observations": 2,
+      "outcomes": {
+        "TARGET_FADED": 1,
+        "PERSISTENT_TARGET": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,623 @@
+{
+  "notes": [
+    "Discovery only; no production changes or independent validation.",
+    "H4 entry gate, scheduled flatten, late cutoff and original stops unchanged.",
+    "Exact EXP40-J formulas; best completed gross close profit must exceed 0.2%.",
+    "Original close-based exits retain priority; structural exits execute next open.",
+    "No additional slippage; aggregate trade sums are not portfolio returns."
+  ],
+  "variants": {
+    "K0_H4": {
+      "trades": 32,
+      "winners": 17,
+      "losers": 15,
+      "net_sum_pct": -0.672133,
+      "gross_sum_pct": 5.727867,
+      "exits": {
+        "V_PROFIT": 14,
+        "TRAILING_REVERSE": 16,
+        "SESSION_FLATTEN": 2
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 101,
+        "time_gate": 4,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 17,
+          "winners": 8,
+          "losers": 9,
+          "net_sum_pct": -1.223175,
+          "gross_sum_pct": 2.176825,
+          "exits": {
+            "V_PROFIT": 7,
+            "TRAILING_REVERSE": 9,
+            "SESSION_FLATTEN": 1
+          }
+        },
+        "AUG": {
+          "trades": 15,
+          "winners": 9,
+          "losers": 6,
+          "net_sum_pct": 0.551042,
+          "gross_sum_pct": 3.551042,
+          "exits": {
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 1,
+            "V_PROFIT": 7
+          }
+        }
+      },
+      "removed": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [],
+      "net_delta_vs_H4_pp": 0.0,
+      "original_winners_harmed": 0,
+      "original_losers_improved": 0,
+      "original_losers_converted": 0
+    },
+    "K1_HIGHER_HIGH": {
+      "trades": 32,
+      "winners": 15,
+      "losers": 17,
+      "net_sum_pct": -0.318049,
+      "gross_sum_pct": 6.081951,
+      "exits": {
+        "STRUCTURAL_HIGHER_HIGH": 8,
+        "V_PROFIT": 10,
+        "TRAILING_REVERSE": 12,
+        "SESSION_FLATTEN": 2
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 101,
+        "structural_warning": 12,
+        "time_gate": 4,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 17,
+          "winners": 7,
+          "losers": 10,
+          "net_sum_pct": -1.026743,
+          "gross_sum_pct": 2.373257,
+          "exits": {
+            "STRUCTURAL_HIGHER_HIGH": 4,
+            "V_PROFIT": 5,
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 1
+          }
+        },
+        "AUG": {
+          "trades": 15,
+          "winners": 8,
+          "losers": 7,
+          "net_sum_pct": 0.708694,
+          "gross_sum_pct": 3.708694,
+          "exits": {
+            "STRUCTURAL_HIGHER_HIGH": 4,
+            "SESSION_FLATTEN": 1,
+            "V_PROFIT": 5,
+            "TRAILING_REVERSE": 5
+          }
+        }
+      },
+      "removed": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [
+        {
+          "signal_time": "2026-06-08 12:25:00",
+          "old_net": 0.151672,
+          "new_net": 0.16326,
+          "old_exit": "2026-06-08 13:25:00",
+          "new_exit": "2026-06-08 13:20:00"
+        },
+        {
+          "signal_time": "2026-07-14 14:40:00",
+          "old_net": 0.019739,
+          "new_net": -0.138665,
+          "old_exit": "2026-07-14 15:35:00",
+          "new_exit": "2026-07-14 15:20:00"
+        },
+        {
+          "signal_time": "2026-07-22 13:05:00",
+          "old_net": -0.312477,
+          "new_net": -0.061975,
+          "old_exit": "2026-07-22 13:30:00",
+          "new_exit": "2026-07-22 13:25:00"
+        },
+        {
+          "signal_time": "2026-07-28 12:10:00",
+          "old_net": -0.155968,
+          "new_net": -0.063222,
+          "old_exit": "2026-07-28 12:40:00",
+          "new_exit": "2026-07-28 12:40:00"
+        },
+        {
+          "signal_time": "2026-08-04 13:50:00",
+          "old_net": -0.386331,
+          "new_net": -0.185827,
+          "old_exit": "2026-08-04 14:20:00",
+          "new_exit": "2026-08-04 14:15:00"
+        },
+        {
+          "signal_time": "2026-08-07 09:55:00",
+          "old_net": 0.014088,
+          "new_net": -0.031184,
+          "old_exit": "2026-08-07 10:15:00",
+          "new_exit": "2026-08-07 10:10:00"
+        },
+        {
+          "signal_time": "2026-08-17 12:00:00",
+          "old_net": 0.079257,
+          "new_net": 0.147325,
+          "old_exit": "2026-08-17 12:30:00",
+          "new_exit": "2026-08-17 12:25:00"
+        },
+        {
+          "signal_time": "2026-08-27 13:15:00",
+          "old_net": 0.127382,
+          "new_net": 0.061734,
+          "old_exit": "2026-08-27 13:40:00",
+          "new_exit": "2026-08-27 13:30:00"
+        }
+      ],
+      "net_delta_vs_H4_pp": 0.354084,
+      "original_winners_harmed": 3,
+      "original_losers_improved": 3,
+      "original_losers_converted": 0
+    },
+    "K2_HIGHER_HIGH_LOW": {
+      "trades": 32,
+      "winners": 16,
+      "losers": 16,
+      "net_sum_pct": -0.305523,
+      "gross_sum_pct": 6.094477,
+      "exits": {
+        "V_PROFIT": 13,
+        "TRAILING_REVERSE": 13,
+        "SESSION_FLATTEN": 2,
+        "STRUCTURAL_HIGHER_HIGH_LOW": 4
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 101,
+        "time_gate": 4,
+        "structural_warning": 7,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 17,
+          "winners": 7,
+          "losers": 10,
+          "net_sum_pct": -1.057069,
+          "gross_sum_pct": 2.342931,
+          "exits": {
+            "V_PROFIT": 6,
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 1,
+            "STRUCTURAL_HIGHER_HIGH_LOW": 3
+          }
+        },
+        "AUG": {
+          "trades": 15,
+          "winners": 9,
+          "losers": 6,
+          "net_sum_pct": 0.751546,
+          "gross_sum_pct": 3.751546,
+          "exits": {
+            "STRUCTURAL_HIGHER_HIGH_LOW": 1,
+            "SESSION_FLATTEN": 1,
+            "V_PROFIT": 7,
+            "TRAILING_REVERSE": 6
+          }
+        }
+      },
+      "removed": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [
+        {
+          "signal_time": "2026-07-14 14:40:00",
+          "old_net": 0.019739,
+          "new_net": -0.138665,
+          "old_exit": "2026-07-14 15:35:00",
+          "new_exit": "2026-07-14 15:20:00"
+        },
+        {
+          "signal_time": "2026-07-22 13:05:00",
+          "old_net": -0.312477,
+          "new_net": -0.080713,
+          "old_exit": "2026-07-22 13:30:00",
+          "new_exit": "2026-07-22 13:30:00"
+        },
+        {
+          "signal_time": "2026-07-28 12:10:00",
+          "old_net": -0.155968,
+          "new_net": -0.063222,
+          "old_exit": "2026-07-28 12:40:00",
+          "new_exit": "2026-07-28 12:40:00"
+        },
+        {
+          "signal_time": "2026-08-04 13:50:00",
+          "old_net": -0.386331,
+          "new_net": -0.185827,
+          "old_exit": "2026-08-04 14:20:00",
+          "new_exit": "2026-08-04 14:15:00"
+        }
+      ],
+      "net_delta_vs_H4_pp": 0.36661,
+      "original_winners_harmed": 1,
+      "original_losers_improved": 3,
+      "original_losers_converted": 0
+    },
+    "K3_BULLISH_UPPER_CLOSE": {
+      "trades": 32,
+      "winners": 16,
+      "losers": 16,
+      "net_sum_pct": -0.199296,
+      "gross_sum_pct": 6.200704,
+      "exits": {
+        "V_PROFIT": 13,
+        "TRAILING_REVERSE": 13,
+        "SESSION_FLATTEN": 2,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 4
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 101,
+        "time_gate": 4,
+        "structural_warning": 6,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 17,
+          "winners": 7,
+          "losers": 10,
+          "net_sum_pct": -1.038331,
+          "gross_sum_pct": 2.361669,
+          "exits": {
+            "V_PROFIT": 6,
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 1,
+            "STRUCTURAL_BULLISH_UPPER_CLOSE": 3
+          }
+        },
+        "AUG": {
+          "trades": 15,
+          "winners": 9,
+          "losers": 6,
+          "net_sum_pct": 0.839035,
+          "gross_sum_pct": 3.839035,
+          "exits": {
+            "STRUCTURAL_BULLISH_UPPER_CLOSE": 1,
+            "SESSION_FLATTEN": 1,
+            "V_PROFIT": 7,
+            "TRAILING_REVERSE": 6
+          }
+        }
+      },
+      "removed": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [
+        {
+          "signal_time": "2026-07-14 14:40:00",
+          "old_net": 0.019739,
+          "new_net": -0.138665,
+          "old_exit": "2026-07-14 15:35:00",
+          "new_exit": "2026-07-14 15:20:00"
+        },
+        {
+          "signal_time": "2026-07-22 13:05:00",
+          "old_net": -0.312477,
+          "new_net": -0.061975,
+          "old_exit": "2026-07-22 13:30:00",
+          "new_exit": "2026-07-22 13:25:00"
+        },
+        {
+          "signal_time": "2026-07-28 12:10:00",
+          "old_net": -0.155968,
+          "new_net": -0.063222,
+          "old_exit": "2026-07-28 12:40:00",
+          "new_exit": "2026-07-28 12:40:00"
+        },
+        {
+          "signal_time": "2026-08-04 13:50:00",
+          "old_net": -0.386331,
+          "new_net": -0.098338,
+          "old_exit": "2026-08-04 14:20:00",
+          "new_exit": "2026-08-04 14:10:00"
+        }
+      ],
+      "net_delta_vs_H4_pp": 0.472837,
+      "original_winners_harmed": 1,
+      "original_losers_improved": 3,
+      "original_losers_converted": 0
+    },
+    "K4_HIGHER_HIGH_BULLISH": {
+      "trades": 32,
+      "winners": 15,
+      "losers": 17,
+      "net_sum_pct": -0.332057,
+      "gross_sum_pct": 6.067943,
+      "exits": {
+        "V_PROFIT": 13,
+        "TRAILING_REVERSE": 12,
+        "SESSION_FLATTEN": 2,
+        "STRUCTURAL_HIGHER_HIGH_BULLISH_CLOSE": 5
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 101,
+        "time_gate": 4,
+        "structural_warning": 9,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 17,
+          "winners": 7,
+          "losers": 10,
+          "net_sum_pct": -1.038331,
+          "gross_sum_pct": 2.361669,
+          "exits": {
+            "V_PROFIT": 6,
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 1,
+            "STRUCTURAL_HIGHER_HIGH_BULLISH_CLOSE": 3
+          }
+        },
+        "AUG": {
+          "trades": 15,
+          "winners": 8,
+          "losers": 7,
+          "net_sum_pct": 0.706274,
+          "gross_sum_pct": 3.706274,
+          "exits": {
+            "STRUCTURAL_HIGHER_HIGH_BULLISH_CLOSE": 2,
+            "SESSION_FLATTEN": 1,
+            "V_PROFIT": 7,
+            "TRAILING_REVERSE": 5
+          }
+        }
+      },
+      "removed": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [
+        {
+          "signal_time": "2026-07-14 14:40:00",
+          "old_net": 0.019739,
+          "new_net": -0.138665,
+          "old_exit": "2026-07-14 15:35:00",
+          "new_exit": "2026-07-14 15:20:00"
+        },
+        {
+          "signal_time": "2026-07-22 13:05:00",
+          "old_net": -0.312477,
+          "new_net": -0.061975,
+          "old_exit": "2026-07-22 13:30:00",
+          "new_exit": "2026-07-22 13:25:00"
+        },
+        {
+          "signal_time": "2026-07-28 12:10:00",
+          "old_net": -0.155968,
+          "new_net": -0.063222,
+          "old_exit": "2026-07-28 12:40:00",
+          "new_exit": "2026-07-28 12:40:00"
+        },
+        {
+          "signal_time": "2026-08-04 13:50:00",
+          "old_net": -0.386331,
+          "new_net": -0.185827,
+          "old_exit": "2026-08-04 14:20:00",
+          "new_exit": "2026-08-04 14:15:00"
+        },
+        {
+          "signal_time": "2026-08-07 09:55:00",
+          "old_net": 0.014088,
+          "new_net": -0.031184,
+          "old_exit": "2026-08-07 10:15:00",
+          "new_exit": "2026-08-07 10:10:00"
+        }
+      ],
+      "net_delta_vs_H4_pp": 0.340076,
+      "original_winners_harmed": 2,
+      "original_losers_improved": 3,
+      "original_losers_converted": 0
+    },
+    "K5_PRIOR_HIGH_BREAK": {
+      "trades": 32,
+      "winners": 16,
+      "losers": 16,
+      "net_sum_pct": -0.286785,
+      "gross_sum_pct": 6.113215,
+      "exits": {
+        "V_PROFIT": 13,
+        "TRAILING_REVERSE": 13,
+        "SESSION_FLATTEN": 2,
+        "STRUCTURAL_HIGHER_CLOSE_BREAK_PRIOR_HIGH": 4
+      },
+      "events": {
+        "signals": 135,
+        "rejected": 101,
+        "time_gate": 4,
+        "structural_warning": 7,
+        "blocked_in_position": 2
+      },
+      "open_position": null,
+      "overnight_trades": 0,
+      "stale_entries": 0,
+      "splits": {
+        "JUN_JUL": {
+          "trades": 17,
+          "winners": 7,
+          "losers": 10,
+          "net_sum_pct": -1.038331,
+          "gross_sum_pct": 2.361669,
+          "exits": {
+            "V_PROFIT": 6,
+            "TRAILING_REVERSE": 7,
+            "SESSION_FLATTEN": 1,
+            "STRUCTURAL_HIGHER_CLOSE_BREAK_PRIOR_HIGH": 3
+          }
+        },
+        "AUG": {
+          "trades": 15,
+          "winners": 9,
+          "losers": 6,
+          "net_sum_pct": 0.751546,
+          "gross_sum_pct": 3.751546,
+          "exits": {
+            "STRUCTURAL_HIGHER_CLOSE_BREAK_PRIOR_HIGH": 1,
+            "SESSION_FLATTEN": 1,
+            "V_PROFIT": 7,
+            "TRAILING_REVERSE": 6
+          }
+        }
+      },
+      "removed": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "added": {
+        "trades": 0,
+        "winners": 0,
+        "losers": 0,
+        "net_sum_pct": 0,
+        "gross_sum_pct": 0,
+        "exits": {}
+      },
+      "changed_shared": [
+        {
+          "signal_time": "2026-07-14 14:40:00",
+          "old_net": 0.019739,
+          "new_net": -0.138665,
+          "old_exit": "2026-07-14 15:35:00",
+          "new_exit": "2026-07-14 15:20:00"
+        },
+        {
+          "signal_time": "2026-07-22 13:05:00",
+          "old_net": -0.312477,
+          "new_net": -0.061975,
+          "old_exit": "2026-07-22 13:30:00",
+          "new_exit": "2026-07-22 13:25:00"
+        },
+        {
+          "signal_time": "2026-07-28 12:10:00",
+          "old_net": -0.155968,
+          "new_net": -0.063222,
+          "old_exit": "2026-07-28 12:40:00",
+          "new_exit": "2026-07-28 12:40:00"
+        },
+        {
+          "signal_time": "2026-08-04 13:50:00",
+          "old_net": -0.386331,
+          "new_net": -0.185827,
+          "old_exit": "2026-08-04 14:20:00",
+          "new_exit": "2026-08-04 14:15:00"
+        }
+      ],
+      "net_delta_vs_H4_pp": 0.385348,
+      "original_winners_harmed": 1,
+      "original_losers_improved": 3,
+      "original_losers_converted": 0
+    }
+  },
+  "baseline_parity": {
+    "trades": 32,
+    "candidates": 135
+  }
+}

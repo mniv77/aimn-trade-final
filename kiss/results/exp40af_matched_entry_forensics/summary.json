@@ -1,0 +1,337 @@
+{
+  "notes": [
+    "All periods discovery. Retrospective pairing is not causal entry logic or proof of same transition.",
+    "Six-bar outcome windows start at different times; deltas are not same-endpoint trade returns. Positive adverse delta means less adverse excursion.",
+    "Earliest AE3 per matched AE0 chosen for deduplication; overlapping episodes remain dependent.",
+    "Unmatched means no AE0 within six bars, not proof of a missed trade. No replay or orders."
+  ],
+  "source_sha256": "567443e80ac62953668bb91399a0e5ec1e7551fb2706243dfa31e0d16ce2cdb0",
+  "groups": {
+    "ALL": {
+      "all_pairs": {
+        "pairs": 85,
+        "unique_late_signals": 77,
+        "both_complete": 78,
+        "contexts": {
+          "LONG/SHORT": 77,
+          "LONG/LONG": 1,
+          "SHORT/SHORT": 7
+        },
+        "median_lead_minutes": 5,
+        "median_entry_advantage_pct": 0.150459,
+        "better_entry": 73,
+        "priced_pairs": 78,
+        "early_persistent": 26,
+        "late_persistent": 10,
+        "median_favorable_delta": 0.098247,
+        "median_adverse_delta": 0.062552,
+        "median_terminal_delta": 0.154907
+      },
+      "unique_pairs": {
+        "pairs": 77,
+        "unique_late_signals": 77,
+        "both_complete": 70,
+        "contexts": {
+          "LONG/SHORT": 70,
+          "LONG/LONG": 1,
+          "SHORT/SHORT": 6
+        },
+        "median_lead_minutes": 5,
+        "median_entry_advantage_pct": 0.140187,
+        "better_entry": 66,
+        "priced_pairs": 70,
+        "early_persistent": 22,
+        "late_persistent": 9,
+        "median_favorable_delta": 0.098247,
+        "median_adverse_delta": 0.055138,
+        "median_terminal_delta": 0.154907
+      },
+      "unique_same_context": {
+        "pairs": 70,
+        "unique_late_signals": 70,
+        "both_complete": 64,
+        "contexts": {
+          "LONG/SHORT": 70
+        },
+        "median_lead_minutes": 5.0,
+        "median_entry_advantage_pct": 0.127459,
+        "better_entry": 60,
+        "priced_pairs": 64,
+        "early_persistent": 20,
+        "late_persistent": 8,
+        "median_favorable_delta": 0.085847,
+        "median_adverse_delta": 0.055138,
+        "median_terminal_delta": 0.104756
+      },
+      "unique_changed_context": {
+        "pairs": 7,
+        "unique_late_signals": 7,
+        "both_complete": 6,
+        "contexts": {
+          "LONG/LONG": 1,
+          "SHORT/SHORT": 6
+        },
+        "median_lead_minutes": 15,
+        "median_entry_advantage_pct": 0.265069,
+        "better_entry": 6,
+        "priced_pairs": 6,
+        "early_persistent": 2,
+        "late_persistent": 1,
+        "median_favorable_delta": 0.234579,
+        "median_adverse_delta": 0.050031,
+        "median_terminal_delta": 0.285707
+      },
+      "unmatched": {
+        "count": 72,
+        "outcomes": {
+          "NO_FEE_SCALE_EXCURSION": 48,
+          "TARGET_FADED": 20,
+          "PERSISTENT_TARGET": 4
+        },
+        "median_terminal": -0.124465
+      }
+    },
+    "JUN_AUG": {
+      "all_pairs": {
+        "pairs": 47,
+        "unique_late_signals": 43,
+        "both_complete": 44,
+        "contexts": {
+          "LONG/SHORT": 43,
+          "LONG/LONG": 1,
+          "SHORT/SHORT": 3
+        },
+        "median_lead_minutes": 5,
+        "median_entry_advantage_pct": 0.150459,
+        "better_entry": 41,
+        "priced_pairs": 44,
+        "early_persistent": 15,
+        "late_persistent": 6,
+        "median_favorable_delta": 0.072796,
+        "median_adverse_delta": 0.067305,
+        "median_terminal_delta": 0.083259
+      },
+      "unique_pairs": {
+        "pairs": 43,
+        "unique_late_signals": 43,
+        "both_complete": 40,
+        "contexts": {
+          "LONG/SHORT": 39,
+          "LONG/LONG": 1,
+          "SHORT/SHORT": 3
+        },
+        "median_lead_minutes": 5,
+        "median_entry_advantage_pct": 0.144833,
+        "better_entry": 38,
+        "priced_pairs": 40,
+        "early_persistent": 13,
+        "late_persistent": 6,
+        "median_favorable_delta": 0.089258,
+        "median_adverse_delta": 0.057541,
+        "median_terminal_delta": 0.094599
+      },
+      "unique_same_context": {
+        "pairs": 39,
+        "unique_late_signals": 39,
+        "both_complete": 37,
+        "contexts": {
+          "LONG/SHORT": 39
+        },
+        "median_lead_minutes": 5,
+        "median_entry_advantage_pct": 0.115147,
+        "better_entry": 35,
+        "priced_pairs": 37,
+        "early_persistent": 11,
+        "late_persistent": 5,
+        "median_favorable_delta": 0.062703,
+        "median_adverse_delta": 0.055959,
+        "median_terminal_delta": 0.076697
+      },
+      "unique_changed_context": {
+        "pairs": 4,
+        "unique_late_signals": 4,
+        "both_complete": 3,
+        "contexts": {
+          "LONG/LONG": 1,
+          "SHORT/SHORT": 3
+        },
+        "median_lead_minutes": 12.5,
+        "median_entry_advantage_pct": 0.709885,
+        "better_entry": 3,
+        "priced_pairs": 3,
+        "early_persistent": 2,
+        "late_persistent": 1,
+        "median_favorable_delta": 0.512888,
+        "median_adverse_delta": 0.117927,
+        "median_terminal_delta": 0.662468
+      },
+      "unmatched": {
+        "count": 48,
+        "outcomes": {
+          "NO_FEE_SCALE_EXCURSION": 34,
+          "TARGET_FADED": 13,
+          "PERSISTENT_TARGET": 1
+        },
+        "median_terminal": -0.181112
+      }
+    },
+    "SEP_OCT": {
+      "all_pairs": {
+        "pairs": 28,
+        "unique_late_signals": 26,
+        "both_complete": 25,
+        "contexts": {
+          "SHORT/SHORT": 4,
+          "LONG/SHORT": 24
+        },
+        "median_lead_minutes": 5.0,
+        "median_entry_advantage_pct": 0.132374,
+        "better_entry": 25,
+        "priced_pairs": 25,
+        "early_persistent": 6,
+        "late_persistent": 2,
+        "median_favorable_delta": 0.122318,
+        "median_adverse_delta": 0.054317,
+        "median_terminal_delta": 0.192868
+      },
+      "unique_pairs": {
+        "pairs": 26,
+        "unique_late_signals": 26,
+        "both_complete": 23,
+        "contexts": {
+          "SHORT/SHORT": 3,
+          "LONG/SHORT": 23
+        },
+        "median_lead_minutes": 5.0,
+        "median_entry_advantage_pct": 0.123536,
+        "better_entry": 23,
+        "priced_pairs": 23,
+        "early_persistent": 5,
+        "late_persistent": 2,
+        "median_favorable_delta": 0.108006,
+        "median_adverse_delta": 0.03774,
+        "median_terminal_delta": 0.190314
+      },
+      "unique_same_context": {
+        "pairs": 23,
+        "unique_late_signals": 23,
+        "both_complete": 20,
+        "contexts": {
+          "LONG/SHORT": 23
+        },
+        "median_lead_minutes": 5,
+        "median_entry_advantage_pct": 0.120277,
+        "better_entry": 20,
+        "priced_pairs": 20,
+        "early_persistent": 5,
+        "late_persistent": 2,
+        "median_favorable_delta": 0.098406,
+        "median_adverse_delta": 0.046028,
+        "median_terminal_delta": 0.17378
+      },
+      "unique_changed_context": {
+        "pairs": 3,
+        "unique_late_signals": 3,
+        "both_complete": 3,
+        "contexts": {
+          "SHORT/SHORT": 3
+        },
+        "median_lead_minutes": 20,
+        "median_entry_advantage_pct": 0.204157,
+        "better_entry": 3,
+        "priced_pairs": 3,
+        "early_persistent": 0,
+        "late_persistent": 0,
+        "median_favorable_delta": 0.123146,
+        "median_adverse_delta": -0.038823,
+        "median_terminal_delta": 0.192868
+      },
+      "unmatched": {
+        "count": 21,
+        "outcomes": {
+          "NO_FEE_SCALE_EXCURSION": 13,
+          "PERSISTENT_TARGET": 2,
+          "TARGET_FADED": 6
+        },
+        "median_terminal": -0.056553
+      }
+    },
+    "NOV": {
+      "all_pairs": {
+        "pairs": 10,
+        "unique_late_signals": 8,
+        "both_complete": 9,
+        "contexts": {
+          "LONG/SHORT": 10
+        },
+        "median_lead_minutes": 5.0,
+        "median_entry_advantage_pct": 0.213286,
+        "better_entry": 7,
+        "priced_pairs": 9,
+        "early_persistent": 5,
+        "late_persistent": 2,
+        "median_favorable_delta": 0.207327,
+        "median_adverse_delta": 0.10419,
+        "median_terminal_delta": 0.199902
+      },
+      "unique_pairs": {
+        "pairs": 8,
+        "unique_late_signals": 8,
+        "both_complete": 7,
+        "contexts": {
+          "LONG/SHORT": 8
+        },
+        "median_lead_minutes": 5.0,
+        "median_entry_advantage_pct": 0.213286,
+        "better_entry": 5,
+        "priced_pairs": 7,
+        "early_persistent": 4,
+        "late_persistent": 1,
+        "median_favorable_delta": 0.207327,
+        "median_adverse_delta": 0.10419,
+        "median_terminal_delta": 0.201287
+      },
+      "unique_same_context": {
+        "pairs": 8,
+        "unique_late_signals": 8,
+        "both_complete": 7,
+        "contexts": {
+          "LONG/SHORT": 8
+        },
+        "median_lead_minutes": 5.0,
+        "median_entry_advantage_pct": 0.213286,
+        "better_entry": 5,
+        "priced_pairs": 7,
+        "early_persistent": 4,
+        "late_persistent": 1,
+        "median_favorable_delta": 0.207327,
+        "median_adverse_delta": 0.10419,
+        "median_terminal_delta": 0.201287
+      },
+      "unique_changed_context": {
+        "pairs": 0,
+        "unique_late_signals": 0,
+        "both_complete": 0,
+        "contexts": {},
+        "median_lead_minutes": null,
+        "median_entry_advantage_pct": null,
+        "better_entry": 0,
+        "priced_pairs": 0,
+        "early_persistent": 0,
+        "late_persistent": 0,
+        "median_favorable_delta": null,
+        "median_adverse_delta": null,
+        "median_terminal_delta": null
+      },
+      "unmatched": {
+        "count": 3,
+        "outcomes": {
+          "PERSISTENT_TARGET": 1,
+          "NO_FEE_SCALE_EXCURSION": 1,
+          "TARGET_FADED": 1
+        },
+        "median_terminal": -0.175842
+      }
+    }
+  }
+}

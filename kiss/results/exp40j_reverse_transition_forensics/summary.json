@@ -1,0 +1,172 @@
+{
+  "notes": [
+    "Discovery-only fixed-trade forensic comparison, not a full replay; ignores newly available entries after hypothetical exits.",
+    "Only fully held candles are used for decisions. Next-open outcomes and original trade groups are retrospective audit labels.",
+    "Warning rules evaluated after best completed closing gross profit exceeds modeled fee. No extra slippage.",
+    "Bar timestamps are start labels."
+  ],
+  "baseline_trades": 32,
+  "baseline_net_sum_pct": -0.672133,
+  "groups": {
+    "WINNER": 17,
+    "NO_CLOSE_ABOVE_FEES": 12,
+    "PROFIT_GIVEN_BACK": 3
+  },
+  "completed_held_bars": 161,
+  "source_sha256": {
+    "candles": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+    "trades": "41fbfbc9ebc89b3a12febbced0277898f30ed35bd1f9b0cba14dbbc4f4e1de87"
+  },
+  "rules": {
+    "higher_high": {
+      "ALL": {
+        "trades": 32,
+        "triggered": 12,
+        "improved": 5,
+        "harmed": 3,
+        "delta_sum_pp": 0.354084
+      },
+      "WINNER": {
+        "trades": 17,
+        "triggered": 9,
+        "improved": 2,
+        "harmed": 3,
+        "delta_sum_pp": -0.189668
+      },
+      "PROFIT_GIVEN_BACK": {
+        "trades": 3,
+        "triggered": 3,
+        "improved": 3,
+        "harmed": 0,
+        "delta_sum_pp": 0.543752
+      },
+      "NO_CLOSE_ABOVE_FEES": {
+        "trades": 12,
+        "triggered": 0,
+        "improved": 0,
+        "harmed": 0,
+        "delta_sum_pp": 0
+      }
+    },
+    "higher_high_low": {
+      "ALL": {
+        "trades": 32,
+        "triggered": 7,
+        "improved": 3,
+        "harmed": 1,
+        "delta_sum_pp": 0.36661
+      },
+      "WINNER": {
+        "trades": 17,
+        "triggered": 4,
+        "improved": 0,
+        "harmed": 1,
+        "delta_sum_pp": -0.158404
+      },
+      "PROFIT_GIVEN_BACK": {
+        "trades": 3,
+        "triggered": 3,
+        "improved": 3,
+        "harmed": 0,
+        "delta_sum_pp": 0.525014
+      },
+      "NO_CLOSE_ABOVE_FEES": {
+        "trades": 12,
+        "triggered": 0,
+        "improved": 0,
+        "harmed": 0,
+        "delta_sum_pp": 0
+      }
+    },
+    "bullish_upper_close": {
+      "ALL": {
+        "trades": 32,
+        "triggered": 6,
+        "improved": 3,
+        "harmed": 1,
+        "delta_sum_pp": 0.472837
+      },
+      "WINNER": {
+        "trades": 17,
+        "triggered": 3,
+        "improved": 0,
+        "harmed": 1,
+        "delta_sum_pp": -0.158404
+      },
+      "PROFIT_GIVEN_BACK": {
+        "trades": 3,
+        "triggered": 3,
+        "improved": 3,
+        "harmed": 0,
+        "delta_sum_pp": 0.631241
+      },
+      "NO_CLOSE_ABOVE_FEES": {
+        "trades": 12,
+        "triggered": 0,
+        "improved": 0,
+        "harmed": 0,
+        "delta_sum_pp": 0
+      }
+    },
+    "higher_high_bullish_close": {
+      "ALL": {
+        "trades": 32,
+        "triggered": 9,
+        "improved": 3,
+        "harmed": 2,
+        "delta_sum_pp": 0.340076
+      },
+      "WINNER": {
+        "trades": 17,
+        "triggered": 6,
+        "improved": 0,
+        "harmed": 2,
+        "delta_sum_pp": -0.203676
+      },
+      "PROFIT_GIVEN_BACK": {
+        "trades": 3,
+        "triggered": 3,
+        "improved": 3,
+        "harmed": 0,
+        "delta_sum_pp": 0.543752
+      },
+      "NO_CLOSE_ABOVE_FEES": {
+        "trades": 12,
+        "triggered": 0,
+        "improved": 0,
+        "harmed": 0,
+        "delta_sum_pp": 0
+      }
+    },
+    "higher_close_break_prior_high": {
+      "ALL": {
+        "trades": 32,
+        "triggered": 7,
+        "improved": 3,
+        "harmed": 1,
+        "delta_sum_pp": 0.385348
+      },
+      "WINNER": {
+        "trades": 17,
+        "triggered": 4,
+        "improved": 0,
+        "harmed": 1,
+        "delta_sum_pp": -0.158404
+      },
+      "PROFIT_GIVEN_BACK": {
+        "trades": 3,
+        "triggered": 3,
+        "improved": 3,
+        "harmed": 0,
+        "delta_sum_pp": 0.543752
+      },
+      "NO_CLOSE_ABOVE_FEES": {
+        "trades": 12,
+        "triggered": 0,
+        "improved": 0,
+        "harmed": 0,
+        "delta_sum_pp": 0
+      }
+    }
+  }
+}

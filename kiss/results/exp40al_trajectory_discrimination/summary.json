@@ -1,0 +1,3368 @@
+{
+  "source_sha256": "654d93d66a4b57adb284ce0e82e77170ef4ffc1f4d7917d819ad4d73c53bfbf5",
+  "notes": [
+    "All historical periods are discovery.",
+    "Trade subsets are descriptive, not executable replay; blocked/overlapping opportunities may change when entries are filtered.",
+    "Missing features are separate, not silently rejected.",
+    "AUC is pairwise WIN vs NO_FEE_CLOSE ranking, not probability of a winning trade.",
+    "Fixed diagnostic grid is not a selected rule."
+  ],
+  "distributions": {
+    "ALL": {
+      "WIN": {
+        "AUTH_W6_retracement": {
+          "n": 23,
+          "missing": 2,
+          "q00": 0.295547,
+          "q25": 0.425286,
+          "q50": 0.657459,
+          "q75": 0.831254,
+          "q100": 1.539216
+        },
+        "AUTH_W12_retracement": {
+          "n": 22,
+          "missing": 3,
+          "q00": 0.145699,
+          "q25": 0.380437,
+          "q50": 0.605515,
+          "q75": 0.765942,
+          "q100": 1.539216
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 22,
+          "missing": 3,
+          "q00": -0.009709,
+          "q25": 0.372165,
+          "q50": 0.448423,
+          "q75": 0.72136,
+          "q100": 1.0
+        }
+      },
+      "NO_FEE_CLOSE": {
+        "AUTH_W6_retracement": {
+          "n": 23,
+          "missing": 2,
+          "q00": 0.130631,
+          "q25": 0.375679,
+          "q50": 0.455414,
+          "q75": 0.615197,
+          "q100": 1.564103
+        },
+        "AUTH_W12_retracement": {
+          "n": 21,
+          "missing": 4,
+          "q00": 0.086053,
+          "q25": 0.269064,
+          "q50": 0.432099,
+          "q75": 0.550239,
+          "q100": 1.564103
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 21,
+          "missing": 4,
+          "q00": 0.073171,
+          "q25": 0.4947,
+          "q50": 0.600257,
+          "q75": 0.763721,
+          "q100": 1.0
+        }
+      },
+      "GIVEBACK": {
+        "AUTH_W6_retracement": {
+          "n": 8,
+          "missing": 0,
+          "q00": 0.205788,
+          "q25": 0.51278,
+          "q50": 0.598529,
+          "q75": 0.731538,
+          "q100": 1.339286
+        },
+        "AUTH_W12_retracement": {
+          "n": 7,
+          "missing": 1,
+          "q00": 0.205788,
+          "q25": 0.426267,
+          "q50": 0.529551,
+          "q75": 0.54084,
+          "q100": 1.339286
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 7,
+          "missing": 1,
+          "q00": 0.11773,
+          "q25": 0.245245,
+          "q50": 0.319149,
+          "q75": 0.804607,
+          "q100": 1.0
+        }
+      }
+    },
+    "JUN_AUG": {
+      "WIN": {
+        "AUTH_W6_retracement": {
+          "n": 13,
+          "missing": 1,
+          "q00": 0.317073,
+          "q25": 0.410526,
+          "q50": 0.673267,
+          "q75": 0.865169,
+          "q100": 1.539216
+        },
+        "AUTH_W12_retracement": {
+          "n": 12,
+          "missing": 2,
+          "q00": 0.145699,
+          "q25": 0.381714,
+          "q50": 0.579025,
+          "q75": 0.785781,
+          "q100": 1.539216
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 12,
+          "missing": 2,
+          "q00": -0.009709,
+          "q25": 0.338409,
+          "q50": 0.41966,
+          "q75": 0.525056,
+          "q100": 1.0
+        }
+      },
+      "NO_FEE_CLOSE": {
+        "AUTH_W6_retracement": {
+          "n": 16,
+          "missing": 1,
+          "q00": 0.130631,
+          "q25": 0.352196,
+          "q50": 0.491011,
+          "q75": 0.63163,
+          "q100": 1.564103
+        },
+        "AUTH_W12_retracement": {
+          "n": 15,
+          "missing": 2,
+          "q00": 0.086053,
+          "q25": 0.31399,
+          "q50": 0.45283,
+          "q75": 0.584862,
+          "q100": 1.564103
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 15,
+          "missing": 2,
+          "q00": 0.073171,
+          "q25": 0.439389,
+          "q50": 0.577061,
+          "q75": 0.734131,
+          "q100": 1.0
+        }
+      },
+      "GIVEBACK": {
+        "AUTH_W6_retracement": {
+          "n": 3,
+          "missing": 0,
+          "q00": 0.543408,
+          "q25": 0.567704,
+          "q50": 0.592,
+          "q75": 0.598529,
+          "q100": 0.605058
+        },
+        "AUTH_W12_retracement": {
+          "n": 2,
+          "missing": 1,
+          "q00": 0.490066,
+          "q25": 0.503402,
+          "q50": 0.516737,
+          "q75": 0.530073,
+          "q100": 0.543408
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 2,
+          "missing": 1,
+          "q00": 0.204545,
+          "q25": 0.3125,
+          "q50": 0.420455,
+          "q75": 0.528409,
+          "q100": 0.636364
+        }
+      }
+    },
+    "SEP_OCT": {
+      "WIN": {
+        "AUTH_W6_retracement": {
+          "n": 8,
+          "missing": 1,
+          "q00": 0.411458,
+          "q25": 0.500736,
+          "q50": 0.658114,
+          "q75": 0.842466,
+          "q100": 1.448276
+        },
+        "AUTH_W12_retracement": {
+          "n": 8,
+          "missing": 1,
+          "q00": 0.256545,
+          "q25": 0.392279,
+          "q50": 0.633929,
+          "q75": 0.842466,
+          "q100": 1.448276
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 8,
+          "missing": 1,
+          "q00": 0.340426,
+          "q25": 0.38127,
+          "q50": 0.747432,
+          "q75": 0.839572,
+          "q100": 1.0
+        }
+      },
+      "NO_FEE_CLOSE": {
+        "AUTH_W6_retracement": {
+          "n": 4,
+          "missing": 0,
+          "q00": 0.303303,
+          "q25": 0.417386,
+          "q50": 0.471609,
+          "q75": 0.519319,
+          "q100": 0.613861
+        },
+        "AUTH_W12_retracement": {
+          "n": 3,
+          "missing": 1,
+          "q00": 0.238462,
+          "q25": 0.240212,
+          "q50": 0.241963,
+          "q75": 0.337031,
+          "q100": 0.432099
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 3,
+          "missing": 1,
+          "q00": 0.586022,
+          "q25": 0.728954,
+          "q50": 0.871886,
+          "q75": 0.883496,
+          "q100": 0.895105
+        }
+      },
+      "GIVEBACK": {
+        "AUTH_W6_retracement": {
+          "n": 4,
+          "missing": 0,
+          "q00": 0.205788,
+          "q25": 0.539507,
+          "q50": 0.81233,
+          "q75": 1.065256,
+          "q100": 1.339286
+        },
+        "AUTH_W12_retracement": {
+          "n": 4,
+          "missing": 0,
+          "q00": 0.205788,
+          "q25": 0.44861,
+          "q50": 0.533911,
+          "q75": 0.738525,
+          "q100": 1.339286
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 4,
+          "missing": 0,
+          "q00": 0.11773,
+          "q25": 0.243891,
+          "q50": 0.629398,
+          "q75": 0.979638,
+          "q100": 1.0
+        }
+      }
+    },
+    "NOV": {
+      "WIN": {
+        "AUTH_W6_retracement": {
+          "n": 2,
+          "missing": 0,
+          "q00": 0.295547,
+          "q25": 0.386025,
+          "q50": 0.476503,
+          "q75": 0.566981,
+          "q100": 0.657459
+        },
+        "AUTH_W12_retracement": {
+          "n": 2,
+          "missing": 0,
+          "q00": 0.295547,
+          "q25": 0.386025,
+          "q50": 0.476503,
+          "q75": 0.566981,
+          "q100": 0.657459
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 2,
+          "missing": 0,
+          "q00": 0.382637,
+          "q25": 0.444729,
+          "q50": 0.506822,
+          "q75": 0.568915,
+          "q100": 0.631008
+        }
+      },
+      "NO_FEE_CLOSE": {
+        "AUTH_W6_retracement": {
+          "n": 3,
+          "missing": 1,
+          "q00": 0.395604,
+          "q25": 0.416295,
+          "q50": 0.436985,
+          "q75": 0.537937,
+          "q100": 0.638889
+        },
+        "AUTH_W12_retracement": {
+          "n": 3,
+          "missing": 1,
+          "q00": 0.395604,
+          "q25": 0.414255,
+          "q50": 0.432905,
+          "q75": 0.491572,
+          "q100": 0.550239
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 3,
+          "missing": 1,
+          "q00": 0.16792,
+          "q25": 0.458217,
+          "q50": 0.748515,
+          "q75": 0.756118,
+          "q100": 0.763721
+        }
+      },
+      "GIVEBACK": {
+        "AUTH_W6_retracement": {
+          "n": 1,
+          "missing": 0,
+          "q00": 0.420896,
+          "q25": 0.420896,
+          "q50": 0.420896,
+          "q75": 0.420896,
+          "q100": 0.420896
+        },
+        "AUTH_W12_retracement": {
+          "n": 1,
+          "missing": 0,
+          "q00": 0.362468,
+          "q25": 0.362468,
+          "q50": 0.362468,
+          "q75": 0.362468,
+          "q100": 0.362468
+        },
+        "AUTH_W12_left_efficiency": {
+          "n": 1,
+          "missing": 0,
+          "q00": 0.319149,
+          "q25": 0.319149,
+          "q50": 0.319149,
+          "q75": 0.319149,
+          "q100": 0.319149
+        }
+      }
+    }
+  },
+  "auc": {
+    "ALL": {
+      "AUTH_W6_retracement": 0.644612,
+      "AUTH_W12_retracement": 0.634199,
+      "AUTH_W12_left_efficiency": 0.595238
+    },
+    "JUN_AUG": {
+      "AUTH_W6_retracement": 0.615385,
+      "AUTH_W12_retracement": 0.583333,
+      "AUTH_W12_left_efficiency": 0.666667
+    },
+    "SEP_OCT": {
+      "AUTH_W6_retracement": 0.75,
+      "AUTH_W12_retracement": 0.875,
+      "AUTH_W12_left_efficiency": 0.625
+    },
+    "NOV": {
+      "AUTH_W6_retracement": 0.5,
+      "AUTH_W12_retracement": 0.5,
+      "AUTH_W12_left_efficiency": 0.666667
+    }
+  },
+  "screens": [
+    {
+      "period": "ALL",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 50,
+          "WIN": 22,
+          "NO_FEE_CLOSE": 21,
+          "GIVEBACK": 7,
+          "net_sum_pct": -5.700457
+        },
+        "FAIL": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.342428
+        },
+        "MISSING": {
+          "n": 4,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.135704
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 40,
+          "WIN": 19,
+          "NO_FEE_CLOSE": 15,
+          "GIVEBACK": 6,
+          "net_sum_pct": -3.349263
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 6,
+          "GIVEBACK": 1,
+          "net_sum_pct": -2.753041
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 9,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 3,
+          "net_sum_pct": -1.019889
+        },
+        "FAIL": {
+          "n": 41,
+          "WIN": 19,
+          "NO_FEE_CLOSE": 18,
+          "GIVEBACK": 4,
+          "net_sum_pct": -5.082415
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 41,
+          "WIN": 19,
+          "NO_FEE_CLOSE": 15,
+          "GIVEBACK": 7,
+          "net_sum_pct": -3.324928
+        },
+        "FAIL": {
+          "n": 13,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 1,
+          "net_sum_pct": -3.717957
+        },
+        "MISSING": {
+          "n": 4,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.135704
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 32,
+          "WIN": 15,
+          "NO_FEE_CLOSE": 12,
+          "GIVEBACK": 5,
+          "net_sum_pct": -2.16171
+        },
+        "FAIL": {
+          "n": 18,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 9,
+          "GIVEBACK": 2,
+          "net_sum_pct": -3.940594
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 18,
+          "WIN": 9,
+          "NO_FEE_CLOSE": 5,
+          "GIVEBACK": 4,
+          "net_sum_pct": -1.10024
+        },
+        "FAIL": {
+          "n": 32,
+          "WIN": 13,
+          "NO_FEE_CLOSE": 16,
+          "GIVEBACK": 3,
+          "net_sum_pct": -5.002064
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 30,
+          "WIN": 14,
+          "NO_FEE_CLOSE": 10,
+          "GIVEBACK": 6,
+          "net_sum_pct": -1.628182
+        },
+        "FAIL": {
+          "n": 24,
+          "WIN": 9,
+          "NO_FEE_CLOSE": 13,
+          "GIVEBACK": 2,
+          "net_sum_pct": -5.414703
+        },
+        "MISSING": {
+          "n": 4,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.135704
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 24,
+          "WIN": 12,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 4,
+          "net_sum_pct": -0.768493
+        },
+        "FAIL": {
+          "n": 26,
+          "WIN": 10,
+          "NO_FEE_CLOSE": 13,
+          "GIVEBACK": 3,
+          "net_sum_pct": -5.333811
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 23,
+          "WIN": 12,
+          "NO_FEE_CLOSE": 7,
+          "GIVEBACK": 4,
+          "net_sum_pct": -1.521762
+        },
+        "FAIL": {
+          "n": 27,
+          "WIN": 10,
+          "NO_FEE_CLOSE": 14,
+          "GIVEBACK": 3,
+          "net_sum_pct": -4.580542
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 24,
+          "WIN": 13,
+          "NO_FEE_CLOSE": 7,
+          "GIVEBACK": 4,
+          "net_sum_pct": 0.326987
+        },
+        "FAIL": {
+          "n": 30,
+          "WIN": 10,
+          "NO_FEE_CLOSE": 16,
+          "GIVEBACK": 4,
+          "net_sum_pct": -7.369872
+        },
+        "MISSING": {
+          "n": 4,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.135704
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 16,
+          "WIN": 11,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": 1.452008
+        },
+        "FAIL": {
+          "n": 34,
+          "WIN": 11,
+          "NO_FEE_CLOSE": 17,
+          "GIVEBACK": 6,
+          "net_sum_pct": -7.554312
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 28,
+          "WIN": 14,
+          "NO_FEE_CLOSE": 10,
+          "GIVEBACK": 4,
+          "net_sum_pct": -2.457455
+        },
+        "FAIL": {
+          "n": 22,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 11,
+          "GIVEBACK": 3,
+          "net_sum_pct": -3.644849
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 15,
+          "WIN": 10,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.294835
+        },
+        "FAIL": {
+          "n": 39,
+          "WIN": 13,
+          "NO_FEE_CLOSE": 20,
+          "GIVEBACK": 6,
+          "net_sum_pct": -7.33772
+        },
+        "MISSING": {
+          "n": 4,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.135704
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 12,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.019327
+        },
+        "FAIL": {
+          "n": 38,
+          "WIN": 14,
+          "NO_FEE_CLOSE": 18,
+          "GIVEBACK": 6,
+          "net_sum_pct": -6.121631
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 33,
+          "WIN": 16,
+          "NO_FEE_CLOSE": 12,
+          "GIVEBACK": 5,
+          "net_sum_pct": -3.330704
+        },
+        "FAIL": {
+          "n": 17,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 9,
+          "GIVEBACK": 2,
+          "net_sum_pct": -2.7716
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.4
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 32,
+          "WIN": 15,
+          "NO_FEE_CLOSE": 12,
+          "GIVEBACK": 5,
+          "net_sum_pct": -2.16171
+        },
+        "FAIL": {
+          "n": 18,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 9,
+          "GIVEBACK": 2,
+          "net_sum_pct": -3.940594
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 20,
+          "WIN": 9,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 3,
+          "net_sum_pct": -2.297169
+        },
+        "FAIL": {
+          "n": 30,
+          "WIN": 13,
+          "NO_FEE_CLOSE": 13,
+          "GIVEBACK": 4,
+          "net_sum_pct": -3.805135
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.5
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 24,
+          "WIN": 12,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 4,
+          "net_sum_pct": -0.768493
+        },
+        "FAIL": {
+          "n": 26,
+          "WIN": 10,
+          "NO_FEE_CLOSE": 13,
+          "GIVEBACK": 3,
+          "net_sum_pct": -5.333811
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 15,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 6,
+          "GIVEBACK": 2,
+          "net_sum_pct": -1.202274
+        },
+        "FAIL": {
+          "n": 35,
+          "WIN": 15,
+          "NO_FEE_CLOSE": 15,
+          "GIVEBACK": 5,
+          "net_sum_pct": -4.90003
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.6
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 16,
+          "WIN": 11,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": 1.452008
+        },
+        "FAIL": {
+          "n": 34,
+          "WIN": 11,
+          "NO_FEE_CLOSE": 17,
+          "GIVEBACK": 6,
+          "net_sum_pct": -7.554312
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 10,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.449985
+        },
+        "FAIL": {
+          "n": 40,
+          "WIN": 15,
+          "NO_FEE_CLOSE": 18,
+          "GIVEBACK": 7,
+          "net_sum_pct": -6.552289
+        },
+        "MISSING": {
+          "n": 8,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.076285
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 30,
+          "WIN": 13,
+          "NO_FEE_CLOSE": 14,
+          "GIVEBACK": 3,
+          "net_sum_pct": -4.045689
+        },
+        "FAIL": {
+          "n": 2,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -1.29426
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.512584
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 24,
+          "WIN": 11,
+          "NO_FEE_CLOSE": 11,
+          "GIVEBACK": 2,
+          "net_sum_pct": -2.772798
+        },
+        "FAIL": {
+          "n": 5,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 0,
+          "net_sum_pct": -2.071689
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 6,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.279067
+        },
+        "FAIL": {
+          "n": 23,
+          "WIN": 9,
+          "NO_FEE_CLOSE": 13,
+          "GIVEBACK": 1,
+          "net_sum_pct": -4.56542
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 23,
+          "WIN": 10,
+          "NO_FEE_CLOSE": 10,
+          "GIVEBACK": 3,
+          "net_sum_pct": -2.611501
+        },
+        "FAIL": {
+          "n": 9,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 6,
+          "GIVEBACK": 0,
+          "net_sum_pct": -2.728448
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.512584
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 19,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 9,
+          "GIVEBACK": 2,
+          "net_sum_pct": -1.937905
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 6,
+          "GIVEBACK": 0,
+          "net_sum_pct": -2.906582
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 10,
+          "WIN": 5,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.051434
+        },
+        "FAIL": {
+          "n": 19,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 11,
+          "GIVEBACK": 1,
+          "net_sum_pct": -3.793053
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 18,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 3,
+          "net_sum_pct": -1.692332
+        },
+        "FAIL": {
+          "n": 14,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 0,
+          "net_sum_pct": -3.647617
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.512584
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 14,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 7,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.84301
+        },
+        "FAIL": {
+          "n": 15,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 1,
+          "net_sum_pct": -4.001477
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 15,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 6,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.472956
+        },
+        "FAIL": {
+          "n": 14,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 9,
+          "GIVEBACK": 1,
+          "net_sum_pct": -3.371531
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 13,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 5,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.267956
+        },
+        "FAIL": {
+          "n": 19,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 11,
+          "GIVEBACK": 2,
+          "net_sum_pct": -5.607905
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.512584
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 10,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.687059
+        },
+        "FAIL": {
+          "n": 19,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 11,
+          "GIVEBACK": 2,
+          "net_sum_pct": -5.531546
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 19,
+          "WIN": 10,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 1,
+          "net_sum_pct": -2.393163
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 7,
+          "GIVEBACK": 1,
+          "net_sum_pct": -2.451324
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 9,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.010487
+        },
+        "FAIL": {
+          "n": 23,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 13,
+          "GIVEBACK": 3,
+          "net_sum_pct": -5.329462
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.512584
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 7,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.303546
+        },
+        "FAIL": {
+          "n": 22,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 12,
+          "GIVEBACK": 2,
+          "net_sum_pct": -4.540941
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 22,
+          "WIN": 10,
+          "NO_FEE_CLOSE": 10,
+          "GIVEBACK": 2,
+          "net_sum_pct": -3.490695
+        },
+        "FAIL": {
+          "n": 7,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 5,
+          "GIVEBACK": 0,
+          "net_sum_pct": -1.353792
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.4
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 19,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 9,
+          "GIVEBACK": 2,
+          "net_sum_pct": -1.937905
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 6,
+          "GIVEBACK": 0,
+          "net_sum_pct": -2.906582
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 14,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 7,
+          "GIVEBACK": 1,
+          "net_sum_pct": -2.26414
+        },
+        "FAIL": {
+          "n": 15,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 1,
+          "net_sum_pct": -2.580347
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.5
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 14,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 7,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.84301
+        },
+        "FAIL": {
+          "n": 15,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 8,
+          "GIVEBACK": 1,
+          "net_sum_pct": -4.001477
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 9,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 5,
+          "GIVEBACK": 0,
+          "net_sum_pct": -1.169245
+        },
+        "FAIL": {
+          "n": 20,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 10,
+          "GIVEBACK": 2,
+          "net_sum_pct": -3.675242
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.6
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 10,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.687059
+        },
+        "FAIL": {
+          "n": 19,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 11,
+          "GIVEBACK": 2,
+          "net_sum_pct": -5.531546
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 7,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.257808
+        },
+        "FAIL": {
+          "n": 22,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 12,
+          "GIVEBACK": 2,
+          "net_sum_pct": -4.586679
+        },
+        "MISSING": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.017122
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 15,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 3,
+          "net_sum_pct": -0.184702
+        },
+        "FAIL": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.107993
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.049224
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 11,
+          "WIN": 7,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 3,
+          "net_sum_pct": 0.893601
+        },
+        "FAIL": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.741177
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 2,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 2,
+          "net_sum_pct": -0.04331
+        },
+        "FAIL": {
+          "n": 13,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.195734
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 14,
+          "WIN": 8,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 3,
+          "net_sum_pct": 0.260417
+        },
+        "FAIL": {
+          "n": 2,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.553112
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.049224
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 10,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 3,
+          "net_sum_pct": 0.729143
+        },
+        "FAIL": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.576719
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 5,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.227526
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 5,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 2,
+          "net_sum_pct": -0.075102
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 10,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 3,
+          "net_sum_pct": 0.319586
+        },
+        "FAIL": {
+          "n": 6,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.612281
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.049224
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 8,
+          "WIN": 5,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 3,
+          "net_sum_pct": 0.329953
+        },
+        "FAIL": {
+          "n": 7,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.177529
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 5,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.227526
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 5,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 2,
+          "net_sum_pct": -0.075102
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 9,
+          "WIN": 5,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 3,
+          "net_sum_pct": 0.314467
+        },
+        "FAIL": {
+          "n": 7,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.607162
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.049224
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 5,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.322873
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 3,
+          "net_sum_pct": -0.170449
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 6,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.21204
+        },
+        "FAIL": {
+          "n": 9,
+          "WIN": 5,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 2,
+          "net_sum_pct": -0.059616
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 6,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.305322
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 4,
+          "GIVEBACK": 2,
+          "net_sum_pct": -0.598017
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.049224
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 5,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.322873
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 3,
+          "net_sum_pct": -0.170449
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 7,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.376498
+        },
+        "FAIL": {
+          "n": 8,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 2,
+          "net_sum_pct": -0.224074
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.4
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 10,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 3,
+          "net_sum_pct": 0.729143
+        },
+        "FAIL": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.576719
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 4,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.222407
+        },
+        "FAIL": {
+          "n": 11,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 2,
+          "net_sum_pct": -0.069983
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.5
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 8,
+          "WIN": 5,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 3,
+          "net_sum_pct": 0.329953
+        },
+        "FAIL": {
+          "n": 7,
+          "WIN": 3,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.177529
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 4,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 2,
+          "net_sum_pct": 0.222407
+        },
+        "FAIL": {
+          "n": 11,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 2,
+          "net_sum_pct": -0.069983
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.6
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 5,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 1,
+          "net_sum_pct": 0.322873
+        },
+        "FAIL": {
+          "n": 10,
+          "WIN": 4,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 3,
+          "net_sum_pct": -0.170449
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 2,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.265717
+        },
+        "FAIL": {
+          "n": 13,
+          "WIN": 6,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 4,
+          "net_sum_pct": -0.113293
+        },
+        "MISSING": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.395895
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 5,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.470066
+        },
+        "FAIL": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.059825
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 5,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.470066
+        },
+        "FAIL": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.059825
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.3
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        },
+        "FAIL": {
+          "n": 5,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.712729
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.973844
+        },
+        "FAIL": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.436397
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.952948
+        },
+        "FAIL": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.457293
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.276332
+        },
+        "FAIL": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -1.133909
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.255436
+        },
+        "FAIL": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.154805
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.255436
+        },
+        "FAIL": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.154805
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.276332
+        },
+        "FAIL": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -1.133909
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.255436
+        },
+        "FAIL": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.154805
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.442076
+        },
+        "FAIL": {
+          "n": 5,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.852317
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.276332
+        },
+        "FAIL": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -1.133909
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL1",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 0,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0
+        },
+        "FAIL": {
+          "n": 6,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.410241
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL2",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 0,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0
+        },
+        "FAIL": {
+          "n": 6,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.410241
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL3",
+      "conditions": [
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.7
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 4,
+          "WIN": 2,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.216507
+        },
+        "FAIL": {
+          "n": 2,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -1.193734
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.4
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.952948
+        },
+        "FAIL": {
+          "n": 3,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 1,
+          "net_sum_pct": -0.457293
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.4
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.255436
+        },
+        "FAIL": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.154805
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.5
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.255436
+        },
+        "FAIL": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.154805
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.5
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 2,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.255436
+        },
+        "FAIL": {
+          "n": 4,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 2,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.154805
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL4",
+      "conditions": [
+        [
+          "AUTH_W6_retracement",
+          ">=",
+          0.6
+        ],
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.442076
+        },
+        "FAIL": {
+          "n": 5,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.852317
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "variant": "AL5",
+      "conditions": [
+        [
+          "AUTH_W12_retracement",
+          ">=",
+          0.6
+        ],
+        [
+          "AUTH_W12_left_efficiency",
+          "<=",
+          0.6
+        ]
+      ],
+      "results": {
+        "PASS": {
+          "n": 1,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 0,
+          "GIVEBACK": 0,
+          "net_sum_pct": 0.442076
+        },
+        "FAIL": {
+          "n": 5,
+          "WIN": 1,
+          "NO_FEE_CLOSE": 3,
+          "GIVEBACK": 1,
+          "net_sum_pct": -1.852317
+        },
+        "MISSING": {
+          "n": 1,
+          "WIN": 0,
+          "NO_FEE_CLOSE": 1,
+          "GIVEBACK": 0,
+          "net_sum_pct": -0.697512
+        }
+      }
+    }
+  ]
+}

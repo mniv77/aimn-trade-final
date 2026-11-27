@@ -1,0 +1,230 @@
+{
+  "notes": [
+    "Observational only; both periods discovery; no trading simulation or production edits.",
+    "Peak proxy is highest high of latest 12 completed same-session bars including signal; latest equal high wins. Not an objective major turning point.",
+    "Peak age is measured from peak bar completion to signal completion/next bar open, not from unknown intrabar peak time.",
+    "Next open is a historical reference, not a guaranteed executable fill. Remaining favorable movement uses EXP40-P six-bar horizon.",
+    "Q3/Q4 select at the same signal time; group timing differences reflect selection, not a measured execution delay. Overlapping warnings retained.",
+    "Partial opening windows retained and counted; missing efficiency decisions remain missing. No new threshold selected."
+  ],
+  "source_sha256": "05d885fa55df7237001662cdc67e078aad43669c494c4bcdf195bd19c877cf2d",
+  "warnings": 628,
+  "focus": [
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/SHORT",
+      "variant": "Q0",
+      "selected": 90,
+      "persistent": 18,
+      "median_peak_age_bars": 5.0,
+      "median_peak_to_entry_pct": 0.695699,
+      "median_remaining_favorable_pct": 0.263527,
+      "median_terminal_pct": 0.020288,
+      "median_adverse_pct": -0.200541,
+      "median_matched_st_lead_minutes": 10.0,
+      "matched_st_leads": 32,
+      "partial_peak_windows": 19
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/SHORT",
+      "variant": "Q3",
+      "selected": 33,
+      "persistent": 10,
+      "median_peak_age_bars": 9.0,
+      "median_peak_to_entry_pct": 0.691082,
+      "median_remaining_favorable_pct": 0.283932,
+      "median_terminal_pct": 0.131826,
+      "median_adverse_pct": -0.183768,
+      "median_matched_st_lead_minutes": 15.0,
+      "matched_st_leads": 19,
+      "partial_peak_windows": 0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/SHORT",
+      "variant": "Q4",
+      "selected": 24,
+      "persistent": 9,
+      "median_peak_age_bars": 9.0,
+      "median_peak_to_entry_pct": 0.707399,
+      "median_remaining_favorable_pct": 0.387659,
+      "median_terminal_pct": 0.128284,
+      "median_adverse_pct": -0.128574,
+      "median_matched_st_lead_minutes": 10.0,
+      "matched_st_leads": 13,
+      "partial_peak_windows": 0
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "LONG/SHORT",
+      "variant": "Q0",
+      "selected": 18,
+      "persistent": 8,
+      "median_peak_age_bars": 3.0,
+      "median_peak_to_entry_pct": 1.141296,
+      "median_remaining_favorable_pct": 0.808885,
+      "median_terminal_pct": 0.413829,
+      "median_adverse_pct": -0.329481,
+      "median_matched_st_lead_minutes": 15.0,
+      "matched_st_leads": 7,
+      "partial_peak_windows": 4
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "LONG/SHORT",
+      "variant": "Q3",
+      "selected": 8,
+      "persistent": 5,
+      "median_peak_age_bars": 4.0,
+      "median_peak_to_entry_pct": 0.734179,
+      "median_remaining_favorable_pct": 0.836585,
+      "median_terminal_pct": 0.635453,
+      "median_adverse_pct": -0.233049,
+      "median_matched_st_lead_minutes": 12.5,
+      "matched_st_leads": 4,
+      "partial_peak_windows": 0
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "LONG/SHORT",
+      "variant": "Q4",
+      "selected": 7,
+      "persistent": 5,
+      "median_peak_age_bars": 4.0,
+      "median_peak_to_entry_pct": 0.76815,
+      "median_remaining_favorable_pct": 0.84895,
+      "median_terminal_pct": 0.808074,
+      "median_adverse_pct": -0.205125,
+      "median_matched_st_lead_minutes": 12.5,
+      "matched_st_leads": 4,
+      "partial_peak_windows": 0
+    }
+  ],
+  "missed_persistent_focus": {
+    "MISSING": 8,
+    "FAIL": 4
+  },
+  "missed_examples": [
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-06-08 09:50:00",
+      "Q3": "MISSING",
+      "Q4": "MISSING",
+      "peak_age_bars": 4,
+      "peak_to_next_open_pct": 1.0409239982888912,
+      "terminal_move_pct_hindsight": "0.40826128722382116",
+      "favorable_pct_hindsight": "1.056676272814594"
+    },
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-06-09 09:55:00",
+      "Q3": "MISSING",
+      "Q4": "MISSING",
+      "peak_age_bars": 5,
+      "peak_to_next_open_pct": 1.0927669236955269,
+      "terminal_move_pct_hindsight": "1.0067916586952497",
+      "favorable_pct_hindsight": "1.5257317773101353"
+    },
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-06-09 10:00:00",
+      "Q3": "MISSING",
+      "Q4": "MISSING",
+      "peak_age_bars": 6,
+      "peak_to_next_open_pct": 1.267798855196546,
+      "terminal_move_pct_hindsight": "0.9630587897082155",
+      "favorable_pct_hindsight": "1.3511571079488416"
+    },
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-06-29 09:55:00",
+      "Q3": "MISSING",
+      "Q4": "MISSING",
+      "peak_age_bars": 2,
+      "peak_to_next_open_pct": 1.4670948666972452,
+      "terminal_move_pct_hindsight": "0.30627237547338204",
+      "favorable_pct_hindsight": "1.8065931337044372"
+    },
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-07-01 15:25:00",
+      "Q3": "FAIL",
+      "Q4": "FAIL",
+      "peak_age_bars": 4,
+      "peak_to_next_open_pct": 0.27520640480359415,
+      "terminal_move_pct_hindsight": "0.8630205720020045",
+      "favorable_pct_hindsight": "1.0386352232814922"
+    },
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-07-02 10:25:00",
+      "Q3": "MISSING",
+      "Q4": "MISSING",
+      "peak_age_bars": 5,
+      "peak_to_next_open_pct": 1.0822023943415662,
+      "terminal_move_pct_hindsight": "0.8337965536408976",
+      "favorable_pct_hindsight": "1.354287735610682"
+    },
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-07-17 13:40:00",
+      "Q3": "FAIL",
+      "Q4": "FAIL",
+      "peak_age_bars": 6,
+      "peak_to_next_open_pct": 0.6436158629533801,
+      "terminal_move_pct_hindsight": "0.8182548766529463",
+      "favorable_pct_hindsight": "0.8338406838272805"
+    },
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-07-20 12:20:00",
+      "Q3": "PASS",
+      "Q4": "FAIL",
+      "peak_age_bars": 10,
+      "peak_to_next_open_pct": 0.505967511559778,
+      "terminal_move_pct_hindsight": "0.7591610297338125",
+      "favorable_pct_hindsight": "0.7737602803056132"
+    },
+    {
+      "period": "DISCOVERY",
+      "signal_time": "2026-07-21 09:50:00",
+      "Q3": "MISSING",
+      "Q4": "MISSING",
+      "peak_age_bars": 4,
+      "peak_to_next_open_pct": 1.4186436616343197,
+      "terminal_move_pct_hindsight": "0.40838154504351243",
+      "favorable_pct_hindsight": "0.8167630900870249"
+    },
+    {
+      "period": "NOVEMBER",
+      "signal_time": "2026-11-16 09:50:00",
+      "Q3": "MISSING",
+      "Q4": "MISSING",
+      "peak_age_bars": 2,
+      "peak_to_next_open_pct": 1.344325837511922,
+      "terminal_move_pct_hindsight": "0.36482694106642066",
+      "favorable_pct_hindsight": "1.1225444340504986"
+    },
+    {
+      "period": "NOVEMBER",
+      "signal_time": "2026-11-16 11:40:00",
+      "Q3": "FAIL",
+      "Q4": "FAIL",
+      "peak_age_bars": 2,
+      "peak_to_next_open_pct": 0.44652615144418634,
+      "terminal_move_pct_hindsight": "0.7496392948999397",
+      "favorable_pct_hindsight": "0.7935512201242001"
+    },
+    {
+      "period": "NOVEMBER",
+      "signal_time": "2026-11-19 10:15:00",
+      "Q3": "MISSING",
+      "Q4": "MISSING",
+      "peak_age_bars": 6,
+      "peak_to_next_open_pct": 2.295869963949164,
+      "terminal_move_pct_hindsight": "1.611859140341776",
+      "favorable_pct_hindsight": "1.9322889694458723"
+    }
+  ]
+}

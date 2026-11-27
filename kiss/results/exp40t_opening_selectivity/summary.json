@@ -1,0 +1,147 @@
+{
+  "notes": [
+    "Observational only; both periods discovery; no trades or orders.",
+    "T0 all missing-history focus warnings; T1 first focus warning of session; T2 first or recovery since immediately preceding focus warning.",
+    "Recovery proxy: an intervening completed close above previous warning high and above its own preceding close. No future bars or outcome inputs. No threshold optimization.",
+    "Previous warnings include all focus warnings regardless of Q4 status. Recovery is a provisional proxy, not proof of new major transition.",
+    "Overlapping horizons; static adverse touch is not a stop replay. Q4 unchanged."
+  ],
+  "source_sha256": "7ce007b4da68747e424c393478684f90c8d80fd85a15c04edee61f44eb6a5ca5",
+  "groups": [
+    {
+      "period": "DISCOVERY",
+      "variant": "T0",
+      "observations": 20,
+      "selected": 20,
+      "persistent": 6,
+      "faded": 9,
+      "no_excursion": 5,
+      "persistence_pct": 30.0,
+      "retained_pct": 100.0,
+      "stop_touched": 8,
+      "entry_bar_stop": 2,
+      "median_terminal_pct": -0.020774
+    },
+    {
+      "period": "DISCOVERY",
+      "variant": "T1",
+      "observations": 20,
+      "selected": 12,
+      "persistent": 5,
+      "faded": 4,
+      "no_excursion": 3,
+      "persistence_pct": 41.6667,
+      "retained_pct": 83.3333,
+      "stop_touched": 3,
+      "entry_bar_stop": 1,
+      "median_terminal_pct": 0.270157
+    },
+    {
+      "period": "DISCOVERY",
+      "variant": "T2",
+      "observations": 20,
+      "selected": 12,
+      "persistent": 5,
+      "faded": 4,
+      "no_excursion": 3,
+      "persistence_pct": 41.6667,
+      "retained_pct": 83.3333,
+      "stop_touched": 3,
+      "entry_bar_stop": 1,
+      "median_terminal_pct": 0.270157
+    },
+    {
+      "period": "NOVEMBER",
+      "variant": "T0",
+      "observations": 4,
+      "selected": 4,
+      "persistent": 2,
+      "faded": 2,
+      "no_excursion": 0,
+      "persistence_pct": 50.0,
+      "retained_pct": 100.0,
+      "stop_touched": 3,
+      "entry_bar_stop": 3,
+      "median_terminal_pct": 0.64696
+    },
+    {
+      "period": "NOVEMBER",
+      "variant": "T1",
+      "observations": 4,
+      "selected": 2,
+      "persistent": 1,
+      "faded": 1,
+      "no_excursion": 0,
+      "persistence_pct": 50.0,
+      "retained_pct": 50.0,
+      "stop_touched": 2,
+      "entry_bar_stop": 2,
+      "median_terminal_pct": 0.64696
+    },
+    {
+      "period": "NOVEMBER",
+      "variant": "T2",
+      "observations": 4,
+      "selected": 3,
+      "persistent": 2,
+      "faded": 1,
+      "no_excursion": 0,
+      "persistence_pct": 66.6667,
+      "retained_pct": 100.0,
+      "stop_touched": 2,
+      "entry_bar_stop": 2,
+      "median_terminal_pct": 0.929092
+    },
+    {
+      "period": "COMBINED",
+      "variant": "T0",
+      "observations": 24,
+      "selected": 24,
+      "persistent": 8,
+      "faded": 11,
+      "no_excursion": 5,
+      "persistence_pct": 33.3333,
+      "retained_pct": 100.0,
+      "stop_touched": 11,
+      "entry_bar_stop": 5,
+      "median_terminal_pct": 0.12919
+    },
+    {
+      "period": "COMBINED",
+      "variant": "T1",
+      "observations": 24,
+      "selected": 14,
+      "persistent": 6,
+      "faded": 5,
+      "no_excursion": 3,
+      "persistence_pct": 42.8571,
+      "retained_pct": 75.0,
+      "stop_touched": 5,
+      "entry_bar_stop": 3,
+      "median_terminal_pct": 0.331322
+    },
+    {
+      "period": "COMBINED",
+      "variant": "T2",
+      "observations": 24,
+      "selected": 15,
+      "persistent": 7,
+      "faded": 5,
+      "no_excursion": 3,
+      "persistence_pct": 46.6667,
+      "retained_pct": 87.5,
+      "stop_touched": 5,
+      "entry_bar_stop": 3,
+      "median_terminal_pct": 0.356372
+    }
+  ],
+  "recovered": [
+    {
+      "period": "NOVEMBER",
+      "signal_time": "2026-11-19 10:15:00",
+      "previous_focus_warning": "2026-11-19 09:55:00",
+      "recovery_confirmation_time": "2026-11-19 10:00:00",
+      "price_outcome_hindsight": "PERSISTENT_TARGET"
+    }
+  ]
+}

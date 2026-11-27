@@ -1,0 +1,86 @@
+{
+  "data_sha256": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+  "b2_csv_sha256": "47ab2a8fe9cd84d50ccad567397830ae9ffbd46cd6628f513bbff64ade14f109",
+  "baseline": {
+    "trades": 122,
+    "winners": 41,
+    "net_sum_pct": -30.391587
+  },
+  "outcomes": {
+    "WINNER": {
+      "trades": 41,
+      "winners": 41,
+      "net_sum_pct": 13.648771
+    },
+    "LOSS_CLOSE_ABOVE_FEE": {
+      "trades": 15,
+      "winners": 0,
+      "net_sum_pct": -7.213139
+    },
+    "LOSS_CLOSE_NOT_ABOVE_FEE": {
+      "trades": 66,
+      "winners": 0,
+      "net_sum_pct": -36.827219
+    }
+  },
+  "splits": {
+    "ALL": {
+      "all": {
+        "trades": 122,
+        "winners": 41,
+        "net_sum_pct": -30.391587
+      },
+      "pullback_ge_0p75": {
+        "trades": 20,
+        "winners": 4,
+        "net_sum_pct": -3.983855
+      },
+      "pullback_lt_0p75": {
+        "trades": 102,
+        "winners": 37,
+        "net_sum_pct": -26.407732
+      }
+    },
+    "JUN_JUL": {
+      "all": {
+        "trades": 83,
+        "winners": 27,
+        "net_sum_pct": -19.068242
+      },
+      "pullback_ge_0p75": {
+        "trades": 14,
+        "winners": 3,
+        "net_sum_pct": -1.13091
+      },
+      "pullback_lt_0p75": {
+        "trades": 69,
+        "winners": 24,
+        "net_sum_pct": -17.937332
+      }
+    },
+    "AUG": {
+      "all": {
+        "trades": 39,
+        "winners": 14,
+        "net_sum_pct": -11.323345
+      },
+      "pullback_ge_0p75": {
+        "trades": 6,
+        "winners": 1,
+        "net_sum_pct": -2.852945
+      },
+      "pullback_lt_0p75": {
+        "trades": 33,
+        "winners": 13,
+        "net_sum_pct": -8.4704
+      }
+    }
+  },
+  "notes": [
+    "Features use completed signal candles only; 30m uses six contiguous 5m bars with start timestamps.",
+    "Pre-peak windows are session-local and omit insufficient history.",
+    "Best-close outcomes are retrospective, not entry features.",
+    "June-August is discovery data, including August; no independent validation or policy replay.",
+    "Only executed B2 trades are studied; blocked candidates and EXP39 rejects require a separate audit."
+  ]
+}

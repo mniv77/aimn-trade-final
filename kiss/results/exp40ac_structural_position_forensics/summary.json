@@ -1,0 +1,820 @@
+{
+  "notes": [
+    "September\u2013October now discovery for this analysis. No new entry rule, replay or orders.",
+    "All 54 focus candidates including blocked and rejected. Six-bar price proxies are not trade outcomes; overlapping windows are dependent.",
+    "Pivots strict two bars either side, confirmed only after second right bar closes; ties and outside bars excluded; consecutive same-kind pivots compressed to more extreme. Session reset. No optimization.",
+    "Recent12 uses up to 12 completed candles including signal. Returns in proxy use simple price change, not engine trade formula."
+  ],
+  "source_hashes": {
+    "nvda_sep_oct_2026_5m_iex.json": "3e944cd4cdeba1adb650804a0a3e81d5355c225d9ad05546176b1de8ef9e9718",
+    "AB1_candidates.csv": "b9dd38fd00aa90260d93a33eb418017eee4fd263f7afdf4e29dc6e8635c4ab6d",
+    "AB1_trades.csv": "78dd5b1d820ddb66c4b507c19697ea841ec0a9c166a979f3f8891634f98f0d9b"
+  },
+  "groups": [
+    {
+      "group": "PRICE_PROXY",
+      "label": "CENSORED",
+      "count": 9,
+      "trade_outcomes": {
+        "UNTRADED": 9
+      },
+      "price_outcomes": {
+        "CENSORED": 9
+      },
+      "features": {
+        "e6": {
+          "available": 9,
+          "median": 0.280967
+        },
+        "e12": {
+          "available": 9,
+          "median": 0.142222
+        },
+        "high_change_pct": {
+          "available": 9,
+          "median": 0.055741
+        },
+        "low_change_pct": {
+          "available": 9,
+          "median": -0.077963
+        },
+        "confirmed_high_age": {
+          "available": 9,
+          "median": 4.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 9,
+          "median": 0.367532
+        },
+        "below_confirmed_low_pct": {
+          "available": 9,
+          "median": -0.0
+        },
+        "recent12_peak_age": {
+          "available": 9,
+          "median": 4.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 9,
+          "median": 0.367532
+        },
+        "recent12_range_position": {
+          "available": 9,
+          "median": 0.115385
+        },
+        "recent12_trough_age": {
+          "available": 9,
+          "median": 0.0
+        },
+        "prior3_decline_pct": {
+          "available": 9,
+          "median": 0.158179
+        },
+        "prior6_decline_pct": {
+          "available": 9,
+          "median": 0.167396
+        }
+      }
+    },
+    {
+      "group": "PRICE_PROXY",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 26,
+      "trade_outcomes": {
+        "WIN": 4,
+        "UNTRADED": 14,
+        "NO_FEE_CLOSE": 7,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 26
+      },
+      "features": {
+        "e6": {
+          "available": 26,
+          "median": 0.427878
+        },
+        "e12": {
+          "available": 26,
+          "median": 0.103246
+        },
+        "high_change_pct": {
+          "available": 24,
+          "median": -0.00939
+        },
+        "low_change_pct": {
+          "available": 23,
+          "median": 0.111147
+        },
+        "confirmed_high_age": {
+          "available": 25,
+          "median": 4.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 25,
+          "median": 0.482356
+        },
+        "below_confirmed_low_pct": {
+          "available": 26,
+          "median": -0.083398
+        },
+        "recent12_peak_age": {
+          "available": 26,
+          "median": 6.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 26,
+          "median": 0.507125
+        },
+        "recent12_range_position": {
+          "available": 26,
+          "median": 0.171258
+        },
+        "recent12_trough_age": {
+          "available": 26,
+          "median": 5.0
+        },
+        "prior3_decline_pct": {
+          "available": 26,
+          "median": 0.185049
+        },
+        "prior6_decline_pct": {
+          "available": 26,
+          "median": 0.193277
+        }
+      }
+    },
+    {
+      "group": "PRICE_PROXY",
+      "label": "PERSISTENT_TARGET",
+      "count": 3,
+      "trade_outcomes": {
+        "UNTRADED": 3
+      },
+      "price_outcomes": {
+        "PERSISTENT_TARGET": 3
+      },
+      "features": {
+        "e6": {
+          "available": 3,
+          "median": 0.52514
+        },
+        "e12": {
+          "available": 3,
+          "median": 0.324324
+        },
+        "high_change_pct": {
+          "available": 3,
+          "median": -0.251555
+        },
+        "low_change_pct": {
+          "available": 3,
+          "median": 0.309941
+        },
+        "confirmed_high_age": {
+          "available": 3,
+          "median": 12.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 3,
+          "median": 0.761154
+        },
+        "below_confirmed_low_pct": {
+          "available": 3,
+          "median": 0.18908
+        },
+        "recent12_peak_age": {
+          "available": 3,
+          "median": 5.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 3,
+          "median": 0.601773
+        },
+        "recent12_range_position": {
+          "available": 3,
+          "median": 0.120805
+        },
+        "recent12_trough_age": {
+          "available": 3,
+          "median": 0.0
+        },
+        "prior3_decline_pct": {
+          "available": 3,
+          "median": 0.271927
+        },
+        "prior6_decline_pct": {
+          "available": 3,
+          "median": 0.432442
+        }
+      }
+    },
+    {
+      "group": "PRICE_PROXY",
+      "label": "TARGET_FADED",
+      "count": 16,
+      "trade_outcomes": {
+        "UNTRADED": 15,
+        "NO_FEE_CLOSE": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 16
+      },
+      "features": {
+        "e6": {
+          "available": 15,
+          "median": 0.196429
+        },
+        "e12": {
+          "available": 14,
+          "median": -0.026989
+        },
+        "high_change_pct": {
+          "available": 12,
+          "median": -0.011561
+        },
+        "low_change_pct": {
+          "available": 11,
+          "median": 0.04137
+        },
+        "confirmed_high_age": {
+          "available": 15,
+          "median": 2.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 15,
+          "median": 0.320469
+        },
+        "below_confirmed_low_pct": {
+          "available": 14,
+          "median": -0.294379
+        },
+        "recent12_peak_age": {
+          "available": 16,
+          "median": 3.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 16,
+          "median": 0.44231
+        },
+        "recent12_range_position": {
+          "available": 16,
+          "median": 0.402857
+        },
+        "recent12_trough_age": {
+          "available": 16,
+          "median": 9.5
+        },
+        "prior3_decline_pct": {
+          "available": 16,
+          "median": 0.176433
+        },
+        "prior6_decline_pct": {
+          "available": 15,
+          "median": 0.138172
+        }
+      }
+    },
+    {
+      "group": "STRUCTURE",
+      "label": "HIGHER_HIGH_HIGHER_LOW",
+      "count": 17,
+      "trade_outcomes": {
+        "UNTRADED": 13,
+        "WIN": 1,
+        "NO_FEE_CLOSE": 3
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 5,
+        "NO_FEE_SCALE_EXCURSION": 8,
+        "CENSORED": 3,
+        "PERSISTENT_TARGET": 1
+      },
+      "features": {
+        "e6": {
+          "available": 17,
+          "median": 0.348837
+        },
+        "e12": {
+          "available": 17,
+          "median": 0.096573
+        },
+        "high_change_pct": {
+          "available": 17,
+          "median": 0.262409
+        },
+        "low_change_pct": {
+          "available": 17,
+          "median": 0.129861
+        },
+        "confirmed_high_age": {
+          "available": 17,
+          "median": 5.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 17,
+          "median": 0.509846
+        },
+        "below_confirmed_low_pct": {
+          "available": 17,
+          "median": -0.086622
+        },
+        "recent12_peak_age": {
+          "available": 17,
+          "median": 5.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 17,
+          "median": 0.509846
+        },
+        "recent12_range_position": {
+          "available": 17,
+          "median": 0.172775
+        },
+        "recent12_trough_age": {
+          "available": 17,
+          "median": 9.0
+        },
+        "prior3_decline_pct": {
+          "available": 17,
+          "median": 0.183991
+        },
+        "prior6_decline_pct": {
+          "available": 17,
+          "median": 0.16233
+        }
+      }
+    },
+    {
+      "group": "STRUCTURE",
+      "label": "LOWER_HIGH_LOWER_LOW",
+      "count": 12,
+      "trade_outcomes": {
+        "UNTRADED": 10,
+        "NO_FEE_CLOSE": 2
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 4,
+        "CENSORED": 4,
+        "NO_FEE_SCALE_EXCURSION": 4
+      },
+      "features": {
+        "e6": {
+          "available": 12,
+          "median": 0.173686
+        },
+        "e12": {
+          "available": 12,
+          "median": 0.043961
+        },
+        "high_change_pct": {
+          "available": 12,
+          "median": -0.068157
+        },
+        "low_change_pct": {
+          "available": 12,
+          "median": -0.077963
+        },
+        "confirmed_high_age": {
+          "available": 12,
+          "median": 3.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 12,
+          "median": 0.279894
+        },
+        "below_confirmed_low_pct": {
+          "available": 12,
+          "median": -0.115544
+        },
+        "recent12_peak_age": {
+          "available": 12,
+          "median": 3.5
+        },
+        "recent12_peak_decline_pct": {
+          "available": 12,
+          "median": 0.294242
+        },
+        "recent12_range_position": {
+          "available": 12,
+          "median": 0.364113
+        },
+        "recent12_trough_age": {
+          "available": 12,
+          "median": 6.0
+        },
+        "prior3_decline_pct": {
+          "available": 12,
+          "median": 0.152368
+        },
+        "prior6_decline_pct": {
+          "available": 12,
+          "median": 0.051166
+        }
+      }
+    },
+    {
+      "group": "STRUCTURE",
+      "label": "MIXED",
+      "count": 17,
+      "trade_outcomes": {
+        "UNTRADED": 13,
+        "NO_FEE_CLOSE": 2,
+        "WIN": 1,
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "CENSORED": 2,
+        "NO_FEE_SCALE_EXCURSION": 11,
+        "TARGET_FADED": 2,
+        "PERSISTENT_TARGET": 2
+      },
+      "features": {
+        "e6": {
+          "available": 17,
+          "median": 0.315789
+        },
+        "e12": {
+          "available": 17,
+          "median": 0.101911
+        },
+        "high_change_pct": {
+          "available": 17,
+          "median": -0.101527
+        },
+        "low_change_pct": {
+          "available": 17,
+          "median": 0.111147
+        },
+        "confirmed_high_age": {
+          "available": 17,
+          "median": 3.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 17,
+          "median": 0.499794
+        },
+        "below_confirmed_low_pct": {
+          "available": 17,
+          "median": -0.167815
+        },
+        "recent12_peak_age": {
+          "available": 17,
+          "median": 8.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 17,
+          "median": 0.52018
+        },
+        "recent12_range_position": {
+          "available": 17,
+          "median": 0.283912
+        },
+        "recent12_trough_age": {
+          "available": 17,
+          "median": 7.0
+        },
+        "prior3_decline_pct": {
+          "available": 17,
+          "median": 0.216104
+        },
+        "prior6_decline_pct": {
+          "available": 17,
+          "median": 0.169372
+        }
+      }
+    },
+    {
+      "group": "STRUCTURE",
+      "label": "UNKNOWN",
+      "count": 8,
+      "trade_outcomes": {
+        "UNTRADED": 5,
+        "WIN": 2,
+        "NO_FEE_CLOSE": 1
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 5,
+        "NO_FEE_SCALE_EXCURSION": 3
+      },
+      "features": {
+        "e6": {
+          "available": 7,
+          "median": 0.487805
+        },
+        "e12": {
+          "available": 6,
+          "median": 0.452165
+        },
+        "high_change_pct": {
+          "available": 2,
+          "median": -0.406675
+        },
+        "low_change_pct": {
+          "available": 0,
+          "median": null
+        },
+        "confirmed_high_age": {
+          "available": 6,
+          "median": 2.5
+        },
+        "confirmed_high_decline_pct": {
+          "available": 6,
+          "median": 0.421243
+        },
+        "below_confirmed_low_pct": {
+          "available": 6,
+          "median": -0.714515
+        },
+        "recent12_peak_age": {
+          "available": 8,
+          "median": 7.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 8,
+          "median": 0.512295
+        },
+        "recent12_range_position": {
+          "available": 8,
+          "median": 0.182556
+        },
+        "recent12_trough_age": {
+          "available": 8,
+          "median": 2.5
+        },
+        "prior3_decline_pct": {
+          "available": 8,
+          "median": 0.200408
+        },
+        "prior6_decline_pct": {
+          "available": 7,
+          "median": 0.27137
+        }
+      }
+    },
+    {
+      "group": "TRADE",
+      "label": "GIVEBACK",
+      "count": 1,
+      "trade_outcomes": {
+        "GIVEBACK": 1
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 1
+      },
+      "features": {
+        "e6": {
+          "available": 1,
+          "median": 0.315789
+        },
+        "e12": {
+          "available": 1,
+          "median": 0.121495
+        },
+        "high_change_pct": {
+          "available": 1,
+          "median": -0.00939
+        },
+        "low_change_pct": {
+          "available": 1,
+          "median": 0.084954
+        },
+        "confirmed_high_age": {
+          "available": 1,
+          "median": 3.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 1,
+          "median": 0.370927
+        },
+        "below_confirmed_low_pct": {
+          "available": 1,
+          "median": -0.061303
+        },
+        "recent12_peak_age": {
+          "available": 1,
+          "median": 9.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 1,
+          "median": 0.380282
+        },
+        "recent12_range_position": {
+          "available": 1,
+          "median": 0.276786
+        },
+        "recent12_trough_age": {
+          "available": 1,
+          "median": 11.0
+        },
+        "prior3_decline_pct": {
+          "available": 1,
+          "median": 0.326467
+        },
+        "prior6_decline_pct": {
+          "available": 1,
+          "median": 0.169372
+        }
+      }
+    },
+    {
+      "group": "TRADE",
+      "label": "NO_FEE_CLOSE",
+      "count": 8,
+      "trade_outcomes": {
+        "NO_FEE_CLOSE": 8
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 7,
+        "TARGET_FADED": 1
+      },
+      "features": {
+        "e6": {
+          "available": 8,
+          "median": 0.589969
+        },
+        "e12": {
+          "available": 8,
+          "median": 0.132848
+        },
+        "high_change_pct": {
+          "available": 7,
+          "median": -0.075369
+        },
+        "low_change_pct": {
+          "available": 7,
+          "median": 0.129861
+        },
+        "confirmed_high_age": {
+          "available": 8,
+          "median": 5.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 8,
+          "median": 0.522083
+        },
+        "below_confirmed_low_pct": {
+          "available": 8,
+          "median": -0.165325
+        },
+        "recent12_peak_age": {
+          "available": 8,
+          "median": 6.5
+        },
+        "recent12_peak_decline_pct": {
+          "available": 8,
+          "median": 0.545444
+        },
+        "recent12_range_position": {
+          "available": 8,
+          "median": 0.171258
+        },
+        "recent12_trough_age": {
+          "available": 8,
+          "median": 4.0
+        },
+        "prior3_decline_pct": {
+          "available": 8,
+          "median": 0.1618
+        },
+        "prior6_decline_pct": {
+          "available": 8,
+          "median": 0.228859
+        }
+      }
+    },
+    {
+      "group": "TRADE",
+      "label": "UNTRADED",
+      "count": 41,
+      "trade_outcomes": {
+        "UNTRADED": 41
+      },
+      "price_outcomes": {
+        "TARGET_FADED": 15,
+        "CENSORED": 9,
+        "NO_FEE_SCALE_EXCURSION": 14,
+        "PERSISTENT_TARGET": 3
+      },
+      "features": {
+        "e6": {
+          "available": 40,
+          "median": 0.310938
+        },
+        "e12": {
+          "available": 39,
+          "median": 0.085911
+        },
+        "high_change_pct": {
+          "available": 37,
+          "median": -0.00939
+        },
+        "low_change_pct": {
+          "available": 36,
+          "median": 0.084954
+        },
+        "confirmed_high_age": {
+          "available": 40,
+          "median": 3.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 40,
+          "median": 0.382584
+        },
+        "below_confirmed_low_pct": {
+          "available": 39,
+          "median": -0.160332
+        },
+        "recent12_peak_age": {
+          "available": 41,
+          "median": 4.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 41,
+          "median": 0.412031
+        },
+        "recent12_range_position": {
+          "available": 41,
+          "median": 0.34507
+        },
+        "recent12_trough_age": {
+          "available": 41,
+          "median": 8.0
+        },
+        "prior3_decline_pct": {
+          "available": 41,
+          "median": 0.176512
+        },
+        "prior6_decline_pct": {
+          "available": 40,
+          "median": 0.15902
+        }
+      }
+    },
+    {
+      "group": "TRADE",
+      "label": "WIN",
+      "count": 4,
+      "trade_outcomes": {
+        "WIN": 4
+      },
+      "price_outcomes": {
+        "NO_FEE_SCALE_EXCURSION": 4
+      },
+      "features": {
+        "e6": {
+          "available": 4,
+          "median": 0.463648
+        },
+        "e12": {
+          "available": 4,
+          "median": 0.073809
+        },
+        "high_change_pct": {
+          "available": 3,
+          "median": -0.251555
+        },
+        "low_change_pct": {
+          "available": 2,
+          "median": 0.065
+        },
+        "confirmed_high_age": {
+          "available": 3,
+          "median": 3.0
+        },
+        "confirmed_high_decline_pct": {
+          "available": 3,
+          "median": 0.469351
+        },
+        "below_confirmed_low_pct": {
+          "available": 4,
+          "median": -0.215568
+        },
+        "recent12_peak_age": {
+          "available": 4,
+          "median": 6.5
+        },
+        "recent12_peak_decline_pct": {
+          "available": 4,
+          "median": 0.477697
+        },
+        "recent12_range_position": {
+          "available": 4,
+          "median": 0.18321
+        },
+        "recent12_trough_age": {
+          "available": 4,
+          "median": 4.0
+        },
+        "prior3_decline_pct": {
+          "available": 4,
+          "median": 0.30115
+        },
+        "prior6_decline_pct": {
+          "available": 4,
+          "median": 0.223882
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "notes": [
+    "Observational only; November data now used for discovery. No orders or strategy edits.",
+    "ST ATR 10 multiplier 3; both timeframes include regular-session warm-up and carry state overnight.",
+    "30m context uses only completed bars, including the prior session when necessary.",
+    "Signed distance is close minus ST, normalized by close or ATR. Future flip delays are measured from candidate decision time, not from an objectively labeled reversal.",
+    "Trade outcomes and future flips are hindsight labels, not entry inputs."
+  ],
+  "source_st_sha256": "c1727a67c903fdc7dc0ca61562f233a07908aebb04347ce255f4e9fccede1749",
+  "candidates": 13,
+  "timeline_bars": 624,
+  "candidate_context_counts": {
+    "LONG/SHORT": 7,
+    "LONG/LONG": 4,
+    "SHORT/SHORT": 2
+  },
+  "candidate_summary": [
+    {
+      "signal_time": "2026-11-18 09:35:00",
+      "status": "REJECTED",
+      "st5_trend": "LONG",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": 0.9675577206929693,
+      "st30_distance_atr": -1.2994843843966966,
+      "b2_net_hindsight": "1.113746",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": 5.0,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-19 09:50:00",
+      "status": "REJECTED",
+      "st5_trend": "LONG",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": 1.4149625919046878,
+      "st30_distance_atr": -3.0110959598002034,
+      "b2_net_hindsight": "-0.060789",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": 30.0,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-23 09:35:00",
+      "status": "SCHEDULED",
+      "st5_trend": "LONG",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": 2.124704796089344,
+      "st30_distance_atr": -3.3876359122419792,
+      "b2_net_hindsight": "-0.697512",
+      "k3_net_hindsight": "-0.697512",
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-23 10:05:00",
+      "status": "REJECTED",
+      "st5_trend": "LONG",
+      "st30_trend": "LONG",
+      "st5_distance_atr": 2.5387924888761266,
+      "st30_distance_atr": 3.837225682954886,
+      "b2_net_hindsight": "-0.697512",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-23 10:30:00",
+      "status": "REJECTED",
+      "st5_trend": "LONG",
+      "st30_trend": "LONG",
+      "st5_distance_atr": 2.574720189670681,
+      "st30_distance_atr": 3.2664655574206587,
+      "b2_net_hindsight": "-0.697512",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-23 15:30:00",
+      "status": "REJECTED",
+      "st5_trend": "LONG",
+      "st30_trend": "LONG",
+      "st5_distance_atr": 3.050083505120898,
+      "st30_distance_atr": 3.2197886712844506,
+      "b2_net_hindsight": "0.599174",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-23 15:40:00",
+      "status": "REJECTED",
+      "st5_trend": "LONG",
+      "st30_trend": "LONG",
+      "st5_distance_atr": 2.3372932477910306,
+      "st30_distance_atr": 3.2197886712844506,
+      "b2_net_hindsight": null,
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-24 13:45:00",
+      "status": "REJECTED",
+      "st5_trend": "SHORT",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": -0.5708039753623032,
+      "st30_distance_atr": -2.747293625615435,
+      "b2_net_hindsight": "0.072005",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-25 09:30:00",
+      "status": "REJECTED",
+      "st5_trend": "SHORT",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": -3.6297569839801853,
+      "st30_distance_atr": -1.8439283031967113,
+      "b2_net_hindsight": "-0.697512",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-25 13:10:00",
+      "status": "REJECTED",
+      "st5_trend": "LONG",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": 2.9443519754745684,
+      "st30_distance_atr": -1.8053607925870503,
+      "b2_net_hindsight": "-0.697512",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-25 13:55:00",
+      "status": "REJECTED",
+      "st5_trend": "LONG",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": 2.6958322975002633,
+      "st30_distance_atr": -1.1716237327240742,
+      "b2_net_hindsight": "-0.52899",
+      "k3_net_hindsight": null,
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-25 14:15:00",
+      "status": "SCHEDULED",
+      "st5_trend": "LONG",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": 1.6191883049712164,
+      "st30_distance_atr": -1.1716237327240742,
+      "b2_net_hindsight": "-0.697512",
+      "k3_net_hindsight": "-0.697512",
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    },
+    {
+      "signal_time": "2026-11-25 14:40:00",
+      "status": "SCHEDULED",
+      "st5_trend": "LONG",
+      "st30_trend": "SHORT",
+      "st5_distance_atr": 2.434510955644896,
+      "st30_distance_atr": -1.1325863371019518,
+      "b2_net_hindsight": "-0.278953",
+      "k3_net_hindsight": "-0.278953",
+      "next_5m_short_flip_delay_minutes_hindsight": null,
+      "next_30m_short_flip_delay_minutes_hindsight": null
+    }
+  ]
+}

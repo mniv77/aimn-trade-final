@@ -1,0 +1,692 @@
+{
+  "notes": [
+    "Both periods discovery; no orders or production changes.",
+    "K3 and all existing exits retained; supplemental warning only after best completed gross close exceeds fee.",
+    "Exact X2/X4 trade and candidate parity required. Earlier exits may free subsequent entries.",
+    "Trade sums are not portfolio returns. Extra costs are sensitivity only."
+  ],
+  "periods": {
+    "DISCOVERY": {
+      "AA0": {
+        "trades": 16,
+        "winners": 8,
+        "losers": 8,
+        "net_sum_pct": -1.093947,
+        "gross_sum_pct": 2.106053,
+        "exits": {
+          "FIRST_CANDLE_INVALIDATION": 2,
+          "V_PROFIT": 7,
+          "TRAILING_REVERSE": 4,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 2,
+          "TREND_CHANGE": 1
+        },
+        "events": {
+          "signals": 93,
+          "rejected": 66,
+          "first_candle_invalidation": 2,
+          "structural_warning": 3,
+          "blocked_in_position": 11,
+          "time_gate": 3
+        },
+        "net_delta_vs_baseline": 0.0,
+        "winners_harmed": 0,
+        "losers_converted": 0,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "JUN_JUL": {
+            "trades": 13,
+            "winners": 8,
+            "losers": 5,
+            "net_sum_pct": 0.326642,
+            "gross_sum_pct": 2.926642,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 2,
+              "V_PROFIT": 7,
+              "TRAILING_REVERSE": 3,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            }
+          },
+          "AUG": {
+            "trades": 3,
+            "winners": 0,
+            "losers": 3,
+            "net_sum_pct": -1.420589,
+            "gross_sum_pct": -0.820589,
+            "exits": {
+              "TRAILING_REVERSE": 1,
+              "TREND_CHANGE": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            }
+          }
+        }
+      },
+      "AA1": {
+        "trades": 16,
+        "winners": 9,
+        "losers": 7,
+        "net_sum_pct": -0.152856,
+        "gross_sum_pct": 3.047144,
+        "exits": {
+          "FIRST_CANDLE_INVALIDATION": 2,
+          "SUPPLEMENTAL_HIGHER_HIGH": 4,
+          "TRAILING_REVERSE": 3,
+          "V_PROFIT": 5,
+          "TREND_CHANGE": 1,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+        },
+        "events": {
+          "signals": 93,
+          "rejected": 66,
+          "first_candle_invalidation": 2,
+          "supplemental_warning": 4,
+          "blocked_in_position": 11,
+          "time_gate": 3,
+          "structural_warning": 1
+        },
+        "net_delta_vs_baseline": 0.941091,
+        "winners_harmed": 0,
+        "losers_converted": 1,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "JUN_JUL": {
+            "trades": 13,
+            "winners": 9,
+            "losers": 4,
+            "net_sum_pct": 1.267733,
+            "gross_sum_pct": 3.867733,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 2,
+              "SUPPLEMENTAL_HIGHER_HIGH": 4,
+              "TRAILING_REVERSE": 2,
+              "V_PROFIT": 5
+            }
+          },
+          "AUG": {
+            "trades": 3,
+            "winners": 0,
+            "losers": 3,
+            "net_sum_pct": -1.420589,
+            "gross_sum_pct": -0.820589,
+            "exits": {
+              "TRAILING_REVERSE": 1,
+              "TREND_CHANGE": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            }
+          }
+        }
+      },
+      "AA2": {
+        "trades": 16,
+        "winners": 9,
+        "losers": 7,
+        "net_sum_pct": -0.455856,
+        "gross_sum_pct": 2.744144,
+        "exits": {
+          "FIRST_CANDLE_INVALIDATION": 2,
+          "V_PROFIT": 7,
+          "TRAILING_REVERSE": 3,
+          "SUPPLEMENTAL_HIGHER_HIGH_LOW": 2,
+          "TREND_CHANGE": 1,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+        },
+        "events": {
+          "signals": 93,
+          "rejected": 66,
+          "first_candle_invalidation": 2,
+          "structural_warning": 2,
+          "supplemental_warning": 2,
+          "blocked_in_position": 11,
+          "time_gate": 3
+        },
+        "net_delta_vs_baseline": 0.638091,
+        "winners_harmed": 0,
+        "losers_converted": 1,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "JUN_JUL": {
+            "trades": 13,
+            "winners": 9,
+            "losers": 4,
+            "net_sum_pct": 0.964733,
+            "gross_sum_pct": 3.564733,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 2,
+              "V_PROFIT": 7,
+              "TRAILING_REVERSE": 2,
+              "SUPPLEMENTAL_HIGHER_HIGH_LOW": 2
+            }
+          },
+          "AUG": {
+            "trades": 3,
+            "winners": 0,
+            "losers": 3,
+            "net_sum_pct": -1.420589,
+            "gross_sum_pct": -0.820589,
+            "exits": {
+              "TRAILING_REVERSE": 1,
+              "TREND_CHANGE": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            }
+          }
+        }
+      },
+      "AA3": {
+        "trades": 28,
+        "winners": 11,
+        "losers": 17,
+        "net_sum_pct": -0.947155,
+        "gross_sum_pct": 4.652845,
+        "exits": {
+          "V_PROFIT": 11,
+          "FIRST_CANDLE_INVALIDATION": 9,
+          "TRAILING_REVERSE": 5,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 3
+        },
+        "events": {
+          "signals": 93,
+          "blocked_in_position": 18,
+          "first_candle_invalidation": 9,
+          "rejected": 47,
+          "structural_warning": 5,
+          "time_gate": 3
+        },
+        "net_delta_vs_baseline": 0.0,
+        "winners_harmed": 0,
+        "losers_converted": 0,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "JUN_JUL": {
+            "trades": 23,
+            "winners": 11,
+            "losers": 12,
+            "net_sum_pct": 0.769967,
+            "gross_sum_pct": 5.369967,
+            "exits": {
+              "V_PROFIT": 11,
+              "FIRST_CANDLE_INVALIDATION": 7,
+              "TRAILING_REVERSE": 4,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            }
+          },
+          "AUG": {
+            "trades": 5,
+            "winners": 0,
+            "losers": 5,
+            "net_sum_pct": -1.717122,
+            "gross_sum_pct": -0.717122,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 2,
+              "TRAILING_REVERSE": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+            }
+          }
+        }
+      },
+      "AA4": {
+        "trades": 28,
+        "winners": 12,
+        "losers": 16,
+        "net_sum_pct": -0.006064,
+        "gross_sum_pct": 5.593936,
+        "exits": {
+          "V_PROFIT": 9,
+          "FIRST_CANDLE_INVALIDATION": 9,
+          "SUPPLEMENTAL_HIGHER_HIGH": 4,
+          "TRAILING_REVERSE": 4,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+        },
+        "events": {
+          "signals": 93,
+          "blocked_in_position": 18,
+          "first_candle_invalidation": 9,
+          "rejected": 47,
+          "supplemental_warning": 4,
+          "structural_warning": 3,
+          "time_gate": 3
+        },
+        "net_delta_vs_baseline": 0.941091,
+        "winners_harmed": 0,
+        "losers_converted": 1,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "JUN_JUL": {
+            "trades": 23,
+            "winners": 12,
+            "losers": 11,
+            "net_sum_pct": 1.711058,
+            "gross_sum_pct": 6.311058,
+            "exits": {
+              "V_PROFIT": 9,
+              "FIRST_CANDLE_INVALIDATION": 7,
+              "SUPPLEMENTAL_HIGHER_HIGH": 4,
+              "TRAILING_REVERSE": 3
+            }
+          },
+          "AUG": {
+            "trades": 5,
+            "winners": 0,
+            "losers": 5,
+            "net_sum_pct": -1.717122,
+            "gross_sum_pct": -0.717122,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 2,
+              "TRAILING_REVERSE": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+            }
+          }
+        }
+      },
+      "AA5": {
+        "trades": 28,
+        "winners": 12,
+        "losers": 16,
+        "net_sum_pct": -0.309064,
+        "gross_sum_pct": 5.290936,
+        "exits": {
+          "V_PROFIT": 11,
+          "FIRST_CANDLE_INVALIDATION": 9,
+          "TRAILING_REVERSE": 4,
+          "SUPPLEMENTAL_HIGHER_HIGH_LOW": 2,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+        },
+        "events": {
+          "signals": 93,
+          "blocked_in_position": 18,
+          "first_candle_invalidation": 9,
+          "rejected": 47,
+          "structural_warning": 4,
+          "supplemental_warning": 2,
+          "time_gate": 3
+        },
+        "net_delta_vs_baseline": 0.638091,
+        "winners_harmed": 0,
+        "losers_converted": 1,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "JUN_JUL": {
+            "trades": 23,
+            "winners": 12,
+            "losers": 11,
+            "net_sum_pct": 1.408058,
+            "gross_sum_pct": 6.008058,
+            "exits": {
+              "V_PROFIT": 11,
+              "FIRST_CANDLE_INVALIDATION": 7,
+              "TRAILING_REVERSE": 3,
+              "SUPPLEMENTAL_HIGHER_HIGH_LOW": 2
+            }
+          },
+          "AUG": {
+            "trades": 5,
+            "winners": 0,
+            "losers": 5,
+            "net_sum_pct": -1.717122,
+            "gross_sum_pct": -0.717122,
+            "exits": {
+              "FIRST_CANDLE_INVALIDATION": 2,
+              "TRAILING_REVERSE": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+            }
+          }
+        }
+      }
+    },
+    "NOVEMBER": {
+      "AA0": {
+        "trades": 2,
+        "winners": 1,
+        "losers": 1,
+        "net_sum_pct": 0.854282,
+        "gross_sum_pct": 1.254282,
+        "exits": {
+          "V_PROFIT": 1,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+        },
+        "events": {
+          "signals": 19,
+          "rejected": 11,
+          "blocked_in_position": 6,
+          "structural_warning": 1,
+          "time_gate": 1
+        },
+        "net_delta_vs_baseline": 0.0,
+        "winners_harmed": 0,
+        "losers_converted": 0,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "NOVEMBER": {
+            "trades": 2,
+            "winners": 1,
+            "losers": 1,
+            "net_sum_pct": 0.854282,
+            "gross_sum_pct": 1.254282,
+            "exits": {
+              "V_PROFIT": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            }
+          }
+        }
+      },
+      "AA1": {
+        "trades": 2,
+        "winners": 2,
+        "losers": 0,
+        "net_sum_pct": 1.216933,
+        "gross_sum_pct": 1.616933,
+        "exits": {
+          "V_PROFIT": 1,
+          "SUPPLEMENTAL_HIGHER_HIGH": 1
+        },
+        "events": {
+          "signals": 19,
+          "rejected": 11,
+          "blocked_in_position": 6,
+          "supplemental_warning": 1,
+          "time_gate": 1
+        },
+        "net_delta_vs_baseline": 0.362651,
+        "winners_harmed": 0,
+        "losers_converted": 1,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "NOVEMBER": {
+            "trades": 2,
+            "winners": 2,
+            "losers": 0,
+            "net_sum_pct": 1.216933,
+            "gross_sum_pct": 1.616933,
+            "exits": {
+              "V_PROFIT": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH": 1
+            }
+          }
+        }
+      },
+      "AA2": {
+        "trades": 2,
+        "winners": 2,
+        "losers": 0,
+        "net_sum_pct": 1.216933,
+        "gross_sum_pct": 1.616933,
+        "exits": {
+          "V_PROFIT": 1,
+          "SUPPLEMENTAL_HIGHER_HIGH_LOW": 1
+        },
+        "events": {
+          "signals": 19,
+          "rejected": 11,
+          "blocked_in_position": 6,
+          "supplemental_warning": 1,
+          "time_gate": 1
+        },
+        "net_delta_vs_baseline": 0.362651,
+        "winners_harmed": 0,
+        "losers_converted": 1,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "NOVEMBER": {
+            "trades": 2,
+            "winners": 2,
+            "losers": 0,
+            "net_sum_pct": 1.216933,
+            "gross_sum_pct": 1.616933,
+            "exits": {
+              "V_PROFIT": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH_LOW": 1
+            }
+          }
+        }
+      },
+      "AA3": {
+        "trades": 5,
+        "winners": 2,
+        "losers": 3,
+        "net_sum_pct": 0.722305,
+        "gross_sum_pct": 1.722305,
+        "exits": {
+          "TRAILING_REVERSE": 3,
+          "V_PROFIT": 1,
+          "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+        },
+        "events": {
+          "signals": 19,
+          "rejected": 8,
+          "blocked_in_position": 6,
+          "structural_warning": 1,
+          "time_gate": 1
+        },
+        "net_delta_vs_baseline": 0.0,
+        "winners_harmed": 0,
+        "losers_converted": 0,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "NOVEMBER": {
+            "trades": 5,
+            "winners": 2,
+            "losers": 3,
+            "net_sum_pct": 0.722305,
+            "gross_sum_pct": 1.722305,
+            "exits": {
+              "TRAILING_REVERSE": 3,
+              "V_PROFIT": 1,
+              "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+            }
+          }
+        }
+      },
+      "AA4": {
+        "trades": 5,
+        "winners": 3,
+        "losers": 2,
+        "net_sum_pct": 1.084956,
+        "gross_sum_pct": 2.084956,
+        "exits": {
+          "TRAILING_REVERSE": 3,
+          "V_PROFIT": 1,
+          "SUPPLEMENTAL_HIGHER_HIGH": 1
+        },
+        "events": {
+          "signals": 19,
+          "rejected": 8,
+          "blocked_in_position": 6,
+          "supplemental_warning": 1,
+          "time_gate": 1
+        },
+        "net_delta_vs_baseline": 0.362651,
+        "winners_harmed": 0,
+        "losers_converted": 1,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "NOVEMBER": {
+            "trades": 5,
+            "winners": 3,
+            "losers": 2,
+            "net_sum_pct": 1.084956,
+            "gross_sum_pct": 2.084956,
+            "exits": {
+              "TRAILING_REVERSE": 3,
+              "V_PROFIT": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH": 1
+            }
+          }
+        }
+      },
+      "AA5": {
+        "trades": 5,
+        "winners": 3,
+        "losers": 2,
+        "net_sum_pct": 1.084956,
+        "gross_sum_pct": 2.084956,
+        "exits": {
+          "TRAILING_REVERSE": 3,
+          "V_PROFIT": 1,
+          "SUPPLEMENTAL_HIGHER_HIGH_LOW": 1
+        },
+        "events": {
+          "signals": 19,
+          "rejected": 8,
+          "blocked_in_position": 6,
+          "supplemental_warning": 1,
+          "time_gate": 1
+        },
+        "net_delta_vs_baseline": 0.362651,
+        "winners_harmed": 0,
+        "losers_converted": 1,
+        "added": 0,
+        "removed": 0,
+        "splits": {
+          "NOVEMBER": {
+            "trades": 5,
+            "winners": 3,
+            "losers": 2,
+            "net_sum_pct": 1.084956,
+            "gross_sum_pct": 2.084956,
+            "exits": {
+              "TRAILING_REVERSE": 3,
+              "V_PROFIT": 1,
+              "SUPPLEMENTAL_HIGHER_HIGH_LOW": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "combined": {
+    "AA0": {
+      "trades": 18,
+      "winners": 9,
+      "losers": 9,
+      "net_sum_pct": -0.239665,
+      "gross_sum_pct": 3.360335,
+      "exits": {
+        "FIRST_CANDLE_INVALIDATION": 2,
+        "V_PROFIT": 8,
+        "TRAILING_REVERSE": 4,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 3,
+        "TREND_CHANGE": 1
+      },
+      "extra_cost_net_pct": {
+        "0.02": -0.599665,
+        "0.05": -1.139665,
+        "0.1": -2.039665
+      }
+    },
+    "AA1": {
+      "trades": 18,
+      "winners": 11,
+      "losers": 7,
+      "net_sum_pct": 1.064077,
+      "gross_sum_pct": 4.664077,
+      "exits": {
+        "FIRST_CANDLE_INVALIDATION": 2,
+        "SUPPLEMENTAL_HIGHER_HIGH": 5,
+        "TRAILING_REVERSE": 3,
+        "V_PROFIT": 6,
+        "TREND_CHANGE": 1,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+      },
+      "extra_cost_net_pct": {
+        "0.02": 0.704077,
+        "0.05": 0.164077,
+        "0.1": -0.735923
+      }
+    },
+    "AA2": {
+      "trades": 18,
+      "winners": 11,
+      "losers": 7,
+      "net_sum_pct": 0.761077,
+      "gross_sum_pct": 4.361077,
+      "exits": {
+        "FIRST_CANDLE_INVALIDATION": 2,
+        "V_PROFIT": 8,
+        "TRAILING_REVERSE": 3,
+        "SUPPLEMENTAL_HIGHER_HIGH_LOW": 3,
+        "TREND_CHANGE": 1,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+      },
+      "extra_cost_net_pct": {
+        "0.02": 0.401077,
+        "0.05": -0.138923,
+        "0.1": -1.038923
+      }
+    },
+    "AA3": {
+      "trades": 33,
+      "winners": 13,
+      "losers": 20,
+      "net_sum_pct": -0.22485,
+      "gross_sum_pct": 6.37515,
+      "exits": {
+        "V_PROFIT": 12,
+        "FIRST_CANDLE_INVALIDATION": 9,
+        "TRAILING_REVERSE": 8,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 4
+      },
+      "extra_cost_net_pct": {
+        "0.02": -0.88485,
+        "0.05": -1.87485,
+        "0.1": -3.52485
+      }
+    },
+    "AA4": {
+      "trades": 33,
+      "winners": 15,
+      "losers": 18,
+      "net_sum_pct": 1.078892,
+      "gross_sum_pct": 7.678892,
+      "exits": {
+        "V_PROFIT": 10,
+        "FIRST_CANDLE_INVALIDATION": 9,
+        "SUPPLEMENTAL_HIGHER_HIGH": 5,
+        "TRAILING_REVERSE": 7,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+      },
+      "extra_cost_net_pct": {
+        "0.02": 0.418892,
+        "0.05": -0.571108,
+        "0.1": -2.221108
+      }
+    },
+    "AA5": {
+      "trades": 33,
+      "winners": 15,
+      "losers": 18,
+      "net_sum_pct": 0.775892,
+      "gross_sum_pct": 7.375892,
+      "exits": {
+        "V_PROFIT": 12,
+        "FIRST_CANDLE_INVALIDATION": 9,
+        "TRAILING_REVERSE": 7,
+        "SUPPLEMENTAL_HIGHER_HIGH_LOW": 3,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+      },
+      "extra_cost_net_pct": {
+        "0.02": 0.115892,
+        "0.05": -0.874108,
+        "0.1": -2.524108
+      }
+    }
+  },
+  "baseline_hashes": {
+    "DISCOVERY_X2_trades.csv": "a8590201b358a3408b74118059799fd7cd4b5c2a79b768cf1e967ebbc674f0aa",
+    "DISCOVERY_X2_candidates.csv": "9f4a66ab7603360f4dfa21eea2101166f73e1c3dfef19ff46748396590f7e938",
+    "DISCOVERY_X4_trades.csv": "48cd41e03afca3a82689cdb67bbecc975e7088d26d68f727da93f14c8bf8bc4d",
+    "DISCOVERY_X4_candidates.csv": "2dea073a61100c785234699bc6232217365b9f5e9aaa05d0f10349c163c90233",
+    "NOVEMBER_X2_trades.csv": "76f95cb33cecbe983d549c091f109646fa0b82fc0022ef7a71f2d49a39d7ed1b",
+    "NOVEMBER_X2_candidates.csv": "f1f9b5492b7ce18cee2167c26a5501e5442332b31fad6cbdb9dbedeeda0a593e",
+    "NOVEMBER_X4_trades.csv": "08f2dc41f2580374689e142c1e5178c78c548ca6343701f9f599ba4e6a2cc3bb",
+    "NOVEMBER_X4_candidates.csv": "91c1a513ed1d465d48e241d5ddfdb9932cf29fcedc8b7b4fd2aac9c22cc88042"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "data_sha256": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+  "engine_git_blob": "c2dd7b7ff262b467ca0c3012bfb6e10c812ef70f",
+  "baseline_parity": 124,
+  "variants": {
+    "B0": {
+      "trades": 124,
+      "winners": 29,
+      "losers": 95,
+      "net_sum_pct": -38.355387,
+      "gross_sum_pct": -13.555387,
+      "exits": {
+        "TRAILING_REVERSE": 94,
+        "V_PROFIT": 27,
+        "STOP_LOSS": 1,
+        "TREND_CHANGE": 2
+      }
+    },
+    "B1": {
+      "trades": 122,
+      "winners": 42,
+      "losers": 80,
+      "net_sum_pct": -29.939156,
+      "gross_sum_pct": -5.539156,
+      "exits": {
+        "TRAILING_REVERSE": 87,
+        "V_PROFIT": 35
+      },
+      "events": {
+        "signals": 135,
+        "blocked_in_position": 13
+      },
+      "open_position": null
+    },
+    "B2": {
+      "trades": 122,
+      "winners": 41,
+      "losers": 81,
+      "net_sum_pct": -30.391587,
+      "gross_sum_pct": -5.991587,
+      "exits": {
+        "TRAILING_REVERSE": 87,
+        "V_PROFIT": 35
+      },
+      "events": {
+        "signals": 135,
+        "blocked_in_position": 13
+      },
+      "open_position": null
+    }
+  }
+}

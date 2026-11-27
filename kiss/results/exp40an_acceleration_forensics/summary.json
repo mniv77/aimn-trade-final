@@ -1,0 +1,1177 @@
+{
+  "notes": [
+    "Discovery only. All 65 AJ1 authorizations; outcomes from separate actual AJ1 and AM3 replays.",
+    "Velocities are close-to-close percent per bar, ending at original peak. Two adjacent three-change windows share only boundary close. No cross-session history. Peak range normalized by median prior six candle ranges. Structural flags compare two preceding six-bar blocks excluding peak. Missing history is not imputed. No thresholds or new trades."
+  ],
+  "source_hashes": {
+    "aimn_exp40am_relative_trajectory_replay.py": "f19067752e1a917da0a277a9bf4e363e57632b9fced7eac8ce4f28a0c382b79f",
+    "aimn_exp40ak_relative_v_leg_forensics.py": "7caf8f2ef059179348754f75c16111429228b7f5c1d0657dc5e45fe0d4ab9e9f",
+    "kiss/results/exp40ak_relative_v_leg_forensics/v_leg_audit.csv": "654d93d66a4b57adb284ce0e82e77170ef4ffc1f4d7917d819ad4d73c53bfbf5",
+    "kiss/visual_research/aimn_nvda_candles.json": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+    "kiss/results/exp40am_relative_trajectory_replay/JUN_AUG_AM3_trades.csv": "8f2e34e3aef01e7100be40a873bead392e153b562ee63980598781ab5f6858aa",
+    "kiss/results/exp40am_relative_trajectory_replay/JUN_AUG_AM3_candidates.csv": "5e5b62a4deadfd534ce94ec88d85bbf69f92bdb55b9b3c919c82ab7825fca3aa",
+    "kiss/results/exp40am_relative_trajectory_replay/JUN_AUG_AM3_gate.csv": "22c7dcd93c7465746a0e0d666a2840641c71ba22f97afa226a15de77a7d6f7ec",
+    "kiss/visual_research/independent_holdout_exp127/nvda_sep_oct_2026_5m_iex.json": "3e944cd4cdeba1adb650804a0a3e81d5355c225d9ad05546176b1de8ef9e9718",
+    "kiss/results/exp40am_relative_trajectory_replay/SEP_OCT_AM3_trades.csv": "cdfe745a023767507fb6870f0985d2eff0ee87996d46341924ed8d2710ebdaee",
+    "kiss/results/exp40am_relative_trajectory_replay/SEP_OCT_AM3_candidates.csv": "306e6ebbcd7d885261ba33899905880c2169a8c815b66fc2c99b83d79fdb58ec",
+    "kiss/results/exp40am_relative_trajectory_replay/SEP_OCT_AM3_gate.csv": "fe985eae78396076d6d410ebcf2349f96458aabc3d78ee7721f5f888db39999f",
+    "kiss/visual_research/independent_holdout_exp40l/nvda_2026-11-16_2026-11-25_5m_iex.json": "eabb5477fc612d1d7ad21973282bc2a527c94da26fefdb9931172c89950b572d",
+    "kiss/results/exp40am_relative_trajectory_replay/NOV_AM3_trades.csv": "53f870e7325a253d2cab83613b3e73c769a31688268251701feb779ebd72acf5",
+    "kiss/results/exp40am_relative_trajectory_replay/NOV_AM3_candidates.csv": "1c52c4208d18f04d39a94ca0f793d024a06d34840f033d14cf8cf5bcd6c34efc",
+    "kiss/results/exp40am_relative_trajectory_replay/NOV_AM3_gate.csv": "2820e171256c8ab4c2f601799e153195bb6e0a88dce6f627a5b4dc0b56d263e9"
+  },
+  "groups": [
+    {
+      "strategy": "aj1",
+      "period": "ALL",
+      "outcome": "WIN",
+      "count": 25,
+      "features": {
+        "early3_velocity": {
+          "n": 23,
+          "median": -0.018806
+        },
+        "recent3_velocity": {
+          "n": 25,
+          "median": 0.092043
+        },
+        "delta3_velocity": {
+          "n": 23,
+          "median": 0.090871
+        },
+        "recent6_velocity": {
+          "n": 23,
+          "median": 0.035068
+        },
+        "recent12_velocity": {
+          "n": 22,
+          "median": 0.015063
+        },
+        "peak_range_pct": {
+          "n": 25,
+          "median": 0.315517
+        },
+        "peak_range_ratio": {
+          "n": 23,
+          "median": 1.023404
+        },
+        "prior12_efficiency": {
+          "n": 22,
+          "median": 0.122997
+        },
+        "prior12_lower_high": {
+          "n": 22,
+          "median": 1.0
+        },
+        "prior12_lower_low": {
+          "n": 22,
+          "median": 0.0
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "ALL",
+      "outcome": "NO_FEE_CLOSE",
+      "count": 25,
+      "features": {
+        "early3_velocity": {
+          "n": 23,
+          "median": 0.043541
+        },
+        "recent3_velocity": {
+          "n": 25,
+          "median": 0.090363
+        },
+        "delta3_velocity": {
+          "n": 23,
+          "median": 0.021636
+        },
+        "recent6_velocity": {
+          "n": 23,
+          "median": 0.068448
+        },
+        "recent12_velocity": {
+          "n": 21,
+          "median": 0.044725
+        },
+        "peak_range_pct": {
+          "n": 25,
+          "median": 0.30251
+        },
+        "peak_range_ratio": {
+          "n": 23,
+          "median": 1.121099
+        },
+        "prior12_efficiency": {
+          "n": 21,
+          "median": 0.386355
+        },
+        "prior12_lower_high": {
+          "n": 21,
+          "median": 0
+        },
+        "prior12_lower_low": {
+          "n": 21,
+          "median": 0
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "ALL",
+      "outcome": "GIVEBACK",
+      "count": 8,
+      "features": {
+        "early3_velocity": {
+          "n": 8,
+          "median": 0.015698
+        },
+        "recent3_velocity": {
+          "n": 8,
+          "median": 0.056225
+        },
+        "delta3_velocity": {
+          "n": 8,
+          "median": 0.107977
+        },
+        "recent6_velocity": {
+          "n": 8,
+          "median": 0.05446
+        },
+        "recent12_velocity": {
+          "n": 7,
+          "median": 0.021455
+        },
+        "peak_range_pct": {
+          "n": 8,
+          "median": 0.277726
+        },
+        "peak_range_ratio": {
+          "n": 8,
+          "median": 0.891049
+        },
+        "prior12_efficiency": {
+          "n": 7,
+          "median": 0.186577
+        },
+        "prior12_lower_high": {
+          "n": 7,
+          "median": 1
+        },
+        "prior12_lower_low": {
+          "n": 7,
+          "median": 0
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "JUN_AUG",
+      "outcome": "WIN",
+      "count": 14,
+      "features": {
+        "early3_velocity": {
+          "n": 13,
+          "median": -0.032337
+        },
+        "recent3_velocity": {
+          "n": 14,
+          "median": 0.109041
+        },
+        "delta3_velocity": {
+          "n": 13,
+          "median": 0.100267
+        },
+        "recent6_velocity": {
+          "n": 13,
+          "median": 0.035068
+        },
+        "recent12_velocity": {
+          "n": 12,
+          "median": 0.027005
+        },
+        "peak_range_pct": {
+          "n": 14,
+          "median": 0.349407
+        },
+        "peak_range_ratio": {
+          "n": 13,
+          "median": 1.147537
+        },
+        "prior12_efficiency": {
+          "n": 12,
+          "median": 0.161271
+        },
+        "prior12_lower_high": {
+          "n": 12,
+          "median": 0.5
+        },
+        "prior12_lower_low": {
+          "n": 12,
+          "median": 0.0
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "JUN_AUG",
+      "outcome": "NO_FEE_CLOSE",
+      "count": 17,
+      "features": {
+        "early3_velocity": {
+          "n": 16,
+          "median": 0.049372
+        },
+        "recent3_velocity": {
+          "n": 17,
+          "median": 0.057332
+        },
+        "delta3_velocity": {
+          "n": 16,
+          "median": 0.007795
+        },
+        "recent6_velocity": {
+          "n": 16,
+          "median": 0.057166
+        },
+        "recent12_velocity": {
+          "n": 15,
+          "median": 0.035799
+        },
+        "peak_range_pct": {
+          "n": 17,
+          "median": 0.269528
+        },
+        "peak_range_ratio": {
+          "n": 16,
+          "median": 1.204043
+        },
+        "prior12_efficiency": {
+          "n": 15,
+          "median": 0.252855
+        },
+        "prior12_lower_high": {
+          "n": 15,
+          "median": 1
+        },
+        "prior12_lower_low": {
+          "n": 15,
+          "median": 1
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "JUN_AUG",
+      "outcome": "GIVEBACK",
+      "count": 3,
+      "features": {
+        "early3_velocity": {
+          "n": 3,
+          "median": -0.00318
+        },
+        "recent3_velocity": {
+          "n": 3,
+          "median": 0.108142
+        },
+        "delta3_velocity": {
+          "n": 3,
+          "median": 0.111323
+        },
+        "recent6_velocity": {
+          "n": 3,
+          "median": 0.052476
+        },
+        "recent12_velocity": {
+          "n": 2,
+          "median": 0.012955
+        },
+        "peak_range_pct": {
+          "n": 3,
+          "median": 0.290426
+        },
+        "peak_range_ratio": {
+          "n": 3,
+          "median": 0.878624
+        },
+        "prior12_efficiency": {
+          "n": 2,
+          "median": 0.113707
+        },
+        "prior12_lower_high": {
+          "n": 2,
+          "median": 0.5
+        },
+        "prior12_lower_low": {
+          "n": 2,
+          "median": 0.5
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "SEP_OCT",
+      "outcome": "WIN",
+      "count": 9,
+      "features": {
+        "early3_velocity": {
+          "n": 8,
+          "median": -0.003907
+        },
+        "recent3_velocity": {
+          "n": 9,
+          "median": 0.047041
+        },
+        "delta3_velocity": {
+          "n": 8,
+          "median": 0.068314
+        },
+        "recent6_velocity": {
+          "n": 8,
+          "median": 0.018632
+        },
+        "recent12_velocity": {
+          "n": 8,
+          "median": 0.009709
+        },
+        "peak_range_pct": {
+          "n": 9,
+          "median": 0.188302
+        },
+        "peak_range_ratio": {
+          "n": 8,
+          "median": 0.820118
+        },
+        "prior12_efficiency": {
+          "n": 8,
+          "median": 0.126637
+        },
+        "prior12_lower_high": {
+          "n": 8,
+          "median": 1.0
+        },
+        "prior12_lower_low": {
+          "n": 8,
+          "median": 1.0
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "SEP_OCT",
+      "outcome": "NO_FEE_CLOSE",
+      "count": 4,
+      "features": {
+        "early3_velocity": {
+          "n": 4,
+          "median": 0.040344
+        },
+        "recent3_velocity": {
+          "n": 4,
+          "median": 0.122201
+        },
+        "delta3_velocity": {
+          "n": 4,
+          "median": 0.078918
+        },
+        "recent6_velocity": {
+          "n": 4,
+          "median": 0.093013
+        },
+        "recent12_velocity": {
+          "n": 3,
+          "median": 0.044725
+        },
+        "peak_range_pct": {
+          "n": 4,
+          "median": 0.15788
+        },
+        "peak_range_ratio": {
+          "n": 4,
+          "median": 1.129987
+        },
+        "prior12_efficiency": {
+          "n": 3,
+          "median": 0.716923
+        },
+        "prior12_lower_high": {
+          "n": 3,
+          "median": 0
+        },
+        "prior12_lower_low": {
+          "n": 3,
+          "median": 0
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "SEP_OCT",
+      "outcome": "GIVEBACK",
+      "count": 4,
+      "features": {
+        "early3_velocity": {
+          "n": 4,
+          "median": 0.015341
+        },
+        "recent3_velocity": {
+          "n": 4,
+          "median": 0.042709
+        },
+        "delta3_velocity": {
+          "n": 4,
+          "median": 0.040884
+        },
+        "recent6_velocity": {
+          "n": 4,
+          "median": 0.022693
+        },
+        "recent12_velocity": {
+          "n": 4,
+          "median": 0.018162
+        },
+        "peak_range_pct": {
+          "n": 4,
+          "median": 0.197738
+        },
+        "peak_range_ratio": {
+          "n": 4,
+          "median": 1.033636
+        },
+        "prior12_efficiency": {
+          "n": 4,
+          "median": 0.129177
+        },
+        "prior12_lower_high": {
+          "n": 4,
+          "median": 0.5
+        },
+        "prior12_lower_low": {
+          "n": 4,
+          "median": 0.5
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "NOV",
+      "outcome": "WIN",
+      "count": 2,
+      "features": {
+        "early3_velocity": {
+          "n": 2,
+          "median": -0.013887
+        },
+        "recent3_velocity": {
+          "n": 2,
+          "median": 0.246292
+        },
+        "delta3_velocity": {
+          "n": 2,
+          "median": 0.260179
+        },
+        "recent6_velocity": {
+          "n": 2,
+          "median": 0.115916
+        },
+        "recent12_velocity": {
+          "n": 2,
+          "median": -0.004496
+        },
+        "peak_range_pct": {
+          "n": 2,
+          "median": 0.656542
+        },
+        "peak_range_ratio": {
+          "n": 2,
+          "median": 1.63517
+        },
+        "prior12_efficiency": {
+          "n": 2,
+          "median": 0.00456
+        },
+        "prior12_lower_high": {
+          "n": 2,
+          "median": 0.5
+        },
+        "prior12_lower_low": {
+          "n": 2,
+          "median": 1.0
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "NOV",
+      "outcome": "NO_FEE_CLOSE",
+      "count": 4,
+      "features": {
+        "early3_velocity": {
+          "n": 3,
+          "median": 0.323522
+        },
+        "recent3_velocity": {
+          "n": 4,
+          "median": 0.13215
+        },
+        "delta3_velocity": {
+          "n": 3,
+          "median": 0.203119
+        },
+        "recent6_velocity": {
+          "n": 3,
+          "median": 0.427637
+        },
+        "recent12_velocity": {
+          "n": 3,
+          "median": 0.065965
+        },
+        "peak_range_pct": {
+          "n": 4,
+          "median": 0.759038
+        },
+        "peak_range_ratio": {
+          "n": 3,
+          "median": 1.020929
+        },
+        "prior12_efficiency": {
+          "n": 3,
+          "median": 0.259755
+        },
+        "prior12_lower_high": {
+          "n": 3,
+          "median": 0
+        },
+        "prior12_lower_low": {
+          "n": 3,
+          "median": 0
+        }
+      }
+    },
+    {
+      "strategy": "aj1",
+      "period": "NOV",
+      "outcome": "GIVEBACK",
+      "count": 1,
+      "features": {
+        "early3_velocity": {
+          "n": 1,
+          "median": 0.034576
+        },
+        "recent3_velocity": {
+          "n": 1,
+          "median": 0.139207
+        },
+        "delta3_velocity": {
+          "n": 1,
+          "median": 0.104631
+        },
+        "recent6_velocity": {
+          "n": 1,
+          "median": 0.086964
+        },
+        "recent12_velocity": {
+          "n": 1,
+          "median": 0.036379
+        },
+        "peak_range_pct": {
+          "n": 1,
+          "median": 0.27856
+        },
+        "peak_range_ratio": {
+          "n": 1,
+          "median": 0.666477
+        },
+        "prior12_efficiency": {
+          "n": 1,
+          "median": 0.186577
+        },
+        "prior12_lower_high": {
+          "n": 1,
+          "median": 1
+        },
+        "prior12_lower_low": {
+          "n": 1,
+          "median": 0
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "ALL",
+      "outcome": "WIN",
+      "count": 11,
+      "features": {
+        "early3_velocity": {
+          "n": 11,
+          "median": -0.065313
+        },
+        "recent3_velocity": {
+          "n": 11,
+          "median": 0.083788
+        },
+        "delta3_velocity": {
+          "n": 11,
+          "median": 0.092032
+        },
+        "recent6_velocity": {
+          "n": 11,
+          "median": 0.014104
+        },
+        "recent12_velocity": {
+          "n": 11,
+          "median": 0.007444
+        },
+        "peak_range_pct": {
+          "n": 11,
+          "median": 0.315517
+        },
+        "peak_range_ratio": {
+          "n": 11,
+          "median": 1.027698
+        },
+        "prior12_efficiency": {
+          "n": 11,
+          "median": 0.052486
+        },
+        "prior12_lower_high": {
+          "n": 11,
+          "median": 1
+        },
+        "prior12_lower_low": {
+          "n": 11,
+          "median": 1
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "ALL",
+      "outcome": "NO_FEE_CLOSE",
+      "count": 5,
+      "features": {
+        "early3_velocity": {
+          "n": 5,
+          "median": -0.004636
+        },
+        "recent3_velocity": {
+          "n": 5,
+          "median": 0.017
+        },
+        "delta3_velocity": {
+          "n": 5,
+          "median": 0.046614
+        },
+        "recent6_velocity": {
+          "n": 5,
+          "median": 0.006181
+        },
+        "recent12_velocity": {
+          "n": 5,
+          "median": -0.027895
+        },
+        "peak_range_pct": {
+          "n": 5,
+          "median": 0.15344
+        },
+        "peak_range_ratio": {
+          "n": 5,
+          "median": 0.881898
+        },
+        "prior12_efficiency": {
+          "n": 5,
+          "median": -0.311431
+        },
+        "prior12_lower_high": {
+          "n": 5,
+          "median": 1
+        },
+        "prior12_lower_low": {
+          "n": 5,
+          "median": 1
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "ALL",
+      "outcome": "GIVEBACK",
+      "count": 1,
+      "features": {
+        "early3_velocity": {
+          "n": 1,
+          "median": -0.08173
+        },
+        "recent3_velocity": {
+          "n": 1,
+          "median": 0.03814
+        },
+        "delta3_velocity": {
+          "n": 1,
+          "median": 0.119871
+        },
+        "recent6_velocity": {
+          "n": 1,
+          "median": -0.021842
+        },
+        "recent12_velocity": {
+          "n": 1,
+          "median": -0.027249
+        },
+        "peak_range_pct": {
+          "n": 1,
+          "median": 0.118584
+        },
+        "peak_range_ratio": {
+          "n": 1,
+          "median": 0.903474
+        },
+        "prior12_efficiency": {
+          "n": 1,
+          "median": -0.388471
+        },
+        "prior12_lower_high": {
+          "n": 1,
+          "median": 1
+        },
+        "prior12_lower_low": {
+          "n": 1,
+          "median": 1
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "JUN_AUG",
+      "outcome": "WIN",
+      "count": 6,
+      "features": {
+        "early3_velocity": {
+          "n": 6,
+          "median": -0.068559
+        },
+        "recent3_velocity": {
+          "n": 6,
+          "median": 0.072221
+        },
+        "delta3_velocity": {
+          "n": 6,
+          "median": 0.126721
+        },
+        "recent6_velocity": {
+          "n": 6,
+          "median": 0.014072
+        },
+        "recent12_velocity": {
+          "n": 6,
+          "median": 0.008723
+        },
+        "peak_range_pct": {
+          "n": 6,
+          "median": 0.332567
+        },
+        "peak_range_ratio": {
+          "n": 6,
+          "median": 1.104475
+        },
+        "prior12_efficiency": {
+          "n": 6,
+          "median": 0.081434
+        },
+        "prior12_lower_high": {
+          "n": 6,
+          "median": 1.0
+        },
+        "prior12_lower_low": {
+          "n": 6,
+          "median": 0.0
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "JUN_AUG",
+      "outcome": "NO_FEE_CLOSE",
+      "count": 5,
+      "features": {
+        "early3_velocity": {
+          "n": 5,
+          "median": -0.004636
+        },
+        "recent3_velocity": {
+          "n": 5,
+          "median": 0.017
+        },
+        "delta3_velocity": {
+          "n": 5,
+          "median": 0.046614
+        },
+        "recent6_velocity": {
+          "n": 5,
+          "median": 0.006181
+        },
+        "recent12_velocity": {
+          "n": 5,
+          "median": -0.027895
+        },
+        "peak_range_pct": {
+          "n": 5,
+          "median": 0.15344
+        },
+        "peak_range_ratio": {
+          "n": 5,
+          "median": 0.881898
+        },
+        "prior12_efficiency": {
+          "n": 5,
+          "median": -0.311431
+        },
+        "prior12_lower_high": {
+          "n": 5,
+          "median": 1
+        },
+        "prior12_lower_low": {
+          "n": 5,
+          "median": 1
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "JUN_AUG",
+      "outcome": "GIVEBACK",
+      "count": 0,
+      "features": {
+        "early3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "delta3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent6_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent12_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "peak_range_pct": {
+          "n": 0,
+          "median": null
+        },
+        "peak_range_ratio": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_efficiency": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_lower_high": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_lower_low": {
+          "n": 0,
+          "median": null
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "SEP_OCT",
+      "outcome": "WIN",
+      "count": 4,
+      "features": {
+        "early3_velocity": {
+          "n": 4,
+          "median": -0.045767
+        },
+        "recent3_velocity": {
+          "n": 4,
+          "median": 0.065415
+        },
+        "delta3_velocity": {
+          "n": 4,
+          "median": 0.084294
+        },
+        "recent6_velocity": {
+          "n": 4,
+          "median": 0.011796
+        },
+        "recent12_velocity": {
+          "n": 4,
+          "median": -9.2e-05
+        },
+        "peak_range_pct": {
+          "n": 4,
+          "median": 0.185402
+        },
+        "peak_range_ratio": {
+          "n": 4,
+          "median": 1.025551
+        },
+        "prior12_efficiency": {
+          "n": 4,
+          "median": -0.008641
+        },
+        "prior12_lower_high": {
+          "n": 4,
+          "median": 1.0
+        },
+        "prior12_lower_low": {
+          "n": 4,
+          "median": 1.0
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "SEP_OCT",
+      "outcome": "NO_FEE_CLOSE",
+      "count": 0,
+      "features": {
+        "early3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "delta3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent6_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent12_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "peak_range_pct": {
+          "n": 0,
+          "median": null
+        },
+        "peak_range_ratio": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_efficiency": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_lower_high": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_lower_low": {
+          "n": 0,
+          "median": null
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "SEP_OCT",
+      "outcome": "GIVEBACK",
+      "count": 1,
+      "features": {
+        "early3_velocity": {
+          "n": 1,
+          "median": -0.08173
+        },
+        "recent3_velocity": {
+          "n": 1,
+          "median": 0.03814
+        },
+        "delta3_velocity": {
+          "n": 1,
+          "median": 0.119871
+        },
+        "recent6_velocity": {
+          "n": 1,
+          "median": -0.021842
+        },
+        "recent12_velocity": {
+          "n": 1,
+          "median": -0.027249
+        },
+        "peak_range_pct": {
+          "n": 1,
+          "median": 0.118584
+        },
+        "peak_range_ratio": {
+          "n": 1,
+          "median": 0.903474
+        },
+        "prior12_efficiency": {
+          "n": 1,
+          "median": -0.388471
+        },
+        "prior12_lower_high": {
+          "n": 1,
+          "median": 1
+        },
+        "prior12_lower_low": {
+          "n": 1,
+          "median": 1
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "NOV",
+      "outcome": "WIN",
+      "count": 1,
+      "features": {
+        "early3_velocity": {
+          "n": 1,
+          "median": 0.104459
+        },
+        "recent3_velocity": {
+          "n": 1,
+          "median": 0.113895
+        },
+        "delta3_velocity": {
+          "n": 1,
+          "median": 0.009436
+        },
+        "recent6_velocity": {
+          "n": 1,
+          "median": 0.109356
+        },
+        "recent12_velocity": {
+          "n": 1,
+          "median": 0.014077
+        },
+        "peak_range_pct": {
+          "n": 1,
+          "median": 0.523763
+        },
+        "peak_range_ratio": {
+          "n": 1,
+          "median": 1.993851
+        },
+        "prior12_efficiency": {
+          "n": 1,
+          "median": 0.075581
+        },
+        "prior12_lower_high": {
+          "n": 1,
+          "median": 0
+        },
+        "prior12_lower_low": {
+          "n": 1,
+          "median": 1
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "NOV",
+      "outcome": "NO_FEE_CLOSE",
+      "count": 0,
+      "features": {
+        "early3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "delta3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent6_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent12_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "peak_range_pct": {
+          "n": 0,
+          "median": null
+        },
+        "peak_range_ratio": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_efficiency": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_lower_high": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_lower_low": {
+          "n": 0,
+          "median": null
+        }
+      }
+    },
+    {
+      "strategy": "am3",
+      "period": "NOV",
+      "outcome": "GIVEBACK",
+      "count": 0,
+      "features": {
+        "early3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "delta3_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent6_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "recent12_velocity": {
+          "n": 0,
+          "median": null
+        },
+        "peak_range_pct": {
+          "n": 0,
+          "median": null
+        },
+        "peak_range_ratio": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_efficiency": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_lower_high": {
+          "n": 0,
+          "median": null
+        },
+        "prior12_lower_low": {
+          "n": 0,
+          "median": null
+        }
+      }
+    }
+  ]
+}

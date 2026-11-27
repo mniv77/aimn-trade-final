@@ -1,0 +1,388 @@
+{
+  "notes": [
+    "Previously used September\u2013October data: historical robustness only, not untouched validation.",
+    "Original June\u2013August warm-up feed provenance is unverified; mixed feed may affect indicator values.",
+    "Frozen engines reused; no parameter tuning. No orders or production changes.",
+    "Net trade sums are not portfolio returns; extra round-trip costs are arithmetic sensitivity, not a fill simulation."
+  ],
+  "source_hashes": {
+    "aimn_exp40aa_reverse_transition_replay.py": "45aaab70cd3436b2dac18988dd7d0abbbdb2a09c47a9857c3d8fdda542b100b6",
+    "aimn_exp40b_causal_replay.py": "f43fb8b676bb48b2ecbc77477ae775a1079095feb5b35347d3697cb4c8c22651",
+    "aimn_exp40c_trajectory_forensics.py": "8aa1f6361efdc8fb17b19594a8fe4470d5de52c170fff30fa21181310f7bcba4",
+    "aimn_exp40d_deceleration_replay.py": "7faa4f24454fcbce64f5dd1ab016322c472622185f89200bb9995ae3fb0e88b3",
+    "aimn_exp40e_adaptive_trajectory.py": "3db3ba5947c4848daedc3837fd3de37ab34aa1014463bfb43c3a8a09775b8ada",
+    "aimn_exp40f_opening_session_forensics.py": "075c3eee0a345f465e3ad092c13fa87825818acd3e47a387ec3d5fe2b8a44cf0",
+    "aimn_exp40g_prior_session_replay.py": "75a192b814df8e01a76993ddb800a7a8182c092720bbd4f916234d0a11c06206",
+    "aimn_exp40h_session_protection.py": "7f546b190ddb76aeb0b7244f17ddcd7c5c6d57a5c1eaed83e660c160380535a6",
+    "aimn_exp40i_profit_preservation.py": "a86572dbea2b61bc618e91ba3259b609b911bf555330fc5e2963d83f267efa9e",
+    "aimn_exp40j_reverse_transition_forensics.py": "472ab234a33dbe7588fd2fa8ef5fce1fd25221ced9a95e61fca8cd519a29bb39",
+    "aimn_exp40k_structural_reversal_replay.py": "36bab76860e192d3d8529efa1ce6b90c1171cee238f992fc277bc193f98c2f1f",
+    "aimn_exp40l_alpaca_validation_downloader.py": "fe62b98873200dbc576d44a410c6166a78a395809aa893e65abbfbe3e70b3c20",
+    "aimn_exp40l_independent_validation.py": "964e924ba5ef3a48dac8e16c6da3c1b0615a6b1a8038a04b6f4f3183a391ff0e",
+    "aimn_exp40m_supertrend_forensics.py": "804e4c90b2993679638dc7ae1a2b99c89f1bd1ddc2dbb2e91e5f974bf0232e1b",
+    "aimn_exp40n_supertrend_trajectory_forensics.py": "613fc04ad377b1c7af38a9f4c995ef0bf1271f8958da2c1f2a20be84810286a8",
+    "aimn_exp40o_transition_recognition_forensics.py": "c20a2872c8b3ff244dabe03ca8453e0518a9db2b92b181da8d13406068c389cd",
+    "aimn_exp40p_transition_noise_forensics.py": "0f101ffbfd8a78108ff7e4ece12c85f14e83acc3a425e1ae4366cd1e0e4d86a3",
+    "aimn_exp40q_combined_trajectory_forensics.py": "ede4e39f98fd427165775cb5191dfe84e738c1a638ed7dbbbe72c86bc1f5b1b3",
+    "aimn_exp40r_entry_timing_forensics.py": "d6925c24e7c92da1f9e658948bedda0d983066380bc9ef4de1004d6d834e9664",
+    "aimn_exp40s_opening_trajectory_forensics.py": "bf32703dd21e908e043983b6467b0be9a29017338cfdc7db590c62b1b362af52",
+    "aimn_exp40t_opening_selectivity.py": "6c3edd17cfe9bfa2a2d15157488fcab9ede062b605e857c3af5fcea68cdb5277",
+    "aimn_exp40u_combined_causal_replay.py": "67ad4c4e6c6680ec5e611d408edb2197612d499e29aa6e3dbc0ec3d835b01657",
+    "aimn_exp40v_transition_verification.py": "4e69c8528a4e64f0c082ef596c34f5a4b6ce8dd815fd4ee93f0f7fb08decad76",
+    "aimn_exp40x_causal_invalidation_replay.py": "251f946917176eefda05ea38af37b72d5e3fd9f488d5e3bf56027e8cd0730664",
+    "aimn_exp40z_reverse_transition_forensics.py": "97f3f71f972ea5c4594570d5df720fcceaa6eae446b5928db24b5a1febfb5ec4",
+    "engine/kiss_backtest.py": "0131b7dfc5bcbd16439ba21ed22702fa3350776116918acbe0683bfbcc44c5b7",
+    "kiss/kiss_exp53_supertrend.py": "c1727a67c903fdc7dc0ca61562f233a07908aebb04347ce255f4e9fccede1749"
+  },
+  "reference_hashes": {
+    "kiss/results/exp40k_structural_reversal_replay/K3_BULLISH_UPPER_CLOSE_trades.csv": "bfb61ad0ee6e9f7884f0c8c5d9bec3098a922417dcbd85d7a27abceb0ad4e9c5",
+    "kiss/results/exp40k_structural_reversal_replay/K3_BULLISH_UPPER_CLOSE_candidates.csv": "92c8e5d2200727ab358cb228ac91094b472718f2d9f9c09e16b35866b23671c7",
+    "kiss/results/exp40aa_reverse_transition_replay/DISCOVERY_AA1_trades.csv": "11ed4b87168bc5fc66febdd18601307ec4e20979f1a0d2e9e83915dad03d4a7a",
+    "kiss/results/exp40aa_reverse_transition_replay/DISCOVERY_AA1_candidates.csv": "9f4a66ab7603360f4dfa21eea2101166f73e1c3dfef19ff46748396590f7e938",
+    "kiss/results/exp40aa_reverse_transition_replay/DISCOVERY_AA4_trades.csv": "6959339379ff561c68e09970fd6e8c9a8d4f78181c8895970e4828b6ec017e3e",
+    "kiss/results/exp40aa_reverse_transition_replay/DISCOVERY_AA4_candidates.csv": "2dea073a61100c785234699bc6232217365b9f5e9aaa05d0f10349c163c90233",
+    "kiss/results/exp40l_independent_validation/K3_trades.csv": "66f5c75b2be0eb6c4631c8f5a66fe9e8602f96d6edf9b07a6f44c32ec548a482",
+    "kiss/results/exp40l_independent_validation/K3_candidates.csv": "e8618cceaa100d4e875a37e359285f0ec88c9b2db197e473e7c89ee9eabed202",
+    "kiss/results/exp40aa_reverse_transition_replay/NOVEMBER_AA1_trades.csv": "29f2a56a313acb0a3cad980cf1f4b1257d9371f297804de495bf7da447bffec0",
+    "kiss/results/exp40aa_reverse_transition_replay/NOVEMBER_AA1_candidates.csv": "f1f9b5492b7ce18cee2167c26a5501e5442332b31fad6cbdb9dbedeeda0a593e",
+    "kiss/results/exp40aa_reverse_transition_replay/NOVEMBER_AA4_trades.csv": "d84abebdfb8ccd2a6579dbcd1becb3aa7e13a2c776e6c021f62848d1758bcdd8",
+    "kiss/results/exp40aa_reverse_transition_replay/NOVEMBER_AA4_candidates.csv": "91c1a513ed1d465d48e241d5ddfdb9932cf29fcedc8b7b4fd2aac9c22cc88042"
+  },
+  "benchmark_parity": {
+    "DISCOVERY_K3": {
+      "trades": 32,
+      "winners": 16,
+      "losers": 16,
+      "net_sum_pct": -0.199296,
+      "gross_sum_pct": 6.200704,
+      "exits": {
+        "V_PROFIT": 13,
+        "TRAILING_REVERSE": 13,
+        "SESSION_FLATTEN": 2,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 4
+      }
+    },
+    "DISCOVERY_AA1": {
+      "trades": 16,
+      "winners": 9,
+      "losers": 7,
+      "net_sum_pct": -0.152856,
+      "gross_sum_pct": 3.047144,
+      "exits": {
+        "FIRST_CANDLE_INVALIDATION": 2,
+        "SUPPLEMENTAL_HIGHER_HIGH": 4,
+        "TRAILING_REVERSE": 3,
+        "V_PROFIT": 5,
+        "TREND_CHANGE": 1,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+      }
+    },
+    "DISCOVERY_AA4": {
+      "trades": 28,
+      "winners": 12,
+      "losers": 16,
+      "net_sum_pct": -0.006064,
+      "gross_sum_pct": 5.593936,
+      "exits": {
+        "V_PROFIT": 9,
+        "FIRST_CANDLE_INVALIDATION": 9,
+        "SUPPLEMENTAL_HIGHER_HIGH": 4,
+        "TRAILING_REVERSE": 4,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 2
+      }
+    },
+    "NOVEMBER_K3": {
+      "trades": 3,
+      "winners": 0,
+      "losers": 3,
+      "net_sum_pct": -1.673977,
+      "gross_sum_pct": -1.073977,
+      "exits": {
+        "TRAILING_REVERSE": 3
+      }
+    },
+    "NOVEMBER_AA1": {
+      "trades": 2,
+      "winners": 2,
+      "losers": 0,
+      "net_sum_pct": 1.216933,
+      "gross_sum_pct": 1.616933,
+      "exits": {
+        "V_PROFIT": 1,
+        "SUPPLEMENTAL_HIGHER_HIGH": 1
+      }
+    },
+    "NOVEMBER_AA4": {
+      "trades": 5,
+      "winners": 3,
+      "losers": 2,
+      "net_sum_pct": 1.084956,
+      "gross_sum_pct": 2.084956,
+      "exits": {
+        "TRAILING_REVERSE": 3,
+        "V_PROFIT": 1,
+        "SUPPLEMENTAL_HIGHER_HIGH": 1
+      }
+    }
+  },
+  "evaluation_sha256": "3e944cd4cdeba1adb650804a0a3e81d5355c225d9ad05546176b1de8ef9e9718",
+  "warmup_sha256": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+  "warmup_candles": 4680,
+  "evaluation_candles": 3354,
+  "evaluation_sessions": [
+    "2026-09-01",
+    "2026-09-02",
+    "2026-09-03",
+    "2026-09-04",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-16",
+    "2026-09-17",
+    "2026-09-18",
+    "2026-09-21",
+    "2026-09-22",
+    "2026-09-23",
+    "2026-09-24",
+    "2026-09-25",
+    "2026-09-28",
+    "2026-09-29",
+    "2026-09-30",
+    "2026-10-01",
+    "2026-10-02",
+    "2026-10-05",
+    "2026-10-06",
+    "2026-10-07",
+    "2026-10-08",
+    "2026-10-09",
+    "2026-10-12",
+    "2026-10-13",
+    "2026-10-14",
+    "2026-10-15",
+    "2026-10-16",
+    "2026-10-19",
+    "2026-10-20",
+    "2026-10-21",
+    "2026-10-22",
+    "2026-10-23",
+    "2026-10-26",
+    "2026-10-27",
+    "2026-10-28",
+    "2026-10-29",
+    "2026-10-30"
+  ],
+  "environment": {
+    "python": "3.13.1 (main, Jan 16 2025, 13:50:41) [GCC 11.4.0]",
+    "platform": "Linux-6.8.0-1069-aws-x86_64-with-glibc2.35"
+  },
+  "warning_counts": {
+    "two_step": 409,
+    "focus": 54
+  },
+  "variants": {
+    "AB0": {
+      "strategy": "K3",
+      "trades": 19,
+      "winners": 8,
+      "losers": 11,
+      "net_sum_pct": -3.317638,
+      "gross_sum_pct": 0.482362,
+      "exits": {
+        "TRAILING_REVERSE": 9,
+        "RSI_EMERGENCY": 1,
+        "SESSION_FLATTEN": 3,
+        "V_PROFIT": 6
+      },
+      "average_net_pct": -0.174613,
+      "extra_cost_net_pct": {
+        "0.02": -3.697638,
+        "0.05": -4.267638,
+        "0.10": -5.217638
+      },
+      "candidates": 73,
+      "candidate_statuses": {
+        "SCHEDULED": 19,
+        "REJECTED": 49,
+        "BLOCKED_POSITION": 5
+      },
+      "overnight_trades": 0,
+      "splits": {
+        "SEPTEMBER": {
+          "trades": 11,
+          "winners": 5,
+          "losers": 6,
+          "net_sum_pct": -1.671427,
+          "gross_sum_pct": 0.528573,
+          "exits": {
+            "TRAILING_REVERSE": 4,
+            "RSI_EMERGENCY": 1,
+            "SESSION_FLATTEN": 3,
+            "V_PROFIT": 3
+          },
+          "average_net_pct": -0.151948,
+          "extra_cost_net_pct": {
+            "0.02": -1.891427,
+            "0.05": -2.221427,
+            "0.10": -2.771427
+          }
+        },
+        "OCTOBER": {
+          "trades": 8,
+          "winners": 3,
+          "losers": 5,
+          "net_sum_pct": -1.646211,
+          "gross_sum_pct": -0.046211,
+          "exits": {
+            "V_PROFIT": 3,
+            "TRAILING_REVERSE": 5
+          },
+          "average_net_pct": -0.205776,
+          "extra_cost_net_pct": {
+            "0.02": -1.806211,
+            "0.05": -2.046211,
+            "0.10": -2.446211
+          }
+        }
+      }
+    },
+    "AB1": {
+      "strategy": "AA1",
+      "trades": 13,
+      "winners": 4,
+      "losers": 9,
+      "net_sum_pct": -2.369424,
+      "gross_sum_pct": 0.230576,
+      "exits": {
+        "SUPPLEMENTAL_HIGHER_HIGH": 2,
+        "V_PROFIT": 2,
+        "FIRST_CANDLE_INVALIDATION": 5,
+        "TRAILING_REVERSE": 3,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+      },
+      "average_net_pct": -0.182263,
+      "extra_cost_net_pct": {
+        "0.02": -2.629424,
+        "0.05": -3.019424,
+        "0.10": -3.669424
+      },
+      "candidates": 54,
+      "candidate_statuses": {
+        "REJECTED": 28,
+        "SCHEDULED": 13,
+        "BLOCKED_POSITION": 13
+      },
+      "overnight_trades": 0,
+      "splits": {
+        "SEPTEMBER": {
+          "trades": 3,
+          "winners": 2,
+          "losers": 1,
+          "net_sum_pct": -0.128444,
+          "gross_sum_pct": 0.471556,
+          "exits": {
+            "SUPPLEMENTAL_HIGHER_HIGH": 1,
+            "V_PROFIT": 1,
+            "FIRST_CANDLE_INVALIDATION": 1
+          },
+          "average_net_pct": -0.042815,
+          "extra_cost_net_pct": {
+            "0.02": -0.188444,
+            "0.05": -0.278444,
+            "0.10": -0.428444
+          }
+        },
+        "OCTOBER": {
+          "trades": 10,
+          "winners": 2,
+          "losers": 8,
+          "net_sum_pct": -2.24098,
+          "gross_sum_pct": -0.24098,
+          "exits": {
+            "SUPPLEMENTAL_HIGHER_HIGH": 1,
+            "FIRST_CANDLE_INVALIDATION": 4,
+            "TRAILING_REVERSE": 3,
+            "V_PROFIT": 1,
+            "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+          },
+          "average_net_pct": -0.224098,
+          "extra_cost_net_pct": {
+            "0.02": -2.44098,
+            "0.05": -2.74098,
+            "0.10": -3.24098
+          }
+        }
+      }
+    },
+    "AB2": {
+      "strategy": "AA4",
+      "trades": 15,
+      "winners": 4,
+      "losers": 11,
+      "net_sum_pct": -2.11435,
+      "gross_sum_pct": 0.88565,
+      "exits": {
+        "SUPPLEMENTAL_HIGHER_HIGH": 2,
+        "V_PROFIT": 3,
+        "FIRST_CANDLE_INVALIDATION": 8,
+        "TRAILING_REVERSE": 1,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+      },
+      "average_net_pct": -0.140957,
+      "extra_cost_net_pct": {
+        "0.02": -2.41435,
+        "0.05": -2.86435,
+        "0.10": -3.61435
+      },
+      "candidates": 54,
+      "candidate_statuses": {
+        "REJECTED": 26,
+        "SCHEDULED": 15,
+        "BLOCKED_POSITION": 13
+      },
+      "overnight_trades": 0,
+      "splits": {
+        "SEPTEMBER": {
+          "trades": 4,
+          "winners": 3,
+          "losers": 1,
+          "net_sum_pct": -0.07922,
+          "gross_sum_pct": 0.72078,
+          "exits": {
+            "SUPPLEMENTAL_HIGHER_HIGH": 1,
+            "V_PROFIT": 2,
+            "FIRST_CANDLE_INVALIDATION": 1
+          },
+          "average_net_pct": -0.019805,
+          "extra_cost_net_pct": {
+            "0.02": -0.15922,
+            "0.05": -0.27922,
+            "0.10": -0.47922
+          }
+        },
+        "OCTOBER": {
+          "trades": 11,
+          "winners": 1,
+          "losers": 10,
+          "net_sum_pct": -2.03513,
+          "gross_sum_pct": 0.16487,
+          "exits": {
+            "FIRST_CANDLE_INVALIDATION": 7,
+            "SUPPLEMENTAL_HIGHER_HIGH": 1,
+            "TRAILING_REVERSE": 1,
+            "V_PROFIT": 1,
+            "STRUCTURAL_BULLISH_UPPER_CLOSE": 1
+          },
+          "average_net_pct": -0.185012,
+          "extra_cost_net_pct": {
+            "0.02": -2.25513,
+            "0.05": -2.58513,
+            "0.10": -3.13513
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,440 @@
+{
+  "notes": [
+    "Fixed-trade observational counterfactual only; both periods discovery. No new entries simulated.",
+    "First three fully held candles only; excludes original exit candle. Decision at close, hypothetical fill next open.",
+    "V1: ST remains LONG since signal, distance increases versus prior bar, rising close. V2 adds higher low. V3 adds best completed gross close <= fee. No fitted thresholds.",
+    "Existing stops and exits are not changed. Counterfactual deltas do not establish strategy profitability."
+  ],
+  "source_hashes": {
+    "DISCOVERY": "2b33f8da3ea261353dc223c478565e279ee8dcfe2b4dd3dae3811b4b2f15c840",
+    "NOVEMBER": "08f2dc41f2580374689e142c1e5178c78c548ca6343701f9f599ba4e6a2cc3bb"
+  },
+  "trade_groups": {
+    "WIN": 14,
+    "NO_FEE_CLOSE": 12,
+    "GIVEBACK": 6
+  },
+  "entry_bar_stops": 3,
+  "observations": 69,
+  "groups": [
+    {
+      "period": "DISCOVERY",
+      "bar": 1,
+      "group": "WIN",
+      "count": 12,
+      "median_gross_close_pct": 0.183367,
+      "never_short": 10,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 10
+    },
+    {
+      "period": "DISCOVERY",
+      "bar": 1,
+      "group": "NO_FEE_CLOSE",
+      "count": 9,
+      "median_gross_close_pct": -0.088248,
+      "never_short": 9,
+      "retreat": 7,
+      "rising_close": 7,
+      "lower_low": 5
+    },
+    {
+      "period": "DISCOVERY",
+      "bar": 1,
+      "group": "GIVEBACK",
+      "count": 5,
+      "median_gross_close_pct": 0.091865,
+      "never_short": 5,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 4
+    },
+    {
+      "period": "DISCOVERY",
+      "bar": 2,
+      "group": "WIN",
+      "count": 12,
+      "median_gross_close_pct": 0.329179,
+      "never_short": 7,
+      "retreat": 4,
+      "rising_close": 5,
+      "lower_low": 12
+    },
+    {
+      "period": "DISCOVERY",
+      "bar": 2,
+      "group": "NO_FEE_CLOSE",
+      "count": 3,
+      "median_gross_close_pct": -0.088818,
+      "never_short": 3,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 1
+    },
+    {
+      "period": "DISCOVERY",
+      "bar": 2,
+      "group": "GIVEBACK",
+      "count": 4,
+      "median_gross_close_pct": 0.097405,
+      "never_short": 3,
+      "retreat": 2,
+      "rising_close": 2,
+      "lower_low": 4
+    },
+    {
+      "period": "DISCOVERY",
+      "bar": 3,
+      "group": "WIN",
+      "count": 9,
+      "median_gross_close_pct": 0.425234,
+      "never_short": 4,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 7
+    },
+    {
+      "period": "DISCOVERY",
+      "bar": 3,
+      "group": "NO_FEE_CLOSE",
+      "count": 2,
+      "median_gross_close_pct": -0.181613,
+      "never_short": 2,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 1
+    },
+    {
+      "period": "DISCOVERY",
+      "bar": 3,
+      "group": "GIVEBACK",
+      "count": 4,
+      "median_gross_close_pct": 0.004636,
+      "never_short": 3,
+      "retreat": 3,
+      "rising_close": 4,
+      "lower_low": 2
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 1,
+      "group": "WIN",
+      "count": 2,
+      "median_gross_close_pct": 0.210004,
+      "never_short": 1,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 2
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 1,
+      "group": "NO_FEE_CLOSE",
+      "count": 0,
+      "median_gross_close_pct": null,
+      "never_short": 0,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 0
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 1,
+      "group": "GIVEBACK",
+      "count": 1,
+      "median_gross_close_pct": 0.172864,
+      "never_short": 1,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 1
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 2,
+      "group": "WIN",
+      "count": 2,
+      "median_gross_close_pct": 0.2667,
+      "never_short": 1,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 1
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 2,
+      "group": "NO_FEE_CLOSE",
+      "count": 0,
+      "median_gross_close_pct": null,
+      "never_short": 0,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 0
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 2,
+      "group": "GIVEBACK",
+      "count": 1,
+      "median_gross_close_pct": 0.257883,
+      "never_short": 1,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 1
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 3,
+      "group": "WIN",
+      "count": 2,
+      "median_gross_close_pct": 0.789018,
+      "never_short": 1,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 2
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 3,
+      "group": "NO_FEE_CLOSE",
+      "count": 0,
+      "median_gross_close_pct": null,
+      "never_short": 0,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 0
+    },
+    {
+      "period": "NOVEMBER",
+      "bar": 3,
+      "group": "GIVEBACK",
+      "count": 1,
+      "median_gross_close_pct": 0.362721,
+      "never_short": 1,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 0
+    },
+    {
+      "period": "COMBINED",
+      "bar": 1,
+      "group": "WIN",
+      "count": 14,
+      "median_gross_close_pct": 0.183367,
+      "never_short": 11,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 12
+    },
+    {
+      "period": "COMBINED",
+      "bar": 1,
+      "group": "NO_FEE_CLOSE",
+      "count": 9,
+      "median_gross_close_pct": -0.088248,
+      "never_short": 9,
+      "retreat": 7,
+      "rising_close": 7,
+      "lower_low": 5
+    },
+    {
+      "period": "COMBINED",
+      "bar": 1,
+      "group": "GIVEBACK",
+      "count": 6,
+      "median_gross_close_pct": 0.132364,
+      "never_short": 6,
+      "retreat": 0,
+      "rising_close": 0,
+      "lower_low": 5
+    },
+    {
+      "period": "COMBINED",
+      "bar": 2,
+      "group": "WIN",
+      "count": 14,
+      "median_gross_close_pct": 0.329179,
+      "never_short": 8,
+      "retreat": 5,
+      "rising_close": 6,
+      "lower_low": 13
+    },
+    {
+      "period": "COMBINED",
+      "bar": 2,
+      "group": "NO_FEE_CLOSE",
+      "count": 3,
+      "median_gross_close_pct": -0.088818,
+      "never_short": 3,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 1
+    },
+    {
+      "period": "COMBINED",
+      "bar": 2,
+      "group": "GIVEBACK",
+      "count": 5,
+      "median_gross_close_pct": 0.128853,
+      "never_short": 4,
+      "retreat": 2,
+      "rising_close": 2,
+      "lower_low": 5
+    },
+    {
+      "period": "COMBINED",
+      "bar": 3,
+      "group": "WIN",
+      "count": 11,
+      "median_gross_close_pct": 0.425234,
+      "never_short": 5,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 9
+    },
+    {
+      "period": "COMBINED",
+      "bar": 3,
+      "group": "NO_FEE_CLOSE",
+      "count": 2,
+      "median_gross_close_pct": -0.181613,
+      "never_short": 2,
+      "retreat": 1,
+      "rising_close": 1,
+      "lower_low": 1
+    },
+    {
+      "period": "COMBINED",
+      "bar": 3,
+      "group": "GIVEBACK",
+      "count": 5,
+      "median_gross_close_pct": 0.009273,
+      "never_short": 4,
+      "retreat": 3,
+      "rising_close": 4,
+      "lower_low": 2
+    }
+  ],
+  "rules": [
+    {
+      "period": "DISCOVERY",
+      "rule": "V1",
+      "triggered": 16,
+      "groups": {
+        "WIN": 5,
+        "NO_FEE_CLOSE": 8,
+        "GIVEBACK": 3
+      },
+      "improved": 10,
+      "harmed": 6,
+      "winners_harmed": 4,
+      "delta_sum_pct": 0.80052
+    },
+    {
+      "period": "DISCOVERY",
+      "rule": "V2",
+      "triggered": 7,
+      "groups": {
+        "NO_FEE_CLOSE": 4,
+        "WIN": 1,
+        "GIVEBACK": 2
+      },
+      "improved": 4,
+      "harmed": 3,
+      "winners_harmed": 1,
+      "delta_sum_pct": 0.257311
+    },
+    {
+      "period": "DISCOVERY",
+      "rule": "V3",
+      "triggered": 14,
+      "groups": {
+        "NO_FEE_CLOSE": 8,
+        "GIVEBACK": 3,
+        "WIN": 3
+      },
+      "improved": 9,
+      "harmed": 5,
+      "winners_harmed": 3,
+      "delta_sum_pct": 0.800519
+    },
+    {
+      "period": "NOVEMBER",
+      "rule": "V1",
+      "triggered": 1,
+      "groups": {
+        "WIN": 1
+      },
+      "improved": 0,
+      "harmed": 1,
+      "winners_harmed": 1,
+      "delta_sum_pct": -1.330035
+    },
+    {
+      "period": "NOVEMBER",
+      "rule": "V2",
+      "triggered": 1,
+      "groups": {
+        "WIN": 1
+      },
+      "improved": 0,
+      "harmed": 1,
+      "winners_harmed": 1,
+      "delta_sum_pct": -1.330035
+    },
+    {
+      "period": "NOVEMBER",
+      "rule": "V3",
+      "triggered": 1,
+      "groups": {
+        "WIN": 1
+      },
+      "improved": 0,
+      "harmed": 1,
+      "winners_harmed": 1,
+      "delta_sum_pct": -1.330035
+    },
+    {
+      "period": "COMBINED",
+      "rule": "V1",
+      "triggered": 17,
+      "groups": {
+        "WIN": 6,
+        "NO_FEE_CLOSE": 8,
+        "GIVEBACK": 3
+      },
+      "improved": 10,
+      "harmed": 7,
+      "winners_harmed": 5,
+      "delta_sum_pct": -0.529515
+    },
+    {
+      "period": "COMBINED",
+      "rule": "V2",
+      "triggered": 8,
+      "groups": {
+        "NO_FEE_CLOSE": 4,
+        "WIN": 2,
+        "GIVEBACK": 2
+      },
+      "improved": 4,
+      "harmed": 4,
+      "winners_harmed": 2,
+      "delta_sum_pct": -1.072724
+    },
+    {
+      "period": "COMBINED",
+      "rule": "V3",
+      "triggered": 15,
+      "groups": {
+        "NO_FEE_CLOSE": 8,
+        "GIVEBACK": 3,
+        "WIN": 4
+      },
+      "improved": 9,
+      "harmed": 6,
+      "winners_harmed": 4,
+      "delta_sum_pct": -0.529516
+    }
+  ]
+}

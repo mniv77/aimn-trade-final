@@ -1,0 +1,3793 @@
+{
+  "notes": [
+    "All discovery data. No entry filters, optimization, replay or orders. Later TWO_STEP is not proof of genuine trend. Overlapping observations dependent. RSI uses same warm-up as AE."
+  ],
+  "source_hashes": {
+    "/home/MeirNiv/aimn-trade-final/kiss/results/exp40ae_early_transition_forensics/warning_audit.csv": "567443e80ac62953668bb91399a0e5ec1e7551fb2706243dfa31e0d16ce2cdb0",
+    "/home/MeirNiv/aimn-trade-final/kiss/visual_research/aimn_nvda_candles.json": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+    "/home/MeirNiv/aimn-trade-final/kiss/visual_research/independent_holdout_exp127/nvda_sep_oct_2026_5m_iex.json": "3e944cd4cdeba1adb650804a0a3e81d5355c225d9ad05546176b1de8ef9e9718",
+    "/home/MeirNiv/aimn-trade-final/kiss/visual_research/independent_holdout_exp40l/nvda_2026-11-16_2026-11-25_5m_iex.json": "eabb5477fc612d1d7ad21973282bc2a527c94da26fefdb9931172c89950b572d"
+  },
+  "groups": [
+    {
+      "period": "JUN_AUG",
+      "axis": "two_step_match",
+      "label": "CENSORED",
+      "count": 9,
+      "features": {
+        "rsi": {
+          "available": 9,
+          "median": 58.934199
+        },
+        "rsi_peak": {
+          "available": 9,
+          "median": 63.821946
+        },
+        "rsi_delta3": {
+          "available": 9,
+          "median": -2.365798
+        },
+        "rsi_delta6": {
+          "available": 9,
+          "median": -0.681459
+        },
+        "rsi_delta_peak": {
+          "available": 9,
+          "median": -7.901071
+        },
+        "st5_distance_atr": {
+          "available": 9,
+          "median": 2.228621
+        },
+        "st5_delta3": {
+          "available": 9,
+          "median": -0.381062
+        },
+        "st5_delta6": {
+          "available": 9,
+          "median": -0.220808
+        },
+        "st5_age": {
+          "available": 9,
+          "median": 31.0
+        },
+        "st30_distance_atr": {
+          "available": 9,
+          "median": -1.961049
+        },
+        "st30_age": {
+          "available": 9,
+          "median": 38.0
+        },
+        "signal_body_fraction": {
+          "available": 9,
+          "median": 0.612903
+        },
+        "signal_close_location": {
+          "available": 9,
+          "median": 0.253879
+        },
+        "signal_range_ratio": {
+          "available": 9,
+          "median": 1.225
+        },
+        "signal_lower_low": {
+          "available": 9,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 9,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 9,
+          "median": -0.051924
+        },
+        "signal_low_change": {
+          "available": 9,
+          "median": -0.082186
+        },
+        "high_change_pct": {
+          "available": 9,
+          "median": 0.032258
+        },
+        "low_change_pct": {
+          "available": 9,
+          "median": 0.133968
+        },
+        "recent12_peak_age": {
+          "available": 9,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 9,
+          "median": 0.252719
+        },
+        "recent12_range_position": {
+          "available": 9,
+          "median": 0.708333
+        },
+        "prior3_decline_pct": {
+          "available": 9,
+          "median": 0.020236
+        },
+        "prior6_decline_pct": {
+          "available": 9,
+          "median": -0.136806
+        },
+        "A_velocity": {
+          "available": 9,
+          "median": -0.048076
+        },
+        "B_velocity": {
+          "available": 9,
+          "median": -0.021398
+        },
+        "C_velocity": {
+          "available": 9,
+          "median": 0.006745
+        },
+        "BA_delta_velocity": {
+          "available": 9,
+          "median": 0.035459
+        },
+        "CB_delta_velocity": {
+          "available": 9,
+          "median": 0.021398
+        },
+        "A_efficiency": {
+          "available": 9,
+          "median": -0.780822
+        },
+        "B_efficiency": {
+          "available": 9,
+          "median": -0.286041
+        },
+        "C_efficiency": {
+          "available": 9,
+          "median": 0.068966
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "axis": "two_step_match",
+      "label": "EARLIER",
+      "count": 47,
+      "features": {
+        "rsi": {
+          "available": 47,
+          "median": 53.618018
+        },
+        "rsi_peak": {
+          "available": 47,
+          "median": 60.144856
+        },
+        "rsi_delta3": {
+          "available": 47,
+          "median": -0.685083
+        },
+        "rsi_delta6": {
+          "available": 45,
+          "median": 1.55804
+        },
+        "rsi_delta_peak": {
+          "available": 47,
+          "median": -5.399127
+        },
+        "st5_distance_atr": {
+          "available": 47,
+          "median": 2.152412
+        },
+        "st5_delta3": {
+          "available": 47,
+          "median": -0.172714
+        },
+        "st5_delta6": {
+          "available": 45,
+          "median": 0.140931
+        },
+        "st5_age": {
+          "available": 47,
+          "median": 16.0
+        },
+        "st30_distance_atr": {
+          "available": 47,
+          "median": -1.56152
+        },
+        "st30_age": {
+          "available": 47,
+          "median": 19.0
+        },
+        "signal_body_fraction": {
+          "available": 47,
+          "median": 0.586207
+        },
+        "signal_close_location": {
+          "available": 47,
+          "median": 0.147059
+        },
+        "signal_range_ratio": {
+          "available": 47,
+          "median": 0.856164
+        },
+        "signal_lower_low": {
+          "available": 47,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 47,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 47,
+          "median": -0.066561
+        },
+        "signal_low_change": {
+          "available": 47,
+          "median": -0.054612
+        },
+        "high_change_pct": {
+          "available": 37,
+          "median": 0.143451
+        },
+        "low_change_pct": {
+          "available": 40,
+          "median": 0.101997
+        },
+        "recent12_peak_age": {
+          "available": 47,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 47,
+          "median": 0.375493
+        },
+        "recent12_range_position": {
+          "available": 47,
+          "median": 0.585216
+        },
+        "prior3_decline_pct": {
+          "available": 47,
+          "median": -0.007286
+        },
+        "prior6_decline_pct": {
+          "available": 45,
+          "median": -0.143586
+        },
+        "A_velocity": {
+          "available": 43,
+          "median": -0.017
+        },
+        "B_velocity": {
+          "available": 45,
+          "median": -0.043098
+        },
+        "C_velocity": {
+          "available": 47,
+          "median": -0.002429
+        },
+        "BA_delta_velocity": {
+          "available": 43,
+          "median": -0.039303
+        },
+        "CB_delta_velocity": {
+          "available": 45,
+          "median": 0.031377
+        },
+        "A_efficiency": {
+          "available": 43,
+          "median": -0.229896
+        },
+        "B_efficiency": {
+          "available": 45,
+          "median": -0.463415
+        },
+        "C_efficiency": {
+          "available": 47,
+          "median": -0.011971
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "axis": "two_step_match",
+      "label": "NO_LATER_TWO_STEP",
+      "count": 48,
+      "features": {
+        "rsi": {
+          "available": 48,
+          "median": 54.55971
+        },
+        "rsi_peak": {
+          "available": 48,
+          "median": 59.083516
+        },
+        "rsi_delta3": {
+          "available": 48,
+          "median": 0.050765
+        },
+        "rsi_delta6": {
+          "available": 48,
+          "median": 3.049542
+        },
+        "rsi_delta_peak": {
+          "available": 48,
+          "median": -4.279758
+        },
+        "st5_distance_atr": {
+          "available": 48,
+          "median": 2.363982
+        },
+        "st5_delta3": {
+          "available": 48,
+          "median": -0.068476
+        },
+        "st5_delta6": {
+          "available": 48,
+          "median": 0.468925
+        },
+        "st5_age": {
+          "available": 48,
+          "median": 20.5
+        },
+        "st30_distance_atr": {
+          "available": 48,
+          "median": -1.507759
+        },
+        "st30_age": {
+          "available": 48,
+          "median": 23.5
+        },
+        "signal_body_fraction": {
+          "available": 48,
+          "median": 0.518891
+        },
+        "signal_close_location": {
+          "available": 48,
+          "median": 0.213084
+        },
+        "signal_range_ratio": {
+          "available": 48,
+          "median": 0.794625
+        },
+        "signal_lower_low": {
+          "available": 48,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 48,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 48,
+          "median": -0.079163
+        },
+        "signal_low_change": {
+          "available": 48,
+          "median": -0.040284
+        },
+        "high_change_pct": {
+          "available": 33,
+          "median": -0.079892
+        },
+        "low_change_pct": {
+          "available": 39,
+          "median": 0.127576
+        },
+        "recent12_peak_age": {
+          "available": 48,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 48,
+          "median": 0.35813
+        },
+        "recent12_range_position": {
+          "available": 48,
+          "median": 0.672244
+        },
+        "prior3_decline_pct": {
+          "available": 48,
+          "median": -0.091172
+        },
+        "prior6_decline_pct": {
+          "available": 48,
+          "median": -0.218407
+        },
+        "A_velocity": {
+          "available": 44,
+          "median": -0.002741
+        },
+        "B_velocity": {
+          "available": 48,
+          "median": -0.04325
+        },
+        "C_velocity": {
+          "available": 48,
+          "median": -0.030391
+        },
+        "BA_delta_velocity": {
+          "available": 44,
+          "median": -0.033854
+        },
+        "CB_delta_velocity": {
+          "available": 48,
+          "median": 0.016131
+        },
+        "A_efficiency": {
+          "available": 44,
+          "median": -0.032213
+        },
+        "B_efficiency": {
+          "available": 48,
+          "median": -0.497906
+        },
+        "C_efficiency": {
+          "available": 48,
+          "median": -0.231566
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "axis": "price_outcome_hindsight",
+      "label": "CENSORED",
+      "count": 12,
+      "features": {
+        "rsi": {
+          "available": 12,
+          "median": 56.932242
+        },
+        "rsi_peak": {
+          "available": 12,
+          "median": 64.033244
+        },
+        "rsi_delta3": {
+          "available": 12,
+          "median": -2.662088
+        },
+        "rsi_delta6": {
+          "available": 12,
+          "median": -1.495037
+        },
+        "rsi_delta_peak": {
+          "available": 12,
+          "median": -9.843499
+        },
+        "st5_distance_atr": {
+          "available": 12,
+          "median": 2.1087
+        },
+        "st5_delta3": {
+          "available": 12,
+          "median": -0.645416
+        },
+        "st5_delta6": {
+          "available": 12,
+          "median": -0.292318
+        },
+        "st5_age": {
+          "available": 12,
+          "median": 31.0
+        },
+        "st30_distance_atr": {
+          "available": 12,
+          "median": -1.472008
+        },
+        "st30_age": {
+          "available": 12,
+          "median": 38.0
+        },
+        "signal_body_fraction": {
+          "available": 12,
+          "median": 0.674242
+        },
+        "signal_close_location": {
+          "available": 12,
+          "median": 0.225
+        },
+        "signal_range_ratio": {
+          "available": 12,
+          "median": 1.273236
+        },
+        "signal_lower_low": {
+          "available": 12,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 12,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 12,
+          "median": -0.052903
+        },
+        "signal_low_change": {
+          "available": 12,
+          "median": -0.087346
+        },
+        "high_change_pct": {
+          "available": 12,
+          "median": 0.18499
+        },
+        "low_change_pct": {
+          "available": 12,
+          "median": 0.1201
+        },
+        "recent12_peak_age": {
+          "available": 12,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 12,
+          "median": 0.274937
+        },
+        "recent12_range_position": {
+          "available": 12,
+          "median": 0.698366
+        },
+        "prior3_decline_pct": {
+          "available": 12,
+          "median": 0.048939
+        },
+        "prior6_decline_pct": {
+          "available": 12,
+          "median": -0.11731
+        },
+        "A_velocity": {
+          "available": 12,
+          "median": -0.051584
+        },
+        "B_velocity": {
+          "available": 12,
+          "median": -0.021082
+        },
+        "C_velocity": {
+          "available": 12,
+          "median": 0.016313
+        },
+        "BA_delta_velocity": {
+          "available": 12,
+          "median": 0.040056
+        },
+        "CB_delta_velocity": {
+          "available": 12,
+          "median": 0.035792
+        },
+        "A_efficiency": {
+          "available": 12,
+          "median": -0.787876
+        },
+        "B_efficiency": {
+          "available": 12,
+          "median": -0.276684
+        },
+        "C_efficiency": {
+          "available": 12,
+          "median": 0.137297
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "axis": "price_outcome_hindsight",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 43,
+      "features": {
+        "rsi": {
+          "available": 43,
+          "median": 54.492368
+        },
+        "rsi_peak": {
+          "available": 43,
+          "median": 58.441334
+        },
+        "rsi_delta3": {
+          "available": 43,
+          "median": 0.461551
+        },
+        "rsi_delta6": {
+          "available": 43,
+          "median": 3.779068
+        },
+        "rsi_delta_peak": {
+          "available": 43,
+          "median": -4.485503
+        },
+        "st5_distance_atr": {
+          "available": 43,
+          "median": 2.363304
+        },
+        "st5_delta3": {
+          "available": 43,
+          "median": -0.093472
+        },
+        "st5_delta6": {
+          "available": 43,
+          "median": 0.643027
+        },
+        "st5_age": {
+          "available": 43,
+          "median": 20.0
+        },
+        "st30_distance_atr": {
+          "available": 43,
+          "median": -1.555863
+        },
+        "st30_age": {
+          "available": 43,
+          "median": 22.0
+        },
+        "signal_body_fraction": {
+          "available": 43,
+          "median": 0.520833
+        },
+        "signal_close_location": {
+          "available": 43,
+          "median": 0.212121
+        },
+        "signal_range_ratio": {
+          "available": 43,
+          "median": 0.778846
+        },
+        "signal_lower_low": {
+          "available": 43,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 43,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 43,
+          "median": -0.05974
+        },
+        "signal_low_change": {
+          "available": 43,
+          "median": -0.034711
+        },
+        "high_change_pct": {
+          "available": 32,
+          "median": -0.086638
+        },
+        "low_change_pct": {
+          "available": 37,
+          "median": 0.08145
+        },
+        "recent12_peak_age": {
+          "available": 43,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 43,
+          "median": 0.34987
+        },
+        "recent12_range_position": {
+          "available": 43,
+          "median": 0.638272
+        },
+        "prior3_decline_pct": {
+          "available": 43,
+          "median": -0.066986
+        },
+        "prior6_decline_pct": {
+          "available": 43,
+          "median": -0.257936
+        },
+        "A_velocity": {
+          "available": 40,
+          "median": 0.030424
+        },
+        "B_velocity": {
+          "available": 43,
+          "median": -0.068263
+        },
+        "C_velocity": {
+          "available": 43,
+          "median": -0.022329
+        },
+        "BA_delta_velocity": {
+          "available": 40,
+          "median": -0.061455
+        },
+        "CB_delta_velocity": {
+          "available": 43,
+          "median": 0.024036
+        },
+        "A_efficiency": {
+          "available": 40,
+          "median": 0.259388
+        },
+        "B_efficiency": {
+          "available": 43,
+          "median": -0.578947
+        },
+        "C_efficiency": {
+          "available": 43,
+          "median": -0.229896
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "axis": "price_outcome_hindsight",
+      "label": "PERSISTENT_TARGET",
+      "count": 16,
+      "features": {
+        "rsi": {
+          "available": 16,
+          "median": 54.234129
+        },
+        "rsi_peak": {
+          "available": 16,
+          "median": 60.676699
+        },
+        "rsi_delta3": {
+          "available": 16,
+          "median": -0.646717
+        },
+        "rsi_delta6": {
+          "available": 15,
+          "median": 5.196164
+        },
+        "rsi_delta_peak": {
+          "available": 16,
+          "median": -4.629353
+        },
+        "st5_distance_atr": {
+          "available": 16,
+          "median": 2.607825
+        },
+        "st5_delta3": {
+          "available": 16,
+          "median": -0.157118
+        },
+        "st5_delta6": {
+          "available": 15,
+          "median": 0.568515
+        },
+        "st5_age": {
+          "available": 16,
+          "median": 18.5
+        },
+        "st30_distance_atr": {
+          "available": 16,
+          "median": -1.619527
+        },
+        "st30_age": {
+          "available": 16,
+          "median": 19.5
+        },
+        "signal_body_fraction": {
+          "available": 16,
+          "median": 0.587446
+        },
+        "signal_close_location": {
+          "available": 16,
+          "median": 0.203372
+        },
+        "signal_range_ratio": {
+          "available": 16,
+          "median": 0.807212
+        },
+        "signal_lower_low": {
+          "available": 16,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 16,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 16,
+          "median": -0.100192
+        },
+        "signal_low_change": {
+          "available": 16,
+          "median": -0.035392
+        },
+        "high_change_pct": {
+          "available": 11,
+          "median": 0.138182
+        },
+        "low_change_pct": {
+          "available": 13,
+          "median": 0.069624
+        },
+        "recent12_peak_age": {
+          "available": 16,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 16,
+          "median": 0.380231
+        },
+        "recent12_range_position": {
+          "available": 16,
+          "median": 0.703588
+        },
+        "prior3_decline_pct": {
+          "available": 16,
+          "median": -0.027697
+        },
+        "prior6_decline_pct": {
+          "available": 15,
+          "median": -0.307142
+        },
+        "A_velocity": {
+          "available": 14,
+          "median": 0.000766
+        },
+        "B_velocity": {
+          "available": 15,
+          "median": -0.041235
+        },
+        "C_velocity": {
+          "available": 16,
+          "median": -0.009232
+        },
+        "BA_delta_velocity": {
+          "available": 14,
+          "median": -0.064387
+        },
+        "CB_delta_velocity": {
+          "available": 15,
+          "median": 0.027006
+        },
+        "A_efficiency": {
+          "available": 14,
+          "median": -0.009884
+        },
+        "B_efficiency": {
+          "available": 15,
+          "median": -0.272727
+        },
+        "C_efficiency": {
+          "available": 16,
+          "median": -0.055129
+        }
+      }
+    },
+    {
+      "period": "JUN_AUG",
+      "axis": "price_outcome_hindsight",
+      "label": "TARGET_FADED",
+      "count": 33,
+      "features": {
+        "rsi": {
+          "available": 33,
+          "median": 54.698877
+        },
+        "rsi_peak": {
+          "available": 33,
+          "median": 61.413903
+        },
+        "rsi_delta3": {
+          "available": 33,
+          "median": -0.528552
+        },
+        "rsi_delta6": {
+          "available": 32,
+          "median": 0.116681
+        },
+        "rsi_delta_peak": {
+          "available": 33,
+          "median": -4.327093
+        },
+        "st5_distance_atr": {
+          "available": 33,
+          "median": 2.327165
+        },
+        "st5_delta3": {
+          "available": 33,
+          "median": -0.000923
+        },
+        "st5_delta6": {
+          "available": 32,
+          "median": 0.035504
+        },
+        "st5_age": {
+          "available": 33,
+          "median": 16.0
+        },
+        "st30_distance_atr": {
+          "available": 33,
+          "median": -1.499023
+        },
+        "st30_age": {
+          "available": 33,
+          "median": 24.0
+        },
+        "signal_body_fraction": {
+          "available": 33,
+          "median": 0.5
+        },
+        "signal_close_location": {
+          "available": 33,
+          "median": 0.162656
+        },
+        "signal_range_ratio": {
+          "available": 33,
+          "median": 0.813333
+        },
+        "signal_lower_low": {
+          "available": 33,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 33,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 33,
+          "median": -0.085539
+        },
+        "signal_low_change": {
+          "available": 33,
+          "median": -0.078927
+        },
+        "high_change_pct": {
+          "available": 24,
+          "median": 0.087981
+        },
+        "low_change_pct": {
+          "available": 26,
+          "median": 0.205885
+        },
+        "recent12_peak_age": {
+          "available": 33,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 33,
+          "median": 0.433301
+        },
+        "recent12_range_position": {
+          "available": 33,
+          "median": 0.630385
+        },
+        "prior3_decline_pct": {
+          "available": 33,
+          "median": -0.007286
+        },
+        "prior6_decline_pct": {
+          "available": 32,
+          "median": -0.139297
+        },
+        "A_velocity": {
+          "available": 30,
+          "median": -0.027051
+        },
+        "B_velocity": {
+          "available": 32,
+          "median": -0.024909
+        },
+        "C_velocity": {
+          "available": 33,
+          "median": -0.002429
+        },
+        "BA_delta_velocity": {
+          "available": 30,
+          "median": 0.002118
+        },
+        "CB_delta_velocity": {
+          "available": 32,
+          "median": 0.024121
+        },
+        "A_efficiency": {
+          "available": 30,
+          "median": -0.242855
+        },
+        "B_efficiency": {
+          "available": 32,
+          "median": -0.371347
+        },
+        "C_efficiency": {
+          "available": 33,
+          "median": -0.011971
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "axis": "two_step_match",
+      "label": "CENSORED",
+      "count": 8,
+      "features": {
+        "rsi": {
+          "available": 8,
+          "median": 45.554631
+        },
+        "rsi_peak": {
+          "available": 8,
+          "median": 53.116293
+        },
+        "rsi_delta3": {
+          "available": 8,
+          "median": -5.671713
+        },
+        "rsi_delta6": {
+          "available": 8,
+          "median": -3.055216
+        },
+        "rsi_delta_peak": {
+          "available": 8,
+          "median": -5.392048
+        },
+        "st5_distance_atr": {
+          "available": 8,
+          "median": 1.19182
+        },
+        "st5_delta3": {
+          "available": 8,
+          "median": 0.461202
+        },
+        "st5_delta6": {
+          "available": 8,
+          "median": 1.989188
+        },
+        "st5_age": {
+          "available": 8,
+          "median": 5.5
+        },
+        "st30_distance_atr": {
+          "available": 8,
+          "median": -2.729603
+        },
+        "st30_age": {
+          "available": 8,
+          "median": 25.0
+        },
+        "signal_body_fraction": {
+          "available": 8,
+          "median": 0.503429
+        },
+        "signal_close_location": {
+          "available": 8,
+          "median": 0.286276
+        },
+        "signal_range_ratio": {
+          "available": 8,
+          "median": 1.209556
+        },
+        "signal_lower_low": {
+          "available": 8,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 8,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 8,
+          "median": -0.068724
+        },
+        "signal_low_change": {
+          "available": 8,
+          "median": -0.11949
+        },
+        "high_change_pct": {
+          "available": 8,
+          "median": 0.03799
+        },
+        "low_change_pct": {
+          "available": 8,
+          "median": -0.020855
+        },
+        "recent12_peak_age": {
+          "available": 8,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 8,
+          "median": 0.338711
+        },
+        "recent12_range_position": {
+          "available": 8,
+          "median": 0.322726
+        },
+        "prior3_decline_pct": {
+          "available": 8,
+          "median": 0.097936
+        },
+        "prior6_decline_pct": {
+          "available": 8,
+          "median": 0.041264
+        },
+        "A_velocity": {
+          "available": 8,
+          "median": -0.000234
+        },
+        "B_velocity": {
+          "available": 8,
+          "median": -0.016528
+        },
+        "C_velocity": {
+          "available": 8,
+          "median": 0.032645
+        },
+        "BA_delta_velocity": {
+          "available": 8,
+          "median": -0.000714
+        },
+        "CB_delta_velocity": {
+          "available": 8,
+          "median": 0.041448
+        },
+        "A_efficiency": {
+          "available": 8,
+          "median": -0.018182
+        },
+        "B_efficiency": {
+          "available": 8,
+          "median": -0.378436
+        },
+        "C_efficiency": {
+          "available": 8,
+          "median": 0.238122
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "axis": "two_step_match",
+      "label": "EARLIER",
+      "count": 28,
+      "features": {
+        "rsi": {
+          "available": 28,
+          "median": 51.403041
+        },
+        "rsi_peak": {
+          "available": 28,
+          "median": 57.512518
+        },
+        "rsi_delta3": {
+          "available": 28,
+          "median": -0.094268
+        },
+        "rsi_delta6": {
+          "available": 27,
+          "median": 0.59463
+        },
+        "rsi_delta_peak": {
+          "available": 28,
+          "median": -5.506321
+        },
+        "st5_distance_atr": {
+          "available": 28,
+          "median": 2.106796
+        },
+        "st5_delta3": {
+          "available": 28,
+          "median": -0.14676
+        },
+        "st5_delta6": {
+          "available": 27,
+          "median": 0.091941
+        },
+        "st5_age": {
+          "available": 28,
+          "median": 19.0
+        },
+        "st30_distance_atr": {
+          "available": 28,
+          "median": -2.134047
+        },
+        "st30_age": {
+          "available": 28,
+          "median": 23.0
+        },
+        "signal_body_fraction": {
+          "available": 28,
+          "median": 0.552201
+        },
+        "signal_close_location": {
+          "available": 28,
+          "median": 0.301573
+        },
+        "signal_range_ratio": {
+          "available": 28,
+          "median": 1.090229
+        },
+        "signal_lower_low": {
+          "available": 28,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 28,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 28,
+          "median": -0.070836
+        },
+        "signal_low_change": {
+          "available": 28,
+          "median": -0.067982
+        },
+        "high_change_pct": {
+          "available": 20,
+          "median": -0.004439
+        },
+        "low_change_pct": {
+          "available": 24,
+          "median": 0.082672
+        },
+        "recent12_peak_age": {
+          "available": 28,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 28,
+          "median": 0.262871
+        },
+        "recent12_range_position": {
+          "available": 28,
+          "median": 0.569007
+        },
+        "prior3_decline_pct": {
+          "available": 28,
+          "median": -0.020641
+        },
+        "prior6_decline_pct": {
+          "available": 27,
+          "median": -0.070795
+        },
+        "A_velocity": {
+          "available": 27,
+          "median": -0.007735
+        },
+        "B_velocity": {
+          "available": 27,
+          "median": -0.016724
+        },
+        "C_velocity": {
+          "available": 28,
+          "median": -0.00688
+        },
+        "BA_delta_velocity": {
+          "available": 27,
+          "median": -0.060426
+        },
+        "CB_delta_velocity": {
+          "available": 27,
+          "median": 0.020278
+        },
+        "A_efficiency": {
+          "available": 27,
+          "median": -0.097744
+        },
+        "B_efficiency": {
+          "available": 27,
+          "median": -0.194805
+        },
+        "C_efficiency": {
+          "available": 28,
+          "median": -0.103997
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "axis": "two_step_match",
+      "label": "NO_LATER_TWO_STEP",
+      "count": 21,
+      "features": {
+        "rsi": {
+          "available": 21,
+          "median": 52.25898
+        },
+        "rsi_peak": {
+          "available": 21,
+          "median": 55.929008
+        },
+        "rsi_delta3": {
+          "available": 21,
+          "median": 0.328131
+        },
+        "rsi_delta6": {
+          "available": 20,
+          "median": 3.754647
+        },
+        "rsi_delta_peak": {
+          "available": 21,
+          "median": -3.871612
+        },
+        "st5_distance_atr": {
+          "available": 21,
+          "median": 2.263703
+        },
+        "st5_delta3": {
+          "available": 21,
+          "median": -0.031021
+        },
+        "st5_delta6": {
+          "available": 20,
+          "median": 0.643629
+        },
+        "st5_age": {
+          "available": 21,
+          "median": 23.0
+        },
+        "st30_distance_atr": {
+          "available": 21,
+          "median": -2.1444
+        },
+        "st30_age": {
+          "available": 21,
+          "median": 22.0
+        },
+        "signal_body_fraction": {
+          "available": 21,
+          "median": 0.586207
+        },
+        "signal_close_location": {
+          "available": 21,
+          "median": 0.193878
+        },
+        "signal_range_ratio": {
+          "available": 21,
+          "median": 0.901961
+        },
+        "signal_lower_low": {
+          "available": 21,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 21,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 21,
+          "median": -0.057698
+        },
+        "signal_low_change": {
+          "available": 21,
+          "median": -0.032921
+        },
+        "high_change_pct": {
+          "available": 16,
+          "median": -0.096809
+        },
+        "low_change_pct": {
+          "available": 16,
+          "median": 0.023644
+        },
+        "recent12_peak_age": {
+          "available": 21,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 21,
+          "median": 0.240237
+        },
+        "recent12_range_position": {
+          "available": 21,
+          "median": 0.66
+        },
+        "prior3_decline_pct": {
+          "available": 21,
+          "median": -0.040213
+        },
+        "prior6_decline_pct": {
+          "available": 20,
+          "median": -0.137328
+        },
+        "A_velocity": {
+          "available": 18,
+          "median": 0.020917
+        },
+        "B_velocity": {
+          "available": 20,
+          "median": -0.034328
+        },
+        "C_velocity": {
+          "available": 21,
+          "median": -0.013404
+        },
+        "BA_delta_velocity": {
+          "available": 18,
+          "median": -0.05001
+        },
+        "CB_delta_velocity": {
+          "available": 20,
+          "median": 0.034144
+        },
+        "A_efficiency": {
+          "available": 18,
+          "median": 0.20543
+        },
+        "B_efficiency": {
+          "available": 20,
+          "median": -0.623397
+        },
+        "C_efficiency": {
+          "available": 21,
+          "median": -0.152542
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "axis": "price_outcome_hindsight",
+      "label": "CENSORED",
+      "count": 10,
+      "features": {
+        "rsi": {
+          "available": 10,
+          "median": 45.513166
+        },
+        "rsi_peak": {
+          "available": 10,
+          "median": 52.699962
+        },
+        "rsi_delta3": {
+          "available": 10,
+          "median": -6.913934
+        },
+        "rsi_delta6": {
+          "available": 10,
+          "median": 0.881008
+        },
+        "rsi_delta_peak": {
+          "available": 10,
+          "median": -5.392048
+        },
+        "st5_distance_atr": {
+          "available": 10,
+          "median": 1.404027
+        },
+        "st5_delta3": {
+          "available": 10,
+          "median": 0.461202
+        },
+        "st5_delta6": {
+          "available": 10,
+          "median": 2.864396
+        },
+        "st5_age": {
+          "available": 10,
+          "median": 4.0
+        },
+        "st30_distance_atr": {
+          "available": 10,
+          "median": -2.70374
+        },
+        "st30_age": {
+          "available": 10,
+          "median": 25.0
+        },
+        "signal_body_fraction": {
+          "available": 10,
+          "median": 0.503429
+        },
+        "signal_close_location": {
+          "available": 10,
+          "median": 0.286276
+        },
+        "signal_range_ratio": {
+          "available": 10,
+          "median": 1.209556
+        },
+        "signal_lower_low": {
+          "available": 10,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 10,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 10,
+          "median": -0.068724
+        },
+        "signal_low_change": {
+          "available": 10,
+          "median": -0.11949
+        },
+        "high_change_pct": {
+          "available": 10,
+          "median": -0.021898
+        },
+        "low_change_pct": {
+          "available": 10,
+          "median": -0.112035
+        },
+        "recent12_peak_age": {
+          "available": 10,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 10,
+          "median": 0.315031
+        },
+        "recent12_range_position": {
+          "available": 10,
+          "median": 0.39303
+        },
+        "prior3_decline_pct": {
+          "available": 10,
+          "median": 0.120226
+        },
+        "prior6_decline_pct": {
+          "available": 10,
+          "median": 0.002769
+        },
+        "A_velocity": {
+          "available": 10,
+          "median": -0.000234
+        },
+        "B_velocity": {
+          "available": 10,
+          "median": -0.029518
+        },
+        "C_velocity": {
+          "available": 10,
+          "median": 0.040075
+        },
+        "BA_delta_velocity": {
+          "available": 10,
+          "median": -0.026209
+        },
+        "CB_delta_velocity": {
+          "available": 10,
+          "median": 0.060927
+        },
+        "A_efficiency": {
+          "available": 10,
+          "median": -0.018182
+        },
+        "B_efficiency": {
+          "available": 10,
+          "median": -0.458333
+        },
+        "C_efficiency": {
+          "available": 10,
+          "median": 0.371479
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "axis": "price_outcome_hindsight",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 19,
+      "features": {
+        "rsi": {
+          "available": 19,
+          "median": 53.969722
+        },
+        "rsi_peak": {
+          "available": 19,
+          "median": 55.929008
+        },
+        "rsi_delta3": {
+          "available": 19,
+          "median": -1.162752
+        },
+        "rsi_delta6": {
+          "available": 19,
+          "median": 1.742898
+        },
+        "rsi_delta_peak": {
+          "available": 19,
+          "median": -3.871612
+        },
+        "st5_distance_atr": {
+          "available": 19,
+          "median": 2.2879
+        },
+        "st5_delta3": {
+          "available": 19,
+          "median": -0.109651
+        },
+        "st5_delta6": {
+          "available": 19,
+          "median": 0.389356
+        },
+        "st5_age": {
+          "available": 19,
+          "median": 28.0
+        },
+        "st30_distance_atr": {
+          "available": 19,
+          "median": -2.198869
+        },
+        "st30_age": {
+          "available": 19,
+          "median": 22.0
+        },
+        "signal_body_fraction": {
+          "available": 19,
+          "median": 0.586207
+        },
+        "signal_close_location": {
+          "available": 19,
+          "median": 0.193878
+        },
+        "signal_range_ratio": {
+          "available": 19,
+          "median": 0.971831
+        },
+        "signal_lower_low": {
+          "available": 19,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 19,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 19,
+          "median": -0.061033
+        },
+        "signal_low_change": {
+          "available": 19,
+          "median": -0.044789
+        },
+        "high_change_pct": {
+          "available": 18,
+          "median": -0.009093
+        },
+        "low_change_pct": {
+          "available": 18,
+          "median": 0.037829
+        },
+        "recent12_peak_age": {
+          "available": 19,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 19,
+          "median": 0.231912
+        },
+        "recent12_range_position": {
+          "available": 19,
+          "median": 0.64
+        },
+        "prior3_decline_pct": {
+          "available": 19,
+          "median": 0.006697
+        },
+        "prior6_decline_pct": {
+          "available": 19,
+          "median": -0.078312
+        },
+        "A_velocity": {
+          "available": 19,
+          "median": 0.013321
+        },
+        "B_velocity": {
+          "available": 19,
+          "median": -0.029141
+        },
+        "C_velocity": {
+          "available": 19,
+          "median": 0.002232
+        },
+        "BA_delta_velocity": {
+          "available": 19,
+          "median": -0.045672
+        },
+        "CB_delta_velocity": {
+          "available": 19,
+          "median": 0.031277
+        },
+        "A_efficiency": {
+          "available": 19,
+          "median": 0.153285
+        },
+        "B_efficiency": {
+          "available": 19,
+          "median": -0.625
+        },
+        "C_efficiency": {
+          "available": 19,
+          "median": 0.032258
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "axis": "price_outcome_hindsight",
+      "label": "PERSISTENT_TARGET",
+      "count": 8,
+      "features": {
+        "rsi": {
+          "available": 8,
+          "median": 51.700188
+        },
+        "rsi_peak": {
+          "available": 8,
+          "median": 61.939006
+        },
+        "rsi_delta3": {
+          "available": 8,
+          "median": 1.666796
+        },
+        "rsi_delta6": {
+          "available": 7,
+          "median": 3.725287
+        },
+        "rsi_delta_peak": {
+          "available": 8,
+          "median": -4.287839
+        },
+        "st5_distance_atr": {
+          "available": 8,
+          "median": 2.509138
+        },
+        "st5_delta3": {
+          "available": 8,
+          "median": 0.140022
+        },
+        "st5_delta6": {
+          "available": 7,
+          "median": 0.400701
+        },
+        "st5_age": {
+          "available": 8,
+          "median": 17.0
+        },
+        "st30_distance_atr": {
+          "available": 8,
+          "median": -1.720354
+        },
+        "st30_age": {
+          "available": 8,
+          "median": 23.5
+        },
+        "signal_body_fraction": {
+          "available": 8,
+          "median": 0.508555
+        },
+        "signal_close_location": {
+          "available": 8,
+          "median": 0.342763
+        },
+        "signal_range_ratio": {
+          "available": 8,
+          "median": 0.955736
+        },
+        "signal_lower_low": {
+          "available": 8,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 8,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 8,
+          "median": -0.0918
+        },
+        "signal_low_change": {
+          "available": 8,
+          "median": -0.034863
+        },
+        "high_change_pct": {
+          "available": 4,
+          "median": -0.096751
+        },
+        "low_change_pct": {
+          "available": 5,
+          "median": 0.392868
+        },
+        "recent12_peak_age": {
+          "available": 8,
+          "median": 3.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 8,
+          "median": 0.299796
+        },
+        "recent12_range_position": {
+          "available": 8,
+          "median": 0.610931
+        },
+        "prior3_decline_pct": {
+          "available": 8,
+          "median": -0.12338
+        },
+        "prior6_decline_pct": {
+          "available": 7,
+          "median": -0.130777
+        },
+        "A_velocity": {
+          "available": 6,
+          "median": -0.024038
+        },
+        "B_velocity": {
+          "available": 7,
+          "median": -0.004598
+        },
+        "C_velocity": {
+          "available": 8,
+          "median": -0.041127
+        },
+        "BA_delta_velocity": {
+          "available": 6,
+          "median": -0.020389
+        },
+        "CB_delta_velocity": {
+          "available": 7,
+          "median": -0.061296
+        },
+        "A_efficiency": {
+          "available": 6,
+          "median": -0.150091
+        },
+        "B_efficiency": {
+          "available": 7,
+          "median": -0.058824
+        },
+        "C_efficiency": {
+          "available": 8,
+          "median": -0.389849
+        }
+      }
+    },
+    {
+      "period": "SEP_OCT",
+      "axis": "price_outcome_hindsight",
+      "label": "TARGET_FADED",
+      "count": 20,
+      "features": {
+        "rsi": {
+          "available": 20,
+          "median": 51.721334
+        },
+        "rsi_peak": {
+          "available": 20,
+          "median": 57.512518
+        },
+        "rsi_delta3": {
+          "available": 20,
+          "median": 0.545862
+        },
+        "rsi_delta6": {
+          "available": 19,
+          "median": 4.253683
+        },
+        "rsi_delta_peak": {
+          "available": 20,
+          "median": -5.64715
+        },
+        "st5_distance_atr": {
+          "available": 20,
+          "median": 1.885507
+        },
+        "st5_delta3": {
+          "available": 20,
+          "median": -0.215394
+        },
+        "st5_delta6": {
+          "available": 19,
+          "median": 0.397486
+        },
+        "st5_age": {
+          "available": 20,
+          "median": 20.5
+        },
+        "st30_distance_atr": {
+          "available": 20,
+          "median": -2.127656
+        },
+        "st30_age": {
+          "available": 20,
+          "median": 19.5
+        },
+        "signal_body_fraction": {
+          "available": 20,
+          "median": 0.665091
+        },
+        "signal_close_location": {
+          "available": 20,
+          "median": 0.266188
+        },
+        "signal_range_ratio": {
+          "available": 20,
+          "median": 1.36008
+        },
+        "signal_lower_low": {
+          "available": 20,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 20,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 20,
+          "median": -0.053502
+        },
+        "signal_low_change": {
+          "available": 20,
+          "median": -0.068421
+        },
+        "high_change_pct": {
+          "available": 12,
+          "median": 0.019835
+        },
+        "low_change_pct": {
+          "available": 15,
+          "median": -0.044852
+        },
+        "recent12_peak_age": {
+          "available": 20,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 20,
+          "median": 0.288142
+        },
+        "recent12_range_position": {
+          "available": 20,
+          "median": 0.63058
+        },
+        "prior3_decline_pct": {
+          "available": 20,
+          "median": -0.030105
+        },
+        "prior6_decline_pct": {
+          "available": 19,
+          "median": -0.072804
+        },
+        "A_velocity": {
+          "available": 18,
+          "median": 0.0073
+        },
+        "B_velocity": {
+          "available": 19,
+          "median": -0.056836
+        },
+        "C_velocity": {
+          "available": 20,
+          "median": -0.010035
+        },
+        "BA_delta_velocity": {
+          "available": 18,
+          "median": -0.067065
+        },
+        "CB_delta_velocity": {
+          "available": 19,
+          "median": 0.02841
+        },
+        "A_efficiency": {
+          "available": 18,
+          "median": 0.083719
+        },
+        "B_efficiency": {
+          "available": 19,
+          "median": -0.474359
+        },
+        "C_efficiency": {
+          "available": 20,
+          "median": -0.112518
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "axis": "two_step_match",
+      "label": "EARLIER",
+      "count": 10,
+      "features": {
+        "rsi": {
+          "available": 10,
+          "median": 51.809579
+        },
+        "rsi_peak": {
+          "available": 10,
+          "median": 56.935701
+        },
+        "rsi_delta3": {
+          "available": 10,
+          "median": -2.840581
+        },
+        "rsi_delta6": {
+          "available": 9,
+          "median": 4.385797
+        },
+        "rsi_delta_peak": {
+          "available": 10,
+          "median": -3.510992
+        },
+        "st5_distance_atr": {
+          "available": 10,
+          "median": 2.361299
+        },
+        "st5_delta3": {
+          "available": 10,
+          "median": -0.499229
+        },
+        "st5_delta6": {
+          "available": 9,
+          "median": 0.464524
+        },
+        "st5_age": {
+          "available": 10,
+          "median": 25.0
+        },
+        "st30_distance_atr": {
+          "available": 10,
+          "median": -2.188122
+        },
+        "st30_age": {
+          "available": 10,
+          "median": 30.0
+        },
+        "signal_body_fraction": {
+          "available": 10,
+          "median": 0.487429
+        },
+        "signal_close_location": {
+          "available": 10,
+          "median": 0.18418
+        },
+        "signal_range_ratio": {
+          "available": 10,
+          "median": 1.081081
+        },
+        "signal_lower_low": {
+          "available": 10,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 10,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 10,
+          "median": -0.178111
+        },
+        "signal_low_change": {
+          "available": 10,
+          "median": -0.178158
+        },
+        "high_change_pct": {
+          "available": 8,
+          "median": -0.223992
+        },
+        "low_change_pct": {
+          "available": 8,
+          "median": 0.170692
+        },
+        "recent12_peak_age": {
+          "available": 10,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 10,
+          "median": 0.753054
+        },
+        "recent12_range_position": {
+          "available": 10,
+          "median": 0.55751
+        },
+        "prior3_decline_pct": {
+          "available": 10,
+          "median": 0.156191
+        },
+        "prior6_decline_pct": {
+          "available": 9,
+          "median": -0.393487
+        },
+        "A_velocity": {
+          "available": 9,
+          "median": 0.020922
+        },
+        "B_velocity": {
+          "available": 9,
+          "median": -0.121425
+        },
+        "C_velocity": {
+          "available": 10,
+          "median": 0.052064
+        },
+        "BA_delta_velocity": {
+          "available": 9,
+          "median": -0.09282
+        },
+        "CB_delta_velocity": {
+          "available": 9,
+          "median": 0.171488
+        },
+        "A_efficiency": {
+          "available": 9,
+          "median": 0.166667
+        },
+        "B_efficiency": {
+          "available": 9,
+          "median": -0.333333
+        },
+        "C_efficiency": {
+          "available": 10,
+          "median": 0.326601
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "axis": "two_step_match",
+      "label": "NO_LATER_TWO_STEP",
+      "count": 3,
+      "features": {
+        "rsi": {
+          "available": 3,
+          "median": 62.246901
+        },
+        "rsi_peak": {
+          "available": 3,
+          "median": 63.515327
+        },
+        "rsi_delta3": {
+          "available": 3,
+          "median": 2.355874
+        },
+        "rsi_delta6": {
+          "available": 3,
+          "median": 6.058406
+        },
+        "rsi_delta_peak": {
+          "available": 3,
+          "median": -1.268426
+        },
+        "st5_distance_atr": {
+          "available": 3,
+          "median": 2.819848
+        },
+        "st5_delta3": {
+          "available": 3,
+          "median": 0.287479
+        },
+        "st5_delta6": {
+          "available": 3,
+          "median": 0.355366
+        },
+        "st5_age": {
+          "available": 3,
+          "median": 18.0
+        },
+        "st30_distance_atr": {
+          "available": 3,
+          "median": -1.805361
+        },
+        "st30_age": {
+          "available": 3,
+          "median": 21.0
+        },
+        "signal_body_fraction": {
+          "available": 3,
+          "median": 0.579439
+        },
+        "signal_close_location": {
+          "available": 3,
+          "median": 0.168224
+        },
+        "signal_range_ratio": {
+          "available": 3,
+          "median": 0.835821
+        },
+        "signal_lower_low": {
+          "available": 3,
+          "median": 0.0
+        },
+        "signal_break_prior_low": {
+          "available": 3,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 3,
+          "median": -0.061239
+        },
+        "signal_low_change": {
+          "available": 3,
+          "median": 0.041121
+        },
+        "high_change_pct": {
+          "available": 2,
+          "median": 1.752814
+        },
+        "low_change_pct": {
+          "available": 3,
+          "median": 1.543169
+        },
+        "recent12_peak_age": {
+          "available": 3,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 3,
+          "median": 0.373784
+        },
+        "recent12_range_position": {
+          "available": 3,
+          "median": 0.797214
+        },
+        "prior3_decline_pct": {
+          "available": 3,
+          "median": -0.377618
+        },
+        "prior6_decline_pct": {
+          "available": 3,
+          "median": -0.973824
+        },
+        "A_velocity": {
+          "available": 3,
+          "median": -0.227152
+        },
+        "B_velocity": {
+          "available": 3,
+          "median": -0.197988
+        },
+        "C_velocity": {
+          "available": 3,
+          "median": -0.125873
+        },
+        "BA_delta_velocity": {
+          "available": 3,
+          "median": 0.029164
+        },
+        "CB_delta_velocity": {
+          "available": 3,
+          "median": 0.072115
+        },
+        "A_efficiency": {
+          "available": 3,
+          "median": -0.727273
+        },
+        "B_efficiency": {
+          "available": 3,
+          "median": -0.472284
+        },
+        "C_efficiency": {
+          "available": 3,
+          "median": -0.515625
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "axis": "price_outcome_hindsight",
+      "label": "CENSORED",
+      "count": 1,
+      "features": {
+        "rsi": {
+          "available": 1,
+          "median": 52.613431
+        },
+        "rsi_peak": {
+          "available": 1,
+          "median": 63.639072
+        },
+        "rsi_delta3": {
+          "available": 1,
+          "median": -3.834743
+        },
+        "rsi_delta6": {
+          "available": 1,
+          "median": -3.67442
+        },
+        "rsi_delta_peak": {
+          "available": 1,
+          "median": -11.025641
+        },
+        "st5_distance_atr": {
+          "available": 1,
+          "median": 2.164973
+        },
+        "st5_delta3": {
+          "available": 1,
+          "median": -0.579085
+        },
+        "st5_delta6": {
+          "available": 1,
+          "median": -0.214957
+        },
+        "st5_age": {
+          "available": 1,
+          "median": 41.0
+        },
+        "st30_distance_atr": {
+          "available": 1,
+          "median": -1.245037
+        },
+        "st30_age": {
+          "available": 1,
+          "median": 24.0
+        },
+        "signal_body_fraction": {
+          "available": 1,
+          "median": 0.608108
+        },
+        "signal_close_location": {
+          "available": 1,
+          "median": 0.391892
+        },
+        "signal_range_ratio": {
+          "available": 1,
+          "median": 1.557895
+        },
+        "signal_lower_low": {
+          "available": 1,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 1,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 1,
+          "median": -0.215488
+        },
+        "signal_low_change": {
+          "available": 1,
+          "median": -0.395204
+        },
+        "high_change_pct": {
+          "available": 1,
+          "median": -0.14782
+        },
+        "low_change_pct": {
+          "available": 1,
+          "median": 0.162833
+        },
+        "recent12_peak_age": {
+          "available": 1,
+          "median": 11.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 1,
+          "median": 0.739098
+        },
+        "recent12_range_position": {
+          "available": 1,
+          "median": 0.236111
+        },
+        "prior3_decline_pct": {
+          "available": 1,
+          "median": 0.162195
+        },
+        "prior6_decline_pct": {
+          "available": 1,
+          "median": 0.121696
+        },
+        "A_velocity": {
+          "available": 1,
+          "median": -0.051914
+        },
+        "B_velocity": {
+          "available": 1,
+          "median": -0.013522
+        },
+        "C_velocity": {
+          "available": 1,
+          "median": 0.054065
+        },
+        "BA_delta_velocity": {
+          "available": 1,
+          "median": 0.038392
+        },
+        "CB_delta_velocity": {
+          "available": 1,
+          "median": 0.067587
+        },
+        "A_efficiency": {
+          "available": 1,
+          "median": -0.154362
+        },
+        "B_efficiency": {
+          "available": 1,
+          "median": -0.193548
+        },
+        "C_efficiency": {
+          "available": 1,
+          "median": 0.342857
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "axis": "price_outcome_hindsight",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 2,
+      "features": {
+        "rsi": {
+          "available": 2,
+          "median": 58.68916
+        },
+        "rsi_peak": {
+          "available": 2,
+          "median": 60.787461
+        },
+        "rsi_delta3": {
+          "available": 2,
+          "median": -4.523178
+        },
+        "rsi_delta6": {
+          "available": 2,
+          "median": -4.214618
+        },
+        "rsi_delta_peak": {
+          "available": 2,
+          "median": -2.098302
+        },
+        "st5_distance_atr": {
+          "available": 2,
+          "median": 2.28177
+        },
+        "st5_delta3": {
+          "available": 2,
+          "median": -0.552511
+        },
+        "st5_delta6": {
+          "available": 2,
+          "median": -0.586509
+        },
+        "st5_age": {
+          "available": 2,
+          "median": 19.5
+        },
+        "st30_distance_atr": {
+          "available": 2,
+          "median": -1.488492
+        },
+        "st30_age": {
+          "available": 2,
+          "median": 20.0
+        },
+        "signal_body_fraction": {
+          "available": 2,
+          "median": 0.284746
+        },
+        "signal_close_location": {
+          "available": 2,
+          "median": 0.241502
+        },
+        "signal_range_ratio": {
+          "available": 2,
+          "median": 0.758074
+        },
+        "signal_lower_low": {
+          "available": 2,
+          "median": 0.5
+        },
+        "signal_break_prior_low": {
+          "available": 2,
+          "median": 0.5
+        },
+        "signal_high_change": {
+          "available": 2,
+          "median": -0.259349
+        },
+        "signal_low_change": {
+          "available": 2,
+          "median": -0.09141
+        },
+        "high_change_pct": {
+          "available": 2,
+          "median": 1.205551
+        },
+        "low_change_pct": {
+          "available": 2,
+          "median": 1.843751
+        },
+        "recent12_peak_age": {
+          "available": 2,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 2,
+          "median": 0.631035
+        },
+        "recent12_range_position": {
+          "available": 2,
+          "median": 0.551276
+        },
+        "prior3_decline_pct": {
+          "available": 2,
+          "median": 0.142116
+        },
+        "prior6_decline_pct": {
+          "available": 2,
+          "median": -0.122466
+        },
+        "A_velocity": {
+          "available": 2,
+          "median": -0.219985
+        },
+        "B_velocity": {
+          "available": 2,
+          "median": -0.087746
+        },
+        "C_velocity": {
+          "available": 2,
+          "median": 0.047372
+        },
+        "BA_delta_velocity": {
+          "available": 2,
+          "median": 0.13224
+        },
+        "CB_delta_velocity": {
+          "available": 2,
+          "median": 0.135118
+        },
+        "A_efficiency": {
+          "available": 2,
+          "median": -0.909883
+        },
+        "B_efficiency": {
+          "available": 2,
+          "median": -0.195671
+        },
+        "C_efficiency": {
+          "available": 2,
+          "median": 0.002008
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "axis": "price_outcome_hindsight",
+      "label": "PERSISTENT_TARGET",
+      "count": 6,
+      "features": {
+        "rsi": {
+          "available": 6,
+          "median": 51.809579
+        },
+        "rsi_peak": {
+          "available": 6,
+          "median": 52.562976
+        },
+        "rsi_delta3": {
+          "available": 6,
+          "median": -0.238248
+        },
+        "rsi_delta6": {
+          "available": 5,
+          "median": 8.520195
+        },
+        "rsi_delta_peak": {
+          "available": 6,
+          "median": -1.525729
+        },
+        "st5_distance_atr": {
+          "available": 6,
+          "median": 2.425265
+        },
+        "st5_delta3": {
+          "available": 6,
+          "median": -0.317888
+        },
+        "st5_delta6": {
+          "available": 5,
+          "median": 0.904864
+        },
+        "st5_age": {
+          "available": 6,
+          "median": 20.0
+        },
+        "st30_distance_atr": {
+          "available": 6,
+          "median": -2.569534
+        },
+        "st30_age": {
+          "available": 6,
+          "median": 43.5
+        },
+        "signal_body_fraction": {
+          "available": 6,
+          "median": 0.524288
+        },
+        "signal_close_location": {
+          "available": 6,
+          "median": 0.2396
+        },
+        "signal_range_ratio": {
+          "available": 6,
+          "median": 0.558271
+        },
+        "signal_lower_low": {
+          "available": 6,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 6,
+          "median": 0.5
+        },
+        "signal_high_change": {
+          "available": 6,
+          "median": -0.206454
+        },
+        "signal_low_change": {
+          "available": 6,
+          "median": -0.059948
+        },
+        "high_change_pct": {
+          "available": 3,
+          "median": -0.554275
+        },
+        "low_change_pct": {
+          "available": 4,
+          "median": 0.170692
+        },
+        "recent12_peak_age": {
+          "available": 6,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 6,
+          "median": 0.45175
+        },
+        "recent12_range_position": {
+          "available": 6,
+          "median": 0.739218
+        },
+        "prior3_decline_pct": {
+          "available": 6,
+          "median": -0.001331
+        },
+        "prior6_decline_pct": {
+          "available": 5,
+          "median": -0.614994
+        },
+        "A_velocity": {
+          "available": 5,
+          "median": 0.020922
+        },
+        "B_velocity": {
+          "available": 5,
+          "median": -0.16012
+        },
+        "C_velocity": {
+          "available": 6,
+          "median": -0.000444
+        },
+        "BA_delta_velocity": {
+          "available": 5,
+          "median": -0.142348
+        },
+        "CB_delta_velocity": {
+          "available": 5,
+          "median": 0.10917
+        },
+        "A_efficiency": {
+          "available": 5,
+          "median": 0.166667
+        },
+        "B_efficiency": {
+          "available": 5,
+          "median": -0.472284
+        },
+        "C_efficiency": {
+          "available": 6,
+          "median": 0.08104
+        }
+      }
+    },
+    {
+      "period": "NOV",
+      "axis": "price_outcome_hindsight",
+      "label": "TARGET_FADED",
+      "count": 4,
+      "features": {
+        "rsi": {
+          "available": 4,
+          "median": 55.315809
+        },
+        "rsi_peak": {
+          "available": 4,
+          "median": 61.80029
+        },
+        "rsi_delta3": {
+          "available": 4,
+          "median": -2.26865
+        },
+        "rsi_delta6": {
+          "available": 4,
+          "median": -0.339614
+        },
+        "rsi_delta_peak": {
+          "available": 4,
+          "median": -6.906239
+        },
+        "st5_distance_atr": {
+          "available": 4,
+          "median": 2.499515
+        },
+        "st5_delta3": {
+          "available": 4,
+          "median": -0.280596
+        },
+        "st5_delta6": {
+          "available": 4,
+          "median": 0.272198
+        },
+        "st5_age": {
+          "available": 4,
+          "median": 25.0
+        },
+        "st30_distance_atr": {
+          "available": 4,
+          "median": -1.578331
+        },
+        "st30_age": {
+          "available": 4,
+          "median": 21.5
+        },
+        "signal_body_fraction": {
+          "available": 4,
+          "median": 0.601114
+        },
+        "signal_close_location": {
+          "available": 4,
+          "median": 0.055723
+        },
+        "signal_range_ratio": {
+          "available": 4,
+          "median": 1.081081
+        },
+        "signal_lower_low": {
+          "available": 4,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 4,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 4,
+          "median": -0.098944
+        },
+        "signal_low_change": {
+          "available": 4,
+          "median": -0.111966
+        },
+        "high_change_pct": {
+          "available": 4,
+          "median": 0.088295
+        },
+        "low_change_pct": {
+          "available": 4,
+          "median": 0.273528
+        },
+        "recent12_peak_age": {
+          "available": 4,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 4,
+          "median": 0.791588
+        },
+        "recent12_range_position": {
+          "available": 4,
+          "median": 0.566937
+        },
+        "prior3_decline_pct": {
+          "available": 4,
+          "median": 0.031627
+        },
+        "prior6_decline_pct": {
+          "available": 4,
+          "median": -0.320489
+        },
+        "A_velocity": {
+          "available": 4,
+          "median": 0.072622
+        },
+        "B_velocity": {
+          "available": 4,
+          "median": -0.102883
+        },
+        "C_velocity": {
+          "available": 4,
+          "median": 0.010542
+        },
+        "BA_delta_velocity": {
+          "available": 4,
+          "median": -0.177986
+        },
+        "CB_delta_velocity": {
+          "available": 4,
+          "median": 0.13506
+        },
+        "A_efficiency": {
+          "available": 4,
+          "median": 0.276469
+        },
+        "B_efficiency": {
+          "available": 4,
+          "median": -0.387407
+        },
+        "C_efficiency": {
+          "available": 4,
+          "median": 0.11231
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "axis": "two_step_match",
+      "label": "CENSORED",
+      "count": 17,
+      "features": {
+        "rsi": {
+          "available": 17,
+          "median": 53.65131
+        },
+        "rsi_peak": {
+          "available": 17,
+          "median": 60.260837
+        },
+        "rsi_delta3": {
+          "available": 17,
+          "median": -2.632007
+        },
+        "rsi_delta6": {
+          "available": 17,
+          "median": -1.126658
+        },
+        "rsi_delta_peak": {
+          "available": 17,
+          "median": -6.518612
+        },
+        "st5_distance_atr": {
+          "available": 17,
+          "median": 1.929012
+        },
+        "st5_delta3": {
+          "available": 17,
+          "median": -0.31205
+        },
+        "st5_delta6": {
+          "available": 17,
+          "median": 0.435432
+        },
+        "st5_age": {
+          "available": 17,
+          "median": 28.0
+        },
+        "st30_distance_atr": {
+          "available": 17,
+          "median": -2.354356
+        },
+        "st30_age": {
+          "available": 17,
+          "median": 38.0
+        },
+        "signal_body_fraction": {
+          "available": 17,
+          "median": 0.57551
+        },
+        "signal_close_location": {
+          "available": 17,
+          "median": 0.284091
+        },
+        "signal_range_ratio": {
+          "available": 17,
+          "median": 1.225
+        },
+        "signal_lower_low": {
+          "available": 17,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 17,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 17,
+          "median": -0.056566
+        },
+        "signal_low_change": {
+          "available": 17,
+          "median": -0.092081
+        },
+        "high_change_pct": {
+          "available": 17,
+          "median": 0.032258
+        },
+        "low_change_pct": {
+          "available": 17,
+          "median": 0.044777
+        },
+        "recent12_peak_age": {
+          "available": 17,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 17,
+          "median": 0.252719
+        },
+        "recent12_range_position": {
+          "available": 17,
+          "median": 0.569038
+        },
+        "prior3_decline_pct": {
+          "available": 17,
+          "median": 0.047845
+        },
+        "prior6_decline_pct": {
+          "available": 17,
+          "median": -0.064193
+        },
+        "A_velocity": {
+          "available": 17,
+          "median": -0.014904
+        },
+        "B_velocity": {
+          "available": 17,
+          "median": -0.021398
+        },
+        "C_velocity": {
+          "available": 17,
+          "median": 0.015948
+        },
+        "BA_delta_velocity": {
+          "available": 17,
+          "median": 0.024505
+        },
+        "CB_delta_velocity": {
+          "available": 17,
+          "median": 0.040452
+        },
+        "A_efficiency": {
+          "available": 17,
+          "median": -0.272727
+        },
+        "B_efficiency": {
+          "available": 17,
+          "median": -0.340206
+        },
+        "C_efficiency": {
+          "available": 17,
+          "median": 0.136986
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "axis": "two_step_match",
+      "label": "EARLIER",
+      "count": 85,
+      "features": {
+        "rsi": {
+          "available": 85,
+          "median": 52.969277
+        },
+        "rsi_peak": {
+          "available": 85,
+          "median": 59.77867
+        },
+        "rsi_delta3": {
+          "available": 85,
+          "median": -1.008292
+        },
+        "rsi_delta6": {
+          "available": 81,
+          "median": 1.55804
+        },
+        "rsi_delta_peak": {
+          "available": 85,
+          "median": -5.399127
+        },
+        "st5_distance_atr": {
+          "available": 85,
+          "median": 2.190796
+        },
+        "st5_delta3": {
+          "available": 85,
+          "median": -0.183869
+        },
+        "st5_delta6": {
+          "available": 81,
+          "median": 0.140931
+        },
+        "st5_age": {
+          "available": 85,
+          "median": 18.0
+        },
+        "st30_distance_atr": {
+          "available": 85,
+          "median": -1.773207
+        },
+        "st30_age": {
+          "available": 85,
+          "median": 23.0
+        },
+        "signal_body_fraction": {
+          "available": 85,
+          "median": 0.560284
+        },
+        "signal_close_location": {
+          "available": 85,
+          "median": 0.188119
+        },
+        "signal_range_ratio": {
+          "available": 85,
+          "median": 0.950746
+        },
+        "signal_lower_low": {
+          "available": 85,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 85,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 85,
+          "median": -0.077336
+        },
+        "signal_low_change": {
+          "available": 85,
+          "median": -0.074279
+        },
+        "high_change_pct": {
+          "available": 65,
+          "median": 0.098877
+        },
+        "low_change_pct": {
+          "available": 72,
+          "median": 0.101997
+        },
+        "recent12_peak_age": {
+          "available": 85,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 85,
+          "median": 0.365543
+        },
+        "recent12_range_position": {
+          "available": 85,
+          "median": 0.568058
+        },
+        "prior3_decline_pct": {
+          "available": 85,
+          "median": -0.007286
+        },
+        "prior6_decline_pct": {
+          "available": 81,
+          "median": -0.128389
+        },
+        "A_velocity": {
+          "available": 79,
+          "median": -0.007735
+        },
+        "B_velocity": {
+          "available": 81,
+          "median": -0.041235
+        },
+        "C_velocity": {
+          "available": 85,
+          "median": -0.002429
+        },
+        "BA_delta_velocity": {
+          "available": 79,
+          "median": -0.058072
+        },
+        "CB_delta_velocity": {
+          "available": 81,
+          "median": 0.037613
+        },
+        "A_efficiency": {
+          "available": 79,
+          "median": -0.097744
+        },
+        "B_efficiency": {
+          "available": 81,
+          "median": -0.376344
+        },
+        "C_efficiency": {
+          "available": 85,
+          "median": -0.011971
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "axis": "two_step_match",
+      "label": "NO_LATER_TWO_STEP",
+      "count": 72,
+      "features": {
+        "rsi": {
+          "available": 72,
+          "median": 54.255938
+        },
+        "rsi_peak": {
+          "available": 72,
+          "median": 57.8139
+        },
+        "rsi_delta3": {
+          "available": 72,
+          "median": 0.394841
+        },
+        "rsi_delta6": {
+          "available": 71,
+          "median": 3.725287
+        },
+        "rsi_delta_peak": {
+          "available": 72,
+          "median": -3.972812
+        },
+        "st5_distance_atr": {
+          "available": 72,
+          "median": 2.363982
+        },
+        "st5_delta3": {
+          "available": 72,
+          "median": -0.03725
+        },
+        "st5_delta6": {
+          "available": 71,
+          "median": 0.504617
+        },
+        "st5_age": {
+          "available": 72,
+          "median": 20.5
+        },
+        "st30_distance_atr": {
+          "available": 72,
+          "median": -1.587663
+        },
+        "st30_age": {
+          "available": 72,
+          "median": 22.0
+        },
+        "signal_body_fraction": {
+          "available": 72,
+          "median": 0.54989
+        },
+        "signal_close_location": {
+          "available": 72,
+          "median": 0.202821
+        },
+        "signal_range_ratio": {
+          "available": 72,
+          "median": 0.804952
+        },
+        "signal_lower_low": {
+          "available": 72,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 72,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 72,
+          "median": -0.063736
+        },
+        "signal_low_change": {
+          "available": 72,
+          "median": -0.033287
+        },
+        "high_change_pct": {
+          "available": 51,
+          "median": -0.060617
+        },
+        "low_change_pct": {
+          "available": 58,
+          "median": 0.097228
+        },
+        "recent12_peak_age": {
+          "available": 72,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 72,
+          "median": 0.306357
+        },
+        "recent12_range_position": {
+          "available": 72,
+          "median": 0.680929
+        },
+        "prior3_decline_pct": {
+          "available": 72,
+          "median": -0.091172
+        },
+        "prior6_decline_pct": {
+          "available": 71,
+          "median": -0.200586
+        },
+        "A_velocity": {
+          "available": 65,
+          "median": -0.000152
+        },
+        "B_velocity": {
+          "available": 71,
+          "median": -0.042597
+        },
+        "C_velocity": {
+          "available": 72,
+          "median": -0.030391
+        },
+        "BA_delta_velocity": {
+          "available": 65,
+          "median": -0.036228
+        },
+        "CB_delta_velocity": {
+          "available": 71,
+          "median": 0.026111
+        },
+        "A_efficiency": {
+          "available": 65,
+          "median": -0.005236
+        },
+        "B_efficiency": {
+          "available": 71,
+          "median": -0.507109
+        },
+        "C_efficiency": {
+          "available": 72,
+          "median": -0.209007
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "axis": "price_outcome_hindsight",
+      "label": "CENSORED",
+      "count": 23,
+      "features": {
+        "rsi": {
+          "available": 23,
+          "median": 52.613431
+        },
+        "rsi_peak": {
+          "available": 23,
+          "median": 63.223174
+        },
+        "rsi_delta3": {
+          "available": 23,
+          "median": -4.466621
+        },
+        "rsi_delta6": {
+          "available": 23,
+          "median": -1.126658
+        },
+        "rsi_delta_peak": {
+          "available": 23,
+          "median": -7.901071
+        },
+        "st5_distance_atr": {
+          "available": 23,
+          "median": 1.836875
+        },
+        "st5_delta3": {
+          "available": 23,
+          "median": -0.579085
+        },
+        "st5_delta6": {
+          "available": 23,
+          "median": 0.435432
+        },
+        "st5_age": {
+          "available": 23,
+          "median": 15.0
+        },
+        "st30_distance_atr": {
+          "available": 23,
+          "median": -2.339742
+        },
+        "st30_age": {
+          "available": 23,
+          "median": 25.0
+        },
+        "signal_body_fraction": {
+          "available": 23,
+          "median": 0.612903
+        },
+        "signal_close_location": {
+          "available": 23,
+          "median": 0.269231
+        },
+        "signal_range_ratio": {
+          "available": 23,
+          "median": 1.275862
+        },
+        "signal_lower_low": {
+          "available": 23,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 23,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 23,
+          "median": -0.062396
+        },
+        "signal_low_change": {
+          "available": 23,
+          "median": -0.113208
+        },
+        "high_change_pct": {
+          "available": 23,
+          "median": 0.032258
+        },
+        "low_change_pct": {
+          "available": 23,
+          "median": 0.044777
+        },
+        "recent12_peak_age": {
+          "available": 23,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 23,
+          "median": 0.297156
+        },
+        "recent12_range_position": {
+          "available": 23,
+          "median": 0.505051
+        },
+        "prior3_decline_pct": {
+          "available": 23,
+          "median": 0.103749
+        },
+        "prior6_decline_pct": {
+          "available": 23,
+          "median": -0.064193
+        },
+        "A_velocity": {
+          "available": 23,
+          "median": -0.029016
+        },
+        "B_velocity": {
+          "available": 23,
+          "median": -0.021398
+        },
+        "C_velocity": {
+          "available": 23,
+          "median": 0.034583
+        },
+        "BA_delta_velocity": {
+          "available": 23,
+          "median": 0.024505
+        },
+        "CB_delta_velocity": {
+          "available": 23,
+          "median": 0.04354
+        },
+        "A_efficiency": {
+          "available": 23,
+          "median": -0.272727
+        },
+        "B_efficiency": {
+          "available": 23,
+          "median": -0.340206
+        },
+        "C_efficiency": {
+          "available": 23,
+          "median": 0.240669
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "axis": "price_outcome_hindsight",
+      "label": "NO_FEE_SCALE_EXCURSION",
+      "count": 64,
+      "features": {
+        "rsi": {
+          "available": 64,
+          "median": 54.380541
+        },
+        "rsi_peak": {
+          "available": 64,
+          "median": 57.8139
+        },
+        "rsi_delta3": {
+          "available": 64,
+          "median": -0.270518
+        },
+        "rsi_delta6": {
+          "available": 64,
+          "median": 3.363402
+        },
+        "rsi_delta_peak": {
+          "available": 64,
+          "median": -3.972812
+        },
+        "st5_distance_atr": {
+          "available": 64,
+          "median": 2.292039
+        },
+        "st5_delta3": {
+          "available": 64,
+          "median": -0.101561
+        },
+        "st5_delta6": {
+          "available": 64,
+          "median": 0.464414
+        },
+        "st5_age": {
+          "available": 64,
+          "median": 21.0
+        },
+        "st30_distance_atr": {
+          "available": 64,
+          "median": -1.590672
+        },
+        "st30_age": {
+          "available": 64,
+          "median": 22.0
+        },
+        "signal_body_fraction": {
+          "available": 64,
+          "median": 0.532475
+        },
+        "signal_close_location": {
+          "available": 64,
+          "median": 0.202999
+        },
+        "signal_range_ratio": {
+          "available": 64,
+          "median": 0.802985
+        },
+        "signal_lower_low": {
+          "available": 64,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 64,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 64,
+          "median": -0.060386
+        },
+        "signal_low_change": {
+          "available": 64,
+          "median": -0.043323
+        },
+        "high_change_pct": {
+          "available": 52,
+          "median": -0.030308
+        },
+        "low_change_pct": {
+          "available": 57,
+          "median": 0.078638
+        },
+        "recent12_peak_age": {
+          "available": 64,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 64,
+          "median": 0.272486
+        },
+        "recent12_range_position": {
+          "available": 64,
+          "median": 0.639136
+        },
+        "prior3_decline_pct": {
+          "available": 64,
+          "median": -0.022624
+        },
+        "prior6_decline_pct": {
+          "available": 64,
+          "median": -0.133949
+        },
+        "A_velocity": {
+          "available": 61,
+          "median": 0.016531
+        },
+        "B_velocity": {
+          "available": 64,
+          "median": -0.04799
+        },
+        "C_velocity": {
+          "available": 64,
+          "median": -0.007541
+        },
+        "BA_delta_velocity": {
+          "available": 61,
+          "median": -0.054347
+        },
+        "CB_delta_velocity": {
+          "available": 64,
+          "median": 0.030059
+        },
+        "A_efficiency": {
+          "available": 61,
+          "median": 0.197802
+        },
+        "B_efficiency": {
+          "available": 64,
+          "median": -0.570931
+        },
+        "C_efficiency": {
+          "available": 64,
+          "median": -0.113804
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "axis": "price_outcome_hindsight",
+      "label": "PERSISTENT_TARGET",
+      "count": 30,
+      "features": {
+        "rsi": {
+          "available": 30,
+          "median": 52.715327
+        },
+        "rsi_peak": {
+          "available": 30,
+          "median": 59.938377
+        },
+        "rsi_delta3": {
+          "available": 30,
+          "median": -0.193857
+        },
+        "rsi_delta6": {
+          "available": 27,
+          "median": 4.385797
+        },
+        "rsi_delta_peak": {
+          "available": 30,
+          "median": -3.978234
+        },
+        "st5_distance_atr": {
+          "available": 30,
+          "median": 2.486281
+        },
+        "st5_delta3": {
+          "available": 30,
+          "median": 0.03924
+        },
+        "st5_delta6": {
+          "available": 27,
+          "median": 0.614245
+        },
+        "st5_age": {
+          "available": 30,
+          "median": 18.5
+        },
+        "st30_distance_atr": {
+          "available": 30,
+          "median": -1.780521
+        },
+        "st30_age": {
+          "available": 30,
+          "median": 27.0
+        },
+        "signal_body_fraction": {
+          "available": 30,
+          "median": 0.541505
+        },
+        "signal_close_location": {
+          "available": 30,
+          "median": 0.231809
+        },
+        "signal_range_ratio": {
+          "available": 30,
+          "median": 0.861264
+        },
+        "signal_lower_low": {
+          "available": 30,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 30,
+          "median": 0.0
+        },
+        "signal_high_change": {
+          "available": 30,
+          "median": -0.11007
+        },
+        "signal_low_change": {
+          "available": 30,
+          "median": -0.03991
+        },
+        "high_change_pct": {
+          "available": 18,
+          "median": -0.092268
+        },
+        "low_change_pct": {
+          "available": 22,
+          "median": 0.092921
+        },
+        "recent12_peak_age": {
+          "available": 30,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 30,
+          "median": 0.366911
+        },
+        "recent12_range_position": {
+          "available": 30,
+          "median": 0.708492
+        },
+        "prior3_decline_pct": {
+          "available": 30,
+          "median": -0.061221
+        },
+        "prior6_decline_pct": {
+          "available": 27,
+          "median": -0.213541
+        },
+        "A_velocity": {
+          "available": 25,
+          "median": 0.006091
+        },
+        "B_velocity": {
+          "available": 27,
+          "median": -0.033352
+        },
+        "C_velocity": {
+          "available": 30,
+          "median": -0.020407
+        },
+        "BA_delta_velocity": {
+          "available": 25,
+          "median": -0.060426
+        },
+        "CB_delta_velocity": {
+          "available": 27,
+          "median": 0.027006
+        },
+        "A_efficiency": {
+          "available": 25,
+          "median": 0.044776
+        },
+        "B_efficiency": {
+          "available": 27,
+          "median": -0.272727
+        },
+        "C_efficiency": {
+          "available": 30,
+          "median": -0.096913
+        }
+      }
+    },
+    {
+      "period": "ALL",
+      "axis": "price_outcome_hindsight",
+      "label": "TARGET_FADED",
+      "count": 57,
+      "features": {
+        "rsi": {
+          "available": 57,
+          "median": 53.530648
+        },
+        "rsi_peak": {
+          "available": 57,
+          "median": 59.874186
+        },
+        "rsi_delta3": {
+          "available": 57,
+          "median": -0.498432
+        },
+        "rsi_delta6": {
+          "available": 55,
+          "median": 0.230293
+        },
+        "rsi_delta_peak": {
+          "available": 57,
+          "median": -5.363956
+        },
+        "st5_distance_atr": {
+          "available": 57,
+          "median": 2.279654
+        },
+        "st5_delta3": {
+          "available": 57,
+          "median": -0.14182
+        },
+        "st5_delta6": {
+          "available": 55,
+          "median": 0.083229
+        },
+        "st5_age": {
+          "available": 57,
+          "median": 17.0
+        },
+        "st30_distance_atr": {
+          "available": 57,
+          "median": -1.679848
+        },
+        "st30_age": {
+          "available": 57,
+          "median": 22.0
+        },
+        "signal_body_fraction": {
+          "available": 57,
+          "median": 0.529412
+        },
+        "signal_close_location": {
+          "available": 57,
+          "median": 0.173913
+        },
+        "signal_range_ratio": {
+          "available": 57,
+          "median": 0.928571
+        },
+        "signal_lower_low": {
+          "available": 57,
+          "median": 1.0
+        },
+        "signal_break_prior_low": {
+          "available": 57,
+          "median": 1.0
+        },
+        "signal_high_change": {
+          "available": 57,
+          "median": -0.077491
+        },
+        "signal_low_change": {
+          "available": 57,
+          "median": -0.074279
+        },
+        "high_change_pct": {
+          "available": 40,
+          "median": 0.0535
+        },
+        "low_change_pct": {
+          "available": 45,
+          "median": 0.129861
+        },
+        "recent12_peak_age": {
+          "available": 57,
+          "median": 1.0
+        },
+        "recent12_peak_decline_pct": {
+          "available": 57,
+          "median": 0.415358
+        },
+        "recent12_range_position": {
+          "available": 57,
+          "median": 0.619847
+        },
+        "prior3_decline_pct": {
+          "available": 57,
+          "median": -0.02119
+        },
+        "prior6_decline_pct": {
+          "available": 55,
+          "median": -0.150204
+        },
+        "A_velocity": {
+          "available": 52,
+          "median": -0.009811
+        },
+        "B_velocity": {
+          "available": 55,
+          "median": -0.031439
+        },
+        "C_velocity": {
+          "available": 57,
+          "median": -0.007063
+        },
+        "BA_delta_velocity": {
+          "available": 52,
+          "median": -0.038039
+        },
+        "CB_delta_velocity": {
+          "available": 55,
+          "median": 0.028871
+        },
+        "A_efficiency": {
+          "available": 52,
+          "median": -0.120301
+        },
+        "B_efficiency": {
+          "available": 55,
+          "median": -0.463415
+        },
+        "C_efficiency": {
+          "available": 57,
+          "median": -0.101124
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,892 @@
+{
+  "notes": [
+    "Observational only; both periods are discovery data. No thresholds selected or strategy replay performed.",
+    "B2 outcome labels exist only for executed trades; blocked candidates are not assumed losers. K3 labels reflect selected executions.",
+    "5m and 30m ST ATR10 multiplier3; 30m context completed only. Discovery begins without prehistory; missing values retained. November has 780 warm-up bars.",
+    "Prior trigger band is previous active ST; current active ST is next-bar trigger boundary. Prior distance uses current ATR; approach uses change in absolute current-band ATR distance (negative means closer).",
+    "Approach windows require uninterrupted same-session bars and unchanged ST direction. 30m windows count 30m bars, not 5m bars.",
+    "30m distance describes the last completed 30m close, not the current 5m price. Future flip labels are retrospective.",
+    "Trade sums are not portfolio returns; feed comparability not established."
+  ],
+  "source_st_sha256": "c1727a67c903fdc7dc0ca61562f233a07908aebb04347ce255f4e9fccede1749",
+  "input_hashes": {
+    "kiss/visual_research/aimn_nvda_candles.json": "020dd41d6a023f236d5bd62e38b98dc2e141a3761280c69aec7ec1c58f0d8f50",
+    "kiss/visual_research/independent_holdout_exp144/nvda_nov_2026_5m_iex.json": "d038f8c34226810c0ef397fee3a393c2757535f12e5243da7f35674ac548d3ec",
+    "kiss/visual_research/independent_holdout_exp40l/nvda_2026-11-16_2026-11-25_5m_iex.json": "eabb5477fc612d1d7ad21973282bc2a527c94da26fefdb9931172c89950b572d",
+    "kiss/results/exp40k_structural_reversal_replay/K3_BULLISH_UPPER_CLOSE_candidates.csv": "92c8e5d2200727ab358cb228ac91094b472718f2d9f9c09e16b35866b23671c7",
+    "kiss/results/exp40b_causal_replay/B2_trades.csv": "47ab2a8fe9cd84d50ccad567397830ae9ffbd46cd6628f513bbff64ade14f109",
+    "kiss/results/exp40k_structural_reversal_replay/K3_BULLISH_UPPER_CLOSE_trades.csv": "bfb61ad0ee6e9f7884f0c8c5d9bec3098a922417dcbd85d7a27abceb0ad4e9c5",
+    "kiss/results/exp40l_independent_validation/K3_candidates.csv": "e8618cceaa100d4e875a37e359285f0ec88c9b2db197e473e7c89ee9eabed202",
+    "kiss/results/exp40l_independent_validation/B2_trades.csv": "10a29c8fbf4cccc5774e0c63afff7436d82378305b1d3d20091805d1005c828a",
+    "kiss/results/exp40l_independent_validation/K3_trades.csv": "66f5c75b2be0eb6c4631c8f5a66fe9e8602f96d6edf9b07a6f44c32ec548a482",
+    "kiss/results/exp40m_supertrend_forensics/candidate_supertrend_audit.csv": "ad209fc269e990215a336635d30d4122c1e54bf585a60ed6dc023e6c52b76f02"
+  },
+  "candidates": 148,
+  "november_m_parity": 13,
+  "groups": [
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "candidates": 41,
+      "net_sum_pct": 13.648771
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "candidates": 81,
+      "net_sum_pct": -44.040358
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "NOT_EXECUTED",
+      "candidates": 13,
+      "net_sum_pct": null
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/LONG",
+      "b2_outcome": "WIN",
+      "candidates": 19,
+      "net_sum_pct": 4.897444
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/LONG",
+      "b2_outcome": "LOSS",
+      "candidates": 50,
+      "net_sum_pct": -26.931216
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/LONG",
+      "b2_outcome": "NOT_EXECUTED",
+      "candidates": 11,
+      "net_sum_pct": null
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/SHORT",
+      "b2_outcome": "WIN",
+      "candidates": 19,
+      "net_sum_pct": 8.312076
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/SHORT",
+      "b2_outcome": "LOSS",
+      "candidates": 18,
+      "net_sum_pct": -9.979549
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/SHORT",
+      "b2_outcome": "NOT_EXECUTED",
+      "candidates": 2,
+      "net_sum_pct": null
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "LONG/UNKNOWN",
+      "b2_outcome": "LOSS",
+      "candidates": 5,
+      "net_sum_pct": -2.943137
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "SHORT/LONG",
+      "b2_outcome": "WIN",
+      "candidates": 1,
+      "net_sum_pct": 0.036848
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "SHORT/LONG",
+      "b2_outcome": "LOSS",
+      "candidates": 4,
+      "net_sum_pct": -1.85764
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "SHORT/SHORT",
+      "b2_outcome": "WIN",
+      "candidates": 2,
+      "net_sum_pct": 0.402403
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "SHORT/SHORT",
+      "b2_outcome": "LOSS",
+      "candidates": 4,
+      "net_sum_pct": -2.328816
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "candidates": 3,
+      "net_sum_pct": 1.784925
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "candidates": 9,
+      "net_sum_pct": -5.053804
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "NOT_EXECUTED",
+      "candidates": 1,
+      "net_sum_pct": null
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "LONG/LONG",
+      "b2_outcome": "WIN",
+      "candidates": 1,
+      "net_sum_pct": 0.599174
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "LONG/LONG",
+      "b2_outcome": "LOSS",
+      "candidates": 2,
+      "net_sum_pct": -1.395024
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "LONG/LONG",
+      "b2_outcome": "NOT_EXECUTED",
+      "candidates": 1,
+      "net_sum_pct": null
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "LONG/SHORT",
+      "b2_outcome": "WIN",
+      "candidates": 1,
+      "net_sum_pct": 1.113746
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "LONG/SHORT",
+      "b2_outcome": "LOSS",
+      "candidates": 6,
+      "net_sum_pct": -2.961268
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "SHORT/SHORT",
+      "b2_outcome": "WIN",
+      "candidates": 1,
+      "net_sum_pct": 0.072005
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "SHORT/SHORT",
+      "b2_outcome": "LOSS",
+      "candidates": 1,
+      "net_sum_pct": -0.697512
+    }
+  ],
+  "context_counts": {
+    "DISCOVERY": {
+      "LONG/UNKNOWN": 5,
+      "LONG/LONG": 80,
+      "LONG/SHORT": 39,
+      "SHORT/LONG": 5,
+      "SHORT/SHORT": 6
+    },
+    "NOVEMBER": {
+      "LONG/SHORT": 7,
+      "LONG/LONG": 4,
+      "SHORT/SHORT": 2
+    }
+  },
+  "all_context_feature_summary": [
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_distance_atr",
+      "candidates": 41,
+      "available": 41,
+      "mean": 2.105702,
+      "median": 2.438945
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_distance_atr",
+      "candidates": 41,
+      "available": 41,
+      "mean": 0.524099,
+      "median": -0.245827
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_close_minus_prior_trigger_atr",
+      "candidates": 41,
+      "available": 41,
+      "mean": 2.146002,
+      "median": 2.449514
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_close_minus_prior_trigger_atr",
+      "candidates": 41,
+      "available": 41,
+      "mean": 0.530493,
+      "median": -0.245827
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_absolute_distance_change_3bars_atr",
+      "candidates": 41,
+      "available": 36,
+      "mean": -0.410914,
+      "median": -0.286997
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_absolute_distance_change_6bars_atr",
+      "candidates": 41,
+      "available": 31,
+      "mean": -0.305327,
+      "median": -0.374444
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_absolute_distance_change_3bars_atr",
+      "candidates": 41,
+      "available": 30,
+      "mean": -0.34878,
+      "median": -0.098237
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_absolute_distance_change_6bars_atr",
+      "candidates": 41,
+      "available": 20,
+      "mean": -0.531853,
+      "median": -0.144103
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_trend_age_bars",
+      "candidates": 41,
+      "available": 41,
+      "mean": 32.439024,
+      "median": 28
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_trend_age_bars",
+      "candidates": 41,
+      "available": 41,
+      "mean": 27.390244,
+      "median": 23
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_context_age_minutes",
+      "candidates": 41,
+      "available": 41,
+      "mean": 211.707317,
+      "median": 15.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_high_count_3comparisons",
+      "candidates": 41,
+      "available": 38,
+      "mean": 1.105263,
+      "median": 1.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_high_count_6comparisons",
+      "candidates": 41,
+      "available": 34,
+      "mean": 2.029412,
+      "median": 2.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_low_count_3comparisons",
+      "candidates": 41,
+      "available": 38,
+      "mean": 0.947368,
+      "median": 1.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_low_count_6comparisons",
+      "candidates": 41,
+      "available": 34,
+      "mean": 1.941176,
+      "median": 2.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_close_count_3comparisons",
+      "candidates": 41,
+      "available": 38,
+      "mean": 1.710526,
+      "median": 2.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_close_count_6comparisons",
+      "candidates": 41,
+      "available": 34,
+      "mean": 2.558824,
+      "median": 3.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_distance_atr",
+      "candidates": 81,
+      "available": 81,
+      "mean": 1.789523,
+      "median": 2.216679
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_distance_atr",
+      "candidates": 81,
+      "available": 76,
+      "mean": 1.739142,
+      "median": 2.958336
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_close_minus_prior_trigger_atr",
+      "candidates": 81,
+      "available": 81,
+      "mean": 1.908494,
+      "median": 2.216679
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_close_minus_prior_trigger_atr",
+      "candidates": 81,
+      "available": 76,
+      "mean": 1.741143,
+      "median": 3.014104
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_absolute_distance_change_3bars_atr",
+      "candidates": 81,
+      "available": 62,
+      "mean": -0.630187,
+      "median": -0.513474
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_absolute_distance_change_6bars_atr",
+      "candidates": 81,
+      "available": 52,
+      "mean": -0.322742,
+      "median": -0.239489
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_absolute_distance_change_3bars_atr",
+      "candidates": 81,
+      "available": 57,
+      "mean": -0.089643,
+      "median": -0.076483
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_absolute_distance_change_6bars_atr",
+      "candidates": 81,
+      "available": 41,
+      "mean": -0.006774,
+      "median": 0.102682
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_trend_age_bars",
+      "candidates": 81,
+      "available": 81,
+      "mean": 29.160494,
+      "median": 22
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_trend_age_bars",
+      "candidates": 81,
+      "available": 76,
+      "mean": 23.631579,
+      "median": 16.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_context_age_minutes",
+      "candidates": 81,
+      "available": 81,
+      "mean": 471.54321,
+      "median": 15.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_high_count_3comparisons",
+      "candidates": 81,
+      "available": 66,
+      "mean": 1.060606,
+      "median": 1.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_high_count_6comparisons",
+      "candidates": 81,
+      "available": 61,
+      "mean": 1.918033,
+      "median": 2
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_low_count_3comparisons",
+      "candidates": 81,
+      "available": 66,
+      "mean": 1,
+      "median": 1.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_low_count_6comparisons",
+      "candidates": 81,
+      "available": 61,
+      "mean": 1.737705,
+      "median": 2
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_close_count_3comparisons",
+      "candidates": 81,
+      "available": 66,
+      "mean": 1.454545,
+      "median": 1.0
+    },
+    {
+      "period": "DISCOVERY",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_close_count_6comparisons",
+      "candidates": 81,
+      "available": 61,
+      "mean": 2.295082,
+      "median": 2
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_distance_atr",
+      "candidates": 3,
+      "available": 3,
+      "mean": 1.148946,
+      "median": 0.967558
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_distance_atr",
+      "candidates": 3,
+      "available": 3,
+      "mean": -0.275663,
+      "median": -1.299484
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_close_minus_prior_trigger_atr",
+      "candidates": 3,
+      "available": 3,
+      "mean": 1.219053,
+      "median": 0.967558
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_close_minus_prior_trigger_atr",
+      "candidates": 3,
+      "available": 3,
+      "mean": -0.163907,
+      "median": -1.299484
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_absolute_distance_change_3bars_atr",
+      "candidates": 3,
+      "available": 2,
+      "mean": 0.600517,
+      "median": 0.600517
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_absolute_distance_change_6bars_atr",
+      "candidates": 3,
+      "available": 2,
+      "mean": -0.03695,
+      "median": -0.03695
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_absolute_distance_change_3bars_atr",
+      "candidates": 3,
+      "available": 3,
+      "mean": -0.376862,
+      "median": -0.352938
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_absolute_distance_change_6bars_atr",
+      "candidates": 3,
+      "available": 3,
+      "mean": -0.351912,
+      "median": -0.623136
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st5_trend_age_bars",
+      "candidates": 3,
+      "available": 3,
+      "mean": 42.666667,
+      "median": 52
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_trend_age_bars",
+      "candidates": 3,
+      "available": 3,
+      "mean": 23.666667,
+      "median": 12
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "st30_context_age_minutes",
+      "candidates": 3,
+      "available": 3,
+      "mean": 361.666667,
+      "median": 20.0
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_high_count_3comparisons",
+      "candidates": 3,
+      "available": 2,
+      "mean": 1,
+      "median": 1.0
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_high_count_6comparisons",
+      "candidates": 3,
+      "available": 2,
+      "mean": 1.5,
+      "median": 1.5
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_low_count_3comparisons",
+      "candidates": 3,
+      "available": 2,
+      "mean": 1,
+      "median": 1.0
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_low_count_6comparisons",
+      "candidates": 3,
+      "available": 2,
+      "mean": 2,
+      "median": 2.0
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_close_count_3comparisons",
+      "candidates": 3,
+      "available": 2,
+      "mean": 1.5,
+      "median": 1.5
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "WIN",
+      "feature": "lower_close_count_6comparisons",
+      "candidates": 3,
+      "available": 2,
+      "mean": 2.5,
+      "median": 2.5
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_distance_atr",
+      "candidates": 9,
+      "available": 9,
+      "mean": 1.635256,
+      "median": 2.434511
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_distance_atr",
+      "candidates": 9,
+      "available": 9,
+      "mean": -0.713352,
+      "median": -1.171624
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_close_minus_prior_trigger_atr",
+      "candidates": 9,
+      "available": 9,
+      "mean": 1.471137,
+      "median": 2.434511
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_close_minus_prior_trigger_atr",
+      "candidates": 9,
+      "available": 9,
+      "mean": -0.54089,
+      "median": -1.171624
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_absolute_distance_change_3bars_atr",
+      "candidates": 9,
+      "available": 7,
+      "mean": -0.676743,
+      "median": -0.462869
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_absolute_distance_change_6bars_atr",
+      "candidates": 9,
+      "available": 6,
+      "mean": -0.156405,
+      "median": 0.089865
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_absolute_distance_change_3bars_atr",
+      "candidates": 9,
+      "available": 7,
+      "mean": -0.867293,
+      "median": -1.105677
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_absolute_distance_change_6bars_atr",
+      "candidates": 9,
+      "available": 7,
+      "mean": -0.940596,
+      "median": -0.736281
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st5_trend_age_bars",
+      "candidates": 9,
+      "available": 9,
+      "mean": 13.444444,
+      "median": 13
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_trend_age_bars",
+      "candidates": 9,
+      "available": 9,
+      "mean": 28.222222,
+      "median": 21
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "st30_context_age_minutes",
+      "candidates": 9,
+      "available": 9,
+      "mean": 681.666667,
+      "median": 15.0
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_high_count_3comparisons",
+      "candidates": 9,
+      "available": 7,
+      "mean": 1.142857,
+      "median": 1
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_high_count_6comparisons",
+      "candidates": 9,
+      "available": 6,
+      "mean": 2.833333,
+      "median": 3.0
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_low_count_3comparisons",
+      "candidates": 9,
+      "available": 7,
+      "mean": 1.142857,
+      "median": 1
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_low_count_6comparisons",
+      "candidates": 9,
+      "available": 6,
+      "mean": 2.5,
+      "median": 2.5
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_close_count_3comparisons",
+      "candidates": 9,
+      "available": 7,
+      "mean": 1.571429,
+      "median": 2
+    },
+    {
+      "period": "NOVEMBER",
+      "context": "ALL",
+      "b2_outcome": "LOSS",
+      "feature": "lower_close_count_6comparisons",
+      "candidates": 9,
+      "available": 6,
+      "mean": 2.666667,
+      "median": 3.0
+    }
+  ]
+}

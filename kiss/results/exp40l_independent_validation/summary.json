@@ -1,0 +1,213 @@
+{
+  "notes": [
+    "Temporal holdout, prior research usage not independently verified; IEX feed comparability unverified.",
+    "No warm-up entries; indicators use all 780 warm-up bars.",
+    "B2 uses K replay with unrestricted validation entry gate, exact discovery parity against original B2.",
+    "Cost scenarios subtract additional round-trip percentage points from completed trades; not a fill/slippage simulation.",
+    "Open B2 exposure is reported separately, with mark to final close, not a claimed fill.",
+    "Trade sums are not portfolio returns. No parameter optimization."
+  ],
+  "source_hashes": {
+    "aimn_exp40b_causal_replay.py": "f43fb8b676bb48b2ecbc77477ae775a1079095feb5b35347d3697cb4c8c22651",
+    "aimn_exp40d_deceleration_replay.py": "7faa4f24454fcbce64f5dd1ab016322c472622185f89200bb9995ae3fb0e88b3",
+    "aimn_exp40e_adaptive_trajectory.py": "3db3ba5947c4848daedc3837fd3de37ab34aa1014463bfb43c3a8a09775b8ada",
+    "aimn_exp40f_opening_session_forensics.py": "075c3eee0a345f465e3ad092c13fa87825818acd3e47a387ec3d5fe2b8a44cf0",
+    "aimn_exp40g_prior_session_replay.py": "75a192b814df8e01a76993ddb800a7a8182c092720bbd4f916234d0a11c06206",
+    "aimn_exp40h_session_protection.py": "7f546b190ddb76aeb0b7244f17ddcd7c5c6d57a5c1eaed83e660c160380535a6",
+    "aimn_exp40k_structural_reversal_replay.py": "36bab76860e192d3d8529efa1ce6b90c1171cee238f992fc277bc193f98c2f1f"
+  },
+  "warmup_sha256": "d038f8c34226810c0ef397fee3a393c2757535f12e5243da7f35674ac548d3ec",
+  "validation_sha256": "eabb5477fc612d1d7ad21973282bc2a527c94da26fefdb9931172c89950b572d",
+  "discovery_parity": {
+    "B2": {
+      "trades": 122,
+      "winners": 41,
+      "losers": 81,
+      "net_sum_pct": -30.391587,
+      "gross_sum_pct": -5.991587,
+      "exits": {
+        "TRAILING_REVERSE": 87,
+        "V_PROFIT": 35
+      }
+    },
+    "H4": {
+      "trades": 32,
+      "winners": 17,
+      "losers": 15,
+      "net_sum_pct": -0.672133,
+      "gross_sum_pct": 5.727867,
+      "exits": {
+        "V_PROFIT": 14,
+        "TRAILING_REVERSE": 16,
+        "SESSION_FLATTEN": 2
+      }
+    },
+    "K3": {
+      "trades": 32,
+      "winners": 16,
+      "losers": 16,
+      "net_sum_pct": -0.199296,
+      "gross_sum_pct": 6.200704,
+      "exits": {
+        "V_PROFIT": 13,
+        "TRAILING_REVERSE": 13,
+        "SESSION_FLATTEN": 2,
+        "STRUCTURAL_BULLISH_UPPER_CLOSE": 4
+      }
+    }
+  },
+  "validation_days": [
+    "2026-11-16",
+    "2026-11-17",
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-23",
+    "2026-11-24",
+    "2026-11-25"
+  ],
+  "variants": {
+    "B2": {
+      "trades": 12,
+      "winners": 3,
+      "losers": 9,
+      "net_sum_pct": -3.268879,
+      "gross_sum_pct": -0.868879,
+      "exits": {
+        "V_PROFIT": 1,
+        "TRAILING_REVERSE": 11
+      },
+      "validation_candidates": 13,
+      "candidate_statuses": {
+        "SCHEDULED": 12,
+        "BLOCKED_POSITION": 1
+      },
+      "overnight_trades": 0,
+      "open_position": null,
+      "additional_round_trip_cost_pct": {
+        "0.00": {
+          "closed_net_sum_pct": -3.268879,
+          "winners": 3,
+          "break_even": 0,
+          "losers": 9,
+          "net_with_open_mark_pct": -3.268879
+        },
+        "0.02": {
+          "closed_net_sum_pct": -3.508879,
+          "winners": 3,
+          "break_even": 0,
+          "losers": 9,
+          "net_with_open_mark_pct": -3.508879
+        },
+        "0.05": {
+          "closed_net_sum_pct": -3.868879,
+          "winners": 3,
+          "break_even": 0,
+          "losers": 9,
+          "net_with_open_mark_pct": -3.868879
+        },
+        "0.10": {
+          "closed_net_sum_pct": -4.468879,
+          "winners": 2,
+          "break_even": 0,
+          "losers": 10,
+          "net_with_open_mark_pct": -4.468879
+        }
+      }
+    },
+    "H4": {
+      "trades": 3,
+      "winners": 0,
+      "losers": 3,
+      "net_sum_pct": -1.673977,
+      "gross_sum_pct": -1.073977,
+      "exits": {
+        "TRAILING_REVERSE": 3
+      },
+      "validation_candidates": 13,
+      "candidate_statuses": {
+        "REJECTED": 10,
+        "SCHEDULED": 3
+      },
+      "overnight_trades": 0,
+      "open_position": null,
+      "additional_round_trip_cost_pct": {
+        "0.00": {
+          "closed_net_sum_pct": -1.673977,
+          "winners": 0,
+          "break_even": 0,
+          "losers": 3,
+          "net_with_open_mark_pct": -1.673977
+        },
+        "0.02": {
+          "closed_net_sum_pct": -1.733977,
+          "winners": 0,
+          "break_even": 0,
+          "losers": 3,
+          "net_with_open_mark_pct": -1.733977
+        },
+        "0.05": {
+          "closed_net_sum_pct": -1.823977,
+          "winners": 0,
+          "break_even": 0,
+          "losers": 3,
+          "net_with_open_mark_pct": -1.823977
+        },
+        "0.10": {
+          "closed_net_sum_pct": -1.973977,
+          "winners": 0,
+          "break_even": 0,
+          "losers": 3,
+          "net_with_open_mark_pct": -1.973977
+        }
+      }
+    },
+    "K3": {
+      "trades": 3,
+      "winners": 0,
+      "losers": 3,
+      "net_sum_pct": -1.673977,
+      "gross_sum_pct": -1.073977,
+      "exits": {
+        "TRAILING_REVERSE": 3
+      },
+      "validation_candidates": 13,
+      "candidate_statuses": {
+        "REJECTED": 10,
+        "SCHEDULED": 3
+      },
+      "overnight_trades": 0,
+      "open_position": null,
+      "additional_round_trip_cost_pct": {
+        "0.00": {
+          "closed_net_sum_pct": -1.673977,
+          "winners": 0,
+          "break_even": 0,
+          "losers": 3,
+          "net_with_open_mark_pct": -1.673977
+        },
+        "0.02": {
+          "closed_net_sum_pct": -1.733977,
+          "winners": 0,
+          "break_even": 0,
+          "losers": 3,
+          "net_with_open_mark_pct": -1.733977
+        },
+        "0.05": {
+          "closed_net_sum_pct": -1.823977,
+          "winners": 0,
+          "break_even": 0,
+          "losers": 3,
+          "net_with_open_mark_pct": -1.823977
+        },
+        "0.10": {
+          "closed_net_sum_pct": -1.973977,
+          "winners": 0,
+          "break_even": 0,
+          "losers": 3,
+          "net_with_open_mark_pct": -1.973977
+        }
+      }
+    }
+  }
+}
