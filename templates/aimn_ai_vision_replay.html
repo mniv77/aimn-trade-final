@@ -10,6 +10,26 @@
 <section><h2>Record a blind AI assessment</h2><p>Use only the visible chart. Record the decision <strong>before</strong> revealing more candles. A decision can be copied into ChatGPT for review, then saved here manually.</p><div class="row"><label>Decision <select id="decision"><option>WAIT</option><option>WATCH LONG</option><option>WATCH SHORT</option><option>ENTER LONG</option><option>ENTER SHORT</option><option>EXIT LONG</option><option>EXIT SHORT</option></select></label><label>Confidence <select id="confidence"><option>Low</option><option selected>Moderate</option><option>High</option></select></label><label>Reason <input id="reason" type="text" placeholder="Visible chart evidence" size="55"></label></div><p><label>Paste AI assessment (JSON) <textarea id="aiResponse" placeholder="Paste the structured JSON assessment returned by ChatGPT, then click Apply AI assessment"></textarea></label></p><div class="row"><button id="applyAI">Apply AI assessment</button><small>Checks the symbol, direction, and last visible candle before filling the assessment. Record it before revealing more candles.</small></div><p><label>Additional observations<textarea id="notes" placeholder="Levels, invalidation, uncertainty; no future information"></textarea></label></p><div class="row"><button id="record" disabled>Record prediction at current candle</button><button id="copy" disabled>Copy blind AI assessment packet</button><button id="export" disabled>Export prediction log JSON</button><button id="import">Import previous prediction log</button><input id="logfile" type="file" accept=".json,application/json" hidden></div><p id="feedback"></p><div id="logWrap"><table><thead><tr><th>#</th><th>Last candle (UTC)</th><th>Close</th><th>Decision</th><th>Confidence</th><th>Reason</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 </main><script>
 'use strict';
+// AIMn UTC v1: known archive/API wall-clock labels are New York market time.
+const aimnNYFormat = new Intl.DateTimeFormat('en-GB', {timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+function aimnNYSeconds(t) {
+  const m=/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/.exec(t);
+  if(!m) throw Error('Expected New York wall-clock timestamp: '+t);
+  const [y,mo,d,h,mi,s]=m.slice(1).map(Number);
+  const wall=Date.UTC(y,mo-1,d,h,mi,s);
+  function wallAt(ms){const p=Object.fromEntries(aimnNYFormat.formatToParts(new Date(ms)).map(x=>[x.type,x.value]));return Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute,+p.second);}
+  // Check all possible New York UTC offsets. Reject ambiguous/nonexistent times.
+  const matches=[wall+4*3600000,wall+5*3600000].filter(ms=>wallAt(ms)===wall);
+  if(matches.length!==1 || new Date(wall).toISOString().slice(0,19)!==t.replace(' ','T')) throw Error('Invalid or ambiguous New York timestamp: '+t);
+  return matches[0]/1000;
+}
+function aimnParseSeconds(t, knownNY){
+  if(typeof t!=='string') throw Error('Invalid timestamp');
+  if(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(t)){const ms=Date.parse(t);if(!Number.isFinite(ms))throw Error('Invalid explicit timestamp');return Math.floor(ms/1000);}
+  if(!knownNY) throw Error('Local JSON timestamps need explicit UTC or timezone offsets');
+  return aimnNYSeconds(t);
+}
+
 const $=id=>document.getElementById(id);let candles=[],visible=0,log=[],chart,series,stSegments=[],sourceName='';
 const launchParams=new URLSearchParams(window.location.search);
 const selectedSymbol=(launchParams.get('symbol')||'').trim().toUpperCase();
@@ -20,10 +40,10 @@ function researchDirection(){return $('direction').value}
 async function getJson(path){let r=await fetch(path,{credentials:'same-origin'});if(!r.ok)throw Error(path+' returned HTTP '+r.status);return r.json()}
 function stamp(t){return new Date(t*1000).toISOString().replace('.000Z',' UTC')}
 function setFeedback(s){$('feedback').textContent=s}
-function normalize(root){let arr=Array.isArray(root)?root:(root.candles||root.data||root.bars||root.results||root.items);if(!Array.isArray(arr))throw Error('Expected an array or object with candles/data/bars/results/items array.');
+function normalize(root,knownNY=true){let arr=Array.isArray(root)?root:(root.candles||root.data||root.bars||root.results||root.items);if(!Array.isArray(arr))throw Error('Expected an array or object with candles/data/bars/results/items array.');
 const out=arr.map((x,i)=>{if(Array.isArray(x)){if(x.length<5)throw Error('Candle array needs [time,open,high,low,close]');x={time:x[0],open:x[1],high:x[2],low:x[3],close:x[4]}}
-let t=x.time??x.timestamp??x.datetime??x.date??x.t??x.ts;let n;if(typeof t==='number')n=t>1e12?Math.floor(t/1000):t;else if(typeof t==='string'&&/^\d+$/.test(t)){let v=Number(t);n=v>1e12?Math.floor(v/1000):v}else{let parsed=Date.parse(t);if(!Number.isFinite(parsed))throw Error('Invalid timestamp at candle '+i);n=Math.floor(parsed/1000)}
-let o=Number(x.open??x.o),h=Number(x.high??x.h),l=Number(x.low??x.l),c=Number(x.close??x.c);if(![n,o,h,l,c].every(Number.isFinite))throw Error('Invalid OHLC at candle '+i);if(h<Math.max(o,c)||l>Math.min(o,c))throw Error('OHLC inconsistent at candle '+i);return {time:n,open:o,high:h,low:l,close:c}}).sort((a,b)=>a.time-b.time);
+let t=x.time??x.timestamp??x.datetime??x.date??x.t??x.ts;let n;if(typeof t==='number')n=t>1e12?Math.floor(t/1000):t;else if(typeof t==='string'&&/^\d+$/.test(t)){let v=Number(t);n=v>1e12?Math.floor(v/1000):v}else{n=aimnParseSeconds(t,knownNY)}
+let o=Number(x.open??x.o),h=Number(x.high??x.h),l=Number(x.low??x.l),c=Number(x.close??x.c);if(![n,o,h,l,c].every(Number.isFinite))throw Error('Invalid OHLC at candle '+i);if(h<Math.max(o,c)||l>Math.min(o,c))throw Error('OHLC inconsistent at candle '+i);return {time:n,legacyTime:typeof t==='string'&&!/^\d+$/.test(t)?Math.floor(Date.parse(t)/1000):n,open:o,high:h,low:l,close:c}}).sort((a,b)=>a.time-b.time);
 for(let i=1;i<out.length;i++)if(out[i].time===out[i-1].time)throw Error('Duplicate candle timestamp '+stamp(out[i].time));if(out.length<20)throw Error('At least 20 candles required');return out}
 // Wilder ATR and conventional Supertrend; no future candles are used.
 function supertrend(bars,period,multiplier){
@@ -84,7 +104,7 @@ async function loadSelectedSymbol(){
     log=[];setFeedback('Loaded '+candles.length+' candles for '+symbol+'. Predictions are stored locally until exported.');render();
   }catch(e){candles=[];$('status').textContent='Load failed: '+e.message;setFeedback('Check the incoming symbol and broker in KISS Backtest Control. No KISS files were changed.')}
 }
-$('file').onchange=async e=>{try{let f=e.target.files[0];if(!f)return;let raw=JSON.parse(await f.text());candles=normalize(raw);sourceName=f.name;visible=Math.max(20,Math.min(candles.length,Math.floor(Number($('initial').value)||100)));log=[];setFeedback('New dataset loaded. Predictions reset.');render()}catch(err){candles=[];$('status').textContent='Error: '+err.message;setFeedback('')}};
+$('file').onchange=async e=>{try{let f=e.target.files[0];if(!f)return;let raw=JSON.parse(await f.text());candles=normalize(raw,false);sourceName=f.name;visible=Math.max(20,Math.min(candles.length,Math.floor(Number($('initial').value)||100)));log=[];setFeedback('New dataset loaded. Predictions reset.');render()}catch(err){candles=[];$('status').textContent='Error: '+err.message;setFeedback('')}};
 $('next').onclick=()=>{visible=Math.min(candles.length,visible+Math.max(1,Math.floor(Number($('step').value)||5)));render()};$('back').onclick=()=>{visible=Math.max(20,visible-Math.max(1,Math.floor(Number($('step').value)||5)));render()};$('reset').onclick=()=>{visible=Math.max(20,Math.min(candles.length,Math.floor(Number($('initial').value)||100)));render()};
 $('record').onclick=()=>{if(!candles.length)return;let end=candles[visible-1],reason=$('reason').value.trim();if(!reason){setFeedback('Please enter a reason before recording.');return}let decision=$('decision').value;let r={schema:'aimn-blind-prediction-v1',symbol:symbolName(),timeframe:selectedTimeframe,candle_utc:stamp(end.time),candle_unix:end.time,visible_candles:visible,close:end.close,research_direction:researchDirection(),decision:$('decision').value,confidence:$('confidence').value,reason,notes:$('notes').value.trim(),recorded_at_utc:new Date().toISOString(),source_file:sourceName};log.push(r);renderLog();$('export').disabled=false;setFeedback('Prediction recorded locally. Export the JSON to preserve it.');$('reason').value='';$('notes').value=''};
 $('copy').onclick=async()=>{
@@ -125,5 +145,6 @@ initChart();
 loadSelectedSymbol();
 </script>
 <script src="/static/aimn_trend_noise_panel.js"></script>
+<script src="/static/aimn_am3_transition_panel.js"></script>
 </body>
 </html>

@@ -251,7 +251,10 @@
     }
 
     try {
+      const previous=JSON.parse(storage.getItem(sessionKey)||'null');
       storage.setItem(sessionKey, JSON.stringify({
+        ...(previous?.dataset_id===datasetId && previous.utc_migration
+          ? {utc_migration:previous.utc_migration} : {}),
         schema: VERSION,
         dataset_id: datasetId,
         visible_candles: visible,
@@ -451,6 +454,55 @@
     $('v4Export').disabled = !records.length;
   }
 
+  // Copy only: never delete or overwrite the original legacy storage key.
+  function migrateUTC(id) {
+    const target=keyFor(id), existing=storage.getItem(target);
+    const parts=JSON.parse(id), legacy=parts.slice();
+    legacy[5]=candles[0].legacyTime;
+    legacy[10]=candles[candles.length-1].legacyTime;
+    const oldId=JSON.stringify(legacy), oldKey=keyFor(oldId);
+    const matches=[];
+    for(let j=0;j<storage.length;j++){
+      const key=storage.key(j);
+      if(!key||key===target||!key.startsWith(PREFIX))continue;
+      let p;
+      try{p=JSON.parse(decodeURIComponent(key.slice(PREFIX.length)));}catch{continue;}
+      if(Array.isArray(p)&&p.length===parts.length&&p.every((v,i)=>i===5||i===10||v===parts[i]))matches.push(key);
+    }
+    if(existing!==null){
+      if(!matches.length)return existing;
+      const current=JSON.parse(existing), m=current.utc_migration;
+      if(matches.length!==1||!m||m.version!==1||keyFor(m.original_dataset_id)!==matches[0])throw Error('Conflicting UTC and legacy sessions; recovery blocked');
+      const prior=JSON.parse(storage.getItem(matches[0]));
+      if(prior.schema!==VERSION||prior.dataset_id!==m.original_dataset_id||!Array.isArray(prior.records)||!Array.isArray(current.records)||current.records.length<prior.records.length||current.visible_candles<prior.visible_candles||!Number.isFinite(Date.parse(prior.updated_at_utc))||!(Date.parse(prior.updated_at_utc)<=Date.parse(m.migrated_at_utc)))throw Error('Legacy session changed or incomplete migration; recovery blocked');
+      return existing;
+    }
+    if(!matches.length)return null;
+    if(matches.length!==1||matches[0]!==oldKey||oldId===id)throw Error('Ambiguous legacy session; migration blocked');
+    const raw=storage.getItem(oldKey);
+    const saved=JSON.parse(raw);
+    if(saved.schema!==VERSION||saved.dataset_id!==oldId||!Array.isArray(saved.records)||!Number.isInteger(saved.visible_candles)||saved.visible_candles<20||saved.visible_candles>candles.length)throw Error('Invalid legacy session');
+    function correct(obj,unix,utc,count,price){
+      if(!Number.isInteger(count)||count<1||count>saved.visible_candles)throw Error('Invalid legacy candle index');
+      const c=candles[count-1];
+      if(obj[unix]!==c.legacyTime||obj[utc]!==new Date(c.legacyTime*1000).toISOString()||Number(price)!==c.close)throw Error('Legacy candle/time/price mismatch at '+count);
+      obj[unix]=c.time;obj[utc]=new Date(c.time*1000).toISOString();
+    }
+    for(const r of saved.records){
+      if(r.ai_assessment!=null)throw Error('Legacy AI assessment requires separate audit');
+      correct(r,'cutoff_unix','cutoff_utc',r.visible_candles,r.cutoff_close);
+      if(r.trade_result){const t=r.trade_result;correct(t,'entry_cutoff_unix','entry_cutoff_utc',t.entry_visible_candles,t.entry_close);correct(t,'exit_cutoff_unix','exit_cutoff_utc',r.visible_candles,t.exit_close);}
+      if(r.outcome){const o=r.outcome;if(!Number.isInteger(o.revealed_candles)||o.revealed_candles<1)throw Error('Invalid reveal count');correct(o,'revealed_to_unix','revealed_to_utc',r.visible_candles+o.revealed_candles,o.end_close);}
+    }
+    saved.dataset_id=id;
+    saved.utc_migration={version:1,original_dataset_id:oldId,migrated_at_utc:new Date().toISOString()};
+    const migrated=JSON.stringify(saved);
+    if(storage.getItem(target)!==null||storage.getItem(oldKey)!==raw)throw Error('Storage changed during migration');
+    storage.setItem(target,migrated);
+    if(storage.getItem(target)!==migrated||storage.getItem(oldKey)!==raw)throw Error('Storage verification failed');
+    return migrated;
+  }
+
   function restoreForDataset() {
     const id = identity();
 
@@ -470,7 +522,7 @@
     }
 
     try {
-      const raw = storage.getItem(sessionKey);
+      const raw = migrateUTC(id);
 
       if (!raw) {
         history();
