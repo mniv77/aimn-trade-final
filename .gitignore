@@ -60,3 +60,4 @@ backups/
 templates/aimn_visual_lab_bak*.html
 templates/aimn_visual_lab_before_*.html
 templates/auto_tuner.html.bak_visual_lab
+/static/aimn_visual_lab/aimn_am3_transition_data.json
